@@ -21,6 +21,19 @@
 /storage/*.key
 /storage/pail
 /vendor
+# AI Assistants & Prompts
+AGENTS.md
+CLAUDE.md
+/.agents/
+/.claude/
+/.copilot/
+/.gemini/
+/.windsurf/
+*.prompt.md
+
+# Tests
+/tests/
+
 _ide_helper.php
 Homestead.json
 Homestead.yaml
