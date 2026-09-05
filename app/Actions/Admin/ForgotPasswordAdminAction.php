@@ -21,15 +21,30 @@ class ForgotPasswordAdminAction
             ->where('email', $normalizedEmail)
             ->first();
 
-        // Only send reset notification if Admin exists and is active
-        if ($admin && $admin->status === 'active') {
-            Password::broker('admins')->sendResetLink(['email' => $normalizedEmail]);
+        if (! $admin) {
+            return [
+                'status' => false,
+                'message' => 'No administrator account found with this email address.',
+                'code' => 404,
+                'data' => (object) [],
+            ];
         }
 
-        // Always return the exact same generic enumeration-safe response
+        if ($admin->status !== 'active') {
+            return [
+                'status' => false,
+                'message' => 'Account is inactive. Please contact the administrator.',
+                'code' => 403,
+                'data' => (object) [],
+            ];
+        }
+
+        Password::broker('admins')->sendResetLink(['email' => $normalizedEmail]);
+
         return [
             'status' => true,
-            'message' => 'If an account exists for this email, a password reset link has been sent.',
+            'message' => 'A password reset link has been sent to your email address.',
+            'code' => 200,
             'data' => (object) [],
         ];
     }

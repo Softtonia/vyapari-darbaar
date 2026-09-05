@@ -52,9 +52,13 @@ class AdminAuthController extends Controller
      */
     public function forgotPassword(ForgotPasswordAdminRequest $request, ForgotPasswordAdminAction $action): JsonResponse
     {
-        $response = $action->execute($request->normalizedEmail());
+        $result = $action->execute($request->normalizedEmail());
 
-        return response()->json($response, 200);
+        return response()->json([
+            'status' => $result['status'],
+            'message' => $result['message'],
+            'data' => $result['data'] ?? (object) [],
+        ], $result['code'] ?? 200);
     }
 
     /**

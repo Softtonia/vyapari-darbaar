@@ -46,7 +46,7 @@ class AdminPasswordResetTest extends TestCase
         $response->assertStatus(200)
             ->assertJson([
                 'status' => true,
-                'message' => 'If an account exists for this email, a password reset link has been sent.',
+                'message' => 'A password reset link has been sent to your email address.',
                 'data' => [],
             ]);
 
@@ -73,7 +73,7 @@ class AdminPasswordResetTest extends TestCase
         ]);
     }
 
-    public function test_nonexistent_admin_receives_enumeration_safe_response_and_no_email_queued(): void
+    public function test_nonexistent_admin_receives_not_found_message_and_no_email_queued(): void
     {
         Notification::fake();
 
@@ -81,10 +81,10 @@ class AdminPasswordResetTest extends TestCase
             'email' => 'nonexistent@example.com',
         ]);
 
-        $response->assertStatus(200)
+        $response->assertStatus(404)
             ->assertJson([
-                'status' => true,
-                'message' => 'If an account exists for this email, a password reset link has been sent.',
+                'status' => false,
+                'message' => 'No administrator account found with this email address.',
                 'data' => [],
             ]);
 
@@ -94,7 +94,7 @@ class AdminPasswordResetTest extends TestCase
         ]);
     }
 
-    public function test_inactive_admin_receives_enumeration_safe_response_and_no_email_queued(): void
+    public function test_inactive_admin_receives_inactive_message_and_no_email_queued(): void
     {
         Notification::fake();
 
@@ -109,10 +109,10 @@ class AdminPasswordResetTest extends TestCase
             'email' => 'inactive.admin@example.com',
         ]);
 
-        $response->assertStatus(200)
+        $response->assertStatus(403)
             ->assertJson([
-                'status' => true,
-                'message' => 'If an account exists for this email, a password reset link has been sent.',
+                'status' => false,
+                'message' => 'Account is inactive. Please contact the administrator.',
                 'data' => [],
             ]);
 
@@ -398,6 +398,13 @@ class AdminPasswordResetTest extends TestCase
 
     public function test_sensitive_fields_and_tokens_are_never_exposed(): void
     {
+        Admin::create([
+            'name' => 'Safe Admin',
+            'email' => 'safe@example.com',
+            'password' => Hash::make('Password@12345'),
+            'status' => 'active',
+        ]);
+
         $response = $this->postJson('/api/admin/forgot-password', [
             'email' => 'safe@example.com',
         ]);
