@@ -31,9 +31,6 @@ CLAUDE.md
 /.windsurf/
 *.prompt.md
 
-# Tests
-/tests/
-
 _ide_helper.php
 Homestead.json
 Homestead.yaml
