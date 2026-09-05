@@ -3,6 +3,7 @@
 namespace App\Actions\Admin;
 
 use App\Models\Admin;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class LoginAdminAction
@@ -44,8 +45,35 @@ class LoginAdminAction
             'last_login_at' => now(),
         ]);
 
+        // Check if an unexpired active token exists for this admin
+        $activeToken = DB::table('personal_access_tokens')
+            ->where('tokenable_type', $admin->getMorphClass())
+            ->where('tokenable_id', $admin->getKey())
+            ->where('name', $tokenName)
+            ->where('expires_at', '>', now())
+            ->whereNotNull('plain_token')
+            ->latest('id')
+            ->first();
+
+        if ($activeToken && ! empty($activeToken->plain_token)) {
+            return [
+                'success' => true,
+                'message' => 'Login successful.',
+                'code' => 200,
+                'data' => [
+                    'token' => $activeToken->plain_token,
+                ],
+            ];
+        }
+
         $expiresMinutes = (int) (config('sanctum.expiration') ?? 1440);
         $tokenResult = $admin->createToken($tokenName, ['*'], now()->addMinutes($expiresMinutes));
+
+        DB::table('personal_access_tokens')
+            ->where('id', $tokenResult->accessToken->id)
+            ->update([
+                'plain_token' => $tokenResult->plainTextToken,
+            ]);
 
         return [
             'success' => true,

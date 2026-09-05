@@ -22,14 +22,6 @@ class AdminAuthController extends Controller
      */
     public function login(LoginAdminRequest $request, LoginAdminAction $action): JsonResponse
     {
-        if ($request->bearerToken() && $request->user('sanctum')) {
-            return response()->json([
-                'status' => false,
-                'message' => 'You are already logged in. Please log out first before signing in again.',
-                'data' => (object) [],
-            ], 400);
-        }
-
         $deviceName = (string) $request->header('User-Agent', 'admin-token');
         $result = $action->execute($request->credentials(), $deviceName);
 

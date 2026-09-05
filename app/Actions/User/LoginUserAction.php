@@ -3,6 +3,7 @@
 namespace App\Actions\User;
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class LoginUserAction
@@ -45,12 +46,36 @@ class LoginUserAction
             ];
         }
 
+        // Check if an unexpired active token exists for this user and device
+        $activeToken = DB::table('personal_access_tokens')
+            ->where('tokenable_type', $user->getMorphClass())
+            ->where('tokenable_id', $user->getKey())
+            ->where('name', $deviceName)
+            ->where('expires_at', '>', now())
+            ->whereNotNull('plain_token')
+            ->latest('id')
+            ->first();
+
+        if ($activeToken && ! empty($activeToken->plain_token)) {
+            return [
+                'success' => true,
+                'token' => $activeToken->plain_token,
+                'user' => $user,
+            ];
+        }
+
         $expiresMinutes = (int) (config('sanctum.expiration') ?? 1440);
-        $token = $user->createToken($deviceName, ['*'], now()->addMinutes($expiresMinutes))->plainTextToken;
+        $tokenResult = $user->createToken($deviceName, ['*'], now()->addMinutes($expiresMinutes));
+
+        DB::table('personal_access_tokens')
+            ->where('id', $tokenResult->accessToken->id)
+            ->update([
+                'plain_token' => $tokenResult->plainTextToken,
+            ]);
 
         return [
             'success' => true,
-            'token' => $token,
+            'token' => $tokenResult->plainTextToken,
             'user' => $user,
         ];
     }

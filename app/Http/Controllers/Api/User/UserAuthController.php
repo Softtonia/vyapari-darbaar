@@ -20,14 +20,6 @@ class UserAuthController extends Controller
      */
     public function login(LoginUserRequest $request, LoginUserAction $action): JsonResponse
     {
-        if ($request->bearerToken() && $request->user('sanctum')) {
-            return response()->json([
-                'status' => false,
-                'message' => 'You are already logged in. Please log out first before signing in again.',
-                'data' => (object) [],
-            ], 400);
-        }
-
         $deviceName = (string) $request->input('device_name', $request->header('User-Agent', 'user-device'));
         $result = $action->execute($request->credentials(), $deviceName);
 

@@ -418,7 +418,7 @@ class AdminAuthTest extends TestCase
         $this->assertEquals(60, $limit1->maxAttempts);
     }
 
-    public function test_admin_login_when_already_authenticated_returns_already_logged_in_message(): void
+    public function test_admin_login_when_already_authenticated_reuses_same_token(): void
     {
         $admin = Admin::create([
             'name' => 'Active Admin',
@@ -427,18 +427,24 @@ class AdminAuthTest extends TestCase
             'status' => 'active',
         ]);
 
-        $token = $admin->createToken('admin-token')->plainTextToken;
-
-        $response = $this->withToken($token)->postJson('/api/admin/login', [
+        $response1 = $this->postJson('/api/admin/login', [
             'email' => 'active_admin@example.com',
             'password' => 'secret123',
         ]);
 
-        $response->assertStatus(400)
-            ->assertJson([
-                'status' => false,
-                'message' => 'You are already logged in. Please log out first before signing in again.',
-            ]);
+        $response1->assertStatus(200);
+        $token1 = $response1->json('data.token');
+
+        // Second login within 24 hours returns the EXACT SAME token
+        $response2 = $this->postJson('/api/admin/login', [
+            'email' => 'active_admin@example.com',
+            'password' => 'secret123',
+        ]);
+
+        $response2->assertStatus(200);
+        $token2 = $response2->json('data.token');
+
+        $this->assertEquals($token1, $token2);
     }
 
     public function test_admin_token_expires_after_24_hours(): void

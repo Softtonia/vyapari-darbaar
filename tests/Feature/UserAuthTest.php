@@ -370,20 +370,26 @@ class UserAuthTest extends TestCase
         ])->assertStatus(429);
     }
 
-    public function test_user_login_when_already_authenticated_returns_already_logged_in_message(): void
+    public function test_user_login_when_already_authenticated_reuses_same_token(): void
     {
-        $token = $this->user->createToken('user-device')->plainTextToken;
-
-        $response = $this->withToken($token)->postJson('/api/user/login', [
+        $response1 = $this->postJson('/api/user/login', [
             'username' => 'ajay.kumar',
             'password' => $this->plainPassword,
         ]);
 
-        $response->assertStatus(400)
-            ->assertJson([
-                'status' => false,
-                'message' => 'You are already logged in. Please log out first before signing in again.',
-            ]);
+        $response1->assertStatus(200);
+        $token1 = $response1->json('data.token');
+
+        // Second login within 24 hours returns the EXACT SAME token
+        $response2 = $this->postJson('/api/user/login', [
+            'username' => 'ajay.kumar',
+            'password' => $this->plainPassword,
+        ]);
+
+        $response2->assertStatus(200);
+        $token2 = $response2->json('data.token');
+
+        $this->assertEquals($token1, $token2);
     }
 
     public function test_user_token_expires_after_24_hours(): void
