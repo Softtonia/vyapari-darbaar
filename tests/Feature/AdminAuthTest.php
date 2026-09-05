@@ -38,18 +38,11 @@ class AdminAuthTest extends TestCase
             ->assertJson([
                 'status' => true,
                 'message' => 'Login successful.',
-                'data' => [
-                    'token_type' => 'Bearer',
-                    'admin' => [
-                        'id' => $admin->id,
-                        'name' => 'Super Admin',
-                        'email' => 'admin@example.com',
-                        'status' => 'active',
-                    ],
-                ],
             ]);
 
         $this->assertNotEmpty($response->json('data.token'));
+        $this->assertNull($response->json('data.admin'));
+        $this->assertNull($response->json('data.token_type'));
     }
 
     public function test_wrong_password_is_rejected_with_generic_message(): void
@@ -128,7 +121,8 @@ class AdminAuthTest extends TestCase
 
         $this->assertStringNotContainsString('secret_password_value', $content);
         $this->assertStringNotContainsString('remember_token', $content);
-        $this->assertArrayNotHasKey('password', $response->json('data.admin'));
+        $this->assertNull($response->json('data.admin'));
+        $this->assertNotEmpty($response->json('data.token'));
     }
 
     public function test_last_login_at_is_updated_on_successful_login(): void

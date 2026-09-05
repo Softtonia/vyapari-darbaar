@@ -52,13 +52,6 @@ class LoginAdminAction
             'code' => 200,
             'data' => [
                 'token' => $tokenResult->plainTextToken,
-                'token_type' => 'Bearer',
-                'admin' => [
-                    'id' => $admin->id,
-                    'name' => $admin->name,
-                    'email' => $admin->email,
-                    'status' => $admin->status,
-                ],
             ],
         ];
     }
