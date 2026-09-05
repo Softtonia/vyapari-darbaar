@@ -113,30 +113,20 @@ jobs:
           '
 
 
-      - name: Prepare Test Directories
-        shell: bash
-
-        run: |
-          set -euo pipefail
-
-          mkdir -p tests/Unit
-          mkdir -p tests/Feature
-
-
       - name: Create CI Environment
         shell: bash
 
         run: |
           set -euo pipefail
 
-          TEST_APP_KEY="$(
+          APP_KEY="$(
             php -r 'echo "base64:" . base64_encode(random_bytes(32));'
           )"
 
           cat > .env <<EOF
           APP_NAME="Vyapari Darbaar"
           APP_ENV=testing
-          APP_KEY=${TEST_APP_KEY}
+          APP_KEY=${APP_KEY}
           APP_DEBUG=false
           APP_URL=http://127.0.0.1
 
@@ -161,7 +151,6 @@ jobs:
           REDIS_HOST=127.0.0.1
           REDIS_PASSWORD=null
           REDIS_PORT=6379
-
           REDIS_DB=0
           REDIS_CACHE_DB=1
 
@@ -182,20 +171,6 @@ jobs:
           EOF
 
 
-      - name: Validate CI Environment
-        shell: bash
-
-        run: |
-          set -euo pipefail
-
-          grep -q '^APP_ENV=testing$' .env
-          grep -q '^DB_DATABASE=vyapari_darbaar_test$' .env
-          grep -q '^REDIS_DB=0$' .env
-          grep -q '^REDIS_CACHE_DB=1$' .env
-
-          echo "CI environment PASS"
-
-
       - name: Validate Composer
         shell: bash
 
@@ -205,7 +180,7 @@ jobs:
           composer validate --no-check-publish
 
 
-      - name: Install Composer Dependencies
+      - name: Install Dependencies
         shell: bash
 
         run: |
@@ -217,7 +192,7 @@ jobs:
             --no-progress
 
 
-      - name: Verify Laravel
+      - name: Laravel Environment Check
         shell: bash
 
         run: |
@@ -261,9 +236,7 @@ jobs:
 
               $redis->select(0);
 
-              $key =
-                  "vyapari-ci-default-" .
-                  getmypid();
+              $key = "vyapari-ci-default-" . getmypid();
 
               $redis->setex(
                   $key,
@@ -282,9 +255,7 @@ jobs:
 
               $redis->select(1);
 
-              $key =
-                  "vyapari-ci-cache-" .
-                  getmypid();
+              $key = "vyapari-ci-cache-" . getmypid();
 
               $redis->setex(
                   $key,
@@ -299,12 +270,12 @@ jobs:
               }
 
               $redis->del($key);
-
               $redis->close();
 
               echo "Redis PASS\n";
 
           } catch (Throwable $e) {
+
               fwrite(
                   STDERR,
                   "ERROR: " .
@@ -344,7 +315,7 @@ jobs:
           php artisan test
 
 
-      - name: Verify Production Caches
+      - name: Verify Laravel Caches
         shell: bash
 
         run: |
@@ -377,9 +348,9 @@ jobs:
         uses: actions/checkout@v7
 
 
-      # ----------------------------------------------------------
-      # Deployment ID
-      # ----------------------------------------------------------
+      # ==========================================================
+      # DEPLOYMENT ID
+      # ==========================================================
 
       - name: Create Deployment ID
         shell: bash
@@ -394,17 +365,187 @@ jobs:
           echo "DEPLOY_ID=$DEPLOY_ID" \
             >> "$GITHUB_ENV"
 
-          echo "Deployment ID: $DEPLOY_ID"
+          echo "Deploy ID: $DEPLOY_ID"
 
 
       # ==========================================================
-      # NETWORK PREFLIGHT
-      #
-      # Important:
-      # Force IPv4 and retry before creating SSH configuration.
+      # NETWORK DIAGNOSTICS
       # ==========================================================
 
-      - name: Wait For Server SSH
+      - name: Diagnose Server Network
+        shell: bash
+
+        run: |
+          set +e
+
+          HOST="${{ secrets.DEV_HOST }}"
+          PORT="${{ secrets.DEV_PORT }}"
+
+          echo "========================================"
+          echo "GITHUB RUNNER NETWORK DIAGNOSTICS"
+          echo "========================================"
+
+          echo
+          echo "===== RUNNER PUBLIC IPV4 ====="
+
+          RUNNER_IP="$(
+            curl \
+              -4 \
+              -fsS \
+              --connect-timeout 10 \
+              https://api.ipify.org \
+              2>/dev/null
+          )"
+
+          CURL_RESULT=$?
+
+          if [ "$CURL_RESULT" -eq 0 ] && [ -n "$RUNNER_IP" ]; then
+              echo "$RUNNER_IP"
+          else
+              echo "Unable to determine runner public IPv4"
+          fi
+
+
+          echo
+          echo "===== SERVER ====="
+
+          echo "Host: $HOST"
+          echo "SSH Port: $PORT"
+
+
+          echo
+          echo "===== ROUTE ====="
+
+          ip route get "$HOST" \
+            2>&1 \
+            || true
+
+
+          echo
+          echo "===== TCP $PORT / SSH ====="
+
+          if timeout 10 bash -c \
+            "cat < /dev/null > /dev/tcp/${HOST}/${PORT}" \
+            2>/dev/null
+          then
+
+              echo "SSH PORT ${PORT}: PASS"
+              SSH_RESULT=0
+
+          else
+
+              echo "SSH PORT ${PORT}: FAIL"
+              SSH_RESULT=1
+
+          fi
+
+
+          echo
+          echo "===== TCP 80 / HTTP ====="
+
+          if timeout 10 bash -c \
+            "cat < /dev/null > /dev/tcp/${HOST}/80" \
+            2>/dev/null
+          then
+
+              echo "PORT 80: PASS"
+              HTTP_RESULT=0
+
+          else
+
+              echo "PORT 80: FAIL"
+              HTTP_RESULT=1
+
+          fi
+
+
+          echo
+          echo "===== TCP 443 / HTTPS ====="
+
+          if timeout 10 bash -c \
+            "cat < /dev/null > /dev/tcp/${HOST}/443" \
+            2>/dev/null
+          then
+
+              echo "PORT 443: PASS"
+              HTTPS_RESULT=0
+
+          else
+
+              echo "PORT 443: FAIL"
+              HTTPS_RESULT=1
+
+          fi
+
+
+          echo
+          echo "========================================"
+          echo "NETWORK SUMMARY"
+          echo "========================================"
+
+          if [ "$SSH_RESULT" -eq 0 ]; then
+              echo "SSH ${PORT}: REACHABLE"
+          else
+              echo "SSH ${PORT}: UNREACHABLE"
+          fi
+
+          if [ "$HTTP_RESULT" -eq 0 ]; then
+              echo "HTTP 80: REACHABLE"
+          else
+              echo "HTTP 80: UNREACHABLE"
+          fi
+
+          if [ "$HTTPS_RESULT" -eq 0 ]; then
+              echo "HTTPS 443: REACHABLE"
+          else
+              echo "HTTPS 443: UNREACHABLE"
+          fi
+
+
+          if [ "$SSH_RESULT" -ne 0 ]; then
+
+              echo
+              echo "::error::GitHub runner cannot reach SSH port ${PORT}."
+
+              if \
+                [ "$HTTP_RESULT" -eq 0 ] || \
+                [ "$HTTPS_RESULT" -eq 0 ]
+              then
+
+                  echo "::error::Server itself is reachable, but SSH is blocked."
+                  echo "::error::Check hosting-provider firewall/security policy for TCP ${PORT}."
+
+              else
+
+                  echo "::error::GitHub runner cannot reach SSH, HTTP or HTTPS."
+                  echo "::error::Check provider networking/routing/firewall."
+
+              fi
+
+              if [ -n "$RUNNER_IP" ]; then
+
+                  echo
+                  echo "Runner IPv4 for provider investigation:"
+                  echo "$RUNNER_IP"
+
+              fi
+
+              exit 1
+
+          fi
+
+
+          echo
+          echo "Network preflight PASS"
+
+          exit 0
+
+
+      # ==========================================================
+      # SSH RETRY CHECK
+      # ==========================================================
+
+      - name: Wait For SSH
         shell: bash
 
         run: |
@@ -413,37 +554,34 @@ jobs:
           HOST="${{ secrets.DEV_HOST }}"
           PORT="${{ secrets.DEV_PORT }}"
 
-          echo "Checking SSH connectivity..."
-          echo "Host: $HOST"
-          echo "Port: $PORT"
+          CONNECTED=0
 
-          SUCCESS=0
 
-          for ATTEMPT in 1 2 3 4 5 6 7 8
+          for ATTEMPT in 1 2 3 4 5
           do
 
-              echo "SSH TCP attempt $ATTEMPT/8"
+              echo "SSH connectivity attempt ${ATTEMPT}/5"
+
 
               if timeout 10 bash -c \
-                  "cat < /dev/null > /dev/tcp/${HOST}/${PORT}" \
-                  2>/dev/null
+                "cat < /dev/null > /dev/tcp/${HOST}/${PORT}" \
+                2>/dev/null
               then
 
-                  echo "SSH TCP connectivity PASS"
+                  CONNECTED=1
 
-                  SUCCESS=1
+                  echo "SSH connectivity PASS"
 
                   break
 
               fi
 
 
-              if [ "$ATTEMPT" -lt 8 ]; then
+              if [ "$ATTEMPT" -lt 5 ]; then
 
                   WAIT_SECONDS="$((ATTEMPT * 5))"
 
-                  echo \
-                    "Server unavailable. Retrying in ${WAIT_SECONDS}s..."
+                  echo "Retrying in ${WAIT_SECONDS}s..."
 
                   sleep "$WAIT_SECONDS"
 
@@ -452,11 +590,9 @@ jobs:
           done
 
 
-          if [ "$SUCCESS" -ne 1 ]; then
+          if [ "$CONNECTED" -ne 1 ]; then
 
-              echo "::error::GitHub runner cannot reach server SSH port."
-              echo "::error::Host=${HOST} Port=${PORT}"
-              echo "::error::This is a network/firewall/server reachability problem, not Laravel."
+              echo "::error::SSH unavailable after 5 attempts"
 
               exit 1
 
@@ -488,27 +624,26 @@ jobs:
             "$HOME/.ssh/deploy_key"
 
 
-          rm -f \
-            "$HOME/.ssh/server_key"
-
-
           KEYSCAN_OK=0
 
 
           for ATTEMPT in 1 2 3 4 5
           do
 
-              echo "SSH keyscan attempt $ATTEMPT/5"
+              echo "ssh-keyscan attempt ${ATTEMPT}/5"
+
+              rm -f \
+                "$HOME/.ssh/server_key"
 
 
               if ssh-keyscan \
-                  -4 \
-                  -T 10 \
-                  -p "$PORT" \
-                  -t ed25519 \
-                  "$HOST" \
-                  2>/dev/null \
-                  > "$HOME/.ssh/server_key"
+                -4 \
+                -T 10 \
+                -p "$PORT" \
+                -t ed25519 \
+                "$HOST" \
+                2>/dev/null \
+                > "$HOME/.ssh/server_key"
               then
 
                   if [ -s "$HOME/.ssh/server_key" ]; then
@@ -522,10 +657,6 @@ jobs:
               fi
 
 
-              rm -f \
-                "$HOME/.ssh/server_key"
-
-
               sleep "$((ATTEMPT * 5))"
 
           done
@@ -533,7 +664,7 @@ jobs:
 
           if [ "$KEYSCAN_OK" -ne 1 ]; then
 
-              echo "::error::Unable to retrieve SSH server host key"
+              echo "::error::Unable to retrieve SSH host key"
 
               exit 1
 
@@ -544,17 +675,19 @@ jobs:
 
 
           ACTUAL_FINGERPRINT="$(
-              ssh-keygen \
-                  -lf "$HOME/.ssh/server_key" \
-              | awk 'NR == 1 {print $2}'
+            ssh-keygen \
+              -lf "$HOME/.ssh/server_key" \
+            | awk 'NR == 1 {print $2}'
           )"
+
+
+          echo "Expected fingerprint: $EXPECTED_FINGERPRINT"
+          echo "Actual fingerprint:   $ACTUAL_FINGERPRINT"
 
 
           if [ "$ACTUAL_FINGERPRINT" != "$EXPECTED_FINGERPRINT" ]; then
 
-              echo "::error::SSH host fingerprint mismatch"
-              echo "Expected: $EXPECTED_FINGERPRINT"
-              echo "Actual:   $ACTUAL_FINGERPRINT"
+              echo "::error::SSH fingerprint mismatch"
 
               exit 1
 
@@ -574,11 +707,11 @@ jobs:
             "$HOME/.ssh/server_key"
 
 
-          echo "SSH fingerprint PASS"
+          echo "SSH setup PASS"
 
 
       # ==========================================================
-      # SSH VERIFICATION
+      # SSH LOGIN
       # ==========================================================
 
       - name: Verify SSH Login
@@ -604,11 +737,9 @@ jobs:
             set -e
 
             echo "SSH LOGIN PASS"
-
-            whoami
+            echo "User: $(whoami)"
 
             php8.3 -v
-
             composer --version
             '
 
@@ -650,10 +781,10 @@ jobs:
           echo "SERVER PREFLIGHT"
           echo "========================================"
 
+          echo "Base path:    $BASE_PATH"
+          echo "Current path: $CURRENT_PATH"
+          echo "Shared path:  $SHARED_PATH"
 
-          # ------------------------------------------------------
-          # Required commands
-          # ------------------------------------------------------
 
           for COMMAND in \
               php8.3 \
@@ -665,21 +796,17 @@ jobs:
           do
 
               command -v "$COMMAND" \
-                  >/dev/null 2>&1 \
-                  || {
-                      echo "ERROR: $COMMAND missing"
-                      exit 1
-                  }
+                >/dev/null 2>&1 \
+                || {
+                    echo "ERROR: $COMMAND missing"
+                    exit 1
+                }
 
           done
 
 
-          echo "Server commands PASS"
+          echo "Required commands PASS"
 
-
-          # ------------------------------------------------------
-          # PHP extensions
-          # ------------------------------------------------------
 
           php8.3 -r '
           $extensions = [
@@ -712,35 +839,27 @@ jobs:
           '
 
 
-          # ------------------------------------------------------
-          # Shared environment
-          # ------------------------------------------------------
-
           test -f "$SHARED_PATH/.env" || {
-              echo "ERROR: shared/.env missing"
+              echo "ERROR: $SHARED_PATH/.env missing"
               exit 1
           }
 
 
           test -r "$SHARED_PATH/.env" || {
-              echo "ERROR: shared/.env not readable"
+              echo "ERROR: shared .env not readable"
               exit 1
           }
 
 
-          # ------------------------------------------------------
-          # Shared runtime directories
-          # ------------------------------------------------------
-
           mkdir -p \
-              "$SHARED_PATH/storage/app/private" \
-              "$SHARED_PATH/storage/app/public" \
-              "$SHARED_PATH/storage/framework/cache/data" \
-              "$SHARED_PATH/storage/framework/sessions" \
-              "$SHARED_PATH/storage/framework/testing" \
-              "$SHARED_PATH/storage/framework/views" \
-              "$SHARED_PATH/storage/logs" \
-              "$SHARED_PATH/backups"
+            "$SHARED_PATH/storage/app/private" \
+            "$SHARED_PATH/storage/app/public" \
+            "$SHARED_PATH/storage/framework/cache/data" \
+            "$SHARED_PATH/storage/framework/sessions" \
+            "$SHARED_PATH/storage/framework/testing" \
+            "$SHARED_PATH/storage/framework/views" \
+            "$SHARED_PATH/storage/logs" \
+            "$SHARED_PATH/backups"
 
 
           test -w "$SHARED_PATH/storage" || {
@@ -750,24 +869,22 @@ jobs:
 
 
           test -w "$SHARED_PATH/backups" || {
-              echo "ERROR: shared backups not writable"
+              echo "ERROR: backup directory not writable"
               exit 1
           }
 
 
-          # ------------------------------------------------------
-          # Single-copy current directory
-          # ------------------------------------------------------
-
           if [ -L "$CURRENT_PATH" ]; then
 
-              CURRENT_TARGET="$(
-                  readlink -f "$CURRENT_PATH" \
-                      || true
+              TARGET="$(
+                readlink -f "$CURRENT_PATH" \
+                  || true
               )"
 
 
-              if [ "$CURRENT_TARGET" = "$BASE_PATH/releases/bootstrap" ]; then
+              if [ "$TARGET" = "$BASE_PATH/releases/bootstrap" ]; then
+
+                  echo "Converting bootstrap release symlink..."
 
                   rm "$CURRENT_PATH"
 
@@ -775,8 +892,8 @@ jobs:
 
               else
 
-                  echo "ERROR: current is an unexpected symlink"
-                  echo "Target: $CURRENT_TARGET"
+                  echo "ERROR: current is unexpected symlink"
+                  echo "Target: $TARGET"
 
                   exit 1
 
@@ -785,7 +902,8 @@ jobs:
           fi
 
 
-          mkdir -p "$CURRENT_PATH"
+          mkdir -p \
+            "$CURRENT_PATH"
 
 
           test -d "$CURRENT_PATH" || {
@@ -800,51 +918,8 @@ jobs:
           }
 
 
-          # ------------------------------------------------------
-          # Remove obsolete bootstrap release only
-          # ------------------------------------------------------
-
-          if [ -d "$BASE_PATH/releases/bootstrap" ]; then
-
-              rm -rf \
-                  "$BASE_PATH/releases/bootstrap"
-
-          fi
-
-
-          if [ -d "$BASE_PATH/releases" ]; then
-
-              RELEASE_COUNT="$(
-                  find "$BASE_PATH/releases" \
-                      -mindepth 1 \
-                      -maxdepth 1 \
-                      -print \
-                  | wc -l
-              )"
-
-
-              if [ "$RELEASE_COUNT" -eq 0 ]; then
-
-                  rmdir "$BASE_PATH/releases"
-
-              else
-
-                  echo "ERROR: Unexpected old release directories exist"
-
-                  find "$BASE_PATH/releases" \
-                      -mindepth 1 \
-                      -maxdepth 1 \
-                      -print
-
-                  exit 1
-
-              fi
-
-          fi
-
-
           mkdir -p \
-              "$HOME/.cache/composer"
+            "$HOME/.cache/composer"
 
 
           echo "SERVER PREFLIGHT PASS"
@@ -883,23 +958,21 @@ jobs:
 
 
           if \
-              [ -f "$CURRENT_PATH/artisan" ] && \
-              [ -f "$CURRENT_PATH/vendor/autoload.php" ]
+            [ -f "$CURRENT_PATH/artisan" ] && \
+            [ -f "$CURRENT_PATH/vendor/autoload.php" ]
           then
 
               cd "$CURRENT_PATH"
 
-
               php8.3 artisan down \
-                  --retry=60
-
+                --retry=60
 
               echo "Maintenance mode ON"
 
           else
 
-              echo "First deployment detected"
-              echo "Maintenance mode skipped"
+              echo "Existing Laravel installation not found."
+              echo "Maintenance mode skipped."
 
           fi
 
@@ -907,7 +980,7 @@ jobs:
 
 
       # ==========================================================
-      # RSYNC WITH RETRIES
+      # UPLOAD
       # ==========================================================
 
       - name: Upload Application
@@ -916,54 +989,54 @@ jobs:
         run: |
           set -euo pipefail
 
-          RSYNC_SUCCESS=0
+          SUCCESS=0
 
 
           for ATTEMPT in 1 2 3
           do
 
-              echo "Rsync attempt $ATTEMPT/3"
+              echo "Rsync attempt ${ATTEMPT}/3"
 
 
               if rsync \
-                  -az \
-                  --delete-delay \
-                  --delay-updates \
-                  --partial \
-                  --timeout=120 \
-                  --no-owner \
-                  --no-group \
-                  --exclude="/.git/" \
-                  --exclude="/.github/" \
-                  --exclude="/.env" \
-                  --exclude="/.env.*" \
-                  --exclude="/vendor/" \
-                  --exclude="/node_modules/" \
-                  --exclude="/storage/" \
-                  --exclude="/public/storage" \
-                  --exclude="/bootstrap/cache/*.php" \
-                  --exclude="/tests/" \
-                  --exclude="/docs/" \
-                  --exclude="/phpunit.xml" \
-                  --exclude="/.phpunit.cache/" \
-                  --exclude="/README.md" \
-                  -e "ssh \
-                    -4 \
-                    -T \
-                    -o BatchMode=yes \
-                    -o IdentitiesOnly=yes \
-                    -o StrictHostKeyChecking=yes \
-                    -o ConnectTimeout=15 \
-                    -o ConnectionAttempts=3 \
-                    -o ServerAliveInterval=15 \
-                    -o ServerAliveCountMax=3 \
-                    -i $HOME/.ssh/deploy_key \
-                    -p ${{ secrets.DEV_PORT }}" \
-                  ./ \
-                  "${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}:${{ secrets.DEV_BASE_PATH }}/current/"
+                -az \
+                --delete-delay \
+                --delay-updates \
+                --partial \
+                --timeout=120 \
+                --no-owner \
+                --no-group \
+                --exclude="/.git/" \
+                --exclude="/.github/" \
+                --exclude="/.env" \
+                --exclude="/.env.*" \
+                --exclude="/vendor/" \
+                --exclude="/node_modules/" \
+                --exclude="/storage/" \
+                --exclude="/public/storage" \
+                --exclude="/bootstrap/cache/*.php" \
+                --exclude="/tests/" \
+                --exclude="/docs/" \
+                --exclude="/phpunit.xml" \
+                --exclude="/.phpunit.cache/" \
+                --exclude="/README.md" \
+                -e "ssh \
+                  -4 \
+                  -T \
+                  -o BatchMode=yes \
+                  -o IdentitiesOnly=yes \
+                  -o StrictHostKeyChecking=yes \
+                  -o ConnectTimeout=15 \
+                  -o ConnectionAttempts=3 \
+                  -o ServerAliveInterval=15 \
+                  -o ServerAliveCountMax=3 \
+                  -i $HOME/.ssh/deploy_key \
+                  -p ${{ secrets.DEV_PORT }}" \
+                ./ \
+                "${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}:${{ secrets.DEV_BASE_PATH }}/current/"
               then
 
-                  RSYNC_SUCCESS=1
+                  SUCCESS=1
 
                   echo "Rsync PASS"
 
@@ -974,17 +1047,19 @@ jobs:
 
               if [ "$ATTEMPT" -lt 3 ]; then
 
-                  echo \
-                      "Rsync failed. Waiting before retry..."
+                  WAIT_SECONDS="$((ATTEMPT * 10))"
 
-                  sleep "$((ATTEMPT * 10))"
+                  echo "Rsync failed."
+                  echo "Retrying in ${WAIT_SECONDS}s..."
+
+                  sleep "$WAIT_SECONDS"
 
               fi
 
           done
 
 
-          if [ "$RSYNC_SUCCESS" -ne 1 ]; then
+          if [ "$SUCCESS" -ne 1 ]; then
 
               echo "::error::Rsync failed after 3 attempts"
 
@@ -994,7 +1069,7 @@ jobs:
 
 
       # ==========================================================
-      # BUILD / BACKUP / MIGRATION / CACHE / HEALTH
+      # DEPLOY APPLICATION
       # ==========================================================
 
       - name: Deploy Application
@@ -1025,7 +1100,8 @@ jobs:
           CURRENT_PATH="$BASE_PATH/current"
           SHARED_PATH="$BASE_PATH/shared"
 
-          APP_HOST="${{ env.APP_HOST }}"
+          APP_HOST="vyaparidarbaar.holiplaces.com"
+
           DEPLOY_ID="${{ env.DEPLOY_ID }}"
 
           PHP_BIN="/usr/bin/php8.3"
@@ -1033,21 +1109,19 @@ jobs:
 
 
           echo "========================================"
-          echo "VYAPARI DARBAAR DEV DEPLOYMENT"
+          echo "VYAPARI DARBAAR DEV DEPLOY"
           echo "========================================"
 
-          echo "Domain:    $APP_HOST"
-          echo "Code Path: $CURRENT_PATH"
           echo "Deploy ID: $DEPLOY_ID"
-
-          echo "========================================"
+          echo "Domain:    $APP_HOST"
+          echo "Path:      $CURRENT_PATH"
 
 
           cd "$CURRENT_PATH"
 
 
           # ------------------------------------------------------
-          # Source validation
+          # SOURCE VALIDATION
           # ------------------------------------------------------
 
           test -f artisan || {
@@ -1078,23 +1152,20 @@ jobs:
 
 
           # ------------------------------------------------------
-          # Shared ENV symlink
+          # ENV LINK
           # ------------------------------------------------------
 
           if [ -L "$CURRENT_PATH/.env" ]; then
-
               rm "$CURRENT_PATH/.env"
 
           elif [ -e "$CURRENT_PATH/.env" ]; then
-
               rm -f "$CURRENT_PATH/.env"
-
           fi
 
 
           ln -s \
-              "$SHARED_PATH/.env" \
-              "$CURRENT_PATH/.env"
+            "$SHARED_PATH/.env" \
+            "$CURRENT_PATH/.env"
 
 
           test -r "$CURRENT_PATH/.env" || {
@@ -1103,27 +1174,21 @@ jobs:
           }
 
 
-          echo ".env symlink PASS"
-
-
           # ------------------------------------------------------
-          # Shared storage symlink
+          # STORAGE LINK
           # ------------------------------------------------------
 
           if [ -L "$CURRENT_PATH/storage" ]; then
-
               rm "$CURRENT_PATH/storage"
 
           elif [ -e "$CURRENT_PATH/storage" ]; then
-
               rm -rf "$CURRENT_PATH/storage"
-
           fi
 
 
           ln -s \
-              "$SHARED_PATH/storage" \
-              "$CURRENT_PATH/storage"
+            "$SHARED_PATH/storage" \
+            "$CURRENT_PATH/storage"
 
 
           test -L "$CURRENT_PATH/storage" || {
@@ -1132,56 +1197,46 @@ jobs:
           }
 
 
-          echo "Storage symlink PASS"
-
-
-          # ------------------------------------------------------
-          # bootstrap/cache
-          # ------------------------------------------------------
-
           mkdir -p \
-              "$CURRENT_PATH/bootstrap/cache"
+            "$CURRENT_PATH/bootstrap/cache"
 
 
           rm -f \
-              "$CURRENT_PATH"/bootstrap/cache/*.php
+            "$CURRENT_PATH"/bootstrap/cache/*.php
 
 
           chmod 2775 \
-              "$CURRENT_PATH/bootstrap/cache"
+            "$CURRENT_PATH/bootstrap/cache"
 
 
           # ------------------------------------------------------
-          # Composer
+          # COMPOSER
           # ------------------------------------------------------
 
           export COMPOSER_CACHE_DIR="$HOME/.cache/composer"
 
 
-          echo "Installing production Composer dependencies..."
-
-
           "$PHP_BIN" "$COMPOSER_BIN" install \
-              --no-dev \
-              --no-interaction \
-              --prefer-dist \
-              --optimize-autoloader \
-              --no-progress
+            --no-dev \
+            --no-interaction \
+            --prefer-dist \
+            --optimize-autoloader \
+            --no-progress
 
 
           echo "Composer install PASS"
 
 
           # ------------------------------------------------------
-          # Public storage link
+          # PUBLIC STORAGE
           # ------------------------------------------------------
 
           if \
-              [ -e "$CURRENT_PATH/public/storage" ] && \
-              [ ! -L "$CURRENT_PATH/public/storage" ]
+            [ -e "$CURRENT_PATH/public/storage" ] && \
+            [ ! -L "$CURRENT_PATH/public/storage" ]
           then
 
-              echo "ERROR: public/storage exists but is not a symlink"
+              echo "ERROR: public/storage exists but is not symlink"
 
               exit 1
 
@@ -1196,15 +1251,15 @@ jobs:
 
 
           ACTUAL_STORAGE="$(
-              readlink -f \
-                  "$CURRENT_PATH/public/storage" \
+            readlink -f \
+              "$CURRENT_PATH/public/storage" \
               || true
           )"
 
 
           EXPECTED_STORAGE="$(
-              readlink -f \
-                  "$SHARED_PATH/storage/app/public" \
+            readlink -f \
+              "$SHARED_PATH/storage/app/public" \
               || true
           )"
 
@@ -1220,20 +1275,18 @@ jobs:
           fi
 
 
-          echo "Public storage PASS"
+          echo "Storage link PASS"
 
 
           # ------------------------------------------------------
-          # Clear stale Laravel caches
+          # CLEAR OLD CACHE
           # ------------------------------------------------------
 
           "$PHP_BIN" artisan optimize:clear
 
-          "$PHP_BIN" artisan --version
-
 
           # ------------------------------------------------------
-          # Infrastructure validation
+          # INFRASTRUCTURE VALIDATION
           # ------------------------------------------------------
 
           "$PHP_BIN" -r '
@@ -1246,10 +1299,7 @@ jobs:
           )->bootstrap();
 
 
-          // --------------------------------------------------
           // MySQL
-          // --------------------------------------------------
-
           \Illuminate\Support\Facades\DB::connection()
               ->getPdo();
 
@@ -1274,10 +1324,7 @@ jobs:
           echo "Database target PASS\n";
 
 
-          // --------------------------------------------------
-          // Redis
-          // --------------------------------------------------
-
+          // Redis DBs
           $defaultDb = (string) config(
               "database.redis.default.database"
           );
@@ -1290,7 +1337,7 @@ jobs:
           if ($defaultDb !== "10") {
 
               throw new RuntimeException(
-                  "Server REDIS_DB must be 10"
+                  "REDIS_DB must be 10"
               );
 
           }
@@ -1299,19 +1346,16 @@ jobs:
           if ($cacheDb !== "11") {
 
               throw new RuntimeException(
-                  "Server REDIS_CACHE_DB must be 11"
+                  "REDIS_CACHE_DB must be 11"
               );
 
           }
 
 
-          echo "Redis DB isolation PASS\n";
+          echo "Redis database isolation PASS\n";
 
 
-          // --------------------------------------------------
           // Queue
-          // --------------------------------------------------
-
           if (config("queue.default") !== "redis") {
 
               throw new RuntimeException(
@@ -1321,29 +1365,27 @@ jobs:
           }
 
 
-          echo "Redis queue configuration PASS\n";
+          echo "Redis queue PASS\n";
 
 
-          // --------------------------------------------------
-          // APP URL
-          // --------------------------------------------------
-
+          // App URL
           $expectedUrl =
               "https://vyaparidarbaar.holiplaces.com";
 
 
-          if (
-              rtrim(
-                  (string) config("app.url"),
-                  "/"
-              ) !== $expectedUrl
-          ) {
+          $currentUrl = rtrim(
+              (string) config("app.url"),
+              "/"
+          );
+
+
+          if ($currentUrl !== $expectedUrl) {
 
               throw new RuntimeException(
-                  "APP_URL must be " .
+                  "APP_URL mismatch. Expected: " .
                   $expectedUrl .
-                  ". Current: " .
-                  config("app.url")
+                  ", Current: " .
+                  $currentUrl
               );
 
           }
@@ -1352,10 +1394,7 @@ jobs:
           echo "APP_URL PASS\n";
 
 
-          // --------------------------------------------------
           // Redis ping
-          // --------------------------------------------------
-
           if (
               \Illuminate\Support\Facades\Redis::connection()
                   ->ping() === false
@@ -1371,18 +1410,15 @@ jobs:
           echo "Redis connection PASS\n";
 
 
-          // --------------------------------------------------
           // Cache
-          // --------------------------------------------------
-
-          $cacheKey =
+          $key =
               "vyapari:deploy:cache:" .
               getmypid();
 
 
           \Illuminate\Support\Facades\Cache::store("redis")
               ->put(
-                  $cacheKey,
+                  $key,
                   "ok",
                   60
               );
@@ -1390,27 +1426,24 @@ jobs:
 
           if (
               \Illuminate\Support\Facades\Cache::store("redis")
-                  ->get($cacheKey) !== "ok"
+                  ->get($key) !== "ok"
           ) {
 
               throw new RuntimeException(
-                  "Redis cache failed"
+                  "Redis cache test failed"
               );
 
           }
 
 
           \Illuminate\Support\Facades\Cache::store("redis")
-              ->forget($cacheKey);
+              ->forget($key);
 
 
           echo "Redis cache PASS\n";
 
 
-          // --------------------------------------------------
-          // Redis lock
-          // --------------------------------------------------
-
+          // Lock
           $lock =
               \Illuminate\Support\Facades\Cache::store("redis")
                   ->lock(
@@ -1437,125 +1470,116 @@ jobs:
 
 
           # ------------------------------------------------------
-          # Obtain DB credentials from Laravel config
+          # DB CONFIG FOR BACKUP
           # ------------------------------------------------------
 
           export CURRENT_PATH
 
 
           DB_NAME="$(
-              "$PHP_BIN" -r '
-              require getenv("CURRENT_PATH")."/vendor/autoload.php";
+            "$PHP_BIN" -r '
+            require getenv("CURRENT_PATH")."/vendor/autoload.php";
 
-              $app =
-                  require getenv("CURRENT_PATH")."/bootstrap/app.php";
+            $app =
+                require getenv("CURRENT_PATH")."/bootstrap/app.php";
 
-              $app->make(
-                  \Illuminate\Contracts\Console\Kernel::class
-              )->bootstrap();
+            $app->make(
+                \Illuminate\Contracts\Console\Kernel::class
+            )->bootstrap();
 
-              echo config(
-                  "database.connections.mysql.database"
-              );
-              '
+            echo config(
+                "database.connections.mysql.database"
+            );
+            '
           )"
 
 
           DB_USER="$(
-              "$PHP_BIN" -r '
-              require getenv("CURRENT_PATH")."/vendor/autoload.php";
+            "$PHP_BIN" -r '
+            require getenv("CURRENT_PATH")."/vendor/autoload.php";
 
-              $app =
-                  require getenv("CURRENT_PATH")."/bootstrap/app.php";
+            $app =
+                require getenv("CURRENT_PATH")."/bootstrap/app.php";
 
-              $app->make(
-                  \Illuminate\Contracts\Console\Kernel::class
-              )->bootstrap();
+            $app->make(
+                \Illuminate\Contracts\Console\Kernel::class
+            )->bootstrap();
 
-              echo config(
-                  "database.connections.mysql.username"
-              );
-              '
+            echo config(
+                "database.connections.mysql.username"
+            );
+            '
           )"
 
 
           DB_PASS="$(
-              "$PHP_BIN" -r '
-              require getenv("CURRENT_PATH")."/vendor/autoload.php";
+            "$PHP_BIN" -r '
+            require getenv("CURRENT_PATH")."/vendor/autoload.php";
 
-              $app =
-                  require getenv("CURRENT_PATH")."/bootstrap/app.php";
+            $app =
+                require getenv("CURRENT_PATH")."/bootstrap/app.php";
 
-              $app->make(
-                  \Illuminate\Contracts\Console\Kernel::class
-              )->bootstrap();
+            $app->make(
+                \Illuminate\Contracts\Console\Kernel::class
+            )->bootstrap();
 
-              echo config(
-                  "database.connections.mysql.password"
-              );
-              '
+            echo config(
+                "database.connections.mysql.password"
+            );
+            '
           )"
 
 
           DB_HOST="$(
-              "$PHP_BIN" -r '
-              require getenv("CURRENT_PATH")."/vendor/autoload.php";
+            "$PHP_BIN" -r '
+            require getenv("CURRENT_PATH")."/vendor/autoload.php";
 
-              $app =
-                  require getenv("CURRENT_PATH")."/bootstrap/app.php";
+            $app =
+                require getenv("CURRENT_PATH")."/bootstrap/app.php";
 
-              $app->make(
-                  \Illuminate\Contracts\Console\Kernel::class
-              )->bootstrap();
+            $app->make(
+                \Illuminate\Contracts\Console\Kernel::class
+            )->bootstrap();
 
-              echo config(
-                  "database.connections.mysql.host"
-              );
-              '
+            echo config(
+                "database.connections.mysql.host"
+            );
+            '
           )"
 
 
           DB_PORT="$(
-              "$PHP_BIN" -r '
-              require getenv("CURRENT_PATH")."/vendor/autoload.php";
+            "$PHP_BIN" -r '
+            require getenv("CURRENT_PATH")."/vendor/autoload.php";
 
-              $app =
-                  require getenv("CURRENT_PATH")."/bootstrap/app.php";
+            $app =
+                require getenv("CURRENT_PATH")."/bootstrap/app.php";
 
-              $app->make(
-                  \Illuminate\Contracts\Console\Kernel::class
-              )->bootstrap();
+            $app->make(
+                \Illuminate\Contracts\Console\Kernel::class
+            )->bootstrap();
 
-              echo config(
-                  "database.connections.mysql.port"
-              );
-              '
+            echo config(
+                "database.connections.mysql.port"
+            );
+            '
           )"
 
 
           DB_PORT="${DB_PORT:-3306}"
 
 
-          test "$DB_NAME" = "vyapari_darbaar_dev" || {
+          if [ "$DB_NAME" != "vyapari_darbaar_dev" ]; then
+
               echo "ERROR: Unsafe database target: $DB_NAME"
+
               exit 1
-          }
 
-
-          test -n "$DB_USER" || {
-              echo "ERROR: DB username empty"
-              exit 1
-          }
-
-
-          test -n "$DB_HOST" || {
-              echo "ERROR: DB host empty"
-              exit 1
-          }
+          fi
 
 
           # ------------------------------------------------------
-          # Database backup
+          # DATABASE BACKUP
           # ------------------------------------------------------
 
           BACKUP_FILE="$SHARED_PATH/backups/db-before-$DEPLOY_ID.sql.gz"
@@ -1564,29 +1588,29 @@ jobs:
 
 
           rm -f \
-              "$BACKUP_TMP"
+            "$BACKUP_TMP"
 
 
           echo "Creating database backup..."
 
 
           if ! \
-              MYSQL_PWD="$DB_PASS" \
-              mysqldump \
-                  --host="$DB_HOST" \
-                  --port="$DB_PORT" \
-                  --user="$DB_USER" \
-                  --single-transaction \
-                  --quick \
-                  --lock-tables=false \
-                  --no-tablespaces \
-                  "$DB_NAME" \
-              | gzip \
-                  > "$BACKUP_TMP"
+            MYSQL_PWD="$DB_PASS" \
+            mysqldump \
+              --host="$DB_HOST" \
+              --port="$DB_PORT" \
+              --user="$DB_USER" \
+              --single-transaction \
+              --quick \
+              --lock-tables=false \
+              --no-tablespaces \
+              "$DB_NAME" \
+            | gzip \
+            > "$BACKUP_TMP"
           then
 
               rm -f \
-                  "$BACKUP_TMP"
+                "$BACKUP_TMP"
 
               unset DB_PASS
 
@@ -1602,8 +1626,7 @@ jobs:
 
           if [ ! -s "$BACKUP_TMP" ]; then
 
-              rm -f \
-                  "$BACKUP_TMP"
+              rm -f "$BACKUP_TMP"
 
               echo "ERROR: Database backup empty"
 
@@ -1613,37 +1636,37 @@ jobs:
 
 
           mv \
-              "$BACKUP_TMP" \
-              "$BACKUP_FILE"
+            "$BACKUP_TMP" \
+            "$BACKUP_FILE"
 
 
           chmod 600 \
-              "$BACKUP_FILE"
+            "$BACKUP_FILE"
 
 
           echo "Database backup PASS"
 
 
           # ------------------------------------------------------
-          # Keep latest 5 backups
+          # KEEP LATEST 5 BACKUPS
           # ------------------------------------------------------
 
           find "$SHARED_PATH/backups" \
-              -maxdepth 1 \
-              -type f \
-              -name 'db-before-*.sql.gz' \
-              -printf '%T@ %p\n' \
-              | sort -nr \
-              | tail -n +6 \
-              | cut -d' ' -f2- \
-              | xargs -r rm -f
+            -maxdepth 1 \
+            -type f \
+            -name 'db-before-*.sql.gz' \
+            -printf '%T@ %p\n' \
+            | sort -nr \
+            | tail -n +6 \
+            | cut -d' ' -f2- \
+            | xargs -r rm -f
 
 
           echo "Backup rotation PASS"
 
 
           # ------------------------------------------------------
-          # Migrations
+          # MIGRATIONS
           # ------------------------------------------------------
 
           "$PHP_BIN" artisan migrate --force
@@ -1653,7 +1676,7 @@ jobs:
 
 
           # ------------------------------------------------------
-          # Laravel production caches
+          # CACHE
           # ------------------------------------------------------
 
           "$PHP_BIN" artisan config:cache
@@ -1663,11 +1686,11 @@ jobs:
           "$PHP_BIN" artisan view:cache
 
 
-          echo "Laravel caches PASS"
+          echo "Laravel cache PASS"
 
 
           # ------------------------------------------------------
-          # Queue restart
+          # QUEUE
           # ------------------------------------------------------
 
           "$PHP_BIN" artisan queue:restart
@@ -1677,26 +1700,26 @@ jobs:
 
 
           # ------------------------------------------------------
-          # Deployment metadata
+          # DEPLOYMENT ID
           # ------------------------------------------------------
 
           printf '%s\n' \
-              "$DEPLOY_ID" \
-              > "$CURRENT_PATH/DEPLOY_ID"
+            "$DEPLOY_ID" \
+            > "$CURRENT_PATH/DEPLOY_ID"
 
 
           # ------------------------------------------------------
-          # Bring application online
+          # APPLICATION ONLINE
           # ------------------------------------------------------
 
           "$PHP_BIN" artisan up
 
 
-          echo "Application online"
+          echo "Maintenance mode OFF"
 
 
           # ------------------------------------------------------
-          # Laravel boot test
+          # POST-DEPLOY DB BOOT CHECK
           # ------------------------------------------------------
 
           "$PHP_BIN" -r '
@@ -1708,38 +1731,28 @@ jobs:
               \Illuminate\Contracts\Console\Kernel::class
           )->bootstrap();
 
-
           \Illuminate\Support\Facades\DB::connection()
               ->getPdo();
 
-
-          echo "Laravel post-deploy boot PASS\n";
+          echo "Laravel boot PASS\n";
           '
 
 
           # ------------------------------------------------------
-          # HTTP Health Check
+          # LOCAL NGINX -> FPM -> LARAVEL CHECK
           #
-          # No curl/wget because both behaved abnormally on server.
-          #
-          # Public hostname:
-          # vyaparidarbaar.holiplaces.com
-          #
-          # Local request:
-          # 127.0.0.1:80 + correct Host header
-          #
-          # Protected endpoint should return 401.
+          # Do not use curl/wget on this server.
           # ------------------------------------------------------
 
           echo "Running HTTP health check..."
 
 
-          if ! python3 <<PY
+          if ! python3 <<'PY'
           import http.client
           import json
           import sys
 
-          host = "${APP_HOST}"
+          host = "vyaparidarbaar.holiplaces.com"
 
           connection = None
 
@@ -1765,29 +1778,26 @@ jobs:
 
               response = connection.getresponse()
 
-
               body = response.read().decode(
                   "utf-8",
                   errors="replace",
               )
 
 
-              print("Host:", host)
-
               print(
-                  "HTTP status:",
+                  "HTTP STATUS:",
                   response.status,
               )
 
               print(
-                  "Content-Type:",
+                  "CONTENT-TYPE:",
                   response.getheader(
                       "Content-Type"
                   ),
               )
 
               print(
-                  "Response:",
+                  "BODY:",
                   body[:1000],
               )
 
@@ -1819,20 +1829,17 @@ jobs:
               if payload.get("status") is not False:
 
                   print(
-                      "ERROR: Unexpected status field",
+                      "ERROR: Invalid status field",
                       file=sys.stderr,
                   )
 
                   sys.exit(1)
 
 
-              if (
-                  payload.get("message")
-                  != "Unauthenticated."
-              ):
+              if payload.get("message") != "Unauthenticated.":
 
                   print(
-                      "ERROR: Unexpected auth response",
+                      "ERROR: Invalid auth message",
                       file=sys.stderr,
                   )
 
@@ -1840,7 +1847,7 @@ jobs:
 
 
               print(
-                  "HTTP application health check PASS"
+                  "HTTP health check PASS"
               )
 
 
@@ -1860,23 +1867,18 @@ jobs:
               if connection is not None:
 
                   try:
-
                       connection.close()
-
                   except Exception:
-
                       pass
 
           PY
           then
 
-              echo "ERROR: Post-deployment HTTP health check failed"
-
+              echo "ERROR: HTTP health check failed"
 
               "$PHP_BIN" artisan down \
-                  --retry=60 \
-                  || true
-
+                --retry=60 \
+                || true
 
               exit 1
 
@@ -1887,9 +1889,14 @@ jobs:
           echo "========================================"
           echo "DEPLOYMENT SUCCESS"
           echo "========================================"
-          echo "Domain:    $APP_HOST"
-          echo "Code Path: $CURRENT_PATH"
-          echo "Deploy ID: $DEPLOY_ID"
+          echo "Domain:"
+          echo "https://vyaparidarbaar.holiplaces.com"
+          echo
+          echo "Code:"
+          echo "$CURRENT_PATH"
+          echo
+          echo "Deploy ID:"
+          echo "$DEPLOY_ID"
           echo "========================================"
 
           REMOTE
@@ -1897,10 +1904,6 @@ jobs:
 
       # ==========================================================
       # FAILURE DIAGNOSTICS
-      #
-      # IMPORTANT:
-      # This step NEVER causes a second SSH exit-code 255.
-      # If server is unreachable, it reports and exits success.
       # ==========================================================
 
       - name: Deployment Failure Diagnostics
@@ -1911,52 +1914,57 @@ jobs:
         run: |
           set +e
 
-          echo "========================================"
-          echo "DEPLOYMENT FAILED"
-          echo "========================================"
-
           HOST="${{ secrets.DEV_HOST }}"
           PORT="${{ secrets.DEV_PORT }}"
 
+          echo
+          echo "========================================"
+          echo "DEPLOYMENT FAILURE DIAGNOSTICS"
+          echo "========================================"
 
-          # ------------------------------------------------------
-          # Do not attempt SSH diagnostics if network is down
-          # ------------------------------------------------------
 
-          if ! timeout 10 bash -c \
-              "cat < /dev/null > /dev/tcp/${HOST}/${PORT}" \
-              2>/dev/null
+          echo
+          echo "===== SERVER NETWORK ====="
+
+          if timeout 10 bash -c \
+            "cat < /dev/null > /dev/tcp/${HOST}/${PORT}" \
+            2>/dev/null
           then
 
-              echo "Server SSH is currently unreachable."
-              echo "Host: $HOST"
-              echo "Port: $PORT"
+              echo "SSH PORT: REACHABLE"
+
+          else
+
+              echo "SSH PORT: UNREACHABLE"
+
               echo
-              echo "Skipping remote diagnostics because the"
-              echo "network connection itself is unavailable."
+              echo "Remote diagnostics skipped because"
+              echo "GitHub runner cannot reach SSH."
 
               exit 0
 
           fi
 
-
-          # ------------------------------------------------------
-          # SSH key may not exist if setup failed earlier
-          # ------------------------------------------------------
 
           if [ ! -f "$HOME/.ssh/deploy_key" ]; then
 
-              echo "SSH private key was not initialized."
-              echo "Skipping remote diagnostics."
+              echo "SSH key was not initialized."
+              echo "Remote diagnostics skipped."
 
               exit 0
 
           fi
 
 
-          # ------------------------------------------------------
-          # Remote diagnostics
-          # ------------------------------------------------------
+          if [ ! -f "$HOME/.ssh/known_hosts" ]; then
+
+              echo "known_hosts was not initialized."
+              echo "Remote diagnostics skipped."
+
+              exit 0
+
+          fi
+
 
           ssh \
             -4 \
@@ -1966,8 +1974,6 @@ jobs:
             -o StrictHostKeyChecking=yes \
             -o ConnectTimeout=10 \
             -o ConnectionAttempts=2 \
-            -o ServerAliveInterval=10 \
-            -o ServerAliveCountMax=2 \
             -i "$HOME/.ssh/deploy_key" \
             -p "$PORT" \
             "${{ secrets.DEV_USER }}@$HOST" << 'REMOTE' \
@@ -1984,15 +1990,14 @@ jobs:
           echo
           echo "===== ARTISAN ABOUT ====="
 
-
           if [ -f "$CURRENT_PATH/artisan" ]; then
 
               cd "$CURRENT_PATH"
 
               php8.3 artisan about \
-                  2>&1 \
-                  | tail -n 100 \
-                  || true
+                2>&1 \
+                | tail -n 100 \
+                || true
 
           else
 
@@ -2004,50 +2009,36 @@ jobs:
           echo
           echo "===== LARAVEL LOG ====="
 
-
           tail -n 100 \
-              "$SHARED_PATH/storage/logs/laravel.log" \
-              2>/dev/null \
-              || true
+            "$SHARED_PATH/storage/logs/laravel.log" \
+            2>/dev/null \
+            || true
 
 
           echo
-          echo "===== DEPLOYMENT ID ====="
-
+          echo "===== DEPLOY ID ====="
 
           cat \
-              "$CURRENT_PATH/DEPLOY_ID" \
-              2>/dev/null \
-              || true
-
-
-          echo
-          echo "===== PHP-FPM ====="
-
-
-          systemctl is-active \
-              php8.3-fpm \
-              2>/dev/null \
-              || true
+            "$CURRENT_PATH/DEPLOY_ID" \
+            2>/dev/null \
+            || true
 
 
           echo
           echo "===== DISK ====="
 
-
           df -h \
-              "$CURRENT_PATH" \
-              2>/dev/null \
-              || true
+            "$CURRENT_PATH" \
+            2>/dev/null \
+            || true
 
 
           echo
           echo "===== MEMORY ====="
 
-
           free -h \
-              2>/dev/null \
-              || true
+            2>/dev/null \
+            || true
 
           REMOTE
 
@@ -2067,12 +2058,12 @@ jobs:
           set +e
 
           rm -f \
-              "$HOME/.ssh/deploy_key"
+            "$HOME/.ssh/deploy_key"
 
           rm -f \
-              "$HOME/.ssh/server_key"
+            "$HOME/.ssh/server_key"
 
           rm -f \
-              "$HOME/.ssh/known_hosts"
+            "$HOME/.ssh/known_hosts"
 
           exit 0
