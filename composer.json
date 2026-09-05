@@ -1,4 +1,4 @@
-git {
+{
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/laravel",
     "type": "project",
