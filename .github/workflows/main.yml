@@ -1099,7 +1099,7 @@ jobs:
               --quiet \
               --output-document="$HEALTH_FILE" \
               --timeout=15 \
-              --header="Host: api.vyaparidarbaar.com" \
+              --header="Host:vyaparidarbaar.holiplaces.com" \
               http://127.0.0.1/api/status
           then
 
