@@ -1,0 +1,1186 @@
+name: Deploy Dev
+
+on:
+  push:
+    branches:
+      - dev
+
+  workflow_dispatch:
+
+concurrency:
+  group: vyapari-darbaar-dev
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+
+jobs:
+
+  # ============================================================
+  # CI — TEST APPLICATION BEFORE DEPLOYMENT
+  # ============================================================
+
+  test:
+    name: Test Laravel Backend
+    runs-on: ubuntu-latest
+
+    services:
+
+      mysql:
+        image: mysql:8.4
+
+        env:
+          MYSQL_DATABASE: vyapari_darbaar_test
+          MYSQL_USER: vyapari_test
+          MYSQL_PASSWORD: vyapari_test_password
+          MYSQL_ROOT_PASSWORD: root_test_password
+
+        ports:
+          - 3306:3306
+
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot_test_password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+
+      redis:
+        image: redis:7-alpine
+
+        ports:
+          - 6379:6379
+
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+
+    steps:
+
+      # ----------------------------------------------------------
+      # Checkout
+      # ----------------------------------------------------------
+
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+
+      # ----------------------------------------------------------
+      # PHP
+      # ----------------------------------------------------------
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, bcmath, pdo_mysql, redis, xml, curl, fileinfo, zip
+          coverage: none
+          tools: composer:v2
+
+
+      - name: Verify PHP Runtime
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          php -v
+
+          php -r '
+          foreach ([
+              "pdo_mysql",
+              "redis",
+              "mbstring",
+              "intl",
+              "bcmath"
+          ] as $extension) {
+              if (!extension_loaded($extension)) {
+                  fwrite(STDERR, "Missing PHP extension: {$extension}\n");
+                  exit(1);
+              }
+          }
+
+          echo "Required PHP extensions PASS\n";
+          '
+
+
+      # ----------------------------------------------------------
+      # Testing environment
+      # ----------------------------------------------------------
+
+      - name: Create Test Environment
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          TEST_APP_KEY="$(
+            php -r 'echo "base64:" . base64_encode(random_bytes(32));'
+          )"
+
+          cat > .env <<EOF
+          APP_NAME="Vyapari Darbaar"
+          APP_ENV=testing
+          APP_KEY=${TEST_APP_KEY}
+          APP_DEBUG=false
+          APP_URL=http://127.0.0.1
+
+          APP_LOCALE=en
+          APP_FALLBACK_LOCALE=en
+          APP_FAKER_LOCALE=en_US
+
+          LOG_CHANNEL=stderr
+          LOG_LEVEL=error
+
+          DB_CONNECTION=mysql
+          DB_HOST=127.0.0.1
+          DB_PORT=3306
+          DB_DATABASE=vyapari_darbaar_test
+          DB_USERNAME=vyapari_test
+          DB_PASSWORD=vyapari_test_password
+
+          CACHE_STORE=redis
+          QUEUE_CONNECTION=redis
+
+          REDIS_CLIENT=phpredis
+          REDIS_HOST=127.0.0.1
+          REDIS_PASSWORD=null
+          REDIS_PORT=6379
+          REDIS_DB=10
+          REDIS_CACHE_DB=11
+          REDIS_PREFIX=vyapari_darbaar_ci_database_
+          CACHE_PREFIX=vyapari_darbaar_ci_cache_
+
+          SESSION_DRIVER=array
+
+          MAIL_MAILER=array
+          MAIL_FROM_ADDRESS=test@example.com
+          MAIL_FROM_NAME="Vyapari Darbaar"
+
+          FRONTEND_ADMIN_URL=http://localhost:3000
+          FRONTEND_USER_URL=http://localhost:3000
+          SUPPORT_EMAIL=support@example.com
+
+          BCRYPT_ROUNDS=4
+          EOF
+
+
+      # ----------------------------------------------------------
+      # Composer
+      # ----------------------------------------------------------
+
+      - name: Validate Composer
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          composer validate --no-check-publish
+
+
+      - name: Install Composer Dependencies
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          composer install \
+            --no-interaction \
+            --prefer-dist \
+            --no-progress
+
+
+      # ----------------------------------------------------------
+      # Laravel
+      # ----------------------------------------------------------
+
+      - name: Clear Laravel Cache
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          php artisan optimize:clear
+
+
+      - name: Run Test Migrations
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          php artisan migrate --force
+
+
+      - name: Run Laravel Test Suite
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          php artisan test
+
+
+      # ----------------------------------------------------------
+      # Ensure production caches are actually buildable
+      # ----------------------------------------------------------
+
+      - name: Verify Laravel Production Caches
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+
+          php artisan optimize:clear
+
+
+
+  # ============================================================
+  # CD — DEPLOY SINGLE CODE COPY TO DEV SERVER
+  # ============================================================
+
+  deploy:
+    name: Deploy Laravel Backend To Dev
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ----------------------------------------------------------
+      # Checkout
+      # ----------------------------------------------------------
+
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+
+      # ----------------------------------------------------------
+      # Deployment ID
+      # ----------------------------------------------------------
+
+      - name: Set Deployment ID
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          DEPLOY_ID="$(date +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
+
+          echo "DEPLOY_ID=$DEPLOY_ID" >> "$GITHUB_ENV"
+
+          echo "Deployment ID: $DEPLOY_ID"
+
+
+      # ----------------------------------------------------------
+      # SSH
+      # ----------------------------------------------------------
+
+      - name: Setup SSH
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          mkdir -p ~/.ssh
+
+          printf '%s\n' \
+            "${{ secrets.DEV_SSH_KEY }}" \
+            > ~/.ssh/deploy_key
+
+          chmod 600 ~/.ssh/deploy_key
+
+
+          ssh-keyscan \
+            -p "${{ secrets.DEV_PORT }}" \
+            -t ed25519 \
+            "${{ secrets.DEV_HOST }}" \
+            2>/dev/null \
+            > ~/.ssh/server_key
+
+
+          # Server fingerprint already manually verified.
+          EXPECTED_FINGERPRINT="SHA256:9UPe5ZfQsWabEgPmXYRqZas3s7PEFS9e+kDqkgv2ans"
+
+          ACTUAL_FINGERPRINT="$(
+            ssh-keygen -lf ~/.ssh/server_key \
+            | awk '{print $2}'
+          )"
+
+
+          if [ "$ACTUAL_FINGERPRINT" != "$EXPECTED_FINGERPRINT" ]; then
+
+            echo "ERROR: SSH host fingerprint mismatch."
+
+            exit 1
+
+          fi
+
+
+          cat ~/.ssh/server_key >> ~/.ssh/known_hosts
+
+          chmod 600 ~/.ssh/known_hosts
+
+          rm -f ~/.ssh/server_key
+
+
+      # ----------------------------------------------------------
+      # Verify SSH
+      # ----------------------------------------------------------
+
+      - name: Verify SSH Connection
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          ssh \
+            -i ~/.ssh/deploy_key \
+            -p "${{ secrets.DEV_PORT }}" \
+            "${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}" \
+            "echo 'SSH connection PASS'"
+
+
+      # ----------------------------------------------------------
+      # Server preflight
+      # ----------------------------------------------------------
+
+      - name: Server Preflight
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          ssh \
+            -i ~/.ssh/deploy_key \
+            -p "${{ secrets.DEV_PORT }}" \
+            "${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}" << 'REMOTE'
+
+          set -euo pipefail
+
+          BASE_PATH="${{ secrets.DEV_BASE_PATH }}"
+
+          CURRENT_PATH="$BASE_PATH/current"
+
+          SHARED_PATH="$BASE_PATH/shared"
+
+
+          echo "Checking server requirements..."
+
+
+          # ------------------------------------------------------
+          # Required programs
+          # ------------------------------------------------------
+
+          command -v php8.3 >/dev/null 2>&1 || {
+              echo "ERROR: php8.3 not found"
+              exit 1
+          }
+
+          command -v composer >/dev/null 2>&1 || {
+              echo "ERROR: composer not found"
+              exit 1
+          }
+
+          command -v rsync >/dev/null 2>&1 || {
+              echo "ERROR: rsync not found"
+              exit 1
+          }
+
+          command -v mysqldump >/dev/null 2>&1 || {
+              echo "ERROR: mysqldump not found"
+              exit 1
+          }
+
+          command -v wget >/dev/null 2>&1 || {
+              echo "ERROR: wget not found"
+              exit 1
+          }
+
+
+          # ------------------------------------------------------
+          # PHP runtime
+          # ------------------------------------------------------
+
+          php8.3 -r '
+          if (!extension_loaded("redis")) {
+              fwrite(STDERR, "ERROR: phpredis missing\n");
+              exit(1);
+          }
+
+          if (!extension_loaded("pdo_mysql")) {
+              fwrite(STDERR, "ERROR: pdo_mysql missing\n");
+              exit(1);
+          }
+
+          echo "PHP extensions PASS\n";
+          '
+
+
+          # ------------------------------------------------------
+          # Shared environment
+          # ------------------------------------------------------
+
+          test -f "$SHARED_PATH/.env" || {
+              echo "ERROR: shared/.env missing"
+              exit 1
+          }
+
+          test -r "$SHARED_PATH/.env" || {
+              echo "ERROR: shared/.env is not readable"
+              exit 1
+          }
+
+
+          # ------------------------------------------------------
+          # Shared Laravel storage
+          # ------------------------------------------------------
+
+          mkdir -p "$SHARED_PATH/storage/app/private"
+          mkdir -p "$SHARED_PATH/storage/app/public"
+
+          mkdir -p "$SHARED_PATH/storage/framework/cache/data"
+          mkdir -p "$SHARED_PATH/storage/framework/sessions"
+          mkdir -p "$SHARED_PATH/storage/framework/testing"
+          mkdir -p "$SHARED_PATH/storage/framework/views"
+
+          mkdir -p "$SHARED_PATH/storage/logs"
+
+          mkdir -p "$SHARED_PATH/backups"
+
+
+          test -w "$SHARED_PATH/storage" || {
+              echo "ERROR: shared storage is not writable"
+              exit 1
+          }
+
+          test -w "$SHARED_PATH/backups" || {
+              echo "ERROR: backup directory is not writable"
+              exit 1
+          }
+
+
+          # ------------------------------------------------------
+          # Convert old bootstrap symlink to SINGLE DIRECTORY mode
+          # only if it is still the known bootstrap test symlink.
+          # ------------------------------------------------------
+
+          if [ -L "$CURRENT_PATH" ]; then
+
+              CURRENT_TARGET="$(
+                  readlink -f "$CURRENT_PATH" || true
+              )"
+
+
+              if [ "$CURRENT_TARGET" = "$BASE_PATH/releases/bootstrap" ]; then
+
+                  echo "Converting bootstrap symlink to single-directory deployment..."
+
+                  rm "$CURRENT_PATH"
+
+                  mkdir -p "$CURRENT_PATH"
+
+              else
+
+                  echo "ERROR: current is an unexpected symlink:"
+                  echo "$CURRENT_TARGET"
+                  echo "Manual review required."
+
+                  exit 1
+
+              fi
+
+          fi
+
+
+          if [ ! -e "$CURRENT_PATH" ]; then
+
+              mkdir -p "$CURRENT_PATH"
+
+          fi
+
+
+          if [ ! -d "$CURRENT_PATH" ]; then
+
+              echo "ERROR: current is not a normal directory"
+
+              exit 1
+
+          fi
+
+
+          chmod 2755 "$CURRENT_PATH"
+
+          chgrp www-data "$CURRENT_PATH"
+
+
+          test -w "$CURRENT_PATH" || {
+              echo "ERROR: current directory is not writable"
+              exit 1
+          }
+
+
+          # ------------------------------------------------------
+          # Remove ONLY the old bootstrap test directory.
+          # No application releases are created by this workflow.
+          # ------------------------------------------------------
+
+          if [ -d "$BASE_PATH/releases/bootstrap" ]; then
+
+              rm -rf "$BASE_PATH/releases/bootstrap"
+
+          fi
+
+
+          if [ -d "$BASE_PATH/releases" ]; then
+
+              RELEASE_COUNT="$(
+                  find "$BASE_PATH/releases" \
+                    -mindepth 1 \
+                    -maxdepth 1 \
+                    | wc -l
+              )"
+
+
+              if [ "$RELEASE_COUNT" -eq 0 ]; then
+
+                  rmdir "$BASE_PATH/releases"
+
+              else
+
+                  echo "ERROR: old release directories still exist."
+                  echo "This workflow uses SINGLE-COPY deployment."
+                  echo "Review $BASE_PATH/releases manually."
+
+                  exit 1
+
+              fi
+
+          fi
+
+
+          # ------------------------------------------------------
+          # Composer cache
+          # ------------------------------------------------------
+
+          mkdir -p "$HOME/.cache/composer"
+
+
+          echo "Server preflight PASS"
+
+          REMOTE
+
+
+      # ----------------------------------------------------------
+      # Put currently-running application in maintenance mode
+      #
+      # First deployment has no Laravel code yet, so it is skipped.
+      # ----------------------------------------------------------
+
+      - name: Enable Maintenance Mode
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          ssh \
+            -i ~/.ssh/deploy_key \
+            -p "${{ secrets.DEV_PORT }}" \
+            "${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}" << 'REMOTE'
+
+          set -euo pipefail
+
+          BASE_PATH="${{ secrets.DEV_BASE_PATH }}"
+
+          CURRENT_PATH="$BASE_PATH/current"
+
+          PHP_BIN="/usr/bin/php8.3"
+
+
+          if \
+            [ -f "$CURRENT_PATH/artisan" ] && \
+            [ -f "$CURRENT_PATH/vendor/autoload.php" ]
+          then
+
+              cd "$CURRENT_PATH"
+
+              $PHP_BIN artisan down \
+                --retry=60 \
+                || true
+
+              echo "Maintenance mode enabled"
+
+          else
+
+              echo "First deployment: maintenance mode skipped"
+
+          fi
+
+          REMOTE
+
+
+      # ----------------------------------------------------------
+      # Upload ONLY application source
+      #
+      # SINGLE code copy:
+      # /var/www/api.vyaparidarbaar.com/current
+      #
+      # --delete-delay removes files deleted from Git.
+      # Excluded shared/runtime content remains untouched.
+      # ----------------------------------------------------------
+
+      - name: Upload Application With Rsync
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          rsync \
+            -az \
+            --delete-delay \
+            --delay-updates \
+            --no-owner \
+            --no-group \
+            --exclude="/.git" \
+            --exclude="/.github" \
+            --exclude="/.env" \
+            --exclude="/.env.*" \
+            --exclude="/vendor" \
+            --exclude="/node_modules" \
+            --exclude="/storage" \
+            --exclude="/bootstrap/cache/*.php" \
+            --exclude="/tests" \
+            --exclude="/docs" \
+            --exclude="/phpunit.xml" \
+            --exclude="/README.md" \
+            --exclude="/.editorconfig" \
+            --exclude="/.phpunit.cache" \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.DEV_PORT }}" \
+            ./ \
+            "${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}:${{ secrets.DEV_BASE_PATH }}/current/"
+
+
+      # ----------------------------------------------------------
+      # Build application directly inside current/
+      # ----------------------------------------------------------
+
+      - name: Build And Deploy Application
+        shell: bash
+
+        run: |
+          set -euo pipefail
+
+          ssh \
+            -i ~/.ssh/deploy_key \
+            -p "${{ secrets.DEV_PORT }}" \
+            "${{ secrets.DEV_USER }}@${{ secrets.DEV_HOST }}" << 'REMOTE'
+
+          set -euo pipefail
+
+          BASE_PATH="${{ secrets.DEV_BASE_PATH }}"
+
+          CURRENT_PATH="$BASE_PATH/current"
+
+          SHARED_PATH="$BASE_PATH/shared"
+
+          DEPLOY_ID="${{ env.DEPLOY_ID }}"
+
+          PHP_BIN="/usr/bin/php8.3"
+
+          COMPOSER_BIN="$(command -v composer)"
+
+
+          echo "========================================"
+          echo "Vyapari Darbaar Dev Deployment"
+          echo "Deployment: $DEPLOY_ID"
+          echo "========================================"
+
+
+          cd "$CURRENT_PATH"
+
+
+          # ------------------------------------------------------
+          # Validate uploaded Laravel source
+          # ------------------------------------------------------
+
+          test -f artisan || {
+              echo "ERROR: artisan missing"
+              exit 1
+          }
+
+          test -f composer.json || {
+              echo "ERROR: composer.json missing"
+              exit 1
+          }
+
+          test -f composer.lock || {
+              echo "ERROR: composer.lock missing"
+              exit 1
+          }
+
+          test -d public || {
+              echo "ERROR: public directory missing"
+              exit 1
+          }
+
+
+          # ------------------------------------------------------
+          # Shared .env
+          # ------------------------------------------------------
+
+          rm -f "$CURRENT_PATH/.env"
+
+          ln -s \
+            "$SHARED_PATH/.env" \
+            "$CURRENT_PATH/.env"
+
+          test -r "$CURRENT_PATH/.env"
+
+
+          # ------------------------------------------------------
+          # Shared storage
+          # ------------------------------------------------------
+
+          if \
+            [ -e "$CURRENT_PATH/storage" ] || \
+            [ -L "$CURRENT_PATH/storage" ]
+          then
+
+              rm -rf "$CURRENT_PATH/storage"
+
+          fi
+
+
+          ln -s \
+            "$SHARED_PATH/storage" \
+            "$CURRENT_PATH/storage"
+
+
+          # ------------------------------------------------------
+          # Runtime permissions
+          # ------------------------------------------------------
+
+          mkdir -p "$CURRENT_PATH/bootstrap/cache"
+
+          rm -f "$CURRENT_PATH"/bootstrap/cache/*.php
+
+
+          chgrp -R www-data "$CURRENT_PATH/bootstrap/cache"
+
+
+          find "$CURRENT_PATH/bootstrap/cache" \
+            -type d \
+            -exec chmod 2775 {} \;
+
+
+          find "$CURRENT_PATH/bootstrap/cache" \
+            -type f \
+            -exec chmod 664 {} \;
+
+
+          find "$SHARED_PATH/storage" \
+            -type d \
+            -exec chmod 2775 {} \;
+
+
+          find "$SHARED_PATH/storage" \
+            -type f \
+            -exec chmod 664 {} \;
+
+
+          # ------------------------------------------------------
+          # Composer cache
+          # ------------------------------------------------------
+
+          export COMPOSER_CACHE_DIR="$HOME/.cache/composer"
+
+
+          # ------------------------------------------------------
+          # Production dependencies
+          # ------------------------------------------------------
+
+          "$PHP_BIN" "$COMPOSER_BIN" install \
+            --no-dev \
+            --no-interaction \
+            --prefer-dist \
+            --optimize-autoloader \
+            --no-progress
+
+
+          # ------------------------------------------------------
+          # Remove stale Laravel caches
+          # ------------------------------------------------------
+
+          "$PHP_BIN" artisan optimize:clear
+
+
+          # ------------------------------------------------------
+          # Framework version
+          # ------------------------------------------------------
+
+          "$PHP_BIN" artisan --version
+
+
+          # ------------------------------------------------------
+          # DB + Redis + Cache + Lock infrastructure preflight
+          # ------------------------------------------------------
+
+          "$PHP_BIN" -r '
+          require "vendor/autoload.php";
+
+          $app = require "bootstrap/app.php";
+
+          $app->make(
+              \Illuminate\Contracts\Console\Kernel::class
+          )->bootstrap();
+
+
+          // MySQL
+          \Illuminate\Support\Facades\DB::connection()->getPdo();
+
+          echo "MySQL connection PASS\n";
+
+
+          // Redis
+          $ping = \Illuminate\Support\Facades\Redis::connection()->ping();
+
+          if (!$ping) {
+              throw new \RuntimeException("Redis PING failed");
+          }
+
+          echo "Redis connection PASS\n";
+
+
+          // Redis cache
+          $cacheKey = "vyapari_darbaar:deploy:cache:" . getmypid();
+
+          \Illuminate\Support\Facades\Cache::store("redis")
+              ->put($cacheKey, "ok", 60);
+
+          if (
+              \Illuminate\Support\Facades\Cache::store("redis")
+                  ->get($cacheKey) !== "ok"
+          ) {
+              throw new \RuntimeException("Redis cache test failed");
+          }
+
+          \Illuminate\Support\Facades\Cache::store("redis")
+              ->forget($cacheKey);
+
+          echo "Redis cache PASS\n";
+
+
+          // Redis lock
+          $lockKey = "vyapari_darbaar:deploy:lock:" . getmypid();
+
+          $lock = \Illuminate\Support\Facades\Cache::store("redis")
+              ->lock($lockKey, 10);
+
+          if (!$lock->get()) {
+              throw new \RuntimeException("Redis lock test failed");
+          }
+
+          $lock->release();
+
+          echo "Redis lock PASS\n";
+          '
+
+
+          # ------------------------------------------------------
+          # Read DB configuration securely through Laravel
+          # ------------------------------------------------------
+
+          export CURRENT_PATH
+
+
+          DB_NAME="$(
+            "$PHP_BIN" -r '
+            require getenv("CURRENT_PATH")."/vendor/autoload.php";
+
+            $app = require getenv("CURRENT_PATH")."/bootstrap/app.php";
+
+            $app->make(
+                \Illuminate\Contracts\Console\Kernel::class
+            )->bootstrap();
+
+            echo config("database.connections.mysql.database");
+            '
+          )"
+
+
+          DB_USER="$(
+            "$PHP_BIN" -r '
+            require getenv("CURRENT_PATH")."/vendor/autoload.php";
+
+            $app = require getenv("CURRENT_PATH")."/bootstrap/app.php";
+
+            $app->make(
+                \Illuminate\Contracts\Console\Kernel::class
+            )->bootstrap();
+
+            echo config("database.connections.mysql.username");
+            '
+          )"
+
+
+          DB_PASS="$(
+            "$PHP_BIN" -r '
+            require getenv("CURRENT_PATH")."/vendor/autoload.php";
+
+            $app = require getenv("CURRENT_PATH")."/bootstrap/app.php";
+
+            $app->make(
+                \Illuminate\Contracts\Console\Kernel::class
+            )->bootstrap();
+
+            echo config("database.connections.mysql.password");
+            '
+          )"
+
+
+          DB_HOST="$(
+            "$PHP_BIN" -r '
+            require getenv("CURRENT_PATH")."/vendor/autoload.php";
+
+            $app = require getenv("CURRENT_PATH")."/bootstrap/app.php";
+
+            $app->make(
+                \Illuminate\Contracts\Console\Kernel::class
+            )->bootstrap();
+
+            echo config("database.connections.mysql.host");
+            '
+          )"
+
+
+          DB_PORT="$(
+            "$PHP_BIN" -r '
+            require getenv("CURRENT_PATH")."/vendor/autoload.php";
+
+            $app = require getenv("CURRENT_PATH")."/bootstrap/app.php";
+
+            $app->make(
+                \Illuminate\Contracts\Console\Kernel::class
+            )->bootstrap();
+
+            echo config("database.connections.mysql.port");
+            '
+          )"
+
+
+          DB_PORT="${DB_PORT:-3306}"
+
+
+          # ------------------------------------------------------
+          # DB backup BEFORE migration
+          # ------------------------------------------------------
+
+          BACKUP_FILE="$SHARED_PATH/backups/db-before-$DEPLOY_ID.sql"
+
+          BACKUP_TMP="${BACKUP_FILE}.tmp"
+
+
+          rm -f "$BACKUP_TMP"
+
+
+          echo "Creating database backup..."
+
+
+          if ! \
+            MYSQL_PWD="$DB_PASS" \
+            mysqldump \
+              --host="$DB_HOST" \
+              --port="$DB_PORT" \
+              --user="$DB_USER" \
+              --single-transaction \
+              --quick \
+              --lock-tables=false \
+              --no-tablespaces \
+              "$DB_NAME" \
+              > "$BACKUP_TMP"
+          then
+
+              rm -f "$BACKUP_TMP"
+
+              unset DB_PASS
+
+              echo "ERROR: database backup failed"
+
+              exit 1
+
+          fi
+
+
+          unset DB_PASS
+
+
+          test -s "$BACKUP_TMP" || {
+
+              rm -f "$BACKUP_TMP"
+
+              echo "ERROR: database backup file is empty"
+
+              exit 1
+
+          }
+
+
+          mv "$BACKUP_TMP" "$BACKUP_FILE"
+
+          chmod 600 "$BACKUP_FILE"
+
+
+          echo "Database backup PASS"
+
+
+          # ------------------------------------------------------
+          # Database migrations
+          # ------------------------------------------------------
+
+          "$PHP_BIN" artisan migrate --force
+
+
+          # ------------------------------------------------------
+          # Laravel optimized caches
+          # ------------------------------------------------------
+
+          "$PHP_BIN" artisan config:cache
+
+          "$PHP_BIN" artisan route:cache
+
+          "$PHP_BIN" artisan view:cache
+
+
+          # ------------------------------------------------------
+          # Queue restart signal
+          # ------------------------------------------------------
+
+          "$PHP_BIN" artisan queue:restart
+
+
+          # ------------------------------------------------------
+          # Deployment metadata
+          # ------------------------------------------------------
+
+          printf '%s\n' "$DEPLOY_ID" \
+            > "$CURRENT_PATH/DEPLOY_ID"
+
+
+          # ------------------------------------------------------
+          # Application back online
+          # ------------------------------------------------------
+
+          "$PHP_BIN" artisan up
+
+
+          echo "Application maintenance mode disabled"
+
+
+          # ------------------------------------------------------
+          # HTTP + Nginx + PHP-FPM + Laravel health check
+          # ------------------------------------------------------
+
+          HEALTH_FILE="/tmp/vyapari-darbaar-health-${DEPLOY_ID}.txt"
+
+
+          rm -f "$HEALTH_FILE"
+
+
+          if ! \
+            wget \
+              --quiet \
+              --output-document="$HEALTH_FILE" \
+              --timeout=15 \
+              --header="Host: api.vyaparidarbaar.com" \
+              http://127.0.0.1/api/status
+          then
+
+              echo "ERROR: Laravel API health check failed"
+
+              rm -f "$HEALTH_FILE"
+
+              "$PHP_BIN" artisan down \
+                --retry=60 \
+                || true
+
+              exit 1
+
+          fi
+
+
+          rm -f "$HEALTH_FILE"
+
+
+          echo "API health check PASS"
+
+
+          # ------------------------------------------------------
+          # Keep ONLY latest 5 database backups
+          #
+          # These are DATABASE backups only.
+          # No application source-code copies are created.
+          # ------------------------------------------------------
+
+          ls -1t \
+            "$SHARED_PATH"/backups/db-before-*.sql \
+            2>/dev/null \
+            | tail -n +6 \
+            | xargs -r rm -f
+
+
+          echo "Old DB backup cleanup PASS"
+
+
+          # ------------------------------------------------------
+          # Final
+          # ------------------------------------------------------
+
+          echo "========================================"
+          echo "Deployment completed successfully"
+          echo "Single application code directory:"
+          echo "$CURRENT_PATH"
+          echo "Deployment ID:"
+          echo "$DEPLOY_ID"
+          echo "========================================"
+
+          REMOTE
+
+
+      # ----------------------------------------------------------
+      # If deployment failed, report server state.
+      #
+      # We intentionally DO NOT automatically run artisan up here.
+      # With single-copy deployment there is no previous code copy
+      # to roll back to. Serving partially deployed code would be
+      # less safe than leaving maintenance mode enabled.
+      # ----------------------------------------------------------
+
+      - name: Report Deployment Failure
+        if: failure()
+        shell: bash
+
+        run: |
+          echo "Deployment failed."
+          echo "Review the failed GitHub Actions step."
+          echo "Application may remain in maintenance mode for safety."
+
+
+      # ----------------------------------------------------------
+      # Always remove SSH private key from runner
+      # ----------------------------------------------------------
+
+      - name: Cleanup SSH Key
+        if: always()
+        shell: bash
+
+        run: |
+          rm -f ~/.ssh/deploy_key
+          rm -f ~/.ssh/known_hosts
