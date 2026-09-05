@@ -45,7 +45,8 @@ class LoginUserAction
             ];
         }
 
-        $token = $user->createToken($deviceName)->plainTextToken;
+        $expiresMinutes = (int) (config('sanctum.expiration') ?? 1440);
+        $token = $user->createToken($deviceName, ['*'], now()->addMinutes($expiresMinutes))->plainTextToken;
 
         return [
             'success' => true,

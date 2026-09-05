@@ -44,7 +44,8 @@ class LoginAdminAction
             'last_login_at' => now(),
         ]);
 
-        $tokenResult = $admin->createToken($tokenName);
+        $expiresMinutes = (int) (config('sanctum.expiration') ?? 1440);
+        $tokenResult = $admin->createToken($tokenName, ['*'], now()->addMinutes($expiresMinutes));
 
         return [
             'success' => true,

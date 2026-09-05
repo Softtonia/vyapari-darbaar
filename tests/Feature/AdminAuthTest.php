@@ -417,4 +417,54 @@ class AdminAuthTest extends TestCase
         $this->assertEquals('admin:'.$admin2->id, $limit2->key);
         $this->assertEquals(60, $limit1->maxAttempts);
     }
+
+    public function test_admin_login_when_already_authenticated_returns_already_logged_in_message(): void
+    {
+        $admin = Admin::create([
+            'name' => 'Active Admin',
+            'email' => 'active_admin@example.com',
+            'password' => Hash::make('secret123'),
+            'status' => 'active',
+        ]);
+
+        $token = $admin->createToken('admin-token')->plainTextToken;
+
+        $response = $this->withToken($token)->postJson('/api/admin/login', [
+            'email' => 'active_admin@example.com',
+            'password' => 'secret123',
+        ]);
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'status' => false,
+                'message' => 'You are already logged in. Please log out first before signing in again.',
+            ]);
+    }
+
+    public function test_admin_token_expires_after_24_hours(): void
+    {
+        $admin = Admin::create([
+            'name' => 'Expiring Admin',
+            'email' => 'expiring@example.com',
+            'password' => Hash::make('secret123'),
+            'status' => 'active',
+        ]);
+
+        $loginResponse = $this->postJson('/api/admin/login', [
+            'email' => 'expiring@example.com',
+            'password' => 'secret123',
+        ]);
+
+        $loginResponse->assertStatus(200);
+        $token = $loginResponse->json('data.token');
+
+        // Token works immediately
+        $this->withToken($token)->getJson('/api/admin/profile')->assertStatus(200);
+
+        // Travel 25 hours into the future
+        $this->travel(25)->hours();
+
+        auth()->forgetGuards();
+        $this->withToken($token)->getJson('/api/admin/profile')->assertStatus(401);
+    }
 }

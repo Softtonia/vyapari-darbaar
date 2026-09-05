@@ -369,4 +369,40 @@ class UserAuthTest extends TestCase
             'password_confirmation' => 'ValidNewPass#2026',
         ])->assertStatus(429);
     }
+
+    public function test_user_login_when_already_authenticated_returns_already_logged_in_message(): void
+    {
+        $token = $this->user->createToken('user-device')->plainTextToken;
+
+        $response = $this->withToken($token)->postJson('/api/user/login', [
+            'username' => 'ajay.kumar',
+            'password' => $this->plainPassword,
+        ]);
+
+        $response->assertStatus(400)
+            ->assertJson([
+                'status' => false,
+                'message' => 'You are already logged in. Please log out first before signing in again.',
+            ]);
+    }
+
+    public function test_user_token_expires_after_24_hours(): void
+    {
+        $loginResponse = $this->postJson('/api/user/login', [
+            'username' => 'ajay.kumar',
+            'password' => $this->plainPassword,
+        ]);
+
+        $loginResponse->assertStatus(200);
+        $token = $loginResponse->json('data.token');
+
+        // Token works immediately
+        $this->withToken($token)->getJson('/api/user/profile')->assertStatus(200);
+
+        // Travel 25 hours into the future
+        $this->travel(25)->hours();
+
+        auth()->forgetGuards();
+        $this->withToken($token)->getJson('/api/user/profile')->assertStatus(401);
+    }
 }
