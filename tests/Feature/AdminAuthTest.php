@@ -73,7 +73,7 @@ class AdminAuthTest extends TestCase
             'password' => 'password123',
         ]);
 
-        $response->assertStatus(404)
+        $response->assertStatus(401)
             ->assertJson([
                 'status' => false,
                 'message' => 'No account found with this email address.',
