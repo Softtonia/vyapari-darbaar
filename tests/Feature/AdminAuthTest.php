@@ -45,7 +45,7 @@ class AdminAuthTest extends TestCase
         $this->assertNull($response->json('data.token_type'));
     }
 
-    public function test_wrong_password_is_rejected_with_generic_message(): void
+    public function test_wrong_password_is_rejected_with_specific_message(): void
     {
         Admin::create([
             'name' => 'Admin User',
@@ -62,21 +62,21 @@ class AdminAuthTest extends TestCase
         $response->assertStatus(401)
             ->assertJson([
                 'status' => false,
-                'message' => 'Invalid credentials.',
+                'message' => 'Incorrect password.',
             ]);
     }
 
-    public function test_unknown_email_is_rejected_with_generic_message(): void
+    public function test_unknown_email_is_rejected_with_specific_message(): void
     {
         $response = $this->postJson('/api/admin/login', [
             'email' => 'unknown@example.com',
             'password' => 'password123',
         ]);
 
-        $response->assertStatus(401)
+        $response->assertStatus(404)
             ->assertJson([
                 'status' => false,
-                'message' => 'Invalid credentials.',
+                'message' => 'No account found with this email address.',
             ]);
     }
 
@@ -404,17 +404,17 @@ class AdminAuthTest extends TestCase
         ]);
 
         $request1 = \Illuminate\Http\Request::create('/api/admin/logout', 'POST');
-        $request1->setUserResolver(fn () => $admin1);
+        $request1->setUserResolver(fn() => $admin1);
 
         $request2 = \Illuminate\Http\Request::create('/api/admin/logout', 'POST');
-        $request2->setUserResolver(fn () => $admin2);
+        $request2->setUserResolver(fn() => $admin2);
 
         $limiter = RateLimiter::limiter('admin-api');
         $limit1 = $limiter($request1);
         $limit2 = $limiter($request2);
 
-        $this->assertEquals('admin:'.$admin1->id, $limit1->key);
-        $this->assertEquals('admin:'.$admin2->id, $limit2->key);
+        $this->assertEquals('admin:' . $admin1->id, $limit1->key);
+        $this->assertEquals('admin:' . $admin2->id, $limit2->key);
         $this->assertEquals(60, $limit1->maxAttempts);
     }
 

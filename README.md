@@ -55,7 +55,7 @@ php artisan queue:work redis --queue=emails,default --tries=3
 
 ## 3. Running the Automated Test Suite
 
-Run the full automated test suite containing 108 tests and 556 assertions:
+Run the full automated test suite containing 135 tests and 688 assertions:
 
 ```powershell
 php artisan test
@@ -66,7 +66,7 @@ php artisan test
 ## 4. Documentation & API Reference
 
 - **[API Reference](docs/API.md):** Detailed endpoint specifications, request payloads, response structures, status codes, and rate limits.
-- **[Postman Collection](docs/postman/Vyapari-Darbaar.postman_collection.json):** Pre-configured Postman collection covering all 21 REST API endpoints.
+- **[Postman Collection](docs/postman/Vyapari-Darbaar.postman_collection.json):** Pre-configured Postman collection covering all 28 REST API endpoints (Authentication, Profile, Email Templates, Users, and Roles).
 - **[Postman Environment](docs/postman/Vyapari-Darbaar.postman_environment.json):** Environment variables for local and staging testing.
 - **[Production Checklist](docs/PRODUCTION_CHECKLIST.md):** Linux Supervisor queue setup, deployment command sequence, failed job management, and security checklist.
 

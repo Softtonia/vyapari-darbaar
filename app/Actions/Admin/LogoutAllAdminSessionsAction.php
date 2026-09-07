@@ -19,7 +19,6 @@ class LogoutAllAdminSessionsAction
         return [
             'status' => true,
             'message' => 'Logged out from all devices successfully.',
-            'data' => (object) [],
         ];
     }
 }

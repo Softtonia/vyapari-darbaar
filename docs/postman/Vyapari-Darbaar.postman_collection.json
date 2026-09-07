@@ -585,6 +585,145 @@
           }
         }
       ]
+    },
+    {
+      "name": "Role Management",
+      "item": [
+        {
+          "name": "List Roles",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/roles?page=1&per_page=20&sort_by=id&sort_order=desc",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "roles"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "per_page", "value": "20" },
+                { "key": "sort_by", "value": "id" },
+                { "key": "sort_order", "value": "desc" },
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "status", "value": "1", "disabled": true },
+                { "key": "is_system", "value": "0", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Content Editor\",\n    \"slug\": \"content-editor\",\n    \"status\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/roles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "roles"]
+            }
+          }
+        },
+        {
+          "name": "Get Role Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/roles/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "roles", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Senior Content Editor\",\n    \"slug\": \"senior-content-editor\",\n    \"status\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/roles/4",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "roles", "4"]
+            }
+          }
+        },
+        {
+          "name": "Update Role Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/roles/4/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "roles", "4", "status"]
+            }
+          }
+        },
+        {
+          "name": "Delete Role",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/roles/4",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "roles", "4"]
+            }
+          }
+        },
+        {
+          "name": "Bulk Delete Roles",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ids\": [4, 5, 6]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/roles/bulk-delete",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "roles", "bulk-delete"]
+            }
+          }
+        }
+      ]
     }
   ]
 }

@@ -12,17 +12,39 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   - Administrator endpoints require `admin` middleware (`EnsureAdmin`).
   - User endpoints require `user` middleware (`EnsureUser`).
   - Cross-model token access is strictly blocked (HTTP 403).
-- **Global Error Format:**
-  ```json
-  {
-      "status": false,
-      "message": "Error description.",
-      "error": "Error details if applicable",
-      "errors": {
-          "field_name": ["Specific validation error message."]
-      }
-  }
-  ```
+- **Global Response Standards:**
+  - **Success with payload:**
+    ```json
+    {
+        "status": true,
+        "message": "Resource retrieved successfully.",
+        "data": { ... }
+    }
+    ```
+  - **Success without payload (e.g. Delete, Logout, Actions):**
+    ```json
+    {
+        "status": true,
+        "message": "Action completed successfully."
+    }
+    ```
+  - **Validation Error (HTTP 422):**
+    ```json
+    {
+        "status": false,
+        "message": "Validation error.",
+        "errors": {
+            "field_name": ["Specific validation error message."]
+        }
+    }
+    ```
+  - **Authentication / Authorization Error (HTTP 401 / 403):**
+    ```json
+    {
+        "status": false,
+        "message": "Error description."
+    }
+    ```
 
 ---
 
@@ -35,39 +57,47 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 - **Request Body:**
   ```json
   {
-      "email": "admin@example.com",
-      "password": "AdminPassword#2026",
+      "email": "admin@vyaparidarbaar.com",
+      "password": "password",
       "device_name": "Admin Dashboard"
   }
   ```
 - **Validation:**
   - `email`: required, email, max:255
   - `password`: required, string
-  - `device_name`: optional, string, max:100
+  - `device_name`: optional, string, max:255
 - **Success (200 OK):**
   ```json
   {
       "status": true,
       "message": "Login successful.",
       "data": {
-          "token": "1|sanctum_token_string...",
-          "token_type": "Bearer",
-          "admin": {
-              "id": 1,
-              "name": "Super Admin",
-              "email": "admin@example.com",
-              "status": "active"
-          }
+          "token": "1|sanctum_token_string..."
       }
   }
   ```
-- **Error (401 Unauthorized / 422 Unprocessable):**
-  ```json
-  {
-      "status": false,
-      "message": "Invalid credentials."
-  }
-  ```
+- **Specific Error Responses:**
+  - Email not found (401 Unauthorized):
+    ```json
+    {
+        "status": false,
+        "message": "No account found with this email address."
+    }
+    ```
+  - Wrong password (401 Unauthorized):
+    ```json
+    {
+        "status": false,
+        "message": "Incorrect password."
+    }
+    ```
+  - Inactive account (403 Forbidden):
+    ```json
+    {
+        "status": false,
+        "message": "Account is inactive. Please contact the administrator."
+    }
+    ```
 
 ---
 
@@ -81,13 +111,18 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
       "email": "admin@example.com"
   }
   ```
-- **Security:** Enumeration-safe (returns identical success response whether email exists or not).
 - **Success (200 OK):**
   ```json
   {
       "status": true,
-      "message": "If your account exists and is active, a password reset link has been sent to your email address.",
-      "data": {}
+      "message": "A password reset link has been sent to your email address."
+  }
+  ```
+- **Error (404 Not Found):**
+  ```json
+  {
+      "status": false,
+      "message": "No administrator account found with this email address."
   }
   ```
 
@@ -111,8 +146,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   ```json
   {
       "status": true,
-      "message": "Password has been reset successfully. Please log in with your new password.",
-      "data": {}
+      "message": "Your password has been reset successfully."
   }
   ```
 
@@ -150,6 +184,21 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
       }
   }
   ```
+- **Specific Error Responses:**
+  - Username not found (401 Unauthorized):
+    ```json
+    {
+        "status": false,
+        "message": "No account found with this username."
+    }
+    ```
+  - Wrong password (401 Unauthorized):
+    ```json
+    {
+        "status": false,
+        "message": "Incorrect password."
+    }
+    ```
 
 ---
 
@@ -192,14 +241,6 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   }
   ```
 - **Security:** `current_password` is required only if `email` is changing. Changing email revokes all other Admin sessions and removes stale password-reset tokens.
-- **Success (200 OK):**
-  ```json
-  {
-      "status": true,
-      "message": "Admin profile updated successfully.",
-      "data": { ... }
-  }
-  ```
 
 ---
 
@@ -207,6 +248,13 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 - **Method:** `POST`
 - **URI:** `/api/admin/logout`
 - **Behavior:** Revokes current session token only.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Logged out successfully."
+  }
+  ```
 
 ---
 
@@ -214,6 +262,13 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 - **Method:** `POST`
 - **URI:** `/api/admin/logout-all`
 - **Behavior:** Revokes all session tokens for the administrator.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Logged out from all devices successfully."
+  }
+  ```
 
 ---
 
@@ -262,7 +317,14 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 ### 3.8 Delete Email Template
 - **Method:** `DELETE`
 - **URI:** `/api/admin/email-templates/{id}`
-- **Security:** Protected system templates (e.g. `USER_ACCOUNT_CREATED`) cannot be deleted (`422 Unprocessable`).
+- **Security:** Protected system templates cannot be deleted (`422 Unprocessable`).
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Email template deleted successfully."
+  }
+  ```
 
 ### 3.9 Bulk Delete Email Templates
 - **Method:** `POST` / `DELETE`
@@ -302,6 +364,13 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 - **Method:** `DELETE`
 - **URI:** `/api/admin/users/{id}`
 - **Behavior:** Revokes Sanctum tokens and hard-deletes record.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "User deleted successfully."
+  }
+  ```
 
 ### 4.6 Bulk Delete Users
 - **Method:** `POST` / `DELETE`
@@ -320,19 +389,222 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 - **Method:** `POST`
 - **URI:** `/api/admin/users/{id}/resend-credentials`
 - **Throttle:** `admin-user-resend-credentials` (3 attempts / 10 min per Admin + User pair)
-- **Behavior:** Generates new temporary password, keeps username unchanged, sets `must_change_password = true`, revokes old tokens, and dispatches encrypted email after commit.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Credentials resent successfully."
+  }
+  ```
 
 ---
 
-## 5. Protected User Endpoints
+## 5. Role Management (Admin)
+*All require `Authorization: Bearer <admin_token>` and `EnsureAdmin` middleware.*
+
+### 5.1 List Roles
+- **Method:** `GET`
+- **URI:** `/api/admin/roles`
+- **Query Parameters:**
+  - `search`: filters `name` and `slug`
+  - `status`: `1` (active) or `0` (inactive)
+  - `is_system`: `1` (system roles) or `0` (custom roles)
+  - `sort_by`: `id`, `name`, `slug`, `status`, `created_at` (default `id`)
+  - `sort_order`: `asc` or `desc` (default `desc`)
+  - `per_page`: `1` to `100` (default `20`)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Roles retrieved successfully.",
+      "data": {
+          "current_page": 1,
+          "data": [
+              {
+                  "id": 1,
+                  "name": "Admin",
+                  "slug": "admin",
+                  "status": true,
+                  "is_system": true,
+                  "created_at": "2026-09-07T06:17:15.000000Z",
+                  "updated_at": "2026-09-07T06:17:15.000000Z"
+              }
+          ],
+          "first_page_url": "http://localhost:8000/api/admin/roles?page=1",
+          "from": 1,
+          "last_page": 1,
+          "last_page_url": "http://localhost:8000/api/admin/roles?page=1",
+          "links": [ ... ],
+          "next_page_url": null,
+          "path": "http://localhost:8000/api/admin/roles",
+          "per_page": 20,
+          "prev_page_url": null,
+          "to": 1,
+          "total": 1
+      }
+  }
+  ```
+
+### 5.2 Create Role
+- **Method:** `POST`
+- **URI:** `/api/admin/roles`
+- **Request Body:**
+  ```json
+  {
+      "name": "Content Editor",
+      "slug": "content-editor",
+      "status": true
+  }
+  ```
+- **Validation:**
+  - `name`: required, string, max:100
+  - `slug`: optional (auto-generated from name if omitted), string, max:100, unique:roles,slug
+  - `status`: optional, boolean (default: true)
+- **Success (201 Created):**
+  ```json
+  {
+      "status": true,
+      "message": "Role created successfully.",
+      "data": {
+          "id": 4,
+          "name": "Content Editor",
+          "slug": "content-editor",
+          "status": true,
+          "is_system": false,
+          "created_at": "2026-09-07T06:18:00.000000Z",
+          "updated_at": "2026-09-07T06:18:00.000000Z"
+      }
+  }
+  ```
+
+### 5.3 View Role Detail
+- **Method:** `GET`
+- **URI:** `/api/admin/roles/{id}`
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Role retrieved successfully.",
+      "data": {
+          "id": 4,
+          "name": "Content Editor",
+          "slug": "content-editor",
+          "status": true,
+          "is_system": false,
+          "created_at": "2026-09-07T06:18:00.000000Z",
+          "updated_at": "2026-09-07T06:18:00.000000Z"
+      }
+  }
+  ```
+
+### 5.4 Update Role
+- **Method:** `PUT`
+- **URI:** `/api/admin/roles/{id}`
+- **Request Body:**
+  ```json
+  {
+      "name": "Senior Content Editor",
+      "slug": "senior-content-editor",
+      "status": false
+  }
+  ```
+- **Security:** If the role is a protected system role (`admin`, `user`, `guest`), its internal `slug` is preserved and cannot be mutated.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Role updated successfully.",
+      "data": {
+          "id": 4,
+          "name": "Senior Content Editor",
+          "slug": "senior-content-editor",
+          "status": false,
+          "is_system": false,
+          "created_at": "2026-09-07T06:18:00.000000Z",
+          "updated_at": "2026-09-07T06:19:00.000000Z"
+      }
+  }
+  ```
+
+### 5.5 Update Role Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/roles/{id}/status`
+- **Request Body:**
+  ```json
+  {
+      "status": true
+  }
+  ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Role status updated successfully.",
+      "data": { ... }
+  }
+  ```
+
+### 5.6 Single Delete Role
+- **Method:** `DELETE`
+- **URI:** `/api/admin/roles/{id}`
+- **Behavior:** Soft deletes the role record.
+- **Security:** System roles (`admin`, `user`, `guest`) cannot be deleted (HTTP 403 Forbidden).
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Role deleted successfully."
+  }
+  ```
+- **Error (403 Forbidden on system role):**
+  ```json
+  {
+      "status": false,
+      "message": "System role cannot be deleted."
+  }
+  ```
+
+### 5.7 Bulk Delete Roles
+- **Method:** `DELETE` / `POST`
+- **URI:** `/api/admin/roles/bulk-delete`
+- **Request Body:**
+  ```json
+  {
+      "ids": [4, 5, 6]
+  }
+  ```
+- **Validation:** `ids` array of 1-100 valid role IDs, distinct integer values.
+- **Behavior:** Single optimized `whereIn('id', $ids)->delete()` query in a database transaction.
+- **Atomic Failure:** If any ID in the array is a protected system role, the entire operation is rejected and no roles are deleted.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Roles deleted successfully.",
+      "data": {
+          "deleted_count": 3
+      }
+  }
+  ```
+- **Error (403 Forbidden):**
+  ```json
+  {
+      "status": false,
+      "message": "System roles cannot be deleted."
+  }
+  ```
+
+---
+
+## 6. Protected User Endpoints
 *All require `Authorization: Bearer <user_token>` and `EnsureUser` middleware.*
 
-### 5.1 User Profile
+### 6.1 User Profile
 - **Method:** `GET`
 - **URI:** `/api/user/profile`
 - **Throttle:** `user-api` (120 requests / min)
 
-### 5.2 Change Password
+### 6.2 Change Password
 - **Method:** `POST`
 - **URI:** `/api/user/change-password`
 - **Throttle:** `user-change-password` (5 attempts / min)
@@ -345,8 +617,22 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   }
   ```
 - **Behavior:** Sets `must_change_password = false`, preserves current device token, and revokes all other device sessions.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Password changed successfully."
+  }
+  ```
 
-### 5.3 User Logout
+### 6.3 User Logout
 - **Method:** `POST`
 - **URI:** `/api/user/logout`
 - **Behavior:** Revokes current device token only.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Logged out successfully."
+  }
+  ```

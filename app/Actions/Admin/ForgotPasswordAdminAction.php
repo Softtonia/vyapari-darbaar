@@ -26,7 +26,6 @@ class ForgotPasswordAdminAction
                 'status' => false,
                 'message' => 'No administrator account found with this email address.',
                 'code' => 404,
-                'data' => (object) [],
             ];
         }
 
@@ -35,7 +34,6 @@ class ForgotPasswordAdminAction
                 'status' => false,
                 'message' => 'Account is inactive. Please contact the administrator.',
                 'code' => 403,
-                'data' => (object) [],
             ];
         }
 
@@ -45,7 +43,6 @@ class ForgotPasswordAdminAction
             'status' => true,
             'message' => 'A password reset link has been sent to your email address.',
             'code' => 200,
-            'data' => (object) [],
         ];
     }
 }

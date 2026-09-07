@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\Admin\Role;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class LoginAdminRequest extends FormRequest
+class BulkDeleteRoleRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,9 +24,8 @@ class LoginAdminRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-            'device_name' => ['nullable', 'string', 'max:255'],
+            'ids' => ['required', 'array', 'min:1', 'max:100'],
+            'ids.*' => ['required', 'integer', 'distinct', 'exists:roles,id'],
         ];
     }
 
@@ -38,23 +37,25 @@ class LoginAdminRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Email address is required.',
-            'email.email' => 'Please provide a valid email address.',
-            'password.required' => 'Password is required.',
+            'ids.required' => 'At least one role ID must be provided.',
+            'ids.array' => 'The ids field must be an array of role IDs.',
+            'ids.min' => 'At least one role ID must be provided.',
+            'ids.max' => 'Cannot bulk delete more than 100 roles at once.',
+            'ids.*.required' => 'Role ID is required.',
+            'ids.*.integer' => 'Each role ID must be an integer.',
+            'ids.*.distinct' => 'Duplicate role IDs are not allowed in the selection.',
+            'ids.*.exists' => 'One or more selected role IDs do not exist.',
         ];
     }
 
     /**
-     * Get normalized credentials.
+     * Get validated integer IDs.
      *
-     * @return array{email: string, password: string}
+     * @return list<int>
      */
-    public function credentials(): array
+    public function validatedIds(): array
     {
-        return [
-            'email' => strtolower(trim((string) $this->input('email'))),
-            'password' => (string) $this->input('password'),
-        ];
+        return array_map('intval', (array) $this->input('ids', []));
     }
 
     /**

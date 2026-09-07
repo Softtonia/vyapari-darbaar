@@ -22,7 +22,7 @@ class AdminAuthController extends Controller
      */
     public function login(LoginAdminRequest $request, LoginAdminAction $action): JsonResponse
     {
-        $deviceName = (string) $request->header('User-Agent', 'admin-token');
+        $deviceName = (string) $request->input('device_name', $request->header('User-Agent', 'admin-token'));
         $result = $action->execute($request->credentials(), $deviceName);
 
         if (! $result['success']) {
@@ -46,11 +46,16 @@ class AdminAuthController extends Controller
     {
         $result = $action->execute($request->normalizedEmail());
 
-        return response()->json([
+        $response = [
             'status' => $result['status'],
             'message' => $result['message'],
-            'data' => $result['data'] ?? (object) [],
-        ], $result['code'] ?? 200);
+        ];
+
+        if (! empty($result['data'])) {
+            $response['data'] = $result['data'];
+        }
+
+        return response()->json($response, $result['code'] ?? 200);
     }
 
     /**
@@ -68,11 +73,16 @@ class AdminAuthController extends Controller
             ], $result['code']);
         }
 
-        return response()->json([
+        $response = [
             'status' => true,
             'message' => $result['message'],
-            'data' => $result['data'],
-        ], 200);
+        ];
+
+        if (! empty($result['data'])) {
+            $response['data'] = $result['data'];
+        }
+
+        return response()->json($response, 200);
     }
 
     /**

@@ -30,10 +30,18 @@ class LoginUserAction
             ->where('username', $credentials['username'])
             ->first();
 
-        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+        if (! $user) {
             return [
                 'success' => false,
-                'message' => 'Invalid credentials.',
+                'message' => 'No account found with this username.',
+                'code' => 401,
+            ];
+        }
+
+        if (! Hash::check($credentials['password'], $user->password)) {
+            return [
+                'success' => false,
+                'message' => 'Incorrect password.',
                 'code' => 401,
             ];
         }
@@ -41,8 +49,8 @@ class LoginUserAction
         if ($user->status !== 'active') {
             return [
                 'success' => false,
-                'message' => 'Invalid credentials.',
-                'code' => 401,
+                'message' => 'Account is inactive. Please contact administrator.',
+                'code' => 403,
             ];
         }
 

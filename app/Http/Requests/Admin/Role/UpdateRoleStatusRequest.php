@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Admin;
+namespace App\Http\Requests\Admin\Role;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class LoginAdminRequest extends FormRequest
+class UpdateRoleStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,9 +24,7 @@ class LoginAdminRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-            'device_name' => ['nullable', 'string', 'max:255'],
+            'status' => ['required', 'boolean'],
         ];
     }
 
@@ -38,22 +36,8 @@ class LoginAdminRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Email address is required.',
-            'email.email' => 'Please provide a valid email address.',
-            'password.required' => 'Password is required.',
-        ];
-    }
-
-    /**
-     * Get normalized credentials.
-     *
-     * @return array{email: string, password: string}
-     */
-    public function credentials(): array
-    {
-        return [
-            'email' => strtolower(trim((string) $this->input('email'))),
-            'password' => (string) $this->input('password'),
+            'status.required' => 'The status field is required.',
+            'status.boolean' => 'The status field must be true or false.',
         ];
     }
 

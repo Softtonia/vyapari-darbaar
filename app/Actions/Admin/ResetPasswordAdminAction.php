@@ -36,7 +36,6 @@ class ResetPasswordAdminAction
                 'success' => true,
                 'message' => 'Your password has been reset successfully.',
                 'code' => 200,
-                'data' => (object) [],
             ];
         }
 

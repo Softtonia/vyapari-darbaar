@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Admin\AdminAuthController;
 use App\Http\Controllers\Api\Admin\AdminProfileController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\Admin\EmailTemplateController;
+use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\User\UserAuthController;
 use App\Http\Controllers\Api\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
@@ -85,6 +86,25 @@ Route::prefix('admin')->group(function () {
             Route::post('{user}/resend-credentials', [AdminUserController::class, 'resendCredentials'])
                 ->middleware('throttle:admin-user-resend-credentials')
                 ->name('admin.users.resend-credentials');
+        });
+
+        // Role management
+        Route::prefix('roles')->group(function () {
+            Route::get('/', [RoleController::class, 'index'])
+                ->name('admin.roles.index');
+            Route::post('/', [RoleController::class, 'store'])
+                ->name('admin.roles.store');
+            Route::post('bulk-delete', [RoleController::class, 'bulkDestroy'])
+                ->name('admin.roles.bulk-delete');
+            Route::delete('bulk-delete', [RoleController::class, 'bulkDestroy']);
+            Route::get('{role}', [RoleController::class, 'show'])
+                ->name('admin.roles.show');
+            Route::put('{role}', [RoleController::class, 'update'])
+                ->name('admin.roles.update');
+            Route::delete('{role}', [RoleController::class, 'destroy'])
+                ->name('admin.roles.destroy');
+            Route::patch('{role}/status', [RoleController::class, 'updateStatus'])
+                ->name('admin.roles.update-status');
         });
     });
 });

@@ -60,7 +60,6 @@ class UserAuthController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Password changed successfully.',
-            'data' => (object) [],
         ], 200);
     }
 
@@ -77,7 +76,6 @@ class UserAuthController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Logged out successfully.',
-            'data' => (object) [],
         ], 200);
     }
 }

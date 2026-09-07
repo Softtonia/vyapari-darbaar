@@ -47,7 +47,6 @@ class AdminPasswordResetTest extends TestCase
             ->assertJson([
                 'status' => true,
                 'message' => 'A password reset link has been sent to your email address.',
-                'data' => [],
             ]);
 
         Notification::assertSentTo(
@@ -85,7 +84,6 @@ class AdminPasswordResetTest extends TestCase
             ->assertJson([
                 'status' => false,
                 'message' => 'No administrator account found with this email address.',
-                'data' => [],
             ]);
 
         Notification::assertNothingSent();
@@ -113,7 +111,6 @@ class AdminPasswordResetTest extends TestCase
             ->assertJson([
                 'status' => false,
                 'message' => 'Account is inactive. Please contact the administrator.',
-                'data' => [],
             ]);
 
         Notification::assertNothingSent();
@@ -163,7 +160,6 @@ class AdminPasswordResetTest extends TestCase
             ->assertJson([
                 'status' => true,
                 'message' => 'Your password has been reset successfully.',
-                'data' => [],
             ]);
 
         // Verify all Sanctum tokens revoked

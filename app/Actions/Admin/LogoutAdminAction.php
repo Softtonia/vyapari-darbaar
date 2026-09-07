@@ -19,7 +19,6 @@ class LogoutAdminAction
         return [
             'status' => true,
             'message' => 'Logged out successfully.',
-            'data' => (object) [],
         ];
     }
 }

@@ -25,10 +25,18 @@ class LoginAdminAction
             ->where('email', $email)
             ->first();
 
-        if (! $admin || ! Hash::check($password, $admin->password)) {
+        if (! $admin) {
             return [
                 'success' => false,
-                'message' => 'Invalid credentials.',
+                'message' => 'No account found with this email address.',
+                'code' => 401,
+            ];
+        }
+
+        if (! Hash::check($password, $admin->password)) {
+            return [
+                'success' => false,
+                'message' => 'Incorrect password.',
                 'code' => 401,
             ];
         }

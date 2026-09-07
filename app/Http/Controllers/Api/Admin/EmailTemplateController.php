@@ -188,7 +188,6 @@ class EmailTemplateController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Email template deleted successfully.',
-            'data' => (object) [],
         ], 200);
     }
 

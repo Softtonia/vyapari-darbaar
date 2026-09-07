@@ -186,7 +186,6 @@ class AdminUserController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Credentials resent successfully.',
-            'data' => (object) [],
         ], 200);
     }
 
@@ -200,7 +199,6 @@ class AdminUserController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'User deleted successfully.',
-            'data' => (object) [],
         ], 200);
     }
 

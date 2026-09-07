@@ -75,21 +75,21 @@ class UserAuthTest extends TestCase
         $response->assertStatus(401)
             ->assertJson([
                 'status' => false,
-                'message' => 'Invalid credentials.',
+                'message' => 'No account found with this username.',
             ]);
     }
 
-    public function test_wrong_username_and_wrong_password_return_generic_error(): void
+    public function test_wrong_username_and_wrong_password_return_specific_error(): void
     {
         $this->postJson('/api/user/login', [
             'username' => 'nonexistent.user',
             'password' => $this->plainPassword,
-        ])->assertStatus(401)->assertJson(['status' => false, 'message' => 'Invalid credentials.']);
+        ])->assertStatus(401)->assertJson(['status' => false, 'message' => 'No account found with this username.']);
 
         $this->postJson('/api/user/login', [
             'username' => 'ajay.kumar',
             'password' => 'WrongPassword#999',
-        ])->assertStatus(401)->assertJson(['status' => false, 'message' => 'Invalid credentials.']);
+        ])->assertStatus(401)->assertJson(['status' => false, 'message' => 'Incorrect password.']);
     }
 
     public function test_inactive_user_cannot_login(): void
@@ -101,10 +101,10 @@ class UserAuthTest extends TestCase
             'password' => $this->plainPassword,
         ]);
 
-        $response->assertStatus(401)
+        $response->assertStatus(403)
             ->assertJson([
                 'status' => false,
-                'message' => 'Invalid credentials.',
+                'message' => 'Account is inactive. Please contact administrator.',
             ]);
     }
 
