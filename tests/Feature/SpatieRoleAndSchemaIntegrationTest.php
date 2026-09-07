@@ -65,7 +65,7 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
                     'id' => $admin->id,
                     'first_name' => 'Rajesh',
                     'last_name' => 'Koothrappali',
-                    'name' => 'Rajesh Koothrappali',
+                    'full_name' => 'Rajesh Koothrappali',
                     'email' => 'rajesh@example.com',
                 ],
             ]);
@@ -150,7 +150,7 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
                 'data' => [
                     'first_name' => 'Amit',
                     'last_name' => 'Verma',
-                    'name' => 'Amit Verma',
+                    'full_name' => 'Amit Verma',
                     'phone_number' => '+919876543210',
                     'email' => 'amit.verma@example.com',
                     'status' => 'active',
@@ -203,7 +203,7 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
                 'data' => [
                     'first_name' => 'Captain Vikram',
                     'last_name' => 'Batra',
-                    'name' => 'Captain Vikram Batra',
+                    'full_name' => 'Captain Vikram Batra',
                     'phone_number' => '+919876543299',
                     'email' => 'vikram.updated@example.com',
                 ],
@@ -240,7 +240,7 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
                 'data' => [
                     'first_name' => 'UpdatedFirst',
                     'last_name' => 'UpdatedLast',
-                    'name' => 'UpdatedFirst UpdatedLast',
+                    'full_name' => 'UpdatedFirst UpdatedLast',
                 ],
             ]);
     }

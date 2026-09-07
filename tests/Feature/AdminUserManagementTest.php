@@ -119,7 +119,7 @@ class AdminUserManagementTest extends TestCase
                     'first_name' => 'Ajay',
                     'last_name' => 'Kumar',
                     'phone_number' => '+919876543210',
-                    'name' => 'Ajay Kumar',
+                    'full_name' => 'Ajay Kumar',
                     'username' => 'ajay.kumar',
                     'email' => 'ajay.kumar@example.com',
                     'status' => 'active',
@@ -358,8 +358,8 @@ class AdminUserManagementTest extends TestCase
                             'id',
                             'first_name',
                             'last_name',
+                            'full_name',
                             'phone_number',
-                            'name',
                             'username',
                             'email',
                             'status',
@@ -411,12 +411,12 @@ class AdminUserManagementTest extends TestCase
         // Search by name substring
         $resName = $this->withToken($this->adminToken)->getJson('/api/admin/users?search=Smith');
         $this->assertCount(1, $resName->json('data.data'));
-        $this->assertEquals('Alice Smith', $resName->json('data.data.0.name'));
+        $this->assertEquals('Alice Smith', $resName->json('data.data.0.full_name'));
 
         // Search by username prefix
         $resUser = $this->withToken($this->adminToken)->getJson('/api/admin/users?search=bob');
         $this->assertCount(1, $resUser->json('data.data'));
-        $this->assertEquals('Bob Jones', $resUser->json('data.data.0.name'));
+        $this->assertEquals('Bob Jones', $resUser->json('data.data.0.full_name'));
 
         // Search by email prefix
         $resEmail = $this->withToken($this->adminToken)->getJson('/api/admin/users?search=alice');
@@ -426,12 +426,12 @@ class AdminUserManagementTest extends TestCase
         // Status filter
         $resStatus = $this->withToken($this->adminToken)->getJson('/api/admin/users?status=inactive');
         $this->assertCount(1, $resStatus->json('data.data'));
-        $this->assertEquals('Bob Jones', $resStatus->json('data.data.0.name'));
+        $this->assertEquals('Bob Jones', $resStatus->json('data.data.0.full_name'));
 
         // Sort by name ASC
         $resSort = $this->withToken($this->adminToken)->getJson('/api/admin/users?sort_by=name&sort_dir=asc');
-        $this->assertEquals('Alice Smith', $resSort->json('data.data.0.name'));
-        $this->assertEquals('Bob Jones', $resSort->json('data.data.1.name'));
+        $this->assertEquals('Alice Smith', $resSort->json('data.data.0.full_name'));
+        $this->assertEquals('Bob Jones', $resSort->json('data.data.1.full_name'));
     }
 
     public function test_user_detail_loads_creator_with_only_id_and_name(): void
@@ -458,12 +458,12 @@ class AdminUserManagementTest extends TestCase
                     'id' => $user->id,
                     'first_name' => 'Detail',
                     'last_name' => 'User',
-                    'name' => 'Detail User',
+                    'full_name' => 'Detail User',
                     'username' => 'detail.user',
                     'email' => 'detail@example.com',
                     'creator' => [
                         'id' => $this->admin->id,
-                        'name' => 'Admin Manager',
+                        'full_name' => 'Admin Manager',
                     ],
                 ],
             ]);
@@ -512,7 +512,7 @@ class AdminUserManagementTest extends TestCase
                 'data' => [
                     'first_name' => 'Updated',
                     'last_name' => 'Name',
-                    'name' => 'Updated Name',
+                    'full_name' => 'Updated Name',
                     'email' => 'updated@example.com',
                     'username' => 'orig.username',
                 ],

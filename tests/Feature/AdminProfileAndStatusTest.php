@@ -56,7 +56,7 @@ class AdminProfileAndStatusTest extends TestCase
                 'message' => 'Admin profile retrieved successfully.',
                 'data' => [
                     'id' => $this->admin->id,
-                    'name' => 'Main Admin',
+                    'full_name' => 'Main Admin',
                     'email' => 'main.admin@example.com',
                     'status' => 'active',
                 ],
@@ -104,7 +104,7 @@ class AdminProfileAndStatusTest extends TestCase
             ->assertJson([
                 'status' => true,
                 'data' => [
-                    'name' => 'Updated Admin Name',
+                    'full_name' => 'Updated Admin Name',
                     'email' => 'main.admin@example.com',
                 ],
             ]);

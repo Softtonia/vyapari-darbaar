@@ -52,7 +52,7 @@ class UserAuthTest extends TestCase
                     'token_type' => 'Bearer',
                     'user' => [
                         'id' => $this->user->id,
-                        'name' => 'Ajay Kumar',
+                        'full_name' => 'Ajay Kumar',
                         'username' => 'ajay.kumar',
                         'email' => 'ajay.kumar@example.com',
                         'status' => 'active',
@@ -145,7 +145,7 @@ class UserAuthTest extends TestCase
                 'message' => 'User profile retrieved successfully.',
                 'data' => [
                     'id' => $this->user->id,
-                    'name' => 'Ajay Kumar',
+                    'full_name' => 'Ajay Kumar',
                     'username' => 'ajay.kumar',
                     'email' => 'ajay.kumar@example.com',
                     'status' => 'active',

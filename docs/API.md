@@ -178,7 +178,6 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
               "first_name": "Ajay",
               "last_name": "Kumar",
               "full_name": "Ajay Kumar",
-              "name": "Ajay Kumar",
               "phone_number": "+919876543210",
               "username": "ajay.kumar",
               "email": "ajay@example.com",
@@ -223,7 +222,6 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
           "first_name": "System",
           "last_name": "Administrator",
           "full_name": "System Administrator",
-          "name": "System Administrator",
           "email": "admin@example.com",
           "status": "active",
           "roles": [
