@@ -11,23 +11,27 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admin_role', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('admin_id')->constrained('admins')->cascadeOnDelete();
-            $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
-            $table->timestamps();
+        if (!Schema::hasTable('admin_role')) {
+            Schema::create('admin_role', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('admin_id')->constrained('admins')->cascadeOnDelete();
+                $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
+                $table->timestamps();
 
-            $table->unique(['admin_id', 'role_id']);
-        });
+                $table->unique(['admin_id', 'role_id']);
+            });
+        }
 
-        Schema::create('role_user', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
-            $table->timestamps();
+        if (!Schema::hasTable('role_user')) {
+            Schema::create('role_user', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+                $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
+                $table->timestamps();
 
-            $table->unique(['user_id', 'role_id']);
-        });
+                $table->unique(['user_id', 'role_id']);
+            });
+        }
     }
 
     /**

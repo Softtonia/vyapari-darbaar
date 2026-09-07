@@ -11,17 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 100);
-            $table->string('slug', 100)->unique();
-            $table->boolean('status')->default(true)->index();
-            $table->boolean('is_system')->default(false)->index();
-            $table->timestamps();
-            $table->softDeletes();
+        if (!Schema::hasTable('roles')) {
+            Schema::create('roles', function (Blueprint $table) {
+                $table->id();
+                $table->string('name', 100);
+                $table->string('slug', 100)->unique();
+                $table->boolean('status')->default(true)->index();
+                $table->boolean('is_system')->default(false)->index();
+                $table->timestamps();
+                $table->softDeletes();
 
-            $table->index(['created_at', 'id']);
-        });
+                $table->index(['created_at', 'id']);
+            });
+        }
     }
 
     /**

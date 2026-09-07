@@ -41,10 +41,11 @@ return new class extends Migration
             });
 
             // Ensure unique constraint on name and guard_name
-            Schema::table($tableNames['roles'], function (Blueprint $table) {
-                // Drop single slug/name unique if conflicting or keep slug unique
-                $table->unique(['name', 'guard_name'], 'roles_name_guard_name_unique');
-            });
+            if (!Schema::hasIndex($tableNames['roles'], 'roles_name_guard_name_unique')) {
+                Schema::table($tableNames['roles'], function (Blueprint $table) {
+                    $table->unique(['name', 'guard_name'], 'roles_name_guard_name_unique');
+                });
+            }
         } else {
             Schema::create($tableNames['roles'], function (Blueprint $table) {
                 $table->id();
@@ -156,9 +157,11 @@ return new class extends Migration
         Schema::dropIfExists($tableNames['permissions']);
 
         if (Schema::hasTable($tableNames['roles'])) {
-            Schema::table($tableNames['roles'], function (Blueprint $table) {
-                $table->dropUnique('roles_name_guard_name_unique');
-                if (Schema::hasColumn('roles', 'guard_name')) {
+            Schema::table($tableNames['roles'], function (Blueprint $table) use ($tableNames) {
+                if (Schema::hasIndex($tableNames['roles'], 'roles_name_guard_name_unique')) {
+                    $table->dropUnique('roles_name_guard_name_unique');
+                }
+                if (Schema::hasColumn($tableNames['roles'], 'guard_name')) {
                     $table->dropColumn('guard_name');
                 }
             });
