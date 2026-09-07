@@ -175,7 +175,11 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
           "token_type": "Bearer",
           "user": {
               "id": 1,
+              "first_name": "Ajay",
+              "last_name": "Kumar",
+              "full_name": "Ajay Kumar",
               "name": "Ajay Kumar",
+              "phone_number": "+919876543210",
               "username": "ajay.kumar",
               "email": "ajay@example.com",
               "status": "active",
@@ -216,9 +220,19 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
       "message": "Admin profile retrieved successfully.",
       "data": {
           "id": 1,
-          "name": "Super Admin",
+          "first_name": "System",
+          "last_name": "Administrator",
+          "full_name": "System Administrator",
+          "name": "System Administrator",
           "email": "admin@example.com",
           "status": "active",
+          "roles": [
+              {
+                  "id": 1,
+                  "name": "admin",
+                  "guard_name": "admin"
+              }
+          ],
           "last_login_at": "2026-09-03T10:00:00.000000Z",
           "created_at": "2026-09-01T00:00:00.000000Z",
           "updated_at": "2026-09-03T10:00:00.000000Z"
@@ -235,7 +249,8 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 - **Request Body:**
   ```json
   {
-      "name": "Updated Admin Name",
+      "first_name": "Super",
+      "last_name": "Admin",
       "email": "new.admin@example.com",
       "current_password": "CurrentPassword#2026"
   }
@@ -347,18 +362,37 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 - **Method:** `POST`
 - **URI:** `/api/admin/users`
 - **Throttle:** `admin-user-create` (20 / min)
-- **Request Body:** `{"name": "Ajay Kumar", "email": "ajay@example.com"}`
-- **Behavior:** Preflights template, generates atomic unique username and secure 16-char temporary password, renders snapshot, commits user, and enqueues encrypted job.
+- **Request Body:**
+  ```json
+  {
+      "first_name": "Ajay",
+      "last_name": "Kumar",
+      "phone_number": "+919876543210",
+      "email": "ajay@example.com",
+      "role": "user"
+  }
+  ```
+- **Behavior:** Preflights template, generates atomic unique username and secure 16-char temporary password, assigns default Spatie role (`user`), renders snapshot, commits user, and enqueues encrypted job.
 
 ### 4.3 View User Detail
 - **Method:** `GET`
 - **URI:** `/api/admin/users/{id}`
-- **Behavior:** Selectively loads creator summary (`creator:id,name`).
+- **Behavior:** Selectively loads creator summary (`creator:id,first_name,last_name,name`) and assigned roles (`roles:id,name,guard_name`).
 
 ### 4.4 Update User
 - **Method:** `PUT`
 - **URI:** `/api/admin/users/{id}`
-- **Editable:** `name`, `email` (`username` is immutable).
+- **Request Body:**
+  ```json
+  {
+      "first_name": "Ajay",
+      "last_name": "Kumar Updated",
+      "phone_number": "+919876543210",
+      "email": "ajay.updated@example.com",
+      "role": "user"
+  }
+  ```
+- **Editable:** `first_name`, `last_name`, `phone_number`, `email`, `role` (`username` is immutable).
 
 ### 4.5 Delete User
 - **Method:** `DELETE`

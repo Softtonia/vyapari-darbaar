@@ -5,26 +5,11 @@ namespace App\Services;
 use App\Models\Role;
 use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleService
 {
-    /**
-     * Cache keys related to roles.
-     *
-     * @var list<string>
-     */
-    public const CACHE_KEYS = [
-        'roles:active',
-        'roles:system',
-    ];
-
-    /**
-     * Cache TTL in seconds (1 hour).
-     */
-    public const CACHE_TTL = 3600;
-
     /**
      * Get a paginated list of roles with dynamic filtering and sorting.
      *
@@ -42,6 +27,7 @@ class RoleService
             ->select([
                 'id',
                 'name',
+                'guard_name',
                 'slug',
                 'status',
                 'is_system',
@@ -59,13 +45,14 @@ class RoleService
     /**
      * Create a new custom role.
      *
-     * @param  array{name: string, slug: string, status?: bool}  $data
+     * @param  array{name: string, slug: string, guard_name?: string, status?: bool}  $data
      */
     public function createRole(array $data): Role
     {
         return DB::transaction(function () use ($data) {
             $role = Role::create([
                 'name' => $data['name'],
+                'guard_name' => $data['guard_name'] ?? 'admin',
                 'slug' => $data['slug'],
                 'status' => $data['status'] ?? true,
                 'is_system' => false,
@@ -80,7 +67,7 @@ class RoleService
     /**
      * Update an existing role.
      *
-     * @param  array{name: string, slug?: string, status?: bool}  $data
+     * @param  array{name: string, slug?: string, guard_name?: string, status?: bool}  $data
      */
     public function updateRole(Role $role, array $data): Role
     {
@@ -88,6 +75,10 @@ class RoleService
             $updateData = [
                 'name' => $data['name'],
             ];
+
+            if (isset($data['guard_name'])) {
+                $updateData['guard_name'] = $data['guard_name'];
+            }
 
             // Only update slug if it's not a protected system role
             if (! $role->is_system && isset($data['slug'])) {
@@ -173,12 +164,14 @@ class RoleService
     }
 
     /**
-     * Invalidate cached role queries across the system.
+     * Invalidate Spatie permissions and role cache across the system.
      */
     public function clearRoleCache(): void
     {
-        foreach (self::CACHE_KEYS as $key) {
-            Cache::forget($key);
+        try {
+            app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        } catch (\Throwable $e) {
+            // Ignore if Spatie registrar is not bound in tests/console
         }
     }
 }

@@ -8,6 +8,7 @@ use App\Models\EmailTemplate;
 use App\Models\User;
 use App\Services\UsernameGenerator;
 use Database\Seeders\EmailTemplateSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -31,9 +32,12 @@ class AdminUserManagementTest extends TestCase
         RateLimiter::clear('admin-api');
         RateLimiter::clear('admin-user-create');
 
+        $this->seed(RoleSeeder::class);
         $this->seed(EmailTemplateSeeder::class);
 
         $this->admin = Admin::create([
+            'first_name' => 'Admin',
+            'last_name' => 'Manager',
             'name' => 'Admin Manager',
             'email' => 'admin.manager@example.com',
             'password' => Hash::make('AdminPass@12345'),
@@ -55,7 +59,10 @@ class AdminUserManagementTest extends TestCase
     public function test_user_token_is_forbidden_from_admin_user_endpoints(): void
     {
         $user = User::create([
+            'first_name' => 'Regular',
+            'last_name' => 'User',
             'name' => 'Regular User',
+            'phone_number' => '+919876543210',
             'username' => 'reg.user',
             'email' => 'reg.user@example.com',
             'password' => Hash::make('Secret123#'),
@@ -92,7 +99,9 @@ class AdminUserManagementTest extends TestCase
 
         $response = $this->withToken($this->adminToken)
             ->postJson('/api/admin/users', [
-                'name' => 'Ajay Kumar',
+                'first_name' => 'Ajay',
+                'last_name' => 'Kumar',
+                'phone_number' => '+919876543210',
                 'email' => 'ajay.kumar@example.com',
                 // Privileged and unauthorized fields must be ignored
                 'username' => 'custom.username',
@@ -107,6 +116,9 @@ class AdminUserManagementTest extends TestCase
                 'status' => true,
                 'message' => 'User created successfully.',
                 'data' => [
+                    'first_name' => 'Ajay',
+                    'last_name' => 'Kumar',
+                    'phone_number' => '+919876543210',
                     'name' => 'Ajay Kumar',
                     'username' => 'ajay.kumar',
                     'email' => 'ajay.kumar@example.com',
@@ -121,12 +133,16 @@ class AdminUserManagementTest extends TestCase
 
         $user = User::where('email', 'ajay.kumar@example.com')->first();
         $this->assertNotNull($user);
+        $this->assertEquals('Ajay', $user->first_name);
+        $this->assertEquals('Kumar', $user->last_name);
+        $this->assertEquals('+919876543210', $user->phone_number);
         $this->assertEquals('ajay.kumar', $user->username);
         $this->assertEquals('active', $user->status);
         $this->assertTrue($user->must_change_password);
         $this->assertEquals($this->admin->id, $user->created_by_admin_id);
         $this->assertNotEmpty($user->password);
         $this->assertNotEquals('custom.password', $user->password);
+        $this->assertTrue($user->hasRole('user'));
 
         // Verify queued job
         Queue::assertPushed(
@@ -157,21 +173,27 @@ class AdminUserManagementTest extends TestCase
 
         // Create user 1: Ajay Kumar -> ajay.kumar
         $res1 = $this->withToken($this->adminToken)->postJson('/api/admin/users', [
-            'name' => 'Ajay Kumar',
+            'first_name' => 'Ajay',
+            'last_name' => 'Kumar',
+            'phone_number' => '+919876543210',
             'email' => 'ajay1@example.com',
         ]);
         $this->assertEquals('ajay.kumar', $res1->json('data.username'));
 
         // Create user 2: Ajay Kumar -> ajay.kumar2
         $res2 = $this->withToken($this->adminToken)->postJson('/api/admin/users', [
-            'name' => 'Ajay Kumar',
+            'first_name' => 'Ajay',
+            'last_name' => 'Kumar',
+            'phone_number' => '+919876543210',
             'email' => 'ajay2@example.com',
         ]);
         $this->assertEquals('ajay.kumar2', $res2->json('data.username'));
 
         // Create user 3: Ajay Kumar -> ajay.kumar3
         $res3 = $this->withToken($this->adminToken)->postJson('/api/admin/users', [
-            'name' => 'Ajay Kumar',
+            'first_name' => 'Ajay',
+            'last_name' => 'Kumar',
+            'phone_number' => '+919876543210',
             'email' => 'ajay3@example.com',
         ]);
         $this->assertEquals('ajay.kumar3', $res3->json('data.username'));
@@ -180,7 +202,10 @@ class AdminUserManagementTest extends TestCase
     public function test_duplicate_email_is_rejected(): void
     {
         User::create([
-            'name' => 'Existing',
+            'first_name' => 'Existing',
+            'last_name' => 'User',
+            'name' => 'Existing User',
+            'phone_number' => '+919876543210',
             'username' => 'existing.user',
             'email' => 'duplicate@example.com',
             'password' => Hash::make('password'),
@@ -189,7 +214,9 @@ class AdminUserManagementTest extends TestCase
 
         $response = $this->withToken($this->adminToken)
             ->postJson('/api/admin/users', [
-                'name' => 'Another User',
+                'first_name' => 'Another',
+                'last_name' => 'User',
+                'phone_number' => '+919876543210',
                 'email' => 'duplicate@example.com',
             ]);
 
@@ -210,7 +237,9 @@ class AdminUserManagementTest extends TestCase
         $template->update(['is_active' => false]);
 
         $res1 = $this->withToken($this->adminToken)->postJson('/api/admin/users', [
-            'name' => 'Blocked User',
+            'first_name' => 'Blocked',
+            'last_name' => 'User',
+            'phone_number' => '+919876543210',
             'email' => 'blocked1@example.com',
         ]);
 
@@ -226,7 +255,9 @@ class AdminUserManagementTest extends TestCase
         $template->delete();
 
         $res2 = $this->withToken($this->adminToken)->postJson('/api/admin/users', [
-            'name' => 'Blocked User 2',
+            'first_name' => 'Blocked',
+            'last_name' => 'User 2',
+            'phone_number' => '+919876543210',
             'email' => 'blocked2@example.com',
         ]);
 
@@ -240,7 +271,10 @@ class AdminUserManagementTest extends TestCase
         Mail::fake();
 
         $user = User::create([
+            'first_name' => 'Ephemeral',
+            'last_name' => 'User',
             'name' => 'Ephemeral User',
+            'phone_number' => '+919876543210',
             'username' => 'ephemeral.user',
             'email' => 'ephemeral@example.com',
             'password' => Hash::make('secret'),
@@ -269,7 +303,10 @@ class AdminUserManagementTest extends TestCase
         Mail::fake();
 
         $user = User::create([
+            'first_name' => 'Existing',
+            'last_name' => 'User',
             'name' => 'Existing User',
+            'phone_number' => '+919876543210',
             'username' => 'existing.user',
             'email' => 'existing@example.com',
             'password' => Hash::make('secret'),
@@ -294,7 +331,10 @@ class AdminUserManagementTest extends TestCase
     {
         for ($i = 1; $i <= 5; $i++) {
             User::create([
+                'first_name' => 'User',
+                'last_name' => "{$i}",
                 'name' => "User {$i}",
+                'phone_number' => "+91987654321{$i}",
                 'username' => "user.{$i}",
                 'email' => "user{$i}@example.com",
                 'password' => Hash::make('password'),
@@ -316,6 +356,9 @@ class AdminUserManagementTest extends TestCase
                     'data' => [
                         '*' => [
                             'id',
+                            'first_name',
+                            'last_name',
+                            'phone_number',
                             'name',
                             'username',
                             'email',
@@ -342,7 +385,10 @@ class AdminUserManagementTest extends TestCase
     public function test_user_listing_filters_and_sorting(): void
     {
         $u1 = User::create([
+            'first_name' => 'Alice',
+            'last_name' => 'Smith',
             'name' => 'Alice Smith',
+            'phone_number' => '+919876543210',
             'username' => 'alice.smith',
             'email' => 'alice@example.com',
             'password' => Hash::make('password'),
@@ -351,7 +397,10 @@ class AdminUserManagementTest extends TestCase
         ]);
 
         $u2 = User::create([
+            'first_name' => 'Bob',
+            'last_name' => 'Jones',
             'name' => 'Bob Jones',
+            'phone_number' => '+919876543211',
             'username' => 'bob.jones',
             'email' => 'bob@example.com',
             'password' => Hash::make('password'),
@@ -388,7 +437,10 @@ class AdminUserManagementTest extends TestCase
     public function test_user_detail_loads_creator_with_only_id_and_name(): void
     {
         $user = User::create([
+            'first_name' => 'Detail',
+            'last_name' => 'User',
             'name' => 'Detail User',
+            'phone_number' => '+919876543210',
             'username' => 'detail.user',
             'email' => 'detail@example.com',
             'password' => Hash::make('password'),
@@ -404,6 +456,8 @@ class AdminUserManagementTest extends TestCase
                 'status' => true,
                 'data' => [
                     'id' => $user->id,
+                    'first_name' => 'Detail',
+                    'last_name' => 'User',
                     'name' => 'Detail User',
                     'username' => 'detail.user',
                     'email' => 'detail@example.com',
@@ -422,7 +476,10 @@ class AdminUserManagementTest extends TestCase
     public function test_update_user_name_and_email_with_immutable_username(): void
     {
         $user = User::create([
+            'first_name' => 'Original',
+            'last_name' => 'Name',
             'name' => 'Original Name',
+            'phone_number' => '+919876543210',
             'username' => 'orig.username',
             'email' => 'orig@example.com',
             'password' => Hash::make('password'),
@@ -432,7 +489,8 @@ class AdminUserManagementTest extends TestCase
         // Attempting to change username fails validation
         $resFail = $this->withToken($this->adminToken)
             ->putJson("/api/admin/users/{$user->id}", [
-                'name' => 'New Name',
+                'first_name' => 'New',
+                'last_name' => 'Name',
                 'email' => 'new@example.com',
                 'username' => 'attempted.new.username',
             ]);
@@ -443,7 +501,8 @@ class AdminUserManagementTest extends TestCase
         // Valid update without modifying username
         $resSuccess = $this->withToken($this->adminToken)
             ->putJson("/api/admin/users/{$user->id}", [
-                'name' => 'Updated Name',
+                'first_name' => 'Updated',
+                'last_name' => 'Name',
                 'email' => 'updated@example.com',
             ]);
 
@@ -451,6 +510,8 @@ class AdminUserManagementTest extends TestCase
             ->assertJson([
                 'status' => true,
                 'data' => [
+                    'first_name' => 'Updated',
+                    'last_name' => 'Name',
                     'name' => 'Updated Name',
                     'email' => 'updated@example.com',
                     'username' => 'orig.username',
@@ -458,6 +519,8 @@ class AdminUserManagementTest extends TestCase
             ]);
 
         $user->refresh();
+        $this->assertEquals('Updated', $user->first_name);
+        $this->assertEquals('Name', $user->last_name);
         $this->assertEquals('Updated Name', $user->name);
         $this->assertEquals('updated@example.com', $user->email);
         $this->assertEquals('orig.username', $user->username);
@@ -466,7 +529,10 @@ class AdminUserManagementTest extends TestCase
     public function test_delete_user_hard_deletes_record_and_revokes_tokens(): void
     {
         $user = User::create([
+            'first_name' => 'To',
+            'last_name' => 'Delete',
             'name' => 'To Delete',
+            'phone_number' => '+919876543210',
             'username' => 'to.delete',
             'email' => 'delete@example.com',
             'password' => Hash::make('password'),
@@ -498,14 +564,18 @@ class AdminUserManagementTest extends TestCase
 
         for ($i = 1; $i <= 20; $i++) {
             $this->withToken($this->adminToken)->postJson('/api/admin/users', [
-                'name' => "Batch User {$i}",
+                'first_name' => 'Batch',
+                'last_name' => "User {$i}",
+                'phone_number' => '+919876543210',
                 'email' => "batch{$i}@example.com",
             ])->assertStatus(201);
         }
 
         // 21st attempt is throttled
         $response = $this->withToken($this->adminToken)->postJson('/api/admin/users', [
-            'name' => 'Throttled User',
+            'first_name' => 'Throttled',
+            'last_name' => 'User',
+            'phone_number' => '+919876543210',
             'email' => 'throttled@example.com',
         ]);
 
@@ -521,7 +591,10 @@ class AdminUserManagementTest extends TestCase
         $users = [];
         for ($i = 1; $i <= 3; $i++) {
             $user = User::create([
+                'first_name' => 'User',
+                'last_name' => "{$i}",
                 'name' => "User {$i}",
+                'phone_number' => "+91987654321{$i}",
                 'username' => "bulkuser{$i}",
                 'email' => "bulkuser{$i}@example.com",
                 'password' => Hash::make('password'),

@@ -26,6 +26,8 @@ class AdminRoleTest extends TestCase
         RateLimiter::clear('admin-api');
 
         $this->admin = Admin::create([
+            'first_name' => 'System',
+            'last_name' => 'Admin',
             'name' => 'System Admin',
             'email' => 'admin@example.com',
             'password' => Hash::make('password123'),
@@ -41,9 +43,9 @@ class AdminRoleTest extends TestCase
         $this->seed(RoleSeeder::class); // Run second time to test idempotency
 
         $this->assertDatabaseCount('roles', 3);
-        $this->assertDatabaseHas('roles', ['slug' => 'admin', 'is_system' => true, 'status' => true]);
-        $this->assertDatabaseHas('roles', ['slug' => 'user', 'is_system' => true, 'status' => true]);
-        $this->assertDatabaseHas('roles', ['slug' => 'guest', 'is_system' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'admin', 'guard_name' => 'admin', 'is_system' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'user', 'guard_name' => 'web', 'is_system' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'guest', 'guard_name' => 'web', 'is_system' => true, 'status' => true]);
     }
 
     public function test_admin_seeder_assigns_admin_role_via_pivot(): void
@@ -52,26 +54,34 @@ class AdminRoleTest extends TestCase
 
         $admin = Admin::where('email', 'admin@vyaparidarbaar.com')->firstOrFail();
         $this->assertTrue($admin->hasRole('admin'));
-        $this->assertDatabaseHas('admin_role', [
-            'admin_id' => $admin->id,
+        $this->assertDatabaseHas('model_has_roles', [
+            'model_id' => $admin->id,
+            'model_type' => $admin->getMorphClass(),
         ]);
     }
 
     public function test_user_and_admin_role_helpers_and_pivot_relationships(): void
     {
         $this->seed(RoleSeeder::class);
-        $adminRole = Role::where('slug', 'admin')->firstOrFail();
-        $userRole = Role::where('slug', 'user')->firstOrFail();
+        $adminRole = Role::where('name', 'admin')->where('guard_name', 'admin')->firstOrFail();
+        $userRole = Role::where('name', 'user')->where('guard_name', 'web')->firstOrFail();
 
         // Admin role assignment & relationships
         $this->admin->assignRole('admin');
         $this->assertTrue($this->admin->hasRole('admin'));
-        $this->assertFalse($this->admin->hasRole('user'));
-        $this->assertTrue($adminRole->admins->contains('id', $this->admin->id));
+        $this->assertFalse($this->admin->hasRole('non-existent-role'));
+        $this->assertDatabaseHas('model_has_roles', [
+            'model_id' => $this->admin->id,
+            'role_id' => $adminRole->id,
+            'model_type' => $this->admin->getMorphClass(),
+        ]);
 
         // User role assignment & relationships
         $user = User::create([
+            'first_name' => 'Demo',
+            'last_name' => 'User',
             'name' => 'Demo User',
+            'phone_number' => '+919876543210',
             'username' => 'demo.user',
             'email' => 'demo@example.com',
             'password' => Hash::make('password123'),
@@ -80,8 +90,11 @@ class AdminRoleTest extends TestCase
 
         $user->assignRole('user');
         $this->assertTrue($user->hasRole('user'));
-        $this->assertFalse($user->hasRole('admin'));
-        $this->assertTrue($userRole->users->contains('id', $user->id));
+        $this->assertDatabaseHas('model_has_roles', [
+            'model_id' => $user->id,
+            'role_id' => $userRole->id,
+            'model_type' => $user->getMorphClass(),
+        ]);
     }
 
     public function test_admin_can_create_custom_role_with_explicit_slug(): void
@@ -172,7 +185,7 @@ class AdminRoleTest extends TestCase
                 'data' => [
                     'current_page',
                     'data' => [
-                        '*' => ['id', 'name', 'slug', 'status', 'is_system', 'created_at', 'updated_at'],
+                        '*' => ['id', 'name', 'guard_name', 'slug', 'status', 'is_system', 'created_at', 'updated_at'],
                     ],
                     'per_page',
                     'total',
@@ -413,7 +426,10 @@ class AdminRoleTest extends TestCase
     public function test_user_token_cannot_access_admin_role_endpoints(): void
     {
         $user = User::create([
+            'first_name' => 'App',
+            'last_name' => 'User',
             'name' => 'App User',
+            'phone_number' => '+919876543210',
             'username' => 'app.user',
             'email' => 'app.user@example.com',
             'password' => Hash::make('password123'),

@@ -29,9 +29,12 @@ class AdminUserController extends Controller
      */
     protected const ALLOWED_SORT_FIELDS = [
         'created_at',
+        'first_name',
+        'last_name',
         'name',
         'username',
         'email',
+        'phone_number',
         'status',
     ];
 
@@ -44,8 +47,12 @@ class AdminUserController extends Controller
         $perPage = max(1, min(100, $perPage));
 
         $query = User::query()
+            ->with('roles')
             ->select([
                 'id',
+                'first_name',
+                'last_name',
+                'phone_number',
                 'name',
                 'username',
                 'email',
@@ -55,11 +62,14 @@ class AdminUserController extends Controller
                 'updated_at',
             ]);
 
-        // Search: name substring, username prefix, email prefix
+        // Search: name, first_name, last_name, username prefix, email prefix, phone_number
         if ($request->filled('search')) {
             $search = (string) $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('phone_number', 'like', "%{$search}%")
                     ->orWhere('username', 'like', "{$search}%")
                     ->orWhere('email', 'like', "{$search}%");
             });
@@ -68,6 +78,14 @@ class AdminUserController extends Controller
         // Status filter
         if ($request->filled('status')) {
             $query->where('status', (string) $request->input('status'));
+        }
+
+        // Role filter
+        if ($request->filled('role')) {
+            $role = (string) $request->input('role');
+            $query->whereHas('roles', function ($q) use ($role) {
+                $q->where('name', $role)->orWhere('slug', $role);
+            });
         }
 
         // Date filters
@@ -120,6 +138,7 @@ class AdminUserController extends Controller
         /** @var Admin $admin */
         $admin = $request->user();
         $user = $action->execute($admin, $request->validatedUserData());
+        $user->loadMissing(['creator:id,first_name,last_name,name', 'roles']);
 
         return response()->json([
             'status' => true,
@@ -133,7 +152,7 @@ class AdminUserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
-        $user->loadMissing(['creator:id,name']);
+        $user->loadMissing(['creator:id,first_name,last_name,name', 'roles']);
 
         return response()->json([
             'status' => true,
@@ -148,6 +167,7 @@ class AdminUserController extends Controller
     public function update(UpdateUserRequest $request, User $user, UpdateUserAction $action): JsonResponse
     {
         $updatedUser = $action->execute($user, $request->validatedUserData());
+        $updatedUser->loadMissing(['creator:id,first_name,last_name,name', 'roles']);
 
         return response()->json([
             'status' => true,
@@ -165,6 +185,7 @@ class AdminUserController extends Controller
         UpdateUserStatusAction $action
     ): JsonResponse {
         $updatedUser = $action->execute($user, (string) $request->input('status'));
+        $updatedUser->loadMissing(['creator:id,first_name,last_name,name', 'roles']);
 
         return response()->json([
             'status' => true,

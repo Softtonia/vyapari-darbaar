@@ -22,10 +22,10 @@ class CreateUserAction
     ) {}
 
     /**
-     * Provision a new user account, render credential email snapshot and queue after commit.
+     * Provision a new user account, assign Spatie role, render credential email snapshot and queue after commit.
      *
      * @param  Admin  $admin
-     * @param  array{name: string, email: string}  $data
+     * @param  array{first_name: string, last_name: string, name: string, phone_number: string, email: string, role?: string}  $data
      * @return User
      *
      * @throws HttpResponseException
@@ -63,10 +63,13 @@ class CreateUserAction
         $renderedSubject = $this->templateRenderer->render($template->subject, $replacements, 'USER_ACCOUNT_CREATED');
         $renderedBody = $this->templateRenderer->render($template->body, $replacements, 'USER_ACCOUNT_CREATED');
 
-        // Step 5: Persist user and assign default user role within DB transaction
+        // Step 5: Persist user and assign Spatie role within DB transaction
         $user = DB::transaction(function () use ($admin, $data, $username, $tempPassword) {
             $newUser = User::create([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
                 'name' => $data['name'],
+                'phone_number' => $data['phone_number'],
                 'username' => $username,
                 'email' => $data['email'],
                 'password' => Hash::make($tempPassword),
@@ -75,10 +78,8 @@ class CreateUserAction
                 'created_by_admin_id' => $admin->id,
             ]);
 
-            $userRole = \App\Models\Role::query()->where('slug', 'user')->first();
-            if ($userRole) {
-                $newUser->roles()->attach($userRole->id);
-            }
+            $roleName = ! empty($data['role']) ? $data['role'] : 'user';
+            $newUser->assignRole($roleName);
 
             return $newUser;
         });

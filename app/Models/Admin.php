@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class Admin extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     /**
      * The table associated with the model.
@@ -20,11 +21,20 @@ class Admin extends Authenticatable
     protected $table = 'admins';
 
     /**
+     * The guard associated with this model for Spatie permissions.
+     *
+     * @var string
+     */
+    protected string $guard_name = 'admin';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
     protected $fillable = [
+        'first_name',
+        'last_name',
         'name',
         'email',
         'password',
@@ -43,6 +53,15 @@ class Admin extends Authenticatable
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'full_name',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -56,6 +75,28 @@ class Admin extends Authenticatable
     }
 
     /**
+     * Get the administrator's full name.
+     */
+    public function getFullNameAttribute(): string
+    {
+        $fullName = trim(($this->first_name ?? '').' '.($this->last_name ?? ''));
+
+        return $fullName !== '' ? $fullName : ($this->attributes['name'] ?? '');
+    }
+
+    /**
+     * Get or fallback name attribute.
+     */
+    public function getNameAttribute(?string $value): string
+    {
+        if (!empty($value)) {
+            return $value;
+        }
+
+        return $this->full_name;
+    }
+
+    /**
      * Get all users created by this administrator.
      *
      * @return HasMany<User, $this>
@@ -63,60 +104,6 @@ class Admin extends Authenticatable
     public function createdUsers(): HasMany
     {
         return $this->hasMany(User::class, 'created_by_admin_id');
-    }
-
-    /**
-     * Get the roles assigned to this administrator.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Role, $this>
-     */
-    public function roles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
-    {
-        return $this->belongsToMany(Role::class, 'admin_role')->withTimestamps();
-    }
-
-    /**
-     * Determine if the admin has a specific role by slug or model.
-     */
-    public function hasRole(string|Role $role): bool
-    {
-        $slug = $role instanceof Role ? $role->slug : $role;
-
-        return $this->roles->contains('slug', $slug);
-    }
-
-    /**
-     * Assign a role to the administrator.
-     */
-    public function assignRole(string|Role|int $role): void
-    {
-        $roleId = match (true) {
-            $role instanceof Role => $role->id,
-            is_numeric($role) => (int) $role,
-            default => Role::query()->where('slug', $role)->value('id'),
-        };
-
-        if ($roleId) {
-            $this->roles()->syncWithoutDetaching([$roleId]);
-        }
-    }
-
-    /**
-     * Sync roles for the administrator.
-     *
-     * @param  array<int|string|Role>  $roles
-     */
-    public function syncRoles(array $roles): void
-    {
-        $roleIds = array_filter(array_map(function ($role) {
-            return match (true) {
-                $role instanceof Role => $role->id,
-                is_numeric($role) => (int) $role,
-                default => Role::query()->where('slug', $role)->value('id'),
-            };
-        }, $roles));
-
-        $this->roles()->sync($roleIds);
     }
 
     /**

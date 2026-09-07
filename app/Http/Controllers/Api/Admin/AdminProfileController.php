@@ -19,6 +19,7 @@ class AdminProfileController extends Controller
     {
         /** @var Admin $admin */
         $admin = $request->user();
+        $admin->loadMissing('roles');
 
         return response()->json([
             'status' => true,
@@ -37,7 +38,7 @@ class AdminProfileController extends Controller
         /** @var Admin $admin */
         $admin = $request->user();
 
-        $updatedAdmin = $action->execute($admin, $request->validated());
+        $updatedAdmin = $action->execute($admin, $request->validatedProfileData());
 
         return response()->json([
             'status' => true,

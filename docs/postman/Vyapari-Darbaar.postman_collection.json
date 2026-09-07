@@ -142,7 +142,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"Super Administrator\"\n}"
+              "raw": "{\n    \"first_name\": \"Admin\",\n    \"last_name\": \"User\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/admin/profile",
@@ -376,7 +376,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"Ajay Kumar\",\n    \"email\": \"ajay.kumar@example.com\"\n}"
+              "raw": "{\n    \"first_name\": \"Amit\",\n    \"last_name\": \"Sharma\",\n    \"phone_number\": \"+919876543210\",\n    \"email\": \"amit.sharma@example.com\",\n    \"role\": \"user\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/admin/users",
@@ -411,7 +411,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"name\": \"Ajay Kumar Updated\",\n    \"email\": \"ajay.updated@example.com\"\n}"
+              "raw": "{\n    \"first_name\": \"Amit\",\n    \"last_name\": \"Sharma\",\n    \"phone_number\": \"+919876543210\",\n    \"email\": \"amit.updated@example.com\",\n    \"role\": \"user\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/admin/users/{{user_id}}",

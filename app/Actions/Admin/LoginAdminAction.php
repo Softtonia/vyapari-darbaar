@@ -21,7 +21,7 @@ class LoginAdminAction
         $password = $credentials['password'];
 
         $admin = Admin::query()
-            ->select(['id', 'name', 'email', 'password', 'status', 'last_login_at'])
+            ->select(['id', 'first_name', 'last_name', 'name', 'email', 'password', 'status', 'last_login_at'])
             ->where('email', $email)
             ->first();
 

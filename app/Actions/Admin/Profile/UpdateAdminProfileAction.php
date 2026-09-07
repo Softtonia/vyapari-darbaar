@@ -8,17 +8,15 @@ use Illuminate\Support\Facades\DB;
 class UpdateAdminProfileAction
 {
     /**
-     * Update admin profile name/email, clean stale password reset tokens, and revoke other sessions if email changes.
+     * Update admin profile name/first_name/last_name/email, clean stale password reset tokens, and revoke other sessions if email changes.
      *
      * @param  Admin  $admin
-     * @param  array{name?: string, email?: string}  $data
+     * @param  array{first_name?: string, last_name?: string, name?: string, email?: string}  $data
      * @return Admin
      */
     public function execute(Admin $admin, array $data): Admin
     {
         return DB::transaction(function () use ($admin, $data) {
-            $emailChanged = false;
-
             if (isset($data['email'])) {
                 $newEmail = strtolower(trim($data['email']));
                 if ($newEmail !== strtolower(trim($admin->email))) {
@@ -34,17 +32,26 @@ class UpdateAdminProfileAction
                     }
 
                     $admin->email = $newEmail;
-                    $emailChanged = true;
                 }
+            }
+
+            if (isset($data['first_name'])) {
+                $admin->first_name = trim($data['first_name']);
+            }
+
+            if (isset($data['last_name'])) {
+                $admin->last_name = trim($data['last_name']);
             }
 
             if (isset($data['name'])) {
                 $admin->name = trim($data['name']);
+            } elseif (isset($data['first_name']) || isset($data['last_name'])) {
+                $admin->name = trim(($admin->first_name ?? '').' '.($admin->last_name ?? ''));
             }
 
             $admin->save();
 
-            return $admin->fresh();
+            return $admin->fresh(['roles']);
         });
     }
 }

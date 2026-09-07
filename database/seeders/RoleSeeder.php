@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Role;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleSeeder extends Seeder
 {
@@ -12,36 +13,51 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $defaultRoles = [
+        // Reset cached roles and permissions
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        $roles = [
             [
-                'name' => 'Admin',
+                'name' => 'admin',
+                'guard_name' => 'admin',
                 'slug' => 'admin',
                 'status' => true,
                 'is_system' => true,
             ],
             [
-                'name' => 'User',
+                'name' => 'user',
+                'guard_name' => 'web',
                 'slug' => 'user',
                 'status' => true,
                 'is_system' => true,
             ],
             [
-                'name' => 'Guest',
+                'name' => 'guest',
+                'guard_name' => 'web',
                 'slug' => 'guest',
                 'status' => true,
                 'is_system' => true,
             ],
         ];
 
-        foreach ($defaultRoles as $role) {
-            Role::updateOrCreate(
-                ['slug' => $role['slug']],
-                [
-                    'name' => $role['name'],
-                    'status' => $role['status'],
-                    'is_system' => $role['is_system'],
-                ]
-            );
+        foreach ($roles as $roleData) {
+            $role = Role::where('slug', $roleData['slug'])
+                ->orWhere(function ($query) use ($roleData) {
+                    $query->where('name', $roleData['name'])
+                        ->where('guard_name', $roleData['guard_name']);
+                })->first();
+
+            if ($role) {
+                $role->update([
+                    'name' => $roleData['name'],
+                    'guard_name' => $roleData['guard_name'],
+                    'slug' => $roleData['slug'],
+                    'status' => $roleData['status'],
+                    'is_system' => $roleData['is_system'],
+                ]);
+            } else {
+                Role::create($roleData);
+            }
         }
     }
 }

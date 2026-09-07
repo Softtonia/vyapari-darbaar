@@ -20,6 +20,9 @@ class LoginUserAction
         $user = User::query()
             ->select([
                 'id',
+                'first_name',
+                'last_name',
+                'phone_number',
                 'name',
                 'username',
                 'email',

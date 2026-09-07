@@ -31,7 +31,9 @@ class UpdateAdminProfileRequest extends FormRequest
         $adminId = $admin?->id;
 
         return [
-            'name' => ['sometimes', 'required', 'string', 'max:150'],
+            'first_name' => ['sometimes', 'required', 'string', 'max:100'],
+            'last_name' => ['sometimes', 'required', 'string', 'max:100'],
+            'name' => ['sometimes', 'nullable', 'string', 'max:150'],
             'email' => [
                 'sometimes',
                 'required',
@@ -73,6 +75,44 @@ class UpdateAdminProfileRequest extends FormRequest
                 }
             }
         });
+    }
+
+    /**
+     * Get normalized profile update data.
+     *
+     * @return array{first_name?: string, last_name?: string, name?: string, email?: string}
+     */
+    public function validatedProfileData(): array
+    {
+        $data = [];
+
+        if ($this->has('first_name')) {
+            $data['first_name'] = trim((string) $this->input('first_name'));
+        }
+
+        if ($this->has('last_name')) {
+            $data['last_name'] = trim((string) $this->input('last_name'));
+        }
+
+        if ($this->has('name')) {
+            $data['name'] = trim((string) $this->input('name'));
+        }
+
+        if (isset($data['first_name']) || isset($data['last_name'])) {
+            $firstName = $data['first_name'] ?? ($this->user()?->first_name ?? '');
+            $lastName = $data['last_name'] ?? ($this->user()?->last_name ?? '');
+            $data['name'] = trim("{$firstName} {$lastName}");
+        } elseif (isset($data['name']) && ! isset($data['first_name'])) {
+            $parts = preg_split('/\s+/', $data['name'], 2);
+            $data['first_name'] = ! empty($parts[0]) ? $parts[0] : 'Admin';
+            $data['last_name'] = $parts[1] ?? '';
+        }
+
+        if ($this->has('email')) {
+            $data['email'] = strtolower(trim((string) $this->input('email')));
+        }
+
+        return $data;
     }
 
     /**
