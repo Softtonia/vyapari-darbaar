@@ -1,10 +1,10 @@
 {
-  "id": "vyapari-darbaar-env",
-  "name": "Vyapari Darbaar Local Environment",
+  "id": "vyapari-darbaar-live-env",
+  "name": "Vyapari Darbaar Live Environment",
   "values": [
     {
       "key": "base_url",
-      "value": "http://127.0.0.1:8000",
+      "value": "https://api.vyaparidarbar.com",
       "type": "default",
       "enabled": true
     },
@@ -22,7 +22,7 @@
     },
     {
       "key": "admin_email",
-      "value": "admin@example.com",
+      "value": "admin@vyaparidarbaar.com",
       "type": "default",
       "enabled": true
     },
@@ -34,7 +34,7 @@
     },
     {
       "key": "username",
-      "value": "ajay.kumar",
+      "value": "user",
       "type": "default",
       "enabled": true
     },
@@ -51,18 +51,17 @@
       "enabled": true
     },
     {
-      "key": "email_template_id",
+      "key": "role_id",
       "value": "1",
       "type": "default",
       "enabled": true
     },
     {
-      "key": "role_id",
+      "key": "email_template_id",
       "value": "1",
       "type": "default",
       "enabled": true
     }
   ],
-  "_postman_variable_scope": "environment",
-  "_postman_exported_at": "2026-09-03T11:00:00.000Z"
+  "_postman_variable_scope": "environment"
 }
