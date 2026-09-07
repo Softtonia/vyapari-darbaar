@@ -410,4 +410,35 @@ class AdminPasswordResetTest extends TestCase
         $this->assertArrayNotHasKey('password', (array) $response->json('data'));
         $this->assertEmpty((array) $response->json('data'));
     }
+
+    public function test_reset_password_fails_when_new_password_is_same_as_current_password(): void
+    {
+        $admin = Admin::create([
+            'name' => 'Same Password Admin',
+            'email' => 'same.password@example.com',
+            'password' => Hash::make('CurrentPassword#2026'),
+            'status' => 'active',
+        ]);
+
+        $rawToken = Password::broker('admins')->createToken($admin);
+
+        $response = $this->postJson('/api/admin/reset-password', [
+            'email' => 'same.password@example.com',
+            'token' => $rawToken,
+            'password' => 'CurrentPassword#2026',
+            'password_confirmation' => 'CurrentPassword#2026',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'status' => false,
+                'message' => 'Validation error.',
+            ])
+            ->assertJsonValidationErrors(['password']);
+
+        $this->assertStringContainsString(
+            'The new password cannot be the same as the current password.',
+            $response->json('errors.password.0')
+        );
+    }
 }

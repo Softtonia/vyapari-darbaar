@@ -42,6 +42,27 @@ class ResetPasswordAdminRequest extends FormRequest
     }
 
     /**
+     * Configure the validator instance.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function ($validator) {
+            $email = strtolower(trim((string) $this->input('email')));
+            $newPassword = (string) $this->input('password');
+
+            if ($email !== '' && $newPassword !== '') {
+                $admin = \App\Models\Admin::where('email', $email)->first();
+                if ($admin && \Illuminate\Support\Facades\Hash::check($newPassword, $admin->password)) {
+                    $validator->errors()->add(
+                        'password',
+                        'The new password cannot be the same as the current password.'
+                    );
+                }
+            }
+        });
+    }
+
+    /**
      * Get normalized reset credentials.
      *
      * @return array{email: string, token: string, password: string, password_confirmation: string}
