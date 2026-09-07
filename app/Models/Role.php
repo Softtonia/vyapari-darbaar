@@ -67,6 +67,26 @@ class Role extends Model
     ];
 
     /**
+     * Get all administrators assigned to this role.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Admin, $this>
+     */
+    public function admins(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Admin::class, 'admin_role')->withTimestamps();
+    }
+
+    /**
+     * Get all users assigned to this role.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<User, $this>
+     */
+    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'role_user')->withTimestamps();
+    }
+
+    /**
      * Scope a query to search by role name or slug.
      */
     public function scopeSearch(Builder $query, ?string $search): Builder

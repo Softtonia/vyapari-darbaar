@@ -63,9 +63,9 @@ class CreateUserAction
         $renderedSubject = $this->templateRenderer->render($template->subject, $replacements, 'USER_ACCOUNT_CREATED');
         $renderedBody = $this->templateRenderer->render($template->body, $replacements, 'USER_ACCOUNT_CREATED');
 
-        // Step 5: Persist user within DB transaction
+        // Step 5: Persist user and assign default user role within DB transaction
         $user = DB::transaction(function () use ($admin, $data, $username, $tempPassword) {
-            return User::create([
+            $newUser = User::create([
                 'name' => $data['name'],
                 'username' => $username,
                 'email' => $data['email'],
@@ -74,6 +74,13 @@ class CreateUserAction
                 'must_change_password' => true,
                 'created_by_admin_id' => $admin->id,
             ]);
+
+            $userRole = \App\Models\Role::query()->where('slug', 'user')->first();
+            if ($userRole) {
+                $newUser->roles()->attach($userRole->id);
+            }
+
+            return $newUser;
         });
 
         // Step 6: Dispatch encrypted credential email job after commit

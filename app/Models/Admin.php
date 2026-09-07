@@ -66,6 +66,60 @@ class Admin extends Authenticatable
     }
 
     /**
+     * Get the roles assigned to this administrator.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<Role, $this>
+     */
+    public function roles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'admin_role')->withTimestamps();
+    }
+
+    /**
+     * Determine if the admin has a specific role by slug or model.
+     */
+    public function hasRole(string|Role $role): bool
+    {
+        $slug = $role instanceof Role ? $role->slug : $role;
+
+        return $this->roles->contains('slug', $slug);
+    }
+
+    /**
+     * Assign a role to the administrator.
+     */
+    public function assignRole(string|Role|int $role): void
+    {
+        $roleId = match (true) {
+            $role instanceof Role => $role->id,
+            is_numeric($role) => (int) $role,
+            default => Role::query()->where('slug', $role)->value('id'),
+        };
+
+        if ($roleId) {
+            $this->roles()->syncWithoutDetaching([$roleId]);
+        }
+    }
+
+    /**
+     * Sync roles for the administrator.
+     *
+     * @param  array<int|string|Role>  $roles
+     */
+    public function syncRoles(array $roles): void
+    {
+        $roleIds = array_filter(array_map(function ($role) {
+            return match (true) {
+                $role instanceof Role => $role->id,
+                is_numeric($role) => (int) $role,
+                default => Role::query()->where('slug', $role)->value('id'),
+            };
+        }, $roles));
+
+        $this->roles()->sync($roleIds);
+    }
+
+    /**
      * Send the password reset notification.
      *
      * @param  string  $token

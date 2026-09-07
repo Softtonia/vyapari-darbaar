@@ -46,6 +46,44 @@ class AdminRoleTest extends TestCase
         $this->assertDatabaseHas('roles', ['slug' => 'guest', 'is_system' => true, 'status' => true]);
     }
 
+    public function test_admin_seeder_assigns_admin_role_via_pivot(): void
+    {
+        $this->seed(\Database\Seeders\DatabaseSeeder::class);
+
+        $admin = Admin::where('email', 'admin@vyaparidarbaar.com')->firstOrFail();
+        $this->assertTrue($admin->hasRole('admin'));
+        $this->assertDatabaseHas('admin_role', [
+            'admin_id' => $admin->id,
+        ]);
+    }
+
+    public function test_user_and_admin_role_helpers_and_pivot_relationships(): void
+    {
+        $this->seed(RoleSeeder::class);
+        $adminRole = Role::where('slug', 'admin')->firstOrFail();
+        $userRole = Role::where('slug', 'user')->firstOrFail();
+
+        // Admin role assignment & relationships
+        $this->admin->assignRole('admin');
+        $this->assertTrue($this->admin->hasRole('admin'));
+        $this->assertFalse($this->admin->hasRole('user'));
+        $this->assertTrue($adminRole->admins->contains('id', $this->admin->id));
+
+        // User role assignment & relationships
+        $user = User::create([
+            'name' => 'Demo User',
+            'username' => 'demo.user',
+            'email' => 'demo@example.com',
+            'password' => Hash::make('password123'),
+            'status' => 'active',
+        ]);
+
+        $user->assignRole('user');
+        $this->assertTrue($user->hasRole('user'));
+        $this->assertFalse($user->hasRole('admin'));
+        $this->assertTrue($userRole->users->contains('id', $user->id));
+    }
+
     public function test_admin_can_create_custom_role_with_explicit_slug(): void
     {
         $response = $this->withToken($this->adminToken)->postJson('/api/admin/roles', [

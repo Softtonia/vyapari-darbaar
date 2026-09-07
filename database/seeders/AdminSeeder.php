@@ -17,7 +17,7 @@ class AdminSeeder extends Seeder
         $password = env('SEED_ADMIN_PASSWORD', 'password');
         $name = env('SEED_ADMIN_NAME', 'System Administrator');
 
-        Admin::updateOrCreate(
+        $admin = Admin::updateOrCreate(
             ['email' => $email],
             [
                 'name' => $name,
@@ -25,5 +25,10 @@ class AdminSeeder extends Seeder
                 'status' => 'active',
             ]
         );
+
+        $adminRole = \App\Models\Role::query()->where('slug', 'admin')->first();
+        if ($adminRole) {
+            $admin->roles()->syncWithoutDetaching([$adminRole->id]);
+        }
     }
 }
