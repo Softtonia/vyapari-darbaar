@@ -17,8 +17,8 @@ class AdminSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $email = env('SEED_ADMIN_EMAIL', 'admin@vyaparidarbaar.com');
-        $password = env('SEED_ADMIN_PASSWORD', 'password');
+        $email = env('SEED_ADMIN_EMAIL', 'vijay.kumar@softtonia.com');
+        $password = env('SEED_ADMIN_PASSWORD', 'Soft@12345');
         $firstName = env('SEED_ADMIN_FIRST_NAME', 'System');
         $lastName = env('SEED_ADMIN_LAST_NAME', 'Administrator');
         $name = env('SEED_ADMIN_NAME', "{$firstName} {$lastName}");
