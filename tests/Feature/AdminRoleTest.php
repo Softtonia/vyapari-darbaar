@@ -52,7 +52,8 @@ class AdminRoleTest extends TestCase
     {
         $this->seed(\Database\Seeders\DatabaseSeeder::class);
 
-        $admin = Admin::where('email', 'admin@vyaparidarbaar.com')->firstOrFail();
+        $email = env('SEED_ADMIN_EMAIL', 'vijay.kumar@softtonia.com');
+        $admin = Admin::where('email', $email)->firstOrFail();
         $this->assertTrue($admin->hasRole('admin'));
         $this->assertDatabaseHas('model_has_roles', [
             'model_id' => $admin->id,

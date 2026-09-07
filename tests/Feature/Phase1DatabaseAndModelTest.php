@@ -338,13 +338,15 @@ class Phase1DatabaseAndModelTest extends TestCase
     public function test_admin_seeder_runs_idempotently(): void
     {
         $this->seed(AdminSeeder::class);
-        $admin = Admin::where('email', 'admin@vyaparidarbaar.com')->first();
+        $email = env('SEED_ADMIN_EMAIL', 'vijay.kumar@softtonia.com');
+        $password = env('SEED_ADMIN_PASSWORD', 'Soft@12345');
+        $admin = Admin::where('email', $email)->first();
         $this->assertNotNull($admin);
-        $this->assertTrue(Hash::check('password', $admin->password));
+        $this->assertTrue(Hash::check($password, $admin->password));
 
         // Re-run seeder to verify idempotency
         $this->seed(AdminSeeder::class);
-        $this->assertEquals(1, Admin::where('email', 'admin@vyaparidarbaar.com')->count());
+        $this->assertEquals(1, Admin::where('email', $email)->count());
     }
 
     public function test_composite_index_exists_on_users_table(): void
