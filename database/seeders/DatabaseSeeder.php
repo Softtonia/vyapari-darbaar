@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             AdminSeeder::class,
             EmailTemplateSeeder::class,
+            CommodityCategorySeeder::class,
+            CommoditySeeder::class,
         ]);
     }
 }

@@ -36,6 +36,7 @@ class UpdateUserRequest extends FormRequest
             'email' => ['sometimes', 'email', 'max:255'],
             'role' => ['sometimes', 'nullable', 'string', 'exists:roles,name'],
         ];
+            
     }
 
     /**
