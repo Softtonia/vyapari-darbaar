@@ -41,6 +41,7 @@ class UpdateAdminProfileRequest extends FormRequest
                 'max:255',
                 Rule::unique('admins', 'email')->ignore($adminId),
             ],
+            'otp' => ['nullable', 'string'],
             'current_password' => ['nullable', 'string'],
         ];
     }
@@ -59,18 +60,21 @@ class UpdateAdminProfileRequest extends FormRequest
                 $currentEmail = strtolower(trim((string) $admin->email));
 
                 if ($newEmail !== $currentEmail) {
-                    $currentPassword = (string) $this->input('current_password');
+                    $otp = trim((string) $this->input('otp'));
 
-                    if ($currentPassword === '') {
+                    if ($otp === '') {
                         $validator->errors()->add(
-                            'current_password',
-                            'The current password is required when changing the email address.'
+                            'otp',
+                            'The OTP is required when changing the email address.'
                         );
-                    } elseif (! Hash::check($currentPassword, $admin->password)) {
-                        $validator->errors()->add(
-                            'current_password',
-                            'The provided current password does not match our records.'
-                        );
+                    } else {
+                        $otpService = app(\App\Services\OtpService::class);
+                        if (! $otpService->verify($newEmail, $otp, 'admin_email_update')) {
+                            $validator->errors()->add(
+                                'otp',
+                                'The OTP is invalid or has expired.'
+                            );
+                        }
                     }
                 }
             }

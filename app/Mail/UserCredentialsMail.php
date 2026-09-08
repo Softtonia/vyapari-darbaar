@@ -39,7 +39,7 @@ class UserCredentialsMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            htmlString: nl2br(e($this->emailBody)),
+            htmlString: $this->emailBody,
         );
     }
 }

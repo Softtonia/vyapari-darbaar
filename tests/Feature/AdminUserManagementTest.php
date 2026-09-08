@@ -473,7 +473,7 @@ class AdminUserManagementTest extends TestCase
         $this->assertArrayNotHasKey('password', $creatorData);
     }
 
-    public function test_update_user_name_and_email_with_immutable_username(): void
+    public function test_update_user_name_with_immutable_username_and_email(): void
     {
         $user = User::create([
             'first_name' => 'Original',
@@ -487,23 +487,35 @@ class AdminUserManagementTest extends TestCase
         ]);
 
         // Attempting to change username fails validation
-        $resFail = $this->withToken($this->adminToken)
+        $resFailUsername = $this->withToken($this->adminToken)
             ->putJson("/api/admin/users/{$user->id}", [
                 'first_name' => 'New',
                 'last_name' => 'Name',
-                'email' => 'new@example.com',
+                'email' => 'orig@example.com',
                 'username' => 'attempted.new.username',
             ]);
 
-        $resFail->assertStatus(422)
+        $resFailUsername->assertStatus(422)
             ->assertJsonValidationErrors(['username']);
 
-        // Valid update without modifying username
+        // Attempting to change email fails validation
+        $resFailEmail = $this->withToken($this->adminToken)
+            ->putJson("/api/admin/users/{$user->id}", [
+                'first_name' => 'New',
+                'last_name' => 'Name',
+                'email' => 'different@example.com',
+            ]);
+
+        $resFailEmail->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
+
+        // Valid update without modifying username or email
         $resSuccess = $this->withToken($this->adminToken)
             ->putJson("/api/admin/users/{$user->id}", [
                 'first_name' => 'Updated',
                 'last_name' => 'Name',
-                'email' => 'updated@example.com',
+                'email' => 'orig@example.com',
+                'phone_number' => '+919999999999',
             ]);
 
         $resSuccess->assertStatus(200)
@@ -513,8 +525,9 @@ class AdminUserManagementTest extends TestCase
                     'first_name' => 'Updated',
                     'last_name' => 'Name',
                     'full_name' => 'Updated Name',
-                    'email' => 'updated@example.com',
+                    'email' => 'orig@example.com',
                     'username' => 'orig.username',
+                    'phone_number' => '+919999999999',
                 ],
             ]);
 
@@ -522,8 +535,9 @@ class AdminUserManagementTest extends TestCase
         $this->assertEquals('Updated', $user->first_name);
         $this->assertEquals('Name', $user->last_name);
         $this->assertEquals('Updated Name', $user->name);
-        $this->assertEquals('updated@example.com', $user->email);
+        $this->assertEquals('orig@example.com', $user->email);
         $this->assertEquals('orig.username', $user->username);
+        $this->assertEquals('+919999999999', $user->phone_number);
     }
 
     public function test_delete_user_hard_deletes_record_and_revokes_tokens(): void

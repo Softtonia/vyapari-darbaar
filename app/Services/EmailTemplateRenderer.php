@@ -5,6 +5,49 @@ namespace App\Services;
 class EmailTemplateRenderer
 {
     /**
+     * Detailed metadata for placeholders including tag syntax, description, and sample usage.
+     *
+     * @var array<string, array{tag: string, variable: string, label: string, description: string, example: string}>
+     */
+    protected static array $placeholderDefinitions = [
+        'UserName' => [
+            'variable' => 'UserName',
+            'tag' => '{{UserName}}',
+            'label' => 'User Full Name',
+            'description' => 'The full name of the user receiving the email.',
+            'example' => 'Demo User',
+        ],
+        'Username' => [
+            'variable' => 'Username',
+            'tag' => '{{Username}}',
+            'label' => 'Username',
+            'description' => 'The unique username / login ID assigned to the user.',
+            'example' => 'demo.user',
+        ],
+        'TemporaryPassword' => [
+            'variable' => 'TemporaryPassword',
+            'tag' => '{{TemporaryPassword}}',
+            'label' => 'Temporary Password',
+            'description' => 'The system-generated temporary password for initial login.',
+            'example' => 'TempExample123!',
+        ],
+        'CompanyName' => [
+            'variable' => 'CompanyName',
+            'tag' => '{{CompanyName}}',
+            'label' => 'Company / Application Name',
+            'description' => 'The configured organization or application brand name.',
+            'example' => 'Vyapari Darbaar',
+        ],
+        'SupportEmail' => [
+            'variable' => 'SupportEmail',
+            'tag' => '{{SupportEmail}}',
+            'label' => 'Support Email',
+            'description' => 'The official support contact email address.',
+            'example' => 'support@vyaparidarbaar.com',
+        ],
+    ];
+
+    /**
      * Map of allowed placeholders per template key.
      *
      * @var array<string, list<string>>
@@ -85,6 +128,34 @@ class EmailTemplateRenderer
         }
 
         return self::$globalPlaceholders;
+    }
+
+    /**
+     * Get allowed placeholders with full descriptions, tags, and usage examples.
+     *
+     * @param  string|null  $templateKey
+     * @return list<array{variable: string, tag: string, label: string, description: string, example: string}>
+     */
+    public function getPlaceholdersWithMetadata(?string $templateKey = null): array
+    {
+        $allowed = $this->getAllowedPlaceholders($templateKey);
+        $result = [];
+
+        foreach ($allowed as $key) {
+            if (isset(self::$placeholderDefinitions[$key])) {
+                $result[] = self::$placeholderDefinitions[$key];
+            } else {
+                $result[] = [
+                    'variable' => $key,
+                    'tag' => '{{'.$key.'}}',
+                    'label' => $key,
+                    'description' => "Dynamic value for {$key}",
+                    'example' => '',
+                ];
+            }
+        }
+
+        return $result;
     }
 
     /**

@@ -33,12 +33,7 @@ class UpdateUserRequest extends FormRequest
             'first_name' => ['required', 'string', 'max:100'],
             'last_name' => ['required', 'string', 'max:100'],
             'phone_number' => ['sometimes', 'nullable', 'string', 'max:20', 'regex:/^\+?[0-9\s\-()]{7,20}$/'],
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-                Rule::unique('users', 'email')->ignore($userId),
-            ],
+            'email' => ['sometimes', 'email', 'max:255'],
             'role' => ['sometimes', 'nullable', 'string', 'exists:roles,name'],
         ];
     }
@@ -61,6 +56,16 @@ class UpdateUserRequest extends FormRequest
                     );
                 }
             }
+
+            if ($this->has('email')) {
+                $requestedEmail = strtolower(trim((string) $this->input('email')));
+                if ($user && $requestedEmail !== strtolower(trim($user->email))) {
+                    $validator->errors()->add(
+                        'email',
+                        'The user email is immutable and cannot be modified.'
+                    );
+                }
+            }
         });
     }
 
@@ -75,8 +80,7 @@ class UpdateUserRequest extends FormRequest
             'first_name.required' => 'The first name is required.',
             'last_name.required' => 'The last name is required.',
             'phone_number.regex' => 'The phone number format is invalid.',
-            'email.required' => 'The email address is required.',
-            'email.unique' => 'The email has already been taken.',
+            'email.email' => 'The email format is invalid.',
             'role.exists' => 'The selected role is invalid.',
         ];
     }
@@ -84,19 +88,17 @@ class UpdateUserRequest extends FormRequest
     /**
      * Get validated update data with normalized fields.
      *
-     * @return array{first_name: string, last_name: string, name: string, email: string, phone_number?: string|null, role?: string|null}
+     * @return array{first_name: string, last_name: string, name: string, phone_number?: string|null, role?: string|null}
      */
     public function validatedUserData(): array
     {
         $firstName = trim((string) $this->input('first_name'));
         $lastName = trim((string) $this->input('last_name'));
-        $email = strtolower(trim((string) $this->input('email')));
 
         $data = [
             'first_name' => $firstName,
             'last_name' => $lastName,
             'name' => trim("{$firstName} {$lastName}"),
-            'email' => $email,
         ];
 
         if ($this->has('phone_number')) {

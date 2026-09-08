@@ -358,10 +358,49 @@ class AdminPasswordResetTest extends TestCase
             'password_confirmation' => 'NewSecurePassword#2026',
         ]);
 
-        $response->assertStatus(400)
+        $response->assertStatus(404)
             ->assertJson([
                 'status' => false,
-                'message' => 'This password reset token is invalid or has expired.',
+                'message' => 'No administrator account found with this email address.',
+            ]);
+    }
+
+    public function test_reset_password_with_nonexistent_email_returns_not_found(): void
+    {
+        $response = $this->postJson('/api/admin/reset-password', [
+            'email' => 'doesnotexist@example.com',
+            'token' => 'some-token',
+            'password' => 'NewSecurePassword#2026',
+            'password_confirmation' => 'NewSecurePassword#2026',
+        ]);
+
+        $response->assertStatus(404)
+            ->assertJson([
+                'status' => false,
+                'message' => 'No administrator account found with this email address.',
+            ]);
+    }
+
+    public function test_reset_password_with_inactive_admin_returns_forbidden(): void
+    {
+        Admin::create([
+            'name' => 'Inactive Admin',
+            'email' => 'inactive.reset@example.com',
+            'password' => Hash::make('OldPassword@123'),
+            'status' => 'inactive',
+        ]);
+
+        $response = $this->postJson('/api/admin/reset-password', [
+            'email' => 'inactive.reset@example.com',
+            'token' => 'some-token',
+            'password' => 'NewSecurePassword#2026',
+            'password_confirmation' => 'NewSecurePassword#2026',
+        ]);
+
+        $response->assertStatus(403)
+            ->assertJson([
+                'status' => false,
+                'message' => 'Account is inactive. Please contact the administrator.',
             ]);
     }
 

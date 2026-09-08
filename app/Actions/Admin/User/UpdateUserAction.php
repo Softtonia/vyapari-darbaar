@@ -21,7 +21,6 @@ class UpdateUserAction
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
                 'name' => $data['name'],
-                'email' => $data['email'],
             ];
 
             if (array_key_exists('phone_number', $data)) {

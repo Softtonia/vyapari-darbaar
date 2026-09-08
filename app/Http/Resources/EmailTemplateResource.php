@@ -17,6 +17,9 @@ class EmailTemplateResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        /** @var \App\Services\EmailTemplateRenderer $renderer */
+        $renderer = app(\App\Services\EmailTemplateRenderer::class);
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -24,6 +27,7 @@ class EmailTemplateResource extends JsonResource
             'subject' => $this->subject,
             'body' => $this->body,
             'is_active' => (bool) $this->is_active,
+            'supported_placeholders' => $renderer->getPlaceholdersWithMetadata($this->key),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

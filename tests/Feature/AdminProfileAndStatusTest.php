@@ -13,6 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
@@ -112,7 +113,24 @@ class AdminProfileAndStatusTest extends TestCase
         $this->assertEquals('Updated Admin Name', $this->admin->fresh()->name);
     }
 
-    public function test_admin_email_change_requires_valid_current_password_and_cleans_reset_tokens(): void
+    public function test_admin_can_request_email_update_otp(): void
+    {
+        Notification::fake();
+
+        $response = $this->withToken($this->adminToken)->postJson('/api/admin/profile/send-email-otp', [
+            'email' => 'new.target.email@example.com',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'OTP has been sent to the email address. Valid for 10 minutes.',
+            ]);
+
+        Notification::assertSentOnDemand(\App\Notifications\AdminEmailUpdateOtpNotification::class);
+    }
+
+    public function test_admin_email_change_requires_valid_otp_and_cleans_reset_tokens(): void
     {
         // 1. Insert a stale password reset token for current email
         DB::table('admin_password_reset_tokens')->insert([
@@ -125,21 +143,25 @@ class AdminProfileAndStatusTest extends TestCase
         $secondaryToken = $this->admin->createToken('admin-secondary')->plainTextToken;
         $this->assertEquals(2, $this->admin->tokens()->count());
 
-        // 3. Attempt email change without current password -> 422
+        // 3. Attempt email change without OTP -> 422
         $this->withToken($this->adminToken)->patchJson('/api/admin/profile', [
             'email' => 'new.admin@example.com',
-        ])->assertStatus(422)->assertJsonValidationErrors(['current_password']);
+        ])->assertStatus(422)->assertJsonValidationErrors(['otp']);
 
-        // 4. Attempt email change with wrong current password -> 422
+        // 4. Attempt email change with wrong OTP -> 422
         $this->withToken($this->adminToken)->patchJson('/api/admin/profile', [
             'email' => 'new.admin@example.com',
-            'current_password' => 'WrongPassword#999',
-        ])->assertStatus(422)->assertJsonValidationErrors(['current_password']);
+            'otp' => '999999',
+        ])->assertStatus(422)->assertJsonValidationErrors(['otp']);
 
-        // 5. Valid email change with correct current password -> 200
+        // 5. Generate valid OTP for new email
+        $otpService = app(\App\Services\OtpService::class);
+        $otpData = $otpService->getOrCreateOtp('new.admin@example.com', 'admin_email_update');
+
+        // 6. Valid email change with correct OTP -> 200
         $response = $this->withToken($this->adminToken)->patchJson('/api/admin/profile', [
             'email' => 'new.admin@example.com',
-            'current_password' => $this->adminPassword,
+            'otp' => $otpData['otp'],
         ]);
 
         $response->assertStatus(200)

@@ -164,6 +164,13 @@ class EmailTemplateManagementTest extends TestCase
                     'body' => 'Full detail body text here',
                     'is_active' => true,
                 ],
+            ])
+            ->assertJsonStructure([
+                'data' => [
+                    'supported_placeholders' => [
+                        '*' => ['variable', 'tag', 'label', 'description', 'example'],
+                    ],
+                ],
             ]);
     }
 

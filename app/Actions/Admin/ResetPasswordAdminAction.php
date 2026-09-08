@@ -17,6 +17,32 @@ class ResetPasswordAdminAction
      */
     public function execute(array $credentials): array
     {
+        $normalizedEmail = strtolower(trim($credentials['email']));
+
+        $admin = Admin::query()
+            ->where('email', $normalizedEmail)
+            ->first();
+
+        if (! $admin) {
+            return [
+                'success' => false,
+                'message' => 'No administrator account found with this email address.',
+                'error' => 'No administrator account found with this email address.',
+                'code' => 404,
+            ];
+        }
+
+        if ($admin->status !== 'active') {
+            return [
+                'success' => false,
+                'message' => 'Account is inactive. Please contact the administrator.',
+                'error' => 'Account is inactive. Please contact the administrator.',
+                'code' => 403,
+            ];
+        }
+
+        $credentials['email'] = $normalizedEmail;
+
         $status = DB::transaction(function () use ($credentials) {
             return Password::broker('admins')->reset(
                 $credentials,
@@ -32,10 +58,22 @@ class ResetPasswordAdminAction
         });
 
         if ($status === Password::PASSWORD_RESET) {
+            // Security: Revoke all active login tokens across all devices
+            $admin->tokens()->delete();
+
             return [
                 'success' => true,
                 'message' => 'Your password has been reset successfully.',
                 'code' => 200,
+            ];
+        }
+
+        if ($status === Password::INVALID_USER) {
+            return [
+                'success' => false,
+                'message' => 'No administrator account found with this email address.',
+                'error' => 'No administrator account found with this email address.',
+                'code' => 404,
             ];
         }
 
