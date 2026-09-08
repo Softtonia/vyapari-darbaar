@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             EmailTemplateSeeder::class,
             CommodityCategorySeeder::class,
             CommoditySeeder::class,
+            CommoditySubcategorySeeder::class,
         ]);
     }
 }
