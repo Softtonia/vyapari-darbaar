@@ -46,6 +46,8 @@ class CommodityCategoryService
                 'name_en',
                 'name_hi',
                 'slug',
+                'description_en',
+                'description_hi',
                 'sort_order',
                 'status',
                 'created_by',
