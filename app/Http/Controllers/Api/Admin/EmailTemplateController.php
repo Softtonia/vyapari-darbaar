@@ -17,6 +17,7 @@ use App\Http\Requests\Admin\EmailTemplate\UpdateEmailTemplateStatusRequest;
 use App\Http\Resources\EmailTemplateListResource;
 use App\Http\Resources\EmailTemplateResource;
 use App\Models\EmailTemplate;
+use App\Services\EmailTemplateRenderer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -175,6 +176,21 @@ class EmailTemplateController extends Controller
             'status' => true,
             'message' => 'Preview generated successfully.',
             'data' => $rendered,
+        ], 200);
+    }
+
+    /**
+     * Get the list of supported dynamic placeholders with labels, descriptions, and examples.
+     */
+    public function placeholders(Request $request, EmailTemplateRenderer $renderer): JsonResponse
+    {
+        $key = $request->input('key') ? (string) $request->input('key') : null;
+        $placeholders = $renderer->getPlaceholdersWithMetadata($key);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Supported email template placeholders retrieved successfully.',
+            'data' => $placeholders,
         ], 200);
     }
 

@@ -595,4 +595,34 @@ class EmailTemplateManagementTest extends TestCase
         $this->assertDatabaseHas('email_templates', ['id' => $systemTemplate->id]);
         $this->assertDatabaseHas('email_templates', ['id' => $customTemplate->id]);
     }
+
+    public function test_admin_can_retrieve_placeholders_list(): void
+    {
+        $response = $this->withToken($this->adminToken)
+            ->getJson('/api/admin/email-templates/placeholders');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Supported email template placeholders retrieved successfully.',
+            ])
+            ->assertJsonStructure([
+                'data' => [
+                    '*' => [
+                        'variable',
+                        'tag',
+                        'label',
+                        'description',
+                        'example',
+                    ],
+                ],
+            ]);
+
+        // Key specific lookup
+        $resKey = $this->withToken($this->adminToken)
+            ->getJson('/api/admin/email-templates/placeholders?key=USER_ACCOUNT_CREATED');
+
+        $resKey->assertStatus(200);
+        $this->assertCount(5, $resKey->json('data'));
+    }
 }

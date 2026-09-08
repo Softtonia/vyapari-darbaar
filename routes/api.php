@@ -55,6 +55,8 @@ Route::prefix('admin')->group(function () {
             Route::delete('bulk-delete', [EmailTemplateController::class, 'bulkDestroy']);
             Route::post('preview', [EmailTemplateController::class, 'preview'])
                 ->name('admin.email-templates.preview');
+            Route::get('placeholders', [EmailTemplateController::class, 'placeholders'])
+                ->name('admin.email-templates.placeholders');
             Route::get('by-key/{key}', [EmailTemplateController::class, 'byKey'])
                 ->name('admin.email-templates.by-key');
             Route::get('{emailTemplate}', [EmailTemplateController::class, 'show'])
