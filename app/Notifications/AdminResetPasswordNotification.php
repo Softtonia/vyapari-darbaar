@@ -56,7 +56,7 @@ class AdminResetPasswordNotification extends Notification implements ShouldBeEnc
             ->subject('Admin Password Reset Request')
             ->line('You are receiving this email because we received a password reset request for your administrator account.')
             ->action('Reset Password', $resetUrl)
-            ->line('This password reset link will expire in 30 minutes.')
+            ->line('This password reset link will expire in 10 minutes.')
             ->line('If you did not request a password reset, no further action is required.');
     }
 }

@@ -37,12 +37,28 @@ class ForgotPasswordAdminAction
             ];
         }
 
-        Password::broker('admins')->sendResetLink(['email' => $normalizedEmail]);
+        $status = Password::broker('admins')->sendResetLink(['email' => $normalizedEmail]);
+
+        if ($status === Password::RESET_THROTTLED) {
+            return [
+                'status' => false,
+                'message' => 'A password reset link was already sent recently. Please check your email or wait 10 minutes before requesting again.',
+                'code' => 429,
+            ];
+        }
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return [
+                'status' => true,
+                'message' => 'A password reset link has been sent to your email address.',
+                'code' => 200,
+            ];
+        }
 
         return [
-            'status' => true,
-            'message' => 'A password reset link has been sent to your email address.',
-            'code' => 200,
+            'status' => false,
+            'message' => 'Unable to send password reset link. Please try again.',
+            'code' => 500,
         ];
     }
 }

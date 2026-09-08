@@ -200,8 +200,8 @@ class AdminPasswordResetTest extends TestCase
 
         $rawToken = Password::broker('admins')->createToken($admin);
 
-        // Travel 31 minutes into the future (broker expire is 30 minutes)
-        Carbon::setTestNow(now()->addMinutes(31));
+        // Travel 11 minutes into the future (broker expire is 10 minutes)
+        Carbon::setTestNow(now()->addMinutes(11));
 
         $response = $this->postJson('/api/admin/reset-password', [
             'email' => 'expire@example.com',
@@ -365,24 +365,60 @@ class AdminPasswordResetTest extends TestCase
             ]);
     }
 
-    public function test_admin_forgot_password_rate_limiting(): void
+    public function test_duplicate_password_reset_request_within_10_minutes_is_throttled(): void
     {
-        Admin::create([
-            'name' => 'Throttle Admin',
-            'email' => 'throttle.admin@example.com',
+        Notification::fake();
+
+        $admin = Admin::create([
+            'name' => 'Duplicate Test Admin',
+            'email' => 'duplicate.admin@example.com',
             'password' => Hash::make('Password@12345'),
             'status' => 'active',
         ]);
 
-        for ($i = 0; $i < 5; $i++) {
+        // First request: success
+        $firstResponse = $this->postJson('/api/admin/forgot-password', [
+            'email' => 'duplicate.admin@example.com',
+        ]);
+
+        $firstResponse->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'A password reset link has been sent to your email address.',
+            ]);
+
+        Notification::assertSentToTimes($admin, AdminResetPasswordNotification::class, 1);
+
+        // 3 minutes later: second request is throttled and NO new email is sent
+        Carbon::setTestNow(now()->addMinutes(3));
+
+        $secondResponse = $this->postJson('/api/admin/forgot-password', [
+            'email' => 'duplicate.admin@example.com',
+        ]);
+
+        $secondResponse->assertStatus(429)
+            ->assertJson([
+                'status' => false,
+                'message' => 'A password reset link was already sent recently. Please check your email or wait 10 minutes before requesting again.',
+            ]);
+
+        // Still only 1 notification sent
+        Notification::assertSentToTimes($admin, AdminResetPasswordNotification::class, 1);
+
+        Carbon::setTestNow();
+    }
+
+    public function test_admin_forgot_password_rate_limiting(): void
+    {
+        for ($i = 1; $i <= 5; $i++) {
             $this->postJson('/api/admin/forgot-password', [
-                'email' => 'throttle.admin@example.com',
-            ])->assertStatus(200);
+                'email' => 'rate.limit@example.com',
+            ])->assertStatus(404);
         }
 
-        // 6th attempt is throttled
+        // 6th attempt is throttled by IP rate limiter
         $response = $this->postJson('/api/admin/forgot-password', [
-            'email' => 'throttle.admin@example.com',
+            'email' => 'rate.limit@example.com',
         ]);
 
         $response->assertStatus(429)
@@ -394,6 +430,8 @@ class AdminPasswordResetTest extends TestCase
 
     public function test_sensitive_fields_and_tokens_are_never_exposed(): void
     {
+        Notification::fake();
+
         Admin::create([
             'name' => 'Safe Admin',
             'email' => 'safe@example.com',
