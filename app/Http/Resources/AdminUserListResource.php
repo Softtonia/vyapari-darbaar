@@ -27,15 +27,7 @@ class AdminUserListResource extends JsonResource
             'email' => $this->email,
             'status' => $this->status,
             'must_change_password' => (bool) $this->must_change_password,
-            'roles' => $this->whenLoaded('roles', function () {
-                return $this->roles->map(function ($role) {
-                    return [
-                        'id' => $role->id,
-                        'name' => $role->name,
-                        'guard_name' => $role->guard_name,
-                    ];
-                });
-            }),
+            'role' => $this->roles->first()?->name ?? 'user',
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

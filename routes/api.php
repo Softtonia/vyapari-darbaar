@@ -3,6 +3,9 @@
 use App\Http\Controllers\Api\Admin\AdminAuthController;
 use App\Http\Controllers\Api\Admin\AdminProfileController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
+use App\Http\Controllers\Api\Admin\CommodityCategoryController;
+use App\Http\Controllers\Api\Admin\CommodityController;
+use App\Http\Controllers\Api\Admin\CommoditySubcategoryController;
 use App\Http\Controllers\Api\Admin\EmailTemplateController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\User\UserAuthController;
@@ -109,6 +112,72 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.roles.destroy');
             Route::patch('{role}/status', [RoleController::class, 'updateStatus'])
                 ->name('admin.roles.update-status');
+        });
+
+        // Commodity Category management
+        Route::prefix('commodity-categories')->group(function () {
+            Route::get('options', [CommodityCategoryController::class, 'options'])
+                ->name('admin.commodity-categories.options');
+            Route::get('/', [CommodityCategoryController::class, 'index'])
+                ->name('admin.commodity-categories.index');
+            Route::post('/', [CommodityCategoryController::class, 'store'])
+                ->name('admin.commodity-categories.store');
+            Route::post('bulk-delete', [CommodityCategoryController::class, 'bulkDestroy'])
+                ->name('admin.commodity-categories.bulk-delete');
+            Route::patch('bulk-status', [CommodityCategoryController::class, 'bulkStatus'])
+                ->name('admin.commodity-categories.bulk-status');
+            Route::get('{commodityCategory}', [CommodityCategoryController::class, 'show'])
+                ->name('admin.commodity-categories.show');
+            Route::put('{commodityCategory}', [CommodityCategoryController::class, 'update'])
+                ->name('admin.commodity-categories.update');
+            Route::delete('{commodityCategory}', [CommodityCategoryController::class, 'destroy'])
+                ->name('admin.commodity-categories.destroy');
+            Route::patch('{commodityCategory}/status', [CommodityCategoryController::class, 'updateStatus'])
+                ->name('admin.commodity-categories.update-status');
+        });
+
+        // Commodity management
+        Route::prefix('commodities')->group(function () {
+            Route::get('options', [CommodityController::class, 'options'])
+                ->name('admin.commodities.options');
+            Route::get('/', [CommodityController::class, 'index'])
+                ->name('admin.commodities.index');
+            Route::post('/', [CommodityController::class, 'store'])
+                ->name('admin.commodities.store');
+            Route::post('bulk-delete', [CommodityController::class, 'bulkDestroy'])
+                ->name('admin.commodities.bulk-delete');
+            Route::patch('bulk-status', [CommodityController::class, 'bulkStatus'])
+                ->name('admin.commodities.bulk-status');
+            Route::get('{commodity}', [CommodityController::class, 'show'])
+                ->name('admin.commodities.show');
+            Route::put('{commodity}', [CommodityController::class, 'update'])
+                ->name('admin.commodities.update');
+            Route::delete('{commodity}', [CommodityController::class, 'destroy'])
+                ->name('admin.commodities.destroy');
+            Route::patch('{commodity}/status', [CommodityController::class, 'updateStatus'])
+                ->name('admin.commodities.update-status');
+        });
+
+        // Commodity Subcategory management
+        Route::prefix('commodity-subcategories')->group(function () {
+            Route::get('options', [CommoditySubcategoryController::class, 'options'])
+                ->name('admin.commodity-subcategories.options');
+            Route::get('/', [CommoditySubcategoryController::class, 'index'])
+                ->name('admin.commodity-subcategories.index');
+            Route::post('/', [CommoditySubcategoryController::class, 'store'])
+                ->name('admin.commodity-subcategories.store');
+            Route::post('bulk-delete', [CommoditySubcategoryController::class, 'bulkDestroy'])
+                ->name('admin.commodity-subcategories.bulk-delete');
+            Route::patch('bulk-status', [CommoditySubcategoryController::class, 'bulkStatus'])
+                ->name('admin.commodity-subcategories.bulk-status');
+            Route::get('{commoditySubcategory}', [CommoditySubcategoryController::class, 'show'])
+                ->name('admin.commodity-subcategories.show');
+            Route::put('{commoditySubcategory}', [CommoditySubcategoryController::class, 'update'])
+                ->name('admin.commodity-subcategories.update');
+            Route::delete('{commoditySubcategory}', [CommoditySubcategoryController::class, 'destroy'])
+                ->name('admin.commodity-subcategories.destroy');
+            Route::patch('{commoditySubcategory}/status', [CommoditySubcategoryController::class, 'updateStatus'])
+                ->name('admin.commodity-subcategories.update-status');
         });
     });
 });

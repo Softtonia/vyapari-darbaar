@@ -11,6 +11,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Queue;
 use Spatie\Permission\Exceptions\GuardDoesNotMatch;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
@@ -127,6 +128,8 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
      */
     public function test_user_creation_with_first_name_last_name_phone_number_and_default_role(): void
     {
+        Queue::fake();
+
         $admin = Admin::create([
             'first_name' => 'Admin',
             'last_name' => 'Master',
@@ -154,6 +157,7 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
                     'phone_number' => '+919876543210',
                     'email' => 'amit.verma@example.com',
                     'status' => 'active',
+                    'role' => 'user',
                 ],
             ]);
 
@@ -193,7 +197,7 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
             'first_name' => 'Captain Vikram',
             'last_name' => 'Batra',
             'phone_number' => '+919876543299',
-            'email' => 'vikram.updated@example.com',
+            'email' => 'vikram@example.com',
             'role' => 'guest',
         ]);
 
@@ -205,7 +209,8 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
                     'last_name' => 'Batra',
                     'full_name' => 'Captain Vikram Batra',
                     'phone_number' => '+919876543299',
-                    'email' => 'vikram.updated@example.com',
+                    'email' => 'vikram@example.com',
+                    'role' => 'guest',
                 ],
             ]);
 

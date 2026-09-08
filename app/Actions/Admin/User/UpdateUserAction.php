@@ -30,7 +30,11 @@ class UpdateUserAction
             $user->update($updateData);
 
             if (! empty($data['role'])) {
-                $user->syncRoles([$data['role']]);
+                $role = \App\Models\Role::where('name', $data['role'])->orWhere('slug', $data['role'])->first();
+                $targetRole = $role ? $role->name : $data['role'];
+
+                // syncRoles replaces existing roles with the new role in pivot table without duplicates
+                $user->syncRoles([$targetRole]);
             }
 
             return $user->fresh(['roles']);

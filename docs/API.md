@@ -729,15 +729,536 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 
 ---
 
-## 6. Protected User Endpoints
+## 6. Commodity Category Management (Admin)
+*All require `Authorization: Bearer <admin_token>` and `EnsureAdmin` middleware.*
+
+### 6.1 List Commodity Categories
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-categories`
+- **Query Parameters:**
+  - `page`: Page number (default: 1)
+  - `per_page`: 1 to 100 (default: 20)
+  - `search`: Filter by `name_en`, `name_hi`, or `slug`
+  - `status`: `1` (active) or `0` (inactive)
+  - `sort_by`: `id`, `name_en`, `name_hi`, `slug`, `sort_order`, `status`, `created_at`, `updated_at` (default `sort_order`)
+  - `sort_order`: `asc` or `desc` (default `asc`)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity categories fetched successfully.",
+      "data": {
+          "items": [
+              {
+                  "id": 1,
+                  "name_en": "Grains",
+                  "name_hi": "अनाज",
+                  "slug": "grains",
+                  "description_en": "Wheat, Paddy/Rice, Maize, Barley, Millet and other cereal grains.",
+                  "description_hi": "गेहूं, धान/चावल, मक्का, जौ, बाजरा एवं अन्य अनाज।",
+                  "sort_order": 1,
+                  "status": true,
+                  "created_at": "2026-09-08T10:00:00.000000Z",
+                  "updated_at": "2026-09-08T10:00:00.000000Z"
+              }
+          ],
+          "pagination": {
+              "current_page": 1,
+              "per_page": 20,
+              "total": 9,
+              "last_page": 1
+          }
+      }
+  }
+  ```
+
+### 6.2 Lightweight Category Options (Cached)
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-categories/options`
+- **Cache Strategy:** Redis cached (`commodity_categories:options`, TTL: 3600s). Returns only active items (`status=true`), sorted by `sort_order ASC, id ASC`.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity category options retrieved successfully.",
+      "data": [
+          {
+              "id": 1,
+              "name_en": "Grains",
+              "name_hi": "अनाज",
+              "slug": "grains"
+          },
+          {
+              "id": 2,
+              "name_en": "Pulses",
+              "name_hi": "दलहन",
+              "slug": "pulses"
+          }
+      ]
+  }
+  ```
+
+### 6.3 Create Commodity Category
+- **Method:** `POST`
+- **URI:** `/api/admin/commodity-categories`
+- **Request Body:**
+  ```json
+  {
+      "name_en": "Grains",
+      "name_hi": "अनाज",
+      "slug": "grains",
+      "description_en": "Grain commodities",
+      "description_hi": "अनाज कमोडिटी",
+      "sort_order": 1,
+      "status": true
+  }
+  ```
+- **Validation:**
+  - `name_en`: required, string, max:150
+  - `name_hi`: optional/nullable, string, max:150
+  - `slug`: optional (auto-generated from `name_en` if omitted), string, max:180, globally unique (including soft-deleted)
+  - `description_en`: optional, string
+  - `description_hi`: optional, string
+  - `sort_order`: optional, integer, min:0, max:65535 (default: 0)
+  - `status`: optional, boolean (default: true)
+- **Success (201 Created):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity category created successfully.",
+      "data": {
+          "id": 1,
+          "name_en": "Grains",
+          "name_hi": "अनाज",
+          "slug": "grains",
+          "description_en": "Grain commodities",
+          "description_hi": "अनाज कमोडिटी",
+          "sort_order": 1,
+          "status": true,
+          "created_at": "2026-09-08T10:00:00.000000Z",
+          "updated_at": "2026-09-08T10:00:00.000000Z"
+      }
+  }
+  ```
+
+### 6.4 Get Commodity Category Detail
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-categories/{id}`
+- **Success (200 OK):** Returns single category detail with creator and updater relations.
+
+### 6.5 Update Commodity Category
+- **Method:** `PUT`
+- **URI:** `/api/admin/commodity-categories/{id}`
+- **Behavior:** If `slug` is omitted from payload, the existing slug is retained (prevents accidental URL breakage).
+- **Success (200 OK):** Returns updated category representation.
+
+### 6.6 Update Category Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/commodity-categories/{id}/status`
+- **Request Body:** `{"status": false}`
+- **Success (200 OK):** Returns updated category with new status.
+
+### 6.7 Bulk Update Category Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/commodity-categories/bulk-status`
+- **Request Body:** `{"ids": [1, 2, 3], "status": true}`
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity categories status updated successfully.",
+      "data": {
+          "updated_count": 3
+      }
+  }
+  ```
+
+### 6.8 Delete Commodity Category
+- **Method:** `DELETE`
+- **URI:** `/api/admin/commodity-categories/{id}`
+- **Behavior:** Safe soft delete. If category has active downstream dependencies, returns HTTP 409.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity category deleted successfully."
+  }
+  ```
+- **Error (409 Conflict - In Use):**
+  ```json
+  {
+      "status": false,
+      "message": "Commodity category cannot be deleted because it is currently in use.",
+      "error": "CATEGORY_IN_USE"
+  }
+  ```
+
+### 6.9 Bulk Delete Commodity Categories
+- **Method:** `POST` / `DELETE`
+- **URI:** `/api/admin/commodity-categories/bulk-delete`
+- **Request Body:** `{"ids": [2, 3, 4]}`
+- **Validation:** `ids` array of 1-100 valid category IDs.
+- **Behavior:** Atomic bulk soft delete inside a transaction. If any category is in use, the entire operation is aborted.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity categories deleted successfully.",
+      "data": {
+          "deleted_count": 3
+      }
+  }
+  ```
+- **Error (409 Conflict - In Use):**
+  ```json
+  {
+      "status": false,
+      "message": "Some commodity categories cannot be deleted because they are in use.",
+      "data": {
+          "blocked_ids": [3, 4]
+      }
+  }
+  ```
+
+---
+
+## 7. Commodity Management (Admin)
+*All require `Authorization: Bearer <admin_token>` and `EnsureAdmin` middleware.*
+
+### 7.1 List Commodities
+- **Method:** `GET`
+- **URI:** `/api/admin/commodities`
+- **Query Parameters:**
+  - `page`: Page number (default: 1)
+  - `per_page`: 1 to 100 (default: 20)
+  - `commodity_category_id`: Filter by parent category ID
+  - `search`: Filter by `name_en`, `name_hi`, or `slug`
+  - `status`: `1` (active) or `0` (inactive)
+  - `sort_by`: `id`, `name_en`, `name_hi`, `slug`, `commodity_category_id`, `sort_order`, `status`, `created_at`, `updated_at` (default `sort_order`)
+  - `sort_order`: `asc` or `desc` (default `asc`)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodities fetched successfully.",
+      "data": {
+          "items": [
+              {
+                  "id": 1,
+                  "commodity_category_id": 1,
+                  "category": {
+                      "id": 1,
+                      "name_en": "Grains",
+                      "name_hi": "अनाज",
+                      "slug": "grains"
+                  },
+                  "name_en": "Wheat",
+                  "name_hi": "गेहूं",
+                  "slug": "wheat",
+                  "sort_order": 1,
+                  "status": true,
+                  "created_at": "2026-09-08T10:00:00.000000Z",
+                  "updated_at": "2026-09-08T10:00:00.000000Z"
+              }
+          ],
+          "pagination": {
+              "current_page": 1,
+              "per_page": 20,
+              "total": 24,
+              "last_page": 2
+          }
+      }
+  }
+  ```
+
+### 7.2 Lightweight Commodity Options (Cached & Category Filtered)
+- **Method:** `GET`
+- **URI:** `/api/admin/commodities/options`
+- **Query Parameters:** `commodity_category_id` (optional)
+- **Cache Strategy:** Redis cached (`commodities:options:all` or `commodities:options:category:{id}`, TTL: 3600s). Suppresses commodities whose parent category is inactive.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity options retrieved successfully.",
+      "data": [
+          {
+              "id": 1,
+              "commodity_category_id": 1,
+              "name_en": "Wheat",
+              "name_hi": "गेहूं",
+              "slug": "wheat"
+          },
+          {
+              "id": 2,
+              "commodity_category_id": 1,
+              "name_en": "Paddy / Rice",
+              "name_hi": "धान / चावल",
+              "slug": "paddy-rice"
+          }
+      ]
+  }
+  ```
+
+### 7.3 Create Commodity
+- **Method:** `POST`
+- **URI:** `/api/admin/commodities`
+- **Request Body:**
+  ```json
+  {
+      "commodity_category_id": 1,
+      "name_en": "Wheat",
+      "name_hi": "गेहूं",
+      "slug": "wheat",
+      "description_en": "Standard milling wheat.",
+      "description_hi": "मानक मिलिंग गेहूं।",
+      "sort_order": 1,
+      "status": true
+  }
+  ```
+- **Validation:**
+  - `commodity_category_id`: required, integer, must reference active & non-deleted category
+  - `name_en`: required, string, max:150
+  - `name_hi`: optional, string, max:150
+  - `slug`: optional (auto-generated from `name_en` if omitted), string, max:180, globally unique
+  - `description_en`: optional, string
+  - `description_hi`: optional, string
+  - `sort_order`: optional, integer, min:0, max:65535 (default: 0)
+  - `status`: optional, boolean (default: true)
+- **Success (201 Created):** Returns created commodity resource.
+
+### 7.4 Get Commodity Detail
+- **Method:** `GET`
+- **URI:** `/api/admin/commodities/{id}`
+- **Success (200 OK):** Returns single commodity detail with category, creator, and updater relations.
+
+### 7.5 Update Commodity
+- **Method:** `PUT`
+- **URI:** `/api/admin/commodities/{id}`
+- **Behavior:** Retains existing slug and category if omitted. Reassignment to a different category requires the target category to be active.
+- **Success (200 OK):** Returns updated commodity resource.
+
+### 7.6 Update Commodity Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/commodities/{id}/status`
+- **Request Body:** `{"status": false}`
+- **Success (200 OK):** Returns updated commodity.
+
+### 7.7 Bulk Update Commodity Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/commodities/bulk-status`
+- **Request Body:** `{"ids": [1, 2, 3], "status": true}`
+- **Success (200 OK):** Returns `{"status": true, "message": "Commodities status updated successfully.", "data": {"updated_count": 3}}`.
+
+### 7.8 Delete Commodity
+- **Method:** `DELETE`
+- **URI:** `/api/admin/commodities/{id}`
+- **Behavior:** Safe soft delete, checking that no non-deleted subcategories exist. Invalidates category and subcategory option caches.
+- **Success (200 OK):** Returns `{"status": true, "message": "Commodity deleted successfully."}`.
+- **Error (409 Conflict - In Use):**
+  ```json
+  {
+      "status": false,
+      "message": "Commodity cannot be deleted because it has subcategories assigned.",
+      "error": "COMMODITY_IN_USE"
+  }
+  ```
+
+### 7.9 Bulk Delete Commodities
+- **Method:** `POST`
+- **URI:** `/api/admin/commodities/bulk-delete`
+- **Request Body:** `{"ids": [2, 3, 4]}`
+- **Validation:** `ids` array of 1-100 valid commodity IDs.
+- **Behavior:** Atomic bulk soft delete across multiple categories inside a database transaction. If any commodity has non-deleted subcategories, none are deleted.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodities deleted successfully.",
+      "data": {
+          "deleted_count": 3
+      }
+  }
+  ```
+- **Error (409 Conflict - In Use):**
+  ```json
+  {
+      "status": false,
+      "message": "Some commodities cannot be deleted because they are in use.",
+      "data": {
+          "blocked_ids": [2]
+      }
+  }
+  ```
+
+---
+
+## 8. Commodity Subcategory Management (Admin)
+*All require `Authorization: Bearer <admin_token>` and `EnsureAdmin` middleware.*
+
+### 8.1 List Commodity Subcategories
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-subcategories`
+- **Query Parameters:**
+  - `page`: Page number (default: 1)
+  - `per_page`: 1 to 100 (default: 20)
+  - `commodity_id`: Filter by parent commodity ID
+  - `commodity_category_id`: Filter by grandparent category ID (validated against `commodity_id` if both provided)
+  - `search`: Filter by `name_en`, `name_hi`, or `slug`
+  - `status`: `1` (active) or `0` (inactive)
+  - `sort_by`: `id`, `name_en`, `name_hi`, `slug`, `commodity_id`, `sort_order`, `status`, `created_at`, `updated_at` (default `sort_order`)
+  - `sort_order`: `asc` or `desc` (default `asc`)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity subcategories fetched successfully.",
+      "data": {
+          "items": [
+              {
+                  "id": 1,
+                  "commodity_id": 1,
+                  "commodity": {
+                      "id": 1,
+                      "commodity_category_id": 1,
+                      "name_en": "Wheat",
+                      "name_hi": "गेहूं",
+                      "slug": "wheat",
+                      "category": {
+                          "id": 1,
+                          "name_en": "Grains",
+                          "name_hi": "अनाज",
+                          "slug": "grains"
+                      }
+                  },
+                  "name_en": "Lokwan Wheat",
+                  "name_hi": "लोकवान गेहूं",
+                  "slug": "lokwan-wheat",
+                  "sort_order": 1,
+                  "status": true,
+                  "created_at": "2026-09-08T10:00:00.000000Z",
+                  "updated_at": "2026-09-08T10:00:00.000000Z"
+              }
+          ],
+          "pagination": {
+              "current_page": 1,
+              "per_page": 20,
+              "total": 50,
+              "last_page": 3
+          }
+      }
+  }
+  ```
+
+### 8.2 Lightweight Subcategory Options (Cached & Commodity Filtered)
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-subcategories/options`
+- **Query Parameters:** `commodity_id` (optional)
+- **Cache Strategy:** Redis cached (`commodity_subcategories:options:all` or `commodity_subcategories:options:commodity:{id}`, TTL: 3600s).
+- **Visibility:** Returns records only when subcategory, parent commodity, and grandparent category are all active (`status = true`) and non-deleted.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity subcategory options retrieved successfully.",
+      "data": [
+          {
+              "id": 1,
+              "commodity_id": 1,
+              "name_en": "Lokwan Wheat",
+              "name_hi": "लोकवान गेहूं",
+              "slug": "lokwan-wheat"
+          }
+      ]
+  }
+  ```
+
+### 8.3 Create Commodity Subcategory
+- **Method:** `POST`
+- **URI:** `/api/admin/commodity-subcategories`
+- **Request Body:**
+  ```json
+  {
+      "commodity_id": 1,
+      "name_en": "Lokwan Wheat",
+      "name_hi": "लोकवान गेहूं",
+      "slug": "lokwan-wheat",
+      "description_en": "High quality Lokwan wheat.",
+      "description_hi": "उच्च गुणवत्ता लोकवान गेहूं।",
+      "sort_order": 1,
+      "status": true
+  }
+  ```
+- **Validation:**
+  - `commodity_id`: required, integer, must reference active & non-deleted Commodity whose parent Category is also active & non-deleted
+  - `name_en`: required, string, max:150
+  - `name_hi`: optional, string, max:150
+  - `slug`: optional (auto-generated from `name_en` if omitted), string, max:180, unique per commodity
+  - `description_en`: optional, string
+  - `description_hi`: optional, string
+  - `sort_order`: optional, integer, min:0, max:65535 (default: 0)
+  - `status`: optional, boolean (default: true)
+- **Success (201 Created):** Returns created commodity subcategory resource.
+
+### 8.4 Get Commodity Subcategory Detail
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-subcategories/{id}`
+- **Success (200 OK):** Returns single subcategory detail with commodity hierarchy, creator, and updater relations.
+
+### 8.5 Update Commodity Subcategory
+- **Method:** `PUT`
+- **URI:** `/api/admin/commodity-subcategories/{id}`
+- **Behavior:**
+  - If `slug` is omitted during commodity reassignment, retains existing slug and validates against collisions on target commodity.
+  - Reassignment to a different commodity requires target commodity and its category to be active.
+- **Success (200 OK):** Returns updated commodity subcategory resource.
+
+### 8.6 Update Commodity Subcategory Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/commodity-subcategories/{id}/status`
+- **Request Body:** `{"status": false}`
+- **Success (200 OK):** Returns updated subcategory.
+
+### 8.7 Bulk Update Commodity Subcategory Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/commodity-subcategories/bulk-status`
+- **Request Body:** `{"ids": [1, 2, 3], "status": true}`
+- **Success (200 OK):** Returns `{"status": true, "message": "Commodity subcategories status updated successfully.", "data": {"updated_count": 3}}`.
+
+### 8.8 Delete Commodity Subcategory
+- **Method:** `DELETE`
+- **URI:** `/api/admin/commodity-subcategories/{id}`
+- **Behavior:** Safe soft delete, invalidating parent commodity option caches.
+- **Success (200 OK):** Returns `{"status": true, "message": "Commodity subcategory deleted successfully."}`.
+
+### 8.9 Bulk Delete Commodity Subcategories
+- **Method:** `POST`
+- **URI:** `/api/admin/commodity-subcategories/bulk-delete`
+- **Request Body:** `{"ids": [2, 3, 4]}`
+- **Validation:** `ids` array of 1-100 valid subcategory IDs.
+- **Behavior:** Atomic bulk soft delete across multiple commodities inside a database transaction.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity subcategories deleted successfully.",
+      "data": {
+          "deleted_count": 3
+      }
+  }
+  ```
+
+---
+
+## 9. Protected User Endpoints
 *All require `Authorization: Bearer <user_token>` and `EnsureUser` middleware.*
 
-### 6.1 User Profile
+### 9.1 User Profile
 - **Method:** `GET`
 - **URI:** `/api/user/profile`
 - **Throttle:** `user-api` (120 requests / min)
 
-### 6.2 Change Password
+### 9.2 Change Password
 - **Method:** `POST`
 - **URI:** `/api/user/change-password`
 - **Throttle:** `user-change-password` (5 attempts / min)
@@ -758,7 +1279,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   }
   ```
 
-### 6.3 User Logout
+### 9.3 User Logout
 - **Method:** `POST`
 - **URI:** `/api/user/logout`
 - **Behavior:** Revokes current device token only.
@@ -769,3 +1290,4 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
       "message": "Logged out successfully."
   }
   ```
+

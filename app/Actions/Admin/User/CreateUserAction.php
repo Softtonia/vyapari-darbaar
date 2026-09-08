@@ -79,9 +79,15 @@ class CreateUserAction
             ]);
 
             $roleName = ! empty($data['role']) ? $data['role'] : 'user';
-            $newUser->assignRole($roleName);
+            
+            // Find role by name or slug, default to 'user'
+            $role = \App\Models\Role::where('name', $roleName)->orWhere('slug', $roleName)->first();
+            $targetRole = $role ? $role->name : 'user';
 
-            return $newUser;
+            // syncRoles handles pivot creation cleanly and prevents duplicate role assignments
+            $newUser->syncRoles([$targetRole]);
+
+            return $newUser->fresh(['roles']);
         });
 
         // Step 6: Dispatch encrypted credential email job after commit
