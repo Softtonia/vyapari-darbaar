@@ -116,7 +116,7 @@ class EmailTemplateRenderer
     }
 
     /**
-     * Get allowed placeholders for a specific template key.
+     * Get allowed placeholders for a specific template key (or all known placeholders if null).
      *
      * @param  string|null  $templateKey
      * @return list<string>
@@ -125,6 +125,11 @@ class EmailTemplateRenderer
     {
         if ($templateKey && isset(self::$allowedPlaceholders[$templateKey])) {
             return self::$allowedPlaceholders[$templateKey];
+        }
+
+        // When no specific key is requested, return all available placeholders in the system
+        if ($templateKey === null || trim($templateKey) === '') {
+            return array_keys(self::$placeholderDefinitions);
         }
 
         return self::$globalPlaceholders;
