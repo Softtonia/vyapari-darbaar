@@ -111,4 +111,14 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Admin::class, 'created_by_admin_id');
     }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\UserResetPasswordNotification($token));
+    }
 }

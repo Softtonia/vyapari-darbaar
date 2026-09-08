@@ -124,6 +124,20 @@ class AppServiceProvider extends ServiceProvider
                 });
         });
 
+        RateLimiter::for('user-password-reset', function (Request $request) {
+            $email = strtolower(trim((string) $request->input('email', '')));
+            $identifier = sha1($email.'|'.$request->ip());
+
+            return Limit::perMinute(5)
+                ->by('user-password-reset:'.$identifier)
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Too many password reset attempts. Please try again later.',
+                    ], 429, $headers);
+                });
+        });
+
         RateLimiter::for('user-change-password', function (Request $request) {
             $user = $request->user();
             $key = ($user instanceof \App\Models\User)

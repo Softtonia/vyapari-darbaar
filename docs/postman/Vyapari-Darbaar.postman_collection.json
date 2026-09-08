@@ -1005,6 +1005,68 @@
                     }
                 },
                 {
+                    "name": "User Forgot Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"user@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/user/forgot-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "forgot-password"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "User Reset Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"token\": \"sample_user_token_here\",\n    \"email\": \"user@example.com\",\n    \"password\": \"NewUserPassword#2026\",\n    \"password_confirmation\": \"NewUserPassword#2026\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/user/reset-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "reset-password"
+                            ]
+                        }
+                    }
+                },
+                {
                     "name": "User Change Password",
                     "request": {
                         "method": "POST",

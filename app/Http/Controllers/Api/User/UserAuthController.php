@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\Api\User;
 
 use App\Actions\User\ChangeUserPasswordAction;
+use App\Actions\User\ForgotPasswordUserAction;
 use App\Actions\User\LoginUserAction;
 use App\Actions\User\LogoutUserAction;
+use App\Actions\User\ResetPasswordUserAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\ChangeUserPasswordRequest;
+use App\Http\Requests\User\ForgotPasswordUserRequest;
 use App\Http\Requests\User\LoginUserRequest;
+use App\Http\Requests\User\ResetPasswordUserRequest;
 use App\Http\Resources\UserProfileResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -39,6 +43,36 @@ class UserAuthController extends Controller
                 'user' => new UserProfileResource($result['user']),
             ],
         ], 200);
+    }
+
+    /**
+     * Send a password reset link to the given user email address.
+     */
+    public function forgotPassword(
+        ForgotPasswordUserRequest $request,
+        ForgotPasswordUserAction $action
+    ): JsonResponse {
+        $result = $action->execute($request->email());
+
+        return response()->json([
+            'status' => $result['status'],
+            'message' => $result['message'],
+        ], $result['code']);
+    }
+
+    /**
+     * Reset user password using the provided token.
+     */
+    public function resetPassword(
+        ResetPasswordUserRequest $request,
+        ResetPasswordUserAction $action
+    ): JsonResponse {
+        $result = $action->execute($request->credentials());
+
+        return response()->json([
+            'status' => $result['success'],
+            'message' => $result['message'],
+        ], $result['code']);
     }
 
     /**

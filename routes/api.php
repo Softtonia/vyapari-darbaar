@@ -188,10 +188,18 @@ Route::prefix('admin')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('user')->group(function () {
-    // Public user login
+    // Public user authentication & password recovery
     Route::post('login', [UserAuthController::class, 'login'])
         ->middleware('throttle:user-login')
         ->name('user.login');
+
+    Route::post('forgot-password', [UserAuthController::class, 'forgotPassword'])
+        ->middleware('throttle:user-password-reset')
+        ->name('user.forgot-password');
+
+    Route::post('reset-password', [UserAuthController::class, 'resetPassword'])
+        ->middleware('throttle:user-password-reset')
+        ->name('user.reset-password');
 
     // Protected user endpoints
     Route::middleware(['auth:sanctum', 'user'])->group(function () {
