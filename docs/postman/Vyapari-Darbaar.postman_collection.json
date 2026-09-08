@@ -87,7 +87,7 @@
                     }
                 },
                 {
-                    "name": "Admin Reset Password",
+                    "name": "Admin Reset Password", 
                     "request": {
                         "method": "POST",
                         "header": [
@@ -725,7 +725,7 @@
                     }
                 },
                 {
-                    "name": "Provision User",
+                    "name": "Create User",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -2331,7 +2331,7 @@
                     }
                 },
                 {
-                    "name": "Lightweight Subcategory Options (Cached)",
+                    "name": "Subcategory Options",
                     "request": {
                         "method": "GET",
                         "header": [
