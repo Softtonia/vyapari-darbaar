@@ -1,1352 +1,2558 @@
 {
-  "info": {
-    "name": "Vyapari Darbaar API",
-    "_postman_id": "vyapari-darbaar-collection-v1",
-    "description": "Comprehensive Postman API Collection for Vyapari Darbaar Laravel 12 backend.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "item": [
-    {
-      "name": "Admin Authentication",
-      "item": [
-        {
-          "name": "Admin Login",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.status === true && jsonData.data && jsonData.data.token) {",
-                  "    pm.environment.set('admin_token', jsonData.data.token);",
-                  "    console.log('Admin token saved to environment.');",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"{{admin_password}}\",\n    \"device_name\": \"Postman Admin\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "login"]
-            }
-          }
-        },
-        {
-          "name": "Admin Forgot Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"email\": \"{{admin_email}}\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/forgot-password",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "forgot-password"]
-            }
-          }
-        },
-        {
-          "name": "Admin Reset Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"token\": \"sample_token_here\",\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"NewAdminPassword#2026\",\n    \"password_confirmation\": \"NewAdminPassword#2026\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/reset-password",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "reset-password"]
-            }
-          }
-        },
-        {
-          "name": "Admin Logout",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/logout",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "logout"]
-            }
-          }
-        },
-        {
-          "name": "Admin Logout All",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/logout-all",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "logout-all"]
-            }
-          }
-        }
-      ]
+    "info": {
+        "name": "Vyapari Darbaar API",
+        "_postman_id": "vyapari-darbaar-collection-v1",
+        "description": "Comprehensive Postman API Collection for Vyapari Darbaar Laravel 12 backend.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
-    {
-      "name": "Admin Profile",
-      "item": [
+    "item": [
         {
-          "name": "Get Admin Profile",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/profile",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "profile"]
-            }
-          }
+            "name": "Admin Authentication",
+            "item": [
+                {
+                    "name": "Admin Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.status === true && jsonData.data && jsonData.data.token) {",
+                                    "    pm.environment.set('admin_token', jsonData.data.token);",
+                                    "    console.log('Admin token saved to environment.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"{{admin_password}}\",\n    \"device_name\": \"Postman Admin\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Admin Forgot Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"{{admin_email}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/forgot-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "forgot-password"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Admin Reset Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"token\": \"sample_token_here\",\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"NewAdminPassword#2026\",\n    \"password_confirmation\": \"NewAdminPassword#2026\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/reset-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "reset-password"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Admin Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "logout"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Admin Logout All",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/logout-all",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "logout-all"
+                            ]
+                        }
+                    }
+                }
+            ]
         },
         {
-          "name": "Update Admin Profile (Name only)",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"first_name\": \"Admin\",\n    \"last_name\": \"User\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/profile",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "profile"]
-            }
-          }
+            "name": "Admin Profile",
+            "item": [
+                {
+                    "name": "Get Admin Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "profile"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Admin Profile (Name only)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"first_name\": \"Admin\",\n    \"last_name\": \"User\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "profile"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Send Email Update OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"new.admin@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/profile/send-email-otp",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "profile",
+                                "send-email-otp"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Admin Profile (Email Change with OTP)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"first_name\": \"Super\",\n    \"last_name\": \"Admin\",\n    \"name\": \"Super Admin\",\n    \"email\": \"new.admin@example.com\",\n    \"otp\": \"123456\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "profile"
+                            ]
+                        }
+                    }
+                }
+            ]
         },
         {
-          "name": "Send Email Update OTP",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"email\": \"new.admin@example.com\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/profile/send-email-otp",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "profile", "send-email-otp"]
-            }
-          }
+            "name": "Email Templates",
+            "item": [
+                {
+                    "name": "Get Supported Placeholders",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/email-templates/placeholders",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "email-templates",
+                                "placeholders"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Supported Placeholders by Key",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/email-templates/placeholders?key=USER_ACCOUNT_CREATED",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "email-templates",
+                                "placeholders"
+                            ],
+                            "query": [
+                                {
+                                    "key": "key",
+                                    "value": "USER_ACCOUNT_CREATED"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Email Templates",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/email-templates?page=1&per_page=20",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "email-templates"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Email Template",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Welcome Notice\",\n    \"key\": \"WELCOME_NOTICE\",\n    \"subject\": \"Welcome to {{CompanyName}}\",\n    \"body\": \"Hello, welcome to {{CompanyName}}. Contact {{SupportEmail}} for help.\",\n    \"is_active\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/email-templates",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "email-templates"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Preview Email Template",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"key\": \"USER_ACCOUNT_CREATED\",\n    \"subject\": \"Your Credentials for {{CompanyName}}\",\n    \"body\": \"Hello {{UserName}}, your username is {{Username}} and temp password is {{TemporaryPassword}}.\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/email-templates/preview",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "email-templates",
+                                "preview"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Template By Key",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/email-templates/by-key/USER_ACCOUNT_CREATED",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "email-templates",
+                                "by-key",
+                                "USER_ACCOUNT_CREATED"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Template Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/email-templates/{{email_template_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "email-templates",
+                                "{{email_template_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Email Template",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Updated Account Credentials\",\n    \"subject\": \"Your Credentials for {{CompanyName}}\",\n    \"body\": \"Hello {{UserName}}, username is {{Username}} and temporary password is {{TemporaryPassword}}.\",\n    \"is_active\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/email-templates/{{email_template_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "email-templates",
+                                "{{email_template_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Email Template Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"is_active\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/email-templates/{{email_template_id}}/status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "email-templates",
+                                "{{email_template_id}}",
+                                "status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Email Template",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/email-templates/{{email_template_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "email-templates",
+                                "{{email_template_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Bulk Delete Email Templates",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"ids\": [2, 3]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/email-templates/bulk-delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "email-templates",
+                                "bulk-delete"
+                            ]
+                        }
+                    }
+                }
+            ]
         },
         {
-          "name": "Update Admin Profile (Email Change with OTP)",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"first_name\": \"Super\",\n    \"last_name\": \"Admin\",\n    \"name\": \"Super Admin\",\n    \"email\": \"new.admin@example.com\",\n    \"otp\": \"123456\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/profile",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "profile"]
-            }
-          }
+            "name": "Admin Users",
+            "item": [
+                {
+                    "name": "List Users",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/users?page=1&per_page=20&status=active",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "users"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "active"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Provision User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"first_name\": \"Amit\",\n    \"last_name\": \"Sharma\",\n    \"phone_number\": \"+919876543210\",\n    \"email\": \"amit.sharma@example.com\",\n    \"role\": \"user\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/users",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "users"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get User Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/users/{{user_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "users",
+                                "{{user_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update User",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"first_name\": \"Amit\",\n    \"last_name\": \"Sharma\",\n    \"phone_number\": \"+919876543210\",\n    \"email\": \"amit.updated@example.com\",\n    \"role\": \"user\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/users/{{user_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "users",
+                                "{{user_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update User Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"inactive\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/users/{{user_id}}/status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "users",
+                                "{{user_id}}",
+                                "status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Resend User Credentials",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/users/{{user_id}}/resend-credentials",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "users",
+                                "{{user_id}}",
+                                "resend-credentials"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete User",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/users/{{user_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "users",
+                                "{{user_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Bulk Delete Users",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"ids\": [2, 3]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/users/bulk-delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "users",
+                                "bulk-delete"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "User Authentication",
+            "item": [
+                {
+                    "name": "User Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.status === true && jsonData.data && jsonData.data.token) {",
+                                    "    pm.environment.set('user_token', jsonData.data.token);",
+                                    "    console.log('User token saved to environment.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"{{user_password}}\",\n    \"device_name\": \"Postman User\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/user/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "login"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "User Change Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"current_password\": \"{{user_password}}\",\n    \"password\": \"NewUserPassword#2026\",\n    \"password_confirmation\": \"NewUserPassword#2026\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/user/change-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "change-password"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "User Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/user/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "logout"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "User Profile",
+            "item": [
+                {
+                    "name": "Get User Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/user/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "profile"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Send Email Update OTP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"new.user.email@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/user/profile/send-email-otp",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "profile",
+                                "send-email-otp"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update User Profile (Name & Phone)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"first_name\": \"Rahul\",\n    \"last_name\": \"Verma\",\n    \"phone_number\": \"+919988776655\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/user/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "profile"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update User Profile (Email with OTP)",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"new.user.email@example.com\",\n    \"otp\": \"123456\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/user/profile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "profile"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Role Management",
+            "item": [
+                {
+                    "name": "List Roles",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/roles?page=1&per_page=20&sort_by=id&sort_order=desc",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "roles"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "sort_by",
+                                    "value": "id"
+                                },
+                                {
+                                    "key": "sort_order",
+                                    "value": "desc"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "1",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "is_system",
+                                    "value": "0",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Role",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Content Editor\",\n    \"slug\": \"content-editor\",\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/roles",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "roles"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.status === true && jsonData.data && jsonData.data.id) {",
+                                    "    pm.environment.set('role_id', jsonData.data.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Role Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/roles/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "roles",
+                                "1"
+                            ]
+                        }
+                    },
+                    "url": {
+                        "raw": "{{base_url}}/api/admin/roles/{{role_id}}",
+                        "path": [
+                            "api",
+                            "admin",
+                            "roles",
+                            "{{role_id}}"
+                        ]
+                    }
+                },
+                {
+                    "name": "Update Role",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Senior Content Editor\",\n    \"slug\": \"senior-content-editor\",\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/roles/4",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "roles",
+                                "4"
+                            ]
+                        }
+                    },
+                    "url": {
+                        "raw": "{{base_url}}/api/admin/roles/{{role_id}}",
+                        "path": [
+                            "api",
+                            "admin",
+                            "roles",
+                            "{{role_id}}"
+                        ]
+                    }
+                },
+                {
+                    "name": "Update Role Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/roles/4/status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "roles",
+                                "4",
+                                "status"
+                            ]
+                        }
+                    },
+                    "url": {
+                        "raw": "{{base_url}}/api/admin/roles/{{role_id}}/status",
+                        "path": [
+                            "api",
+                            "admin",
+                            "roles",
+                            "{{role_id}}",
+                            "status"
+                        ]
+                    }
+                },
+                {
+                    "name": "Delete Role",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/roles/4",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "roles",
+                                "4"
+                            ]
+                        }
+                    },
+                    "url": {
+                        "raw": "{{base_url}}/api/admin/roles/{{role_id}}",
+                        "path": [
+                            "api",
+                            "admin",
+                            "roles",
+                            "{{role_id}}"
+                        ]
+                    }
+                },
+                {
+                    "name": "Bulk Delete Roles",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"ids\": [4, 5, 6]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/roles/bulk-delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "roles",
+                                "bulk-delete"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Commodity Categories",
+            "item": [
+                {
+                    "name": "List Commodity Categories",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-categories?page=1&per_page=20&search=grain&status=1&sort_by=sort_order&sort_order=asc",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-categories"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "grain"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "sort_by",
+                                    "value": "sort_order"
+                                },
+                                {
+                                    "key": "sort_order",
+                                    "value": "asc"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Category Options",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-categories/options",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-categories",
+                                "options"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Commodity Category",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.status === true && jsonData.data && jsonData.data.id) {",
+                                    "    pm.environment.set('commodity_category_id', jsonData.data.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name_en\": \"Grains\",\n    \"name_hi\": \"अनाज\",\n    \"slug\": \"grains\",\n    \"description_en\": \"Wheat, Paddy/Rice, Maize, Barley, Millet and other cereal grains.\",\n    \"description_hi\": \"गेहूं, धान/चावल, मक्का, जौ, बाजरा एवं अन्य अनाज।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-categories",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-categories"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Commodity Category",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-categories/{{commodity_category_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-categories",
+                                "{{commodity_category_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Commodity Category",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name_en\": \"Grains & Cereals\",\n    \"name_hi\": \"अनाज व खाद्यान्न\",\n    \"slug\": \"grains-cereals\",\n    \"description_en\": \"Updated grain commodities list.\",\n    \"description_hi\": \"अद्यतन अनाज कमोडिटी सूची।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-categories/{{commodity_category_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-categories",
+                                "{{commodity_category_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Commodity Category Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-categories/{{commodity_category_id}}/status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-categories",
+                                "{{commodity_category_id}}",
+                                "status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Bulk Update Category Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"ids\": [1, 2, 3],\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-categories/bulk-status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-categories",
+                                "bulk-status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Commodity Category",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-categories/{{commodity_category_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-categories",
+                                "{{commodity_category_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Bulk Delete Commodity Categories",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"ids\": [2, 3, 4]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-categories/bulk-delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-categories",
+                                "bulk-delete"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Commodities",
+            "item": [
+                {
+                    "name": "List Commodities",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodities?page=1&per_page=20&commodity_category_id={{commodity_category_id}}&search=wheat&status=1&sort_by=sort_order&sort_order=asc",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodities"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "commodity_category_id",
+                                    "value": "{{commodity_category_id}}"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": "wheat"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "sort_by",
+                                    "value": "sort_order"
+                                },
+                                {
+                                    "key": "sort_order",
+                                    "value": "asc"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Commodity Options",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodities/options?commodity_category_id={{commodity_category_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodities",
+                                "options"
+                            ],
+                            "query": [
+                                {
+                                    "key": "commodity_category_id",
+                                    "value": "{{commodity_category_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Commodity",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.status === true && jsonData.data && jsonData.data.id) {",
+                                    "    pm.environment.set('commodity_id', jsonData.data.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"commodity_category_id\": {{commodity_category_id}},\n    \"name_en\": \"Wheat\",\n    \"name_hi\": \"गेहूं\",\n    \"slug\": \"wheat\",\n    \"description_en\": \"Standard milling wheat.\",\n    \"description_hi\": \"मानक मिलिंग गेहूं।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodities",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodities"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Commodity Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodities/{{commodity_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodities",
+                                "{{commodity_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Commodity",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"commodity_category_id\": {{commodity_category_id}},\n    \"name_en\": \"Wheat (Premium Lokwan)\",\n    \"name_hi\": \"गेहूं (प्रीमियम लोकवान)\",\n    \"slug\": \"wheat-premium-lokwan\",\n    \"description_en\": \"High grade milling wheat.\",\n    \"description_hi\": \"उत्कृष्ट श्रेणी मिलिंग गेहूं।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodities/{{commodity_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodities",
+                                "{{commodity_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Commodity Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodities/{{commodity_id}}/status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodities",
+                                "{{commodity_id}}",
+                                "status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Bulk Update Commodity Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"ids\": [1, 2, 3],\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodities/bulk-status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodities",
+                                "bulk-status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Commodity",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodities/{{commodity_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodities",
+                                "{{commodity_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Bulk Delete Commodities",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"ids\": [2, 3, 4]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodities/bulk-delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodities",
+                                "bulk-delete"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Commodity Subcategories",
+            "item": [
+                {
+                    "name": "List Commodity Subcategories",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-subcategories?page=1&per_page=20&commodity_id={{commodity_id}}&commodity_category_id={{commodity_category_id}}&search=&status=1&sort_by=sort_order&sort_order=asc",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-subcategories"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "commodity_id",
+                                    "value": "{{commodity_id}}"
+                                },
+                                {
+                                    "key": "commodity_category_id",
+                                    "value": "{{commodity_category_id}}"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": ""
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "sort_by",
+                                    "value": "sort_order"
+                                },
+                                {
+                                    "key": "sort_order",
+                                    "value": "asc"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Lightweight Subcategory Options (Cached)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-subcategories/options?commodity_id={{commodity_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-subcategories",
+                                "options"
+                            ],
+                            "query": [
+                                {
+                                    "key": "commodity_id",
+                                    "value": "{{commodity_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Commodity Subcategory",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.status === true && jsonData.data && jsonData.data.id) {",
+                                    "    pm.environment.set('commodity_subcategory_id', jsonData.data.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name_en\": \"Lokwan Wheat\",\n    \"name_hi\": \"लोकवान गेहूं\",\n    \"slug\": \"lokwan-wheat\",\n    \"description_en\": \"High grade Lokwan wheat.\",\n    \"description_hi\": \"उत्कृष्ट श्रेणी लोकवान गेहूं।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-subcategories",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-subcategories"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Commodity Subcategory Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-subcategories/{{commodity_subcategory_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-subcategories",
+                                "{{commodity_subcategory_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Commodity Subcategory",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name_en\": \"Lokwan Wheat (Grade A)\",\n    \"name_hi\": \"लोकवान गेहूं (ग्रेड ए)\",\n    \"slug\": \"lokwan-wheat-grade-a\",\n    \"description_en\": \"High grade milling Lokwan wheat.\",\n    \"description_hi\": \"उत्कृष्ट श्रेणी मिलिंग लोकवान गेहूं।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-subcategories/{{commodity_subcategory_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-subcategories",
+                                "{{commodity_subcategory_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Commodity Subcategory Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-subcategories/{{commodity_subcategory_id}}/status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-subcategories",
+                                "{{commodity_subcategory_id}}",
+                                "status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Bulk Update Commodity Subcategory Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"ids\": [1, 2, 3],\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-subcategories/bulk-status",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-subcategories",
+                                "bulk-status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Commodity Subcategory",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-subcategories/{{commodity_subcategory_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-subcategories",
+                                "{{commodity_subcategory_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Bulk Delete Commodity Subcategories",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"ids\": [2, 3, 4]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/commodity-subcategories/bulk-delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-subcategories",
+                                "bulk-delete"
+                            ]
+                        }
+                    }
+                }
+            ]
         }
-      ]
-    },
-    {
-      "name": "Email Templates",
-      "item": [
-        {
-          "name": "Get Supported Placeholders",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/email-templates/placeholders",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "email-templates", "placeholders"]
-            }
-          }
-        },
-        {
-          "name": "Get Supported Placeholders by Key",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/email-templates/placeholders?key=USER_ACCOUNT_CREATED",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "email-templates", "placeholders"],
-              "query": [
-                { "key": "key", "value": "USER_ACCOUNT_CREATED" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "List Email Templates",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/email-templates?page=1&per_page=20",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "email-templates"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "per_page", "value": "20" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Create Email Template",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"name\": \"Welcome Notice\",\n    \"key\": \"WELCOME_NOTICE\",\n    \"subject\": \"Welcome to {{CompanyName}}\",\n    \"body\": \"Hello, welcome to {{CompanyName}}. Contact {{SupportEmail}} for help.\",\n    \"is_active\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/email-templates",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "email-templates"]
-            }
-          }
-        },
-        {
-          "name": "Preview Email Template",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"key\": \"USER_ACCOUNT_CREATED\",\n    \"subject\": \"Your Credentials for {{CompanyName}}\",\n    \"body\": \"Hello {{UserName}}, your username is {{Username}} and temp password is {{TemporaryPassword}}.\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/email-templates/preview",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "email-templates", "preview"]
-            }
-          }
-        },
-        {
-          "name": "Get Template By Key",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/email-templates/by-key/USER_ACCOUNT_CREATED",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "email-templates", "by-key", "USER_ACCOUNT_CREATED"]
-            }
-          }
-        },
-        {
-          "name": "Get Template Detail",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/email-templates/{{email_template_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "email-templates", "{{email_template_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Email Template",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"name\": \"Updated Account Credentials\",\n    \"subject\": \"Your Credentials for {{CompanyName}}\",\n    \"body\": \"Hello {{UserName}}, username is {{Username}} and temporary password is {{TemporaryPassword}}.\",\n    \"is_active\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/email-templates/{{email_template_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "email-templates", "{{email_template_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Email Template Status",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"is_active\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/email-templates/{{email_template_id}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "email-templates", "{{email_template_id}}", "status"]
-            }
-          }
-        },
-        {
-          "name": "Delete Email Template",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/email-templates/{{email_template_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "email-templates", "{{email_template_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Bulk Delete Email Templates",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"ids\": [2, 3]\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/email-templates/bulk-delete",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "email-templates", "bulk-delete"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Admin Users",
-      "item": [
-        {
-          "name": "List Users",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/users?page=1&per_page=20&status=active",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "users"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "per_page", "value": "20" },
-                { "key": "status", "value": "active" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Provision User",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"first_name\": \"Amit\",\n    \"last_name\": \"Sharma\",\n    \"phone_number\": \"+919876543210\",\n    \"email\": \"amit.sharma@example.com\",\n    \"role\": \"user\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/users",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "users"]
-            }
-          }
-        },
-        {
-          "name": "Get User Detail",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/users/{{user_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "users", "{{user_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Update User",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"first_name\": \"Amit\",\n    \"last_name\": \"Sharma\",\n    \"phone_number\": \"+919876543210\",\n    \"email\": \"amit.updated@example.com\",\n    \"role\": \"user\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/users/{{user_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "users", "{{user_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Update User Status",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"status\": \"inactive\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/users/{{user_id}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "users", "{{user_id}}", "status"]
-            }
-          }
-        },
-        {
-          "name": "Resend User Credentials",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/users/{{user_id}}/resend-credentials",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "users", "{{user_id}}", "resend-credentials"]
-            }
-          }
-        },
-        {
-          "name": "Delete User",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/users/{{user_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "users", "{{user_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Bulk Delete Users",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"ids\": [2, 3]\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/users/bulk-delete",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "users", "bulk-delete"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "User Authentication",
-      "item": [
-        {
-          "name": "User Login",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.status === true && jsonData.data && jsonData.data.token) {",
-                  "    pm.environment.set('user_token', jsonData.data.token);",
-                  "    console.log('User token saved to environment.');",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"{{user_password}}\",\n    \"device_name\": \"Postman User\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/user/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "user", "login"]
-            }
-          }
-        },
-        {
-          "name": "User Change Password",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{user_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"current_password\": \"{{user_password}}\",\n    \"password\": \"NewUserPassword#2026\",\n    \"password_confirmation\": \"NewUserPassword#2026\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/user/change-password",
-              "host": ["{{base_url}}"],
-              "path": ["api", "user", "change-password"]
-            }
-          }
-        },
-        {
-          "name": "User Logout",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{user_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/user/logout",
-              "host": ["{{base_url}}"],
-              "path": ["api", "user", "logout"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "User Profile",
-      "item": [
-        {
-          "name": "Get User Profile",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{user_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/user/profile",
-              "host": ["{{base_url}}"],
-              "path": ["api", "user", "profile"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Role Management",
-      "item": [
-        {
-          "name": "List Roles",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/roles?page=1&per_page=20&sort_by=id&sort_order=desc",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "roles"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "per_page", "value": "20" },
-                { "key": "sort_by", "value": "id" },
-                { "key": "sort_order", "value": "desc" },
-                { "key": "search", "value": "", "disabled": true },
-                { "key": "status", "value": "1", "disabled": true },
-                { "key": "is_system", "value": "0", "disabled": true }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Create Role",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"name\": \"Content Editor\",\n    \"slug\": \"content-editor\",\n    \"status\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/roles",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "roles"]
-            }
-          }
-        },
-        {
-          "name": "Get Role Detail",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/roles/1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "roles", "1"]
-            }
-          }
-        },
-        {
-          "name": "Update Role",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"name\": \"Senior Content Editor\",\n    \"slug\": \"senior-content-editor\",\n    \"status\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/roles/4",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "roles", "4"]
-            }
-          }
-        },
-        {
-          "name": "Update Role Status",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"status\": false\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/roles/4/status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "roles", "4", "status"]
-            }
-          }
-        },
-        {
-          "name": "Delete Role",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/roles/4",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "roles", "4"]
-            }
-          }
-        },
-        {
-          "name": "Bulk Delete Roles",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"ids\": [4, 5, 6]\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/roles/bulk-delete",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "roles", "bulk-delete"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Commodity Categories",
-      "item": [
-        {
-          "name": "List Commodity Categories",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-categories?page=1&per_page=20&search=grain&status=1&sort_by=sort_order&sort_order=asc",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-categories"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "per_page", "value": "20" },
-                { "key": "search", "value": "grain" },
-                { "key": "status", "value": "1" },
-                { "key": "sort_by", "value": "sort_order" },
-                { "key": "sort_order", "value": "asc" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Category Options",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-categories/options",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-categories", "options"]
-            }
-          }
-        },
-        {
-          "name": "Create Commodity Category",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.status === true && jsonData.data && jsonData.data.id) {",
-                  "    pm.environment.set('commodity_category_id', jsonData.data.id);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"name_en\": \"Grains\",\n    \"name_hi\": \"अनाज\",\n    \"slug\": \"grains\",\n    \"description_en\": \"Wheat, Paddy/Rice, Maize, Barley, Millet and other cereal grains.\",\n    \"description_hi\": \"गेहूं, धान/चावल, मक्का, जौ, बाजरा एवं अन्य अनाज।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-categories",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-categories"]
-            }
-          }
-        },
-        {
-          "name": "Get Commodity Category",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-categories/{{commodity_category_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-categories", "{{commodity_category_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Commodity Category",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"name_en\": \"Grains & Cereals\",\n    \"name_hi\": \"अनाज व खाद्यान्न\",\n    \"slug\": \"grains-cereals\",\n    \"description_en\": \"Updated grain commodities list.\",\n    \"description_hi\": \"अद्यतन अनाज कमोडिटी सूची।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-categories/{{commodity_category_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-categories", "{{commodity_category_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Commodity Category Status",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"status\": false\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-categories/{{commodity_category_id}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-categories", "{{commodity_category_id}}", "status"]
-            }
-          }
-        },
-        {
-          "name": "Bulk Update Category Status",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"ids\": [1, 2, 3],\n    \"status\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-categories/bulk-status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-categories", "bulk-status"]
-            }
-          }
-        },
-        {
-          "name": "Delete Commodity Category",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-categories/{{commodity_category_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-categories", "{{commodity_category_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Bulk Delete Commodity Categories",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"ids\": [2, 3, 4]\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-categories/bulk-delete",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-categories", "bulk-delete"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Commodities",
-      "item": [
-        {
-          "name": "List Commodities",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodities?page=1&per_page=20&commodity_category_id={{commodity_category_id}}&search=wheat&status=1&sort_by=sort_order&sort_order=asc",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodities"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "per_page", "value": "20" },
-                { "key": "commodity_category_id", "value": "{{commodity_category_id}}" },
-                { "key": "search", "value": "wheat" },
-                { "key": "status", "value": "1" },
-                { "key": "sort_by", "value": "sort_order" },
-                { "key": "sort_order", "value": "asc" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Commodity Options",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodities/options?commodity_category_id={{commodity_category_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodities", "options"],
-              "query": [
-                { "key": "commodity_category_id", "value": "{{commodity_category_id}}" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Create Commodity",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.status === true && jsonData.data && jsonData.data.id) {",
-                  "    pm.environment.set('commodity_id', jsonData.data.id);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"commodity_category_id\": {{commodity_category_id}},\n    \"name_en\": \"Wheat\",\n    \"name_hi\": \"गेहूं\",\n    \"slug\": \"wheat\",\n    \"description_en\": \"Standard milling wheat.\",\n    \"description_hi\": \"मानक मिलिंग गेहूं।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodities",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodities"]
-            }
-          }
-        },
-        {
-          "name": "Get Commodity Detail",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodities/{{commodity_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodities", "{{commodity_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Commodity",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"commodity_category_id\": {{commodity_category_id}},\n    \"name_en\": \"Wheat (Premium Lokwan)\",\n    \"name_hi\": \"गेहूं (प्रीमियम लोकवान)\",\n    \"slug\": \"wheat-premium-lokwan\",\n    \"description_en\": \"High grade milling wheat.\",\n    \"description_hi\": \"उत्कृष्ट श्रेणी मिलिंग गेहूं।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodities/{{commodity_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodities", "{{commodity_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Commodity Status",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"status\": false\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodities/{{commodity_id}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodities", "{{commodity_id}}", "status"]
-            }
-          }
-        },
-        {
-          "name": "Bulk Update Commodity Status",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"ids\": [1, 2, 3],\n    \"status\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodities/bulk-status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodities", "bulk-status"]
-            }
-          }
-        },
-        {
-          "name": "Delete Commodity",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodities/{{commodity_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodities", "{{commodity_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Bulk Delete Commodities",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"ids\": [2, 3, 4]\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodities/bulk-delete",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodities", "bulk-delete"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Commodity Subcategories",
-      "item": [
-        {
-          "name": "List Commodity Subcategories",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-subcategories?page=1&per_page=20&commodity_id={{commodity_id}}&commodity_category_id={{commodity_category_id}}&search=&status=1&sort_by=sort_order&sort_order=asc",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-subcategories"],
-              "query": [
-                { "key": "page", "value": "1" },
-                { "key": "per_page", "value": "20" },
-                { "key": "commodity_id", "value": "{{commodity_id}}" },
-                { "key": "commodity_category_id", "value": "{{commodity_category_id}}" },
-                { "key": "search", "value": "" },
-                { "key": "status", "value": "1" },
-                { "key": "sort_by", "value": "sort_order" },
-                { "key": "sort_order", "value": "asc" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Lightweight Subcategory Options (Cached)",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-subcategories/options?commodity_id={{commodity_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-subcategories", "options"],
-              "query": [
-                { "key": "commodity_id", "value": "{{commodity_id}}" }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Create Commodity Subcategory",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.status === true && jsonData.data && jsonData.data.id) {",
-                  "    pm.environment.set('commodity_subcategory_id', jsonData.data.id);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name_en\": \"Lokwan Wheat\",\n    \"name_hi\": \"लोकवान गेहूं\",\n    \"slug\": \"lokwan-wheat\",\n    \"description_en\": \"High grade Lokwan wheat.\",\n    \"description_hi\": \"उत्कृष्ट श्रेणी लोकवान गेहूं।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-subcategories",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-subcategories"]
-            }
-          }
-        },
-        {
-          "name": "Get Commodity Subcategory Detail",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-subcategories/{{commodity_subcategory_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-subcategories", "{{commodity_subcategory_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Commodity Subcategory",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name_en\": \"Lokwan Wheat (Grade A)\",\n    \"name_hi\": \"लोकवान गेहूं (ग्रेड ए)\",\n    \"slug\": \"lokwan-wheat-grade-a\",\n    \"description_en\": \"High grade milling Lokwan wheat.\",\n    \"description_hi\": \"उत्कृष्ट श्रेणी मिलिंग लोकवान गेहूं।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-subcategories/{{commodity_subcategory_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-subcategories", "{{commodity_subcategory_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Update Commodity Subcategory Status",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"status\": false\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-subcategories/{{commodity_subcategory_id}}/status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-subcategories", "{{commodity_subcategory_id}}", "status"]
-            }
-          }
-        },
-        {
-          "name": "Bulk Update Commodity Subcategory Status",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"ids\": [1, 2, 3],\n    \"status\": true\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-subcategories/bulk-status",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-subcategories", "bulk-status"]
-            }
-          }
-        },
-        {
-          "name": "Delete Commodity Subcategory",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-subcategories/{{commodity_subcategory_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-subcategories", "{{commodity_subcategory_id}}"]
-            }
-          }
-        },
-        {
-          "name": "Bulk Delete Commodity Subcategories",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Accept", "value": "application/json" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"ids\": [2, 3, 4]\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/admin/commodity-subcategories/bulk-delete",
-              "host": ["{{base_url}}"],
-              "path": ["api", "admin", "commodity-subcategories", "bulk-delete"]
-            }
-          }
-        }
-      ]
-    }
-  ]
+    ]
 }

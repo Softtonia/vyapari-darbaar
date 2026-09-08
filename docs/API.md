@@ -1253,12 +1253,84 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 ## 9. Protected User Endpoints
 *All require `Authorization: Bearer <user_token>` and `EnsureUser` middleware.*
 
-### 9.1 User Profile
+### 9.1 User Profile Detail
 - **Method:** `GET`
 - **URI:** `/api/user/profile`
 - **Throttle:** `user-api` (120 requests / min)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "User profile retrieved successfully.",
+      "data": {
+          "id": 1,
+          "first_name": "Rahul",
+          "last_name": "Sharma",
+          "full_name": "Rahul Sharma",
+          "phone_number": "+919876543210",
+          "username": "rahul.sharma",
+          "email": "rahul.sharma@example.com",
+          "status": "active",
+          "must_change_password": false,
+          "roles": [
+              {
+                  "id": 2,
+                  "name": "user",
+                  "guard_name": "web"
+              }
+          ],
+          "created_at": "2026-09-08T10:00:00.000000Z",
+          "updated_at": "2026-09-08T10:00:00.000000Z"
+      }
+  }
+  ```
 
-### 9.2 Change Password
+### 9.2 Send Email Update OTP (User)
+- **Method:** `POST`
+- **URI:** `/api/user/profile/send-email-otp`
+- **Request Body:**
+  ```json
+  {
+      "email": "new.email@example.com"
+  }
+  ```
+- **Validation:** `email` required, valid email, unique in `users`, must differ from current email.
+- **Behavior:** Generates 6-digit numeric OTP valid for 10 minutes, enforces 60-second cooldown per target email, and sends notification email.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "OTP has been sent to the email address. Valid for 10 minutes.",
+      "data": {
+          "remaining_seconds": 600
+      }
+  }
+  ```
+
+### 9.3 Update User Profile
+- **Method:** `PATCH`
+- **URI:** `/api/user/profile`
+- **Request Body (Name & Phone):**
+  ```json
+  {
+      "first_name": "Rahul",
+      "last_name": "Verma",
+      "phone_number": "+919988776655"
+  }
+  ```
+- **Request Body (Email Change):**
+  ```json
+  {
+      "email": "new.email@example.com",
+      "otp": "123456"
+  }
+  ```
+- **Behavior:**
+  - Name and phone number update directly.
+  - If changing email address, requires valid OTP. Upon successful email change, revokes all other active device tokens while preserving current token.
+- **Success (200 OK):** Returns updated `UserProfileResource`.
+
+### 9.4 Change Password
 - **Method:** `POST`
 - **URI:** `/api/user/change-password`
 - **Throttle:** `user-change-password` (5 attempts / min)
@@ -1279,7 +1351,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   }
   ```
 
-### 9.3 User Logout
+### 9.5 User Logout
 - **Method:** `POST`
 - **URI:** `/api/user/logout`
 - **Behavior:** Revokes current device token only.

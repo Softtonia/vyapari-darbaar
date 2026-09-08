@@ -195,9 +195,14 @@ Route::prefix('user')->group(function () {
 
     // Protected user endpoints
     Route::middleware(['auth:sanctum', 'user'])->group(function () {
+        // Profile management
         Route::get('profile', [UserProfileController::class, 'profile'])
             ->middleware('throttle:user-api')
             ->name('user.profile');
+        Route::post('profile/send-email-otp', [UserProfileController::class, 'sendEmailOtp'])
+            ->name('user.profile.send-email-otp');
+        Route::patch('profile', [UserProfileController::class, 'update'])
+            ->name('user.profile.update');
 
         Route::post('change-password', [UserAuthController::class, 'changePassword'])
             ->middleware('throttle:user-change-password')
