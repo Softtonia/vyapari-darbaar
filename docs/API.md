@@ -240,7 +240,33 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 
 ---
 
-### 2.2 Admin Profile Update (PATCH)
+### 2.2 Send Email Update OTP
+- **Method:** `POST`
+- **URI:** `/api/admin/profile/send-email-otp`
+- **Throttle:** `admin-api`
+- **Request Body:**
+  ```json
+  {
+      "email": "new.admin@example.com"
+  }
+  ```
+- **Validation:**
+  - `email`: required, email, max:255, unique:admins, must be different from current email.
+- **Behavior:** Generates a 6-digit OTP valid for 10 minutes (reuses active OTP if requested within 10 min, 60s resend cooldown).
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "OTP has been sent to the email address. Valid for 10 minutes.",
+      "data": {
+          "remaining_seconds": 600
+      }
+  }
+  ```
+
+---
+
+### 2.3 Admin Profile Update (PATCH)
 - **Method:** `PATCH`
 - **URI:** `/api/admin/profile`
 - **Throttle:** `admin-api`
@@ -249,15 +275,26 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   {
       "first_name": "Super",
       "last_name": "Admin",
+      "name": "Super Admin",
       "email": "new.admin@example.com",
-      "current_password": "CurrentPassword#2026"
+      "otp": "123456"
   }
   ```
-- **Security:** `current_password` is required only if `email` is changing. Changing email revokes all other Admin sessions and removes stale password-reset tokens.
+- **Validation:**
+  - `otp`: required when `email` is changed. Must match active OTP sent to the new email.
+- **Security:** Changing email revokes all other Admin sessions and removes stale password-reset tokens.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Admin profile updated successfully.",
+      "data": { ... }
+  }
+  ```
 
 ---
 
-### 2.3 Admin Logout
+### 2.4 Admin Logout
 - **Method:** `POST`
 - **URI:** `/api/admin/logout`
 - **Behavior:** Revokes current session token only.
@@ -271,7 +308,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 
 ---
 
-### 2.4 Admin Logout All
+### 2.5 Admin Logout All
 - **Method:** `POST`
 - **URI:** `/api/admin/logout-all`
 - **Behavior:** Revokes all session tokens for the administrator.
@@ -288,46 +325,110 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 ## 3. Email Template Management (Admin)
 *All require `Authorization: Bearer <admin_token>`.*
 
-### 3.1 List Email Templates
+### 3.1 Supported Dynamic Placeholders
+
+| Variable Tag | Variable Name | Description | Example / Usage |
+| :--- | :--- | :--- | :--- |
+| `{{UserName}}` | **User Full Name** | Full name of the user receiving the email. | `Hello {{UserName}},` &rarr; *Hello Ajay Kumar,* |
+| `{{Username}}` | **Username** | Unique login username/ID for the user account. | `Username: {{Username}}` &rarr; *Username: ajay.kumar* |
+| `{{TemporaryPassword}}` | **Temporary Password** | System-generated temporary login password. | `Password: {{TemporaryPassword}}` &rarr; *Password: Temp#123* |
+| `{{CompanyName}}` | **Company Name** | Application brand name configured in system (`APP_NAME`). | `Regards, {{CompanyName}}` &rarr; *Regards, Vyapari Darbaar* |
+| `{{SupportEmail}}` | **Support Email** | Primary support contact email address. | `Contact us at {{SupportEmail}}` &rarr; *support@vyaparidarbaar.com* |
+
+---
+
+### 3.2 Get Supported Placeholders
+- **Method:** `GET`
+- **URI:** `/api/admin/email-templates/placeholders`
+- **Query Parameters:** `key` (optional, e.g. `USER_ACCOUNT_CREATED`)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Supported email template placeholders retrieved successfully.",
+      "data": [
+          {
+              "variable": "UserName",
+              "tag": "{{UserName}}",
+              "label": "User Full Name",
+              "description": "The full name of the user receiving the email.",
+              "example": "Demo User"
+          },
+          {
+              "variable": "Username",
+              "tag": "{{Username}}",
+              "label": "Username",
+              "description": "The unique username / login ID assigned to the user.",
+              "example": "demo.user"
+          },
+          {
+              "variable": "TemporaryPassword",
+              "tag": "{{TemporaryPassword}}",
+              "label": "Temporary Password",
+              "description": "The system-generated temporary password for initial login.",
+              "example": "TempExample123!"
+          },
+          {
+              "variable": "CompanyName",
+              "tag": "{{CompanyName}}",
+              "label": "Company / Application Name",
+              "description": "The configured organization or application brand name.",
+              "example": "Vyapari Darbaar"
+          },
+          {
+              "variable": "SupportEmail",
+              "tag": "{{SupportEmail}}",
+              "label": "Support Email",
+              "description": "The official support contact email address.",
+              "example": "support@vyaparidarbaar.com"
+          }
+      ]
+  }
+  ```
+
+---
+
+### 3.3 List Email Templates
 - **Method:** `GET`
 - **URI:** `/api/admin/email-templates`
 - **Query Parameters:** `page`, `per_page` (default 20, max 100), `search`, `is_active`
 - **Performance:** Omits `LONGTEXT` `body` column.
 
-### 3.2 Create Email Template
+### 3.4 Create Email Template
 - **Method:** `POST`
 - **URI:** `/api/admin/email-templates`
 - **Validation:**
   - `key`: required, regex `/^[A-Z0-9_]+$/`, unique
   - `name`: required, string, max:150
   - `subject`: required, string, max:255 (forbidden to contain `{{TemporaryPassword}}`)
-  - `body`: required, string
+  - `body`: required, string (Supports full HTML structure)
 
-### 3.3 Preview Email Template
+### 3.5 Preview Email Template
 - **Method:** `POST`
 - **URI:** `/api/admin/email-templates/preview`
 - **Request Body:** `{"key": "USER_ACCOUNT_CREATED", "subject": "...", "body": "..."}`
 - **Behavior:** Pure in-memory render with demo data; no side effects.
 
-### 3.4 Get Template by Key
+### 3.6 Get Template by Key
 - **Method:** `GET`
 - **URI:** `/api/admin/email-templates/by-key/{key}`
 
-### 3.5 Get Template Detail
+### 3.7 Get Template Detail
 - **Method:** `GET`
 - **URI:** `/api/admin/email-templates/{id}`
+- **Note:** Returns template details along with `supported_placeholders` array.
 
-### 3.6 Update Email Template
+### 3.8 Update Email Template
 - **Method:** `PUT`
 - **URI:** `/api/admin/email-templates/{id}`
 - **Rule:** `key` is immutable.
 
-### 3.7 Update Template Status
+### 3.9 Update Template Status
 - **Method:** `PATCH`
 - **URI:** `/api/admin/email-templates/{id}/status`
 - **Request Body:** `{"is_active": true}`
 
-### 3.8 Delete Email Template
+### 3.10 Delete Email Template
 - **Method:** `DELETE`
 - **URI:** `/api/admin/email-templates/{id}`
 - **Security:** Protected system templates cannot be deleted (`422 Unprocessable`).
@@ -339,7 +440,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   }
   ```
 
-### 3.9 Bulk Delete Email Templates
+### 3.11 Bulk Delete Email Templates
 - **Method:** `POST` / `DELETE`
 - **URI:** `/api/admin/email-templates/bulk-delete`
 - **Request Body:** `{"ids": [2, 3, 4]}`

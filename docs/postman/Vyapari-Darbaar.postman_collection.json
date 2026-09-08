@@ -152,7 +152,27 @@
           }
         },
         {
-          "name": "Update Admin Profile (Email Change with Password)",
+          "name": "Send Email Update OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"new.admin@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/admin/profile/send-email-otp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "profile", "send-email-otp"]
+            }
+          }
+        },
+        {
+          "name": "Update Admin Profile (Email Change with OTP)",
           "request": {
             "method": "PATCH",
             "header": [
@@ -162,7 +182,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"new.admin@example.com\",\n    \"current_password\": \"{{admin_password}}\"\n}"
+              "raw": "{\n    \"first_name\": \"Super\",\n    \"last_name\": \"Admin\",\n    \"name\": \"Super Admin\",\n    \"email\": \"new.admin@example.com\",\n    \"otp\": \"123456\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/admin/profile",
@@ -176,6 +196,39 @@
     {
       "name": "Email Templates",
       "item": [
+        {
+          "name": "Get Supported Placeholders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/email-templates/placeholders",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "email-templates", "placeholders"]
+            }
+          }
+        },
+        {
+          "name": "Get Supported Placeholders by Key",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/email-templates/placeholders?key=USER_ACCOUNT_CREATED",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "email-templates", "placeholders"],
+              "query": [
+                { "key": "key", "value": "USER_ACCOUNT_CREATED" }
+              ]
+            }
+          }
+        },
         {
           "name": "List Email Templates",
           "request": {
