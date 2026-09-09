@@ -126,17 +126,25 @@ class CommodityVarietyController extends Controller
         CommodityVariety $commodityVariety,
         CommodityVarietyService $service
     ): JsonResponse {
-        $updatedVariety = $service->updateCommodityVariety(
-            $commodityVariety,
-            $request->validated(),
-            $request->user()?->id
-        );
+        try {
+            $updatedVariety = $service->updateCommodityVariety(
+                $commodityVariety,
+                $request->validated(),
+                $request->user()?->id
+            );
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Commodity variety updated successfully.',
-            'data' => new CommodityVarietyResource($updatedVariety),
-        ], 200);
+            return response()->json([
+                'status' => true,
+                'message' => 'Commodity variety updated successfully.',
+                'data' => new CommodityVarietyResource($updatedVariety),
+            ], 200);
+        } catch (\DomainException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+                'error' => 'COMMODITY_VARIETY_IN_USE',
+            ], 409);
+        }
     }
 
     /**
@@ -189,12 +197,20 @@ class CommodityVarietyController extends Controller
         CommodityVariety $commodityVariety,
         CommodityVarietyService $service
     ): JsonResponse {
-        $service->deleteCommodityVariety($commodityVariety);
+        try {
+            $service->deleteCommodityVariety($commodityVariety);
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Commodity variety deleted successfully.',
-        ], 200);
+            return response()->json([
+                'status' => true,
+                'message' => 'Commodity variety deleted successfully.',
+            ], 200);
+        } catch (\DomainException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+                'error' => 'COMMODITY_VARIETY_IN_USE',
+            ], 409);
+        }
     }
 
     /**
@@ -204,13 +220,23 @@ class CommodityVarietyController extends Controller
         BulkDeleteCommodityVarietyRequest $request,
         CommodityVarietyService $service
     ): JsonResponse {
-        $deletedCount = $service->bulkDeleteCommodityVarieties($request->validated('ids'));
+        $result = $service->bulkDeleteCommodityVarieties($request->validated('ids'));
+
+        if (! empty($result['blocked_ids'])) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Some commodity varieties cannot be deleted because they have grades assigned.',
+                'data' => [
+                    'blocked_ids' => $result['blocked_ids'],
+                ],
+            ], 409);
+        }
 
         return response()->json([
             'status' => true,
             'message' => 'Commodity varieties deleted successfully.',
             'data' => [
-                'deleted_count' => $deletedCount,
+                'deleted_count' => $result['deleted_count'],
             ],
         ], 200);
     }

@@ -90,6 +90,16 @@ class CommoditySubcategory extends Model
     }
 
     /**
+     * Get the grades belonging to this commodity subcategory.
+     *
+     * @return HasMany<CommodityGrade, $this>
+     */
+    public function grades(): HasMany
+    {
+        return $this->hasMany(CommodityGrade::class, 'commodity_subcategory_id');
+    }
+
+    /**
      * Get the administrator who created the commodity subcategory.
      *
      * @return BelongsTo<Admin, $this>

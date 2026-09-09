@@ -342,9 +342,19 @@ class CommodityCategoryService
                 foreach ($affectedSubcategoryIds as $subId) {
                     Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subId);
                 }
+
+                // Cross-module cache invalidation for Commodity Grades
+                Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_ALL);
+                foreach ($affectedCommodityIds as $commId) {
+                    Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commId);
+                }
+                foreach ($affectedSubcategoryIds as $subId) {
+                    Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subId);
+                }
             } else {
                 Cache::forget(CommoditySubcategoryService::CACHE_KEY_OPTIONS_ALL);
                 Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_ALL);
+                Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_ALL);
             }
         } catch (\Throwable $e) {
             // Non-blocking cache exception

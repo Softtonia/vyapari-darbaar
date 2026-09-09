@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Admin\AdminProfileController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\Admin\CommodityCategoryController;
 use App\Http\Controllers\Api\Admin\CommodityController;
+use App\Http\Controllers\Api\Admin\CommodityGradeController;
 use App\Http\Controllers\Api\Admin\CommoditySubcategoryController;
 use App\Http\Controllers\Api\Admin\CommodityVarietyController;
 use App\Http\Controllers\Api\Admin\EmailTemplateController;
@@ -201,6 +202,28 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.commodity-varieties.destroy');
             Route::patch('{commodityVariety}/status', [CommodityVarietyController::class, 'updateStatus'])
                 ->name('admin.commodity-varieties.update-status');
+        });
+
+        // Commodity Grade management
+        Route::prefix('commodity-grades')->group(function () {
+            Route::get('options', [CommodityGradeController::class, 'options'])
+                ->name('admin.commodity-grades.options');
+            Route::get('/', [CommodityGradeController::class, 'index'])
+                ->name('admin.commodity-grades.index');
+            Route::post('/', [CommodityGradeController::class, 'store'])
+                ->name('admin.commodity-grades.store');
+            Route::post('bulk-delete', [CommodityGradeController::class, 'bulkDestroy'])
+                ->name('admin.commodity-grades.bulk-delete');
+            Route::patch('bulk-status', [CommodityGradeController::class, 'bulkStatus'])
+                ->name('admin.commodity-grades.bulk-status');
+            Route::get('{commodityGrade}', [CommodityGradeController::class, 'show'])
+                ->name('admin.commodity-grades.show');
+            Route::put('{commodityGrade}', [CommodityGradeController::class, 'update'])
+                ->name('admin.commodity-grades.update');
+            Route::delete('{commodityGrade}', [CommodityGradeController::class, 'destroy'])
+                ->name('admin.commodity-grades.destroy');
+            Route::patch('{commodityGrade}/status', [CommodityGradeController::class, 'updateStatus'])
+                ->name('admin.commodity-grades.update-status');
         });
     });
 });

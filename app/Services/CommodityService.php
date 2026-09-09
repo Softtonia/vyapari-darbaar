@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Commodity;
+use App\Models\CommodityGrade;
 use App\Models\CommoditySubcategory;
 use App\Models\CommodityVariety;
 use DomainException;
@@ -240,9 +241,10 @@ class CommodityService
     {
         if (
             CommoditySubcategory::query()->where('commodity_id', $commodity->id)->exists() ||
-            CommodityVariety::query()->where('commodity_id', $commodity->id)->exists()
+            CommodityVariety::query()->where('commodity_id', $commodity->id)->exists() ||
+            CommodityGrade::query()->where('commodity_id', $commodity->id)->exists()
         ) {
-            throw new DomainException('Commodity cannot be deleted because it has subcategories or varieties assigned.');
+            throw new DomainException('Commodity cannot be deleted because it has subcategories, varieties, or grades assigned.');
         }
 
         $categoryId = (int) $commodity->commodity_category_id;
@@ -283,7 +285,15 @@ class CommodityService
             ->map(fn ($id) => (int) $id)
             ->toArray();
 
-        $blockedIds = array_values(array_unique(array_merge($blockedSubcategoryIds, $blockedVarietyIds)));
+        // Check if any commodity has assigned direct or indirect grades
+        $blockedGradeIds = CommodityGrade::query()
+            ->whereIn('commodity_id', $ids)
+            ->distinct()
+            ->pluck('commodity_id')
+            ->map(fn ($id) => (int) $id)
+            ->toArray();
+
+        $blockedIds = array_values(array_unique(array_merge($blockedSubcategoryIds, $blockedVarietyIds, $blockedGradeIds)));
         sort($blockedIds);
 
         if (! empty($blockedIds)) {
@@ -388,8 +398,18 @@ class CommodityService
                 foreach ($subcatIds as $subId) {
                     Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subId);
                 }
+
+                // Cross-module cache invalidation for Commodity Grades
+                Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_ALL);
+                foreach ($allCommIds as $commId) {
+                    Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commId);
+                }
+                foreach ($subcatIds as $subId) {
+                    Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subId);
+                }
             } else {
                 Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_ALL);
+                Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_ALL);
             }
         } catch (\Throwable $e) {
             // Non-blocking cache exception

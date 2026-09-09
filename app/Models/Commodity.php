@@ -100,6 +100,16 @@ class Commodity extends Model
     }
 
     /**
+     * Get the grades belonging to this commodity.
+     *
+     * @return HasMany<CommodityGrade, $this>
+     */
+    public function grades(): HasMany
+    {
+        return $this->hasMany(CommodityGrade::class, 'commodity_id');
+    }
+
+    /**
      * Get the administrator who created the commodity.
      *
      * @return BelongsTo<Admin, $this>

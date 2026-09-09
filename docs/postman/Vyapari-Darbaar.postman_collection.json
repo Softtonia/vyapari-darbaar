@@ -2973,6 +2973,330 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "Commodity Grades",
+            "item": [
+                {
+                    "name": "List Commodity Grades",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-grades?page=1&per_page=20&commodity_id=1&sort_by=sort_order&sort_order=asc",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-grades"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "commodity_id",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "sort_by",
+                                    "value": "sort_order"
+                                },
+                                {
+                                    "key": "sort_order",
+                                    "value": "asc"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Commodity Grade Options",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-grades/options?commodity_id=1",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-grades",
+                                "options"
+                            ],
+                            "query": [
+                                {
+                                    "key": "commodity_id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Commodity Grade",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"commodity_id\": 1,\n    \"commodity_subcategory_id\": 1,\n    \"commodity_variety_id\": 1,\n    \"name_en\": \"Super Grade A\",\n    \"name_hi\": \"सुपर ग्रेड ए\",\n    \"slug\": \"super-grade-a\",\n    \"description_en\": \"Top quality wheat grade.\",\n    \"description_hi\": \"उच्चतम गुणवत्ता वाला गेहूं ग्रेड।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-grades",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-grades"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Commodity Grade Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-grades/{{commodity_grade_id}}",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-grades",
+                                "{{commodity_grade_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Commodity Grade",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"commodity_id\": 1,\n    \"commodity_subcategory_id\": 1,\n    \"commodity_variety_id\": 1,\n    \"name_en\": \"Super Grade A Premium\",\n    \"name_hi\": \"सुपर ग्रेड ए प्रीमियम\",\n    \"slug\": \"super-grade-a-premium\",\n    \"description_en\": \"Updated premium grade description.\",\n    \"description_hi\": \"संशोधित विवरण।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-grades/{{commodity_grade_id}}",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-grades",
+                                "{{commodity_grade_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Commodity Grade Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-grades/{{commodity_grade_id}}/status",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-grades",
+                                "{{commodity_grade_id}}",
+                                "status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Bulk Update Commodity Grades Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"ids\": [1, 2],\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-grades/bulk-status",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-grades",
+                                "bulk-status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Commodity Grade",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-grades/{{commodity_grade_id}}",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-grades",
+                                "{{commodity_grade_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Bulk Delete Commodity Grades",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"ids\": [1, 2]\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-grades/bulk-delete",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-grades",
+                                "bulk-delete"
+                            ]
+                        }
+                    }
+                }
+            ]
         }
     ]
 }

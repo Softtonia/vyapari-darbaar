@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CommodityGrade;
 use App\Models\CommoditySubcategory;
 use App\Models\CommodityVariety;
 use DomainException;
@@ -136,10 +137,12 @@ class CommoditySubcategoryService
     {
         $oldCommodityId = (int) $commoditySubcategory->commodity_id;
 
-        // Subcategory Reparenting Protection: If moving to another commodity, ensure no non-deleted varieties are assigned
+        // Subcategory Reparenting Protection: If moving to another commodity, ensure no non-deleted varieties or grades are assigned
         if (array_key_exists('commodity_id', $data) && (int) $data['commodity_id'] !== $oldCommodityId) {
-            if (CommodityVariety::query()->where('commodity_subcategory_id', $commoditySubcategory->id)->exists()) {
-                throw new DomainException('Commodity subcategory cannot be moved because varieties are assigned to it.');
+            $hasVarieties = CommodityVariety::query()->where('commodity_subcategory_id', $commoditySubcategory->id)->exists();
+            $hasGrades = CommodityGrade::query()->where('commodity_subcategory_id', $commoditySubcategory->id)->exists();
+            if ($hasVarieties || $hasGrades) {
+                throw new DomainException('Commodity subcategory cannot be moved because varieties or grades are assigned to it.');
             }
         }
 
@@ -265,8 +268,11 @@ class CommoditySubcategoryService
      */
     public function deleteCommoditySubcategory(CommoditySubcategory $commoditySubcategory): void
     {
-        if (CommodityVariety::query()->where('commodity_subcategory_id', $commoditySubcategory->id)->exists()) {
-            throw new DomainException('Commodity subcategory cannot be deleted because it has varieties assigned.');
+        if (
+            CommodityVariety::query()->where('commodity_subcategory_id', $commoditySubcategory->id)->exists() ||
+            CommodityGrade::query()->where('commodity_subcategory_id', $commoditySubcategory->id)->exists()
+        ) {
+            throw new DomainException('Commodity subcategory cannot be deleted because it has varieties or grades assigned.');
         }
 
         $commodityId = (int) $commoditySubcategory->commodity_id;
@@ -292,17 +298,28 @@ class CommoditySubcategoryService
         }
 
         // Check if any subcategory has assigned non-deleted varieties
-        $blockedIds = CommodityVariety::query()
+        $varietyBlockedIds = CommodityVariety::query()
             ->whereIn('commodity_subcategory_id', $ids)
             ->distinct()
             ->pluck('commodity_subcategory_id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
 
+        // Check if any subcategory has assigned non-deleted grades
+        $gradeBlockedIds = CommodityGrade::query()
+            ->whereIn('commodity_subcategory_id', $ids)
+            ->distinct()
+            ->pluck('commodity_subcategory_id')
+            ->map(fn ($id) => (int) $id)
+            ->toArray();
+
+        $blockedIds = array_values(array_unique(array_merge($varietyBlockedIds, $gradeBlockedIds)));
+        sort($blockedIds);
+
         if (! empty($blockedIds)) {
             return [
                 'deleted_count' => 0,
-                'blocked_ids' => array_values($blockedIds),
+                'blocked_ids' => $blockedIds,
             ];
         }
 
@@ -399,6 +416,29 @@ class CommoditySubcategoryService
             foreach ($subcategoryIds as $subId) {
                 if ($subId) {
                     Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subId);
+                }
+            }
+
+            // Cross-module cache invalidation for CommodityGrades
+            Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_ALL);
+
+            if ($commodityId !== null) {
+                Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commodityId);
+            }
+
+            foreach ($commodityIds as $commId) {
+                if ($commId) {
+                    Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commId);
+                }
+            }
+
+            if ($subcategoryId !== null) {
+                Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subcategoryId);
+            }
+
+            foreach ($subcategoryIds as $subId) {
+                if ($subId) {
+                    Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subId);
                 }
             }
         } catch (\Throwable $e) {

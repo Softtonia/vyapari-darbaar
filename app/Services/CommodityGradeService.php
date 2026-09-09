@@ -3,24 +3,25 @@
 namespace App\Services;
 
 use App\Models\CommodityGrade;
-use App\Models\CommodityVariety;
-use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
-class CommodityVarietyService
+class CommodityGradeService
 {
     /**
      * Cache key prefix for options.
      */
-    public const CACHE_KEY_OPTIONS_ALL = 'commodity_varieties:options:all';
+    public const CACHE_KEY_OPTIONS_ALL = 'commodity_grades:options:all';
 
-    public const CACHE_KEY_OPTIONS_COMMODITY_PREFIX = 'commodity_varieties:options:commodity:';
+    public const CACHE_KEY_OPTIONS_COMMODITY_PREFIX = 'commodity_grades:options:commodity:';
 
-    public const CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX = 'commodity_varieties:options:subcategory:';
+    public const CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX = 'commodity_grades:options:subcategory:';
+
+    public const CACHE_KEY_OPTIONS_VARIETY_PREFIX = 'commodity_grades:options:variety:';
 
     /**
      * Cache TTL in seconds (1 hour).
@@ -28,11 +29,11 @@ class CommodityVarietyService
     public const CACHE_TTL_SECONDS = 3600;
 
     /**
-     * Get a paginated list of commodity varieties with dynamic filtering and sorting.
+     * Get a paginated list of commodity grades with dynamic filtering and sorting.
      *
      * @param  array<string, mixed>  $filters
      */
-    public function listCommodityVarieties(array $filters = []): LengthAwarePaginator
+    public function listCommodityGrades(array $filters = []): LengthAwarePaginator
     {
         $perPage = (int) ($filters['per_page'] ?? 20);
         $perPage = max(1, min(100, $perPage));
@@ -40,16 +41,18 @@ class CommodityVarietyService
         $sortBy = (string) ($filters['sort_by'] ?? 'sort_order');
         $sortOrder = (string) ($filters['sort_order'] ?? 'asc');
 
-        $query = CommodityVariety::query()
+        $query = CommodityGrade::query()
             ->with([
                 'commodity:id,commodity_category_id,name_en,name_hi,slug',
                 'commodity.category:id,name_en,name_hi,slug',
                 'subcategory:id,commodity_id,name_en,name_hi,slug',
+                'variety:id,commodity_id,commodity_subcategory_id,name_en,name_hi,slug',
             ])
             ->select([
                 'id',
                 'commodity_id',
                 'commodity_subcategory_id',
+                'commodity_variety_id',
                 'name_en',
                 'name_hi',
                 'slug',
@@ -61,6 +64,7 @@ class CommodityVarietyService
             ->search($filters['search'] ?? null)
             ->commodity($filters['commodity_id'] ?? null)
             ->subcategory($filters['commodity_subcategory_id'] ?? null)
+            ->variety($filters['commodity_variety_id'] ?? null)
             ->category($filters['commodity_category_id'] ?? null)
             ->status($filters['status'] ?? null)
             ->sorted($sortBy, $sortOrder);
@@ -69,15 +73,17 @@ class CommodityVarietyService
     }
 
     /**
-     * Get lightweight, cached list of active commodity varieties for dropdown options.
-     * Requires variety, commodity, and parent category to all be active and non-deleted.
-     * If assigned to a subcategory, the subcategory must also be active and non-deleted.
+     * Get lightweight, cached list of active commodity grades for dropdown options.
+     * Requires grade, commodity, and parent category to all be active and non-deleted.
+     * If assigned to a subcategory or variety, they must also be active and non-deleted.
      *
      * @return array<int, array<string, mixed>>
      */
-    public function getOptions(?int $commodityId = null, ?int $subcategoryId = null): array
+    public function getOptions(?int $commodityId = null, ?int $subcategoryId = null, ?int $varietyId = null): array
     {
-        if ($subcategoryId !== null) {
+        if ($varietyId !== null) {
+            $cacheKey = self::CACHE_KEY_OPTIONS_VARIETY_PREFIX.$varietyId;
+        } elseif ($subcategoryId !== null) {
             $cacheKey = self::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subcategoryId;
         } elseif ($commodityId !== null) {
             $cacheKey = self::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commodityId;
@@ -85,8 +91,8 @@ class CommodityVarietyService
             $cacheKey = self::CACHE_KEY_OPTIONS_ALL;
         }
 
-        return Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, function () use ($commodityId, $subcategoryId) {
-            return CommodityVariety::query()
+        return Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, function () use ($commodityId, $subcategoryId, $varietyId) {
+            return CommodityGrade::query()
                 ->active()
                 ->whereHas('commodity', function (Builder $query) {
                     $query->active()->whereHas('category', function (Builder $q) {
@@ -99,9 +105,16 @@ class CommodityVarietyService
                             $q->active();
                         });
                 })
+                ->where(function (Builder $query) {
+                    $query->whereNull('commodity_variety_id')
+                        ->orWhereHas('variety', function (Builder $q) {
+                            $q->active();
+                        });
+                })
                 ->when($commodityId !== null, fn (Builder $q) => $q->where('commodity_id', $commodityId))
                 ->when($subcategoryId !== null, fn (Builder $q) => $q->where('commodity_subcategory_id', $subcategoryId))
-                ->select(['id', 'commodity_id', 'commodity_subcategory_id', 'name_en', 'name_hi', 'slug'])
+                ->when($varietyId !== null, fn (Builder $q) => $q->where('commodity_variety_id', $varietyId))
+                ->select(['id', 'commodity_id', 'commodity_subcategory_id', 'commodity_variety_id', 'name_en', 'name_hi', 'slug'])
                 ->orderBy('sort_order', 'asc')
                 ->orderBy('id', 'asc')
                 ->get()
@@ -110,22 +123,24 @@ class CommodityVarietyService
     }
 
     /**
-     * Create a new commodity variety.
+     * Create a new commodity grade.
      *
      * @param  array<string, mixed>  $data
      */
-    public function createCommodityVariety(array $data, ?int $adminId = null): CommodityVariety
+    public function createCommodityGrade(array $data, ?int $adminId = null): CommodityGrade
     {
         $commodityId = (int) $data['commodity_id'];
         $subcategoryId = ! empty($data['commodity_subcategory_id']) ? (int) $data['commodity_subcategory_id'] : null;
+        $varietyId = ! empty($data['commodity_variety_id']) ? (int) $data['commodity_variety_id'] : null;
 
-        $variety = DB::transaction(function () use ($data, $commodityId, $subcategoryId, $adminId) {
+        $grade = DB::transaction(function () use ($data, $commodityId, $subcategoryId, $varietyId, $adminId) {
             $slug = ! empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['name_en']);
             $slug = $this->generateUniqueSlug($slug, $commodityId);
 
-            return CommodityVariety::create([
+            return CommodityGrade::create([
                 'commodity_id' => $commodityId,
                 'commodity_subcategory_id' => $subcategoryId,
+                'commodity_variety_id' => $varietyId,
                 'name_en' => $data['name_en'],
                 'name_hi' => $data['name_hi'] ?? null,
                 'slug' => $slug,
@@ -138,36 +153,28 @@ class CommodityVarietyService
             ]);
         });
 
-        $this->clearCache($commodityId, [], $subcategoryId, []);
+        $this->clearCache($commodityId, [], $subcategoryId, [], $varietyId, []);
 
-        return $variety->load([
+        return $grade->load([
             'commodity:id,commodity_category_id,name_en,name_hi,slug',
             'commodity.category:id,name_en,name_hi,slug',
             'subcategory:id,commodity_id,name_en,name_hi,slug',
+            'variety:id,commodity_id,commodity_subcategory_id,name_en,name_hi,slug',
         ]);
     }
 
     /**
-     * Update an existing commodity variety.
+     * Update an existing commodity grade.
      *
      * @param  array<string, mixed>  $data
      */
-    public function updateCommodityVariety(CommodityVariety $commodityVariety, array $data, ?int $adminId = null): CommodityVariety
+    public function updateCommodityGrade(CommodityGrade $commodityGrade, array $data, ?int $adminId = null): CommodityGrade
     {
-        $oldCommodityId = (int) $commodityVariety->commodity_id;
-        $oldSubcategoryId = $commodityVariety->commodity_subcategory_id ? (int) $commodityVariety->commodity_subcategory_id : null;
+        $oldCommodityId = (int) $commodityGrade->commodity_id;
+        $oldSubcategoryId = $commodityGrade->commodity_subcategory_id ? (int) $commodityGrade->commodity_subcategory_id : null;
+        $oldVarietyId = $commodityGrade->commodity_variety_id ? (int) $commodityGrade->commodity_variety_id : null;
 
-        // Reparenting Protection: blocked if any non-deleted Grade references this variety
-        $isMovingCommodity = array_key_exists('commodity_id', $data) && (int) $data['commodity_id'] !== $oldCommodityId;
-        $isMovingSubcategory = array_key_exists('commodity_subcategory_id', $data) && ($data['commodity_subcategory_id'] !== null ? (int) $data['commodity_subcategory_id'] : null) !== $oldSubcategoryId;
-
-        if ($isMovingCommodity || $isMovingSubcategory) {
-            if (CommodityGrade::query()->where('commodity_variety_id', $commodityVariety->id)->exists()) {
-                throw new DomainException('Commodity variety cannot be moved because grades are assigned to it.');
-            }
-        }
-
-        $updatedVariety = DB::transaction(function () use ($commodityVariety, $data, $adminId) {
+        $updatedGrade = DB::transaction(function () use ($commodityGrade, $data, $adminId) {
             $updateData = [];
 
             if (array_key_exists('commodity_id', $data)) {
@@ -178,6 +185,10 @@ class CommodityVarietyService
                 $updateData['commodity_subcategory_id'] = $data['commodity_subcategory_id'] !== null ? (int) $data['commodity_subcategory_id'] : null;
             }
 
+            if (array_key_exists('commodity_variety_id', $data)) {
+                $updateData['commodity_variety_id'] = $data['commodity_variety_id'] !== null ? (int) $data['commodity_variety_id'] : null;
+            }
+
             if (array_key_exists('name_en', $data)) {
                 $updateData['name_en'] = $data['name_en'];
             }
@@ -186,7 +197,6 @@ class CommodityVarietyService
                 $updateData['name_hi'] = $data['name_hi'];
             }
 
-            // If slug is explicitly supplied, normalize and update; otherwise retain old slug
             if (array_key_exists('slug', $data) && ! empty($data['slug'])) {
                 $updateData['slug'] = Str::slug($data['slug']);
             }
@@ -211,56 +221,61 @@ class CommodityVarietyService
                 $updateData['updated_by'] = $adminId;
             }
 
-            $commodityVariety->update($updateData);
+            $commodityGrade->update($updateData);
 
-            return $commodityVariety->fresh([
+            return $commodityGrade->fresh([
                 'commodity:id,commodity_category_id,name_en,name_hi,slug',
                 'commodity.category:id,name_en,name_hi,slug',
                 'subcategory:id,commodity_id,name_en,name_hi,slug',
+                'variety:id,commodity_id,commodity_subcategory_id,name_en,name_hi,slug',
                 'creator',
                 'updater',
             ]);
         });
 
-        $newCommodityId = (int) $updatedVariety->commodity_id;
-        $newSubcategoryId = $updatedVariety->commodity_subcategory_id ? (int) $updatedVariety->commodity_subcategory_id : null;
+        $newCommodityId = (int) $updatedGrade->commodity_id;
+        $newSubcategoryId = $updatedGrade->commodity_subcategory_id ? (int) $updatedGrade->commodity_subcategory_id : null;
+        $newVarietyId = $updatedGrade->commodity_variety_id ? (int) $updatedGrade->commodity_variety_id : null;
 
         $affectedCommodityIds = array_values(array_filter(array_unique([$oldCommodityId, $newCommodityId])));
         $affectedSubcategoryIds = array_values(array_filter(array_unique([$oldSubcategoryId, $newSubcategoryId])));
+        $affectedVarietyIds = array_values(array_filter(array_unique([$oldVarietyId, $newVarietyId])));
 
-        $this->clearCache(null, $affectedCommodityIds, null, $affectedSubcategoryIds);
+        $this->clearCache(null, $affectedCommodityIds, null, $affectedSubcategoryIds, null, $affectedVarietyIds);
 
-        return $updatedVariety;
+        return $updatedGrade;
     }
 
     /**
-     * Update commodity variety active/inactive status.
+     * Update commodity grade active/inactive status.
      */
-    public function updateStatus(CommodityVariety $commodityVariety, bool $status, ?int $adminId = null): CommodityVariety
+    public function updateStatus(CommodityGrade $commodityGrade, bool $status, ?int $adminId = null): CommodityGrade
     {
-        $commodityId = (int) $commodityVariety->commodity_id;
-        $subcategoryId = $commodityVariety->commodity_subcategory_id ? (int) $commodityVariety->commodity_subcategory_id : null;
+        $commodityId = (int) $commodityGrade->commodity_id;
+        $subcategoryId = $commodityGrade->commodity_subcategory_id ? (int) $commodityGrade->commodity_subcategory_id : null;
+        $varietyId = $commodityGrade->commodity_variety_id ? (int) $commodityGrade->commodity_variety_id : null;
 
-        $updatedVariety = DB::transaction(function () use ($commodityVariety, $status, $adminId) {
-            $commodityVariety->update([
+        $updatedGrade = DB::transaction(function () use ($commodityGrade, $status, $adminId) {
+            $commodityGrade->update([
                 'status' => $status,
                 'updated_by' => $adminId,
             ]);
 
-            return $commodityVariety->fresh([
+            return $commodityGrade->fresh([
                 'commodity:id,commodity_category_id,name_en,name_hi,slug',
                 'commodity.category:id,name_en,name_hi,slug',
                 'subcategory:id,commodity_id,name_en,name_hi,slug',
+                'variety:id,commodity_id,commodity_subcategory_id,name_en,name_hi,slug',
             ]);
         });
 
-        $this->clearCache($commodityId, [], $subcategoryId, []);
+        $this->clearCache($commodityId, [], $subcategoryId, [], $varietyId, []);
 
-        return $updatedVariety;
+        return $updatedGrade;
     }
 
     /**
-     * Bulk update status for multiple commodity varieties.
+     * Bulk update status for multiple commodity grades.
      *
      * @param  list<int>  $ids
      */
@@ -270,16 +285,25 @@ class CommodityVarietyService
             return 0;
         }
 
-        // Retrieve distinct affected commodity IDs and subcategory IDs before mutation
-        $affectedRows = CommodityVariety::query()
+        $grades = CommodityGrade::query()
             ->whereIn('id', $ids)
-            ->get(['commodity_id', 'commodity_subcategory_id']);
+            ->get(['id', 'commodity_id', 'commodity_subcategory_id', 'commodity_variety_id']);
 
-        $affectedCommodityIds = $affectedRows->pluck('commodity_id')->filter()->unique()->map(fn ($id) => (int) $id)->values()->toArray();
-        $affectedSubcategoryIds = $affectedRows->pluck('commodity_subcategory_id')->filter()->unique()->map(fn ($id) => (int) $id)->values()->toArray();
+        $foundIds = $grades->pluck('id')->all();
+        $missingIds = array_diff($ids, $foundIds);
+
+        if (! empty($missingIds)) {
+            throw ValidationException::withMessages([
+                'ids' => ['One or more selected commodity grade IDs are invalid or already deleted.'],
+            ]);
+        }
+
+        $affectedCommodityIds = $grades->pluck('commodity_id')->filter()->unique()->map(fn ($id) => (int) $id)->values()->toArray();
+        $affectedSubcategoryIds = $grades->pluck('commodity_subcategory_id')->filter()->unique()->map(fn ($id) => (int) $id)->values()->toArray();
+        $affectedVarietyIds = $grades->pluck('commodity_variety_id')->filter()->unique()->map(fn ($id) => (int) $id)->values()->toArray();
 
         $updatedCount = DB::transaction(function () use ($ids, $status, $adminId) {
-            return CommodityVariety::query()
+            return CommodityGrade::query()
                 ->whereIn('id', $ids)
                 ->update([
                     'status' => $status,
@@ -287,77 +311,65 @@ class CommodityVarietyService
                 ]);
         });
 
-        $this->clearCache(null, $affectedCommodityIds, null, $affectedSubcategoryIds);
+        $this->clearCache(null, $affectedCommodityIds, null, $affectedSubcategoryIds, null, $affectedVarietyIds);
 
         return $updatedCount;
     }
 
     /**
-     * Soft delete a single commodity variety safely.
+     * Soft delete a single commodity grade safely.
      */
-    public function deleteCommodityVariety(CommodityVariety $commodityVariety): void
+    public function deleteCommodityGrade(CommodityGrade $commodityGrade): void
     {
-        if (CommodityGrade::query()->where('commodity_variety_id', $commodityVariety->id)->exists()) {
-            throw new DomainException('Commodity variety cannot be deleted because it has grades assigned.');
-        }
+        $commodityId = (int) $commodityGrade->commodity_id;
+        $subcategoryId = $commodityGrade->commodity_subcategory_id ? (int) $commodityGrade->commodity_subcategory_id : null;
+        $varietyId = $commodityGrade->commodity_variety_id ? (int) $commodityGrade->commodity_variety_id : null;
 
-        $commodityId = (int) $commodityVariety->commodity_id;
-        $subcategoryId = $commodityVariety->commodity_subcategory_id ? (int) $commodityVariety->commodity_subcategory_id : null;
-
-        DB::transaction(function () use ($commodityVariety) {
-            $commodityVariety->delete();
+        DB::transaction(function () use ($commodityGrade) {
+            $commodityGrade->delete();
         });
 
-        $this->clearCache($commodityId, [], $subcategoryId, []);
+        $this->clearCache($commodityId, [], $subcategoryId, [], $varietyId, []);
     }
 
     /**
-     * Bulk soft delete multiple commodity varieties atomically in a single transaction.
+     * Bulk soft delete multiple commodity grades atomically in a single transaction.
      *
      * @param  list<int>  $ids
-     * @return array{deleted_count: int, blocked_ids: list<int>}
+     * @return int Number of deleted grades
      */
-    public function bulkDeleteCommodityVarieties(array $ids): array
+    public function bulkDeleteCommodityGrades(array $ids): int
     {
         if (empty($ids)) {
-            return ['deleted_count' => 0, 'blocked_ids' => []];
+            return 0;
         }
 
-        // Check if any variety has assigned non-deleted grades
-        $blockedIds = CommodityGrade::query()
-            ->whereIn('commodity_variety_id', $ids)
-            ->distinct()
-            ->pluck('commodity_variety_id')
-            ->map(fn ($id) => (int) $id)
-            ->toArray();
-
-        if (! empty($blockedIds)) {
-            return [
-                'deleted_count' => 0,
-                'blocked_ids' => array_values($blockedIds),
-            ];
-        }
-
-        // Retrieve distinct affected commodity IDs and subcategory IDs before mutation
-        $affectedRows = CommodityVariety::query()
+        $grades = CommodityGrade::query()
             ->whereIn('id', $ids)
-            ->get(['commodity_id', 'commodity_subcategory_id']);
+            ->get(['id', 'commodity_id', 'commodity_subcategory_id', 'commodity_variety_id']);
 
-        $affectedCommodityIds = $affectedRows->pluck('commodity_id')->filter()->unique()->map(fn ($id) => (int) $id)->values()->toArray();
-        $affectedSubcategoryIds = $affectedRows->pluck('commodity_subcategory_id')->filter()->unique()->map(fn ($id) => (int) $id)->values()->toArray();
+        $foundIds = $grades->pluck('id')->all();
+        $missingIds = array_diff($ids, $foundIds);
+
+        if (! empty($missingIds)) {
+            throw ValidationException::withMessages([
+                'ids' => ['One or more selected commodity grade IDs are invalid or already deleted.'],
+            ]);
+        }
+
+        $affectedCommodityIds = $grades->pluck('commodity_id')->filter()->unique()->map(fn ($id) => (int) $id)->values()->toArray();
+        $affectedSubcategoryIds = $grades->pluck('commodity_subcategory_id')->filter()->unique()->map(fn ($id) => (int) $id)->values()->toArray();
+        $affectedVarietyIds = $grades->pluck('commodity_variety_id')->filter()->unique()->map(fn ($id) => (int) $id)->values()->toArray();
 
         $deletedCount = DB::transaction(function () use ($ids) {
-            return CommodityVariety::query()
+            return CommodityGrade::query()
                 ->whereIn('id', $ids)
                 ->delete();
         });
 
-        $this->clearCache(null, $affectedCommodityIds, null, $affectedSubcategoryIds);
+        $this->clearCache(null, $affectedCommodityIds, null, $affectedSubcategoryIds, null, $affectedVarietyIds);
 
-        return [
-            'deleted_count' => $deletedCount,
-            'blocked_ids' => [],
-        ];
+        return $deletedCount;
     }
 
     /**
@@ -370,7 +382,7 @@ class CommodityVarietyService
         $counter = 2;
 
         while (
-            CommodityVariety::query()
+            CommodityGrade::query()
                 ->withTrashed()
                 ->where('commodity_id', $commodityId)
                 ->when($ignoreId !== null, fn ($q) => $q->where('id', '!=', $ignoreId))
@@ -385,18 +397,15 @@ class CommodityVarietyService
     }
 
     /**
-     * Invalidate commodity variety options caches.
-     *
-     * @param  int|null  $commodityId Single commodity ID
-     * @param  list<int>  $commodityIds List of commodity IDs
-     * @param  int|null  $subcategoryId Single subcategory ID
-     * @param  list<int>  $subcategoryIds List of subcategory IDs
+     * Invalidate commodity grade options caches.
      */
     public function clearCache(
         ?int $commodityId = null,
         array $commodityIds = [],
         ?int $subcategoryId = null,
-        array $subcategoryIds = []
+        array $subcategoryIds = [],
+        ?int $varietyId = null,
+        array $varietyIds = []
     ): void {
         try {
             Cache::forget(self::CACHE_KEY_OPTIONS_ALL);
@@ -421,26 +430,13 @@ class CommodityVarietyService
                 }
             }
 
-            // Cross-module cache invalidation for CommodityGrades
-            Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_ALL);
-
-            if ($commodityId !== null) {
-                Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commodityId);
+            if ($varietyId !== null) {
+                Cache::forget(self::CACHE_KEY_OPTIONS_VARIETY_PREFIX.$varietyId);
             }
 
-            foreach ($commodityIds as $commId) {
-                if ($commId) {
-                    Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commId);
-                }
-            }
-
-            if ($subcategoryId !== null) {
-                Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subcategoryId);
-            }
-
-            foreach ($subcategoryIds as $subId) {
-                if ($subId) {
-                    Cache::forget(CommodityGradeService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subId);
+            foreach ($varietyIds as $vId) {
+                if ($vId) {
+                    Cache::forget(self::CACHE_KEY_OPTIONS_VARIETY_PREFIX.$vId);
                 }
             }
         } catch (\Throwable $e) {

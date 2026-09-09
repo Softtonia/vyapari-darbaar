@@ -1605,4 +1605,251 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   }
   ```
 
+---
+
+## 11. Commodity Grade Management (Admin)
+*All require `Authorization: Bearer <admin_token>` and `EnsureAdmin` middleware.*
+
+Supported 3-Tier Hierarchy:
+1. **Direct Commodity Grade:** `commodity_id`, `commodity_subcategory_id = null`, `commodity_variety_id = null`
+2. **Subcategory Grade:** `commodity_id`, `commodity_subcategory_id`, `commodity_variety_id = null`
+3. **Direct Variety Grade:** `commodity_id`, `commodity_subcategory_id = null`, `commodity_variety_id` (direct variety)
+4. **Subcategory Variety Grade:** `commodity_id`, `commodity_subcategory_id`, `commodity_variety_id` (subcategory-linked variety)
+
+### 11.1 List Commodity Grades
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-grades`
+- **Query Parameters:**
+  - `page`: Page number (default: 1)
+  - `per_page`: 1 to 100 (default: 20)
+  - `commodity_id`: Filter by commodity
+  - `commodity_subcategory_id`: Filter by subcategory
+  - `commodity_variety_id`: Filter by variety
+  - `commodity_category_id`: Filter by parent category
+  - `search`: Filter by `name_en`, `name_hi`, or `slug`
+  - `status`: `1` (active) or `0` (inactive)
+  - `sort_by`: `id`, `name_en`, `name_hi`, `slug`, `commodity_id`, `commodity_subcategory_id`, `commodity_variety_id`, `sort_order`, `status`, `created_at`, `updated_at` (default `sort_order`)
+  - `sort_order`: `asc` or `desc` (default `asc`)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity grades fetched successfully.",
+      "data": {
+          "items": [
+              {
+                  "id": 1,
+                  "commodity_id": 1,
+                  "commodity_subcategory_id": 1,
+                  "commodity_variety_id": 1,
+                  "commodity": {
+                      "id": 1,
+                      "commodity_category_id": 1,
+                      "name_en": "Wheat",
+                      "name_hi": "गेहूं",
+                      "slug": "wheat",
+                      "category": {
+                          "id": 1,
+                          "name_en": "Grains",
+                          "name_hi": "अनाज",
+                          "slug": "grains"
+                      }
+                  },
+                  "subcategory": {
+                      "id": 1,
+                      "commodity_id": 1,
+                      "name_en": "Milling Wheat",
+                      "name_hi": "मिलिंग गेहूं",
+                      "slug": "milling-wheat"
+                  },
+                  "variety": {
+                      "id": 1,
+                      "commodity_id": 1,
+                      "commodity_subcategory_id": 1,
+                      "name_en": "HD-2967",
+                      "name_hi": "एचडी-2967",
+                      "slug": "hd-2967"
+                  },
+                  "name_en": "Grade A Premium",
+                  "name_hi": "ग्रेड ए प्रीमियम",
+                  "slug": "grade-a-premium",
+                  "sort_order": 1,
+                  "status": true,
+                  "created_at": "2026-09-09T10:00:00.000000Z",
+                  "updated_at": "2026-09-09T10:00:00.000000Z"
+              }
+          ],
+          "pagination": {
+              "current_page": 1,
+              "per_page": 20,
+              "total": 1,
+              "last_page": 1
+          }
+      }
+  }
+  ```
+
+---
+
+### 11.2 Lightweight Commodity Grade Options (Cached & Filter Precedence)
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-grades/options`
+- **Query Parameters:**
+  - `commodity_variety_id`: (optional)
+  - `commodity_subcategory_id`: (optional)
+  - `commodity_id`: (optional)
+- **Cache Precedence Strategy:**
+  - `commodity_variety_id` -> `commodity_grades:options:variety:{id}`
+  - `commodity_subcategory_id` -> `commodity_grades:options:subcategory:{id}`
+  - `commodity_id` -> `commodity_grades:options:commodity:{id}`
+  - None -> `commodity_grades:options:all`
+  - Suppresses inactive/soft-deleted parents and verifies relational consistency (422 on contradictory query params).
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity grade options retrieved successfully.",
+      "data": [
+          {
+              "id": 1,
+              "commodity_id": 1,
+              "commodity_subcategory_id": 1,
+              "commodity_variety_id": 1,
+              "name_en": "Grade A Premium",
+              "name_hi": "ग्रेड ए प्रीमियम",
+              "slug": "grade-a-premium"
+          }
+      ]
+  }
+  ```
+
+---
+
+### 11.3 Create Commodity Grade
+- **Method:** `POST`
+- **URI:** `/api/admin/commodity-grades`
+- **Request Body:**
+  ```json
+  {
+      "commodity_id": 1,
+      "commodity_subcategory_id": 1,
+      "commodity_variety_id": 1,
+      "name_en": "Grade A Premium",
+      "name_hi": "ग्रेड ए प्रीमियम",
+      "slug": "grade-a-premium",
+      "description_en": "High grade milling wheat.",
+      "description_hi": "उच्च श्रेणी का मिलिंग गेहूं।",
+      "sort_order": 1,
+      "status": true
+  }
+  ```
+- **Success (201 Created):** Returns `CommodityGradeResource`.
+
+---
+
+### 11.4 Get Commodity Grade Detail
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-grades/{id}`
+- **Success (200 OK):** Returns detailed `CommodityGradeResource`.
+
+---
+
+### 11.5 Update Commodity Grade
+- **Method:** `PUT`
+- **URI:** `/api/admin/commodity-grades/{id}`
+- **Request Body:**
+  ```json
+  {
+      "commodity_id": 1,
+      "commodity_subcategory_id": 1,
+      "commodity_variety_id": null,
+      "name_en": "Grade A Special",
+      "name_hi": "ग्रेड ए स्पेशल",
+      "slug": "grade-a-special",
+      "description_en": "Updated grade description.",
+      "sort_order": 1,
+      "status": true
+  }
+  ```
+- **Key Present != Relationship Changed Rules:**
+  - Submitting existing `commodity_id` / `commodity_subcategory_id` / `commodity_variety_id` does NOT trigger reassignment checks.
+  - If `commodity_id` actually changes, request MUST explicitly specify both `commodity_subcategory_id` and `commodity_variety_id` decisions (or `null`).
+  - Explicit `null` detaches relationship; omitted key retains existing database value.
+  - Validates full effective parent tuple together (e.g. detaching subcategory while variety requires subcategory returns 422).
+- **Success (200 OK):** Returns updated `CommodityGradeResource`.
+
+---
+
+### 11.6 Update Commodity Grade Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/commodity-grades/{id}/status`
+- **Request Body:**
+  ```json
+  {
+      "status": false
+  }
+  ```
+- **Success (200 OK):** Returns updated `CommodityGradeResource`.
+
+---
+
+### 11.7 Bulk Update Commodity Grade Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/commodity-grades/bulk-status`
+- **Request Body:**
+  ```json
+  {
+      "ids": [1, 2, 3],
+      "status": true
+  }
+  ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity grades status updated successfully.",
+      "data": {
+          "updated_count": 3
+      }
+  }
+  ```
+
+---
+
+### 11.8 Delete Commodity Grade
+- **Method:** `DELETE`
+- **URI:** `/api/admin/commodity-grades/{id}`
+- **Behavior:** Soft deletes grade and invalidates affected options caches.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity grade deleted successfully."
+  }
+  ```
+
+---
+
+### 11.9 Bulk Delete Commodity Grades
+- **Method:** `POST`
+- **URI:** `/api/admin/commodity-grades/bulk-delete`
+- **Request Body:**
+  ```json
+  {
+      "ids": [1, 2, 3]
+  }
+  ```
+- **Behavior:** Validates IDs shape, fetches requested non-deleted records with one query, atomically soft-deletes in a single transaction, and purges all affected parent options caches.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity grades deleted successfully.",
+      "data": {
+          "deleted_count": 3
+      }
+  }
+  ```
+
+
 
