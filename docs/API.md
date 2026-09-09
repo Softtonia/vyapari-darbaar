@@ -2185,29 +2185,7 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
       "status": true,
       "message": "User registered successfully.",
       "data": {
-          "token": "1|abcdef123456...",
-          "token_type": "Bearer",
-          "user": {
-              "id": 1,
-              "first_name": "Ramesh",
-              "last_name": "Kumar",
-              "name": "Ramesh Kumar",
-              "full_name": "Ramesh Kumar",
-              "phone_number": "+919876543210",
-              "username": "ramesh.kumar",
-              "email": "ramesh.kumar@example.com",
-              "status": "active",
-              "must_change_password": false,
-              "roles": [
-                  {
-                      "id": 4,
-                      "name": "trader",
-                      "guard_name": "web"
-                  }
-              ],
-              "created_at": "2026-09-09T12:00:00.000000Z",
-              "updated_at": "2026-09-09T12:00:00.000000Z"
-          }
+          "token": "1|abcdef123456..."
       }
   }
   ```

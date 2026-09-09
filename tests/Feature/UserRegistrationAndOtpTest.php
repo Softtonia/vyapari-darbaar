@@ -240,19 +240,13 @@ class UserRegistrationAndOtpTest extends TestCase
                 'status' => true,
                 'message' => 'User registered successfully.',
                 'data' => [
-                    'token_type' => 'Bearer',
-                    'user' => [
-                        'first_name' => 'Ramesh',
-                        'last_name' => 'Kumar',
-                        'name' => 'Ramesh Kumar',
-                        'email' => 'ramesh.kumar@example.com',
-                        'phone_number' => '+919876543210',
-                        'status' => 'active',
-                    ],
+                    'token' => $response->json('data.token'),
                 ],
             ]);
 
         $this->assertNotEmpty($response->json('data.token'));
+        $this->assertNull($response->json('data.user'));
+        $this->assertNull($response->json('data.token_type'));
 
         // Database assertions
         $this->assertDatabaseHas('users', [
