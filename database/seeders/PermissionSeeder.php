@@ -66,6 +66,8 @@ class PermissionSeeder extends Seeder
             'commodity-grades.create',
             'commodity-grades.update',
             'commodity-grades.delete',
+            'site-setting.view',
+            'site-setting.update',
         ];
 
         foreach ($adminPermissions as $permissionName) {

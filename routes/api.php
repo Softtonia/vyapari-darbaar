@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\Admin\CommoditySubcategoryController;
 use App\Http\Controllers\Api\Admin\CommodityVarietyController;
 use App\Http\Controllers\Api\Admin\EmailTemplateController;
 use App\Http\Controllers\Api\Admin\RoleController;
+use App\Http\Controllers\Api\Admin\SiteSettingController as AdminSiteSettingController;
+use App\Http\Controllers\Api\SiteSettingController;
 use App\Http\Controllers\Api\User\UserAuthController;
 use App\Http\Controllers\Api\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
@@ -225,8 +227,24 @@ Route::prefix('admin')->group(function () {
             Route::patch('{commodityGrade}/status', [CommodityGradeController::class, 'updateStatus'])
                 ->name('admin.commodity-grades.update-status');
         });
+
+        // Site Settings management
+        Route::prefix('site-settings')->group(function () {
+            Route::get('/', [AdminSiteSettingController::class, 'show'])
+                ->name('admin.site-settings.show');
+            Route::patch('/', [AdminSiteSettingController::class, 'update'])
+                ->name('admin.site-settings.update');
+        });
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Public Site Settings Route
+|--------------------------------------------------------------------------
+*/
+Route::get('site-settings', [SiteSettingController::class, 'show'])
+    ->name('site-settings.show');
 
 /*
 |--------------------------------------------------------------------------

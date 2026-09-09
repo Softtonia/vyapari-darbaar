@@ -8,6 +8,7 @@ use App\Models\CommodityCategory;
 use App\Models\CommodityGrade;
 use App\Models\CommoditySubcategory;
 use App\Models\CommodityVariety;
+use App\Models\Role;
 use App\Models\User;
 use App\Services\CommodityCategoryService;
 use App\Services\CommodityGradeService;
@@ -158,7 +159,32 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 2: Create all 4 valid grade hierarchy forms.
+     * Test 2: Regular user or unauthorized admin cannot access admin grade endpoints.
+     */
+    public function test_regular_user_cannot_access_admin_grade_endpoints(): void
+    {
+        $user = User::create([
+            'first_name' => 'Regular',
+            'last_name' => 'User',
+            'name' => 'Regular User',
+            'username' => 'regular.user',
+            'phone_number' => '9876543210',
+            'email' => 'regular.user@example.com',
+            'password' => Hash::make('Secret123'),
+            'status' => 'active',
+        ]);
+        $userToken = $user->createToken('user-token')->plainTextToken;
+
+        $response = $this->getJson('/api/admin/commodity-grades', [
+            'Authorization' => "Bearer {$userToken}",
+            'Accept' => 'application/json',
+        ]);
+
+        $response->assertStatus(403);
+    }
+
+    /**
+     * Test 3: Create all 4 valid grade hierarchy forms.
      */
     public function test_can_create_all_four_valid_grade_hierarchy_types(): void
     {
@@ -166,13 +192,16 @@ class CommodityGradeManagementTest extends TestCase
         $res1 = $this->postJson('/api/admin/commodity-grades', [
             'commodity_id' => $this->commodityWheat->id,
             'name_en' => 'Grade Direct Wheat',
+            'name_hi' => 'डायरेक्ट गेहूं ग्रेड',
             'description_en' => 'Wheat direct grade description',
+            'description_hi' => 'विवरण',
         ], $this->authHeaders());
 
         $res1->assertStatus(201)
             ->assertJsonPath('status', true)
             ->assertJsonPath('data.commodity_subcategory_id', null)
             ->assertJsonPath('data.commodity_variety_id', null)
+            ->assertJsonPath('data.name_hi', 'डायरेक्ट गेहूं ग्रेड')
             ->assertJsonPath('data.slug', 'grade-direct-wheat');
 
         // 2. Subcategory Grade
@@ -214,9 +243,9 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 3: Creation validation rejects inconsistent hierarchies.
+     * Test 4: Creation validation rejects inconsistent hierarchies and inactive parents.
      */
-    public function test_create_validation_rejects_inconsistent_hierarchies(): void
+    public function test_create_validation_rejects_inconsistent_hierarchies_and_inactive_parents(): void
     {
         // Direct variety + non-null subcategory -> 422
         $res1 = $this->postJson('/api/admin/commodity-grades', [
@@ -239,19 +268,19 @@ class CommodityGradeManagementTest extends TestCase
         $res2->assertStatus(422)
             ->assertJsonValidationErrors(['commodity_subcategory_id']);
 
-        // Wrong subcategory + variety -> 422
-        $res3 = $this->postJson('/api/admin/commodity-grades', [
+        // Inactive parent category
+        $this->categoryGrains->update(['status' => false]);
+        $resInactive = $this->postJson('/api/admin/commodity-grades', [
             'commodity_id' => $this->commodityWheat->id,
-            'commodity_subcategory_id' => $this->subcatDesiChana->id,
-            'commodity_variety_id' => $this->varietyMillingWheatHD->id,
-            'name_en' => 'Invalid Combination 3',
+            'name_en' => 'Grade Inactive Parent',
         ], $this->authHeaders());
 
-        $res3->assertStatus(422);
+        $resInactive->assertStatus(422)
+            ->assertJsonValidationErrors(['commodity_id']);
     }
 
     /**
-     * Test 4: List endpoint with filtering, search, and contradictory filter rejection.
+     * Test 5: List endpoint with filtering, search, and contradictory filter rejection.
      */
     public function test_list_and_filter_consistency(): void
     {
@@ -260,9 +289,15 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => $this->varietyMillingWheatHD->id,
             'name_en' => 'Wheat Super Grade',
+            'name_hi' => 'सुपर ग्रेड',
             'slug' => 'wheat-super-grade',
             'status' => true,
         ]);
+
+        // Search by Hindi name
+        $resSearch = $this->getJson('/api/admin/commodity-grades?search=सुपर', $this->authHeaders());
+        $resSearch->assertStatus(200)
+            ->assertJsonCount(1, 'data.items');
 
         // Valid filter
         $res = $this->getJson("/api/admin/commodity-grades?commodity_id={$this->commodityWheat->id}&commodity_subcategory_id={$this->subcatMillingWheat->id}", $this->authHeaders());
@@ -277,9 +312,9 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 5: Options endpoint caching and precedence.
+     * Test 6: Options endpoint caching, precedence, and suppression of inactive parents.
      */
-    public function test_options_endpoint_caching_and_precedence(): void
+    public function test_options_endpoint_caching_and_suppression(): void
     {
         Cache::flush();
 
@@ -304,18 +339,23 @@ class CommodityGradeManagementTest extends TestCase
         $resSub->assertStatus(200);
         $this->assertTrue(Cache::has(CommodityGradeService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$this->subcatMillingWheat->id));
 
-        // Commodity precedence
-        $resComm = $this->getJson("/api/admin/commodity-grades/options?commodity_id={$this->commodityWheat->id}", $this->authHeaders());
-        $resComm->assertStatus(200);
-        $this->assertTrue(Cache::has(CommodityGradeService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$this->commodityWheat->id));
+        // Deactivate variety directly in DB -> suppressed in options
+        $this->varietyMillingWheatHD->update(['status' => false]);
+        Cache::flush();
+        $resSuppressed = $this->getJson("/api/admin/commodity-grades/options?commodity_id={$this->commodityWheat->id}&commodity_subcategory_id={$this->subcatMillingWheat->id}&commodity_variety_id={$this->varietyMillingWheatHD->id}", $this->authHeaders());
+        $resSuppressed->assertStatus(200)
+            ->assertJsonCount(0, 'data');
 
-        // Contradictory options query -> 422
-        $resContra = $this->getJson("/api/admin/commodity-grades/options?commodity_id={$this->commodityWheat->id}&commodity_subcategory_id={$this->subcatDesiChana->id}", $this->authHeaders());
-        $resContra->assertStatus(422);
+        // Reactivate variety -> restored
+        $this->varietyMillingWheatHD->update(['status' => true]);
+        Cache::flush();
+        $resRestored = $this->getJson("/api/admin/commodity-grades/options?commodity_id={$this->commodityWheat->id}&commodity_subcategory_id={$this->subcatMillingWheat->id}&commodity_variety_id={$this->varietyMillingWheatHD->id}", $this->authHeaders());
+        $resRestored->assertStatus(200)
+            ->assertJsonCount(1, 'data');
     }
 
     /**
-     * Test 6: UPDATE: Key Present != Relationship Changed and ordinary edit under inactive parent.
+     * Test 7: UPDATE: Key Present != Relationship Changed and ordinary edit under inactive parent.
      */
     public function test_update_same_relationship_values_does_not_trigger_reassignment_validation(): void
     {
@@ -345,7 +385,7 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 7: Omitted vs Explicit Null semantics on update.
+     * Test 8: Omitted vs Explicit Null semantics on update.
      */
     public function test_omitted_vs_explicit_null_semantics(): void
     {
@@ -387,7 +427,7 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 8: Subcategory detach with existing subcategory variety returns 422.
+     * Test 9: Subcategory detach with existing subcategory variety returns 422.
      */
     public function test_subcategory_detach_with_existing_variety_fails_validation(): void
     {
@@ -420,7 +460,7 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 9: Commodity move requires explicit subcategory and variety decisions.
+     * Test 10: Commodity move requires explicit subcategory and variety decisions.
      */
     public function test_commodity_move_requires_explicit_child_decisions(): void
     {
@@ -440,6 +480,9 @@ class CommodityGradeManagementTest extends TestCase
 
         $res->assertStatus(422)
             ->assertJsonValidationErrors(['commodity_subcategory_id', 'commodity_variety_id']);
+
+        // Ensure failed move leaves original unchanged
+        $this->assertEquals($this->commodityWheat->id, $grade->fresh()->commodity_id);
 
         // Move with explicit nulls succeeds
         $resNull = $this->putJson("/api/admin/commodity-grades/{$grade->id}", [
@@ -467,7 +510,7 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 10: Slug uniqueness check across active and soft-deleted records.
+     * Test 11: Slug uniqueness check across active and soft-deleted records.
      */
     public function test_slug_uniqueness_including_soft_deletes_when_moving_commodity(): void
     {
@@ -501,7 +544,7 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 11: Single and bulk status updates.
+     * Test 12: Single and bulk status updates.
      */
     public function test_single_and_bulk_status_updates(): void
     {
@@ -538,7 +581,7 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 12: Single delete and atomic bulk delete.
+     * Test 13: Single delete and atomic bulk delete.
      */
     public function test_single_delete_and_atomic_bulk_delete(): void
     {
@@ -581,7 +624,7 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 13: Inactive Grade blocks Variety delete and reparenting.
+     * Test 14: Inactive Grade blocks Variety delete and reparenting.
      */
     public function test_inactive_grade_blocks_variety_delete_and_reparenting(): void
     {
@@ -616,7 +659,7 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 14: Inactive Grade blocks Subcategory delete and reparenting.
+     * Test 15: Inactive Grade blocks Subcategory delete and reparenting.
      */
     public function test_inactive_grade_blocks_subcategory_delete_and_reparenting(): void
     {
@@ -644,7 +687,7 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 15: Direct Grade blocks Commodity delete.
+     * Test 16: Direct Grade blocks Commodity delete.
      */
     public function test_direct_grade_blocks_commodity_delete(): void
     {
@@ -661,7 +704,7 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 16: Bulk delete dependency protections for Variety, Subcategory, and Commodity.
+     * Test 17: Bulk delete dependency protections for Variety, Subcategory, and Commodity.
      */
     public function test_bulk_delete_dependency_merging(): void
     {
@@ -700,9 +743,9 @@ class CommodityGradeManagementTest extends TestCase
     }
 
     /**
-     * Test 17: Cross-module cache invalidation when parent entities change status.
+     * Test 18: Cross-module cache invalidation when parent entities change status and failed validation does not purge cache.
      */
-    public function test_cross_module_cache_invalidation(): void
+    public function test_cross_module_cache_invalidation_and_failed_validation_isolation(): void
     {
         Cache::flush();
 
@@ -717,6 +760,13 @@ class CommodityGradeManagementTest extends TestCase
 
         // Populate options cache
         $this->getJson("/api/admin/commodity-grades/options?commodity_id={$this->commodityWheat->id}", $this->authHeaders());
+        $this->assertTrue(Cache::has(CommodityGradeService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$this->commodityWheat->id));
+
+        // Failed validation does NOT purge cache
+        $this->putJson("/api/admin/commodity-grades/{$grade->id}", [
+            'commodity_subcategory_id' => null, // Invalid since variety requires subcategory
+        ], $this->authHeaders())->assertStatus(422);
+
         $this->assertTrue(Cache::has(CommodityGradeService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$this->commodityWheat->id));
 
         // Update Category status -> clears Grade caches

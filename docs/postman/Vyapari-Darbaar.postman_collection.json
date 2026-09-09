@@ -3297,6 +3297,172 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "Site Settings",
+            "item": [
+                {
+                    "name": "Get Public Site Settings",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/site-settings",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "site-settings"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Admin Site Settings",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/admin/site-settings",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "site-settings"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Site Settings - Text",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"site_name_en\": \"Vyapari Darbar\",\n    \"site_name_hi\": \"व्यापारी दरबार\",\n    \"site_title_en\": \"India Premier Mandi Platform\",\n    \"site_title_hi\": \"भारत का प्रमुख मंडी मंच\",\n    \"site_description_en\": \"Connecting mandi traders across India.\",\n    \"site_description_hi\": \"पूरे भारत के मंडी व्यापारियों को जोड़ना।\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/site-settings",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "site-settings"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Site Settings - Logo Upload",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "_method",
+                                    "value": "PATCH",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "site_name_en",
+                                    "value": "Vyapari Darbar",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "site_name_hi",
+                                    "value": "व्यापारी दरबार",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "site_title_en",
+                                    "value": "India Premier Mandi Platform",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "site_title_hi",
+                                    "value": "भारत का प्रमुख मंडी मंच",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "site_description_en",
+                                    "value": "Connecting mandi traders across India.",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "site_description_hi",
+                                    "value": "पूरे भारत के मंडी व्यापारियों को जोड़ना।",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "web_logo",
+                                    "type": "file",
+                                    "src": []
+                                },
+                                {
+                                    "key": "mobile_logo",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/site-settings",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "site-settings"
+                            ]
+                        }
+                    }
+                }
+            ]
         }
     ]
 }

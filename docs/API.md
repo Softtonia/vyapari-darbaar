@@ -1851,5 +1851,133 @@ Supported 3-Tier Hierarchy:
   }
   ```
 
+---
+
+## 12. Site Settings Endpoints (Singleton)
+
+Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for global site metadata, branding logos, and bilingual copy. There are no create, list, or delete endpoints.
+
+### 12.1 Get Public Site Settings
+- **Method:** `GET`
+- **URI:** `/api/site-settings`
+- **Authentication:** Public (No authentication required)
+- **Caching:** Cached in Redis under key `site_settings:public` for 3600 seconds (1 hour).
+- **Behavior:** Returns bilingual text fields and fully qualified public logo URLs. Internal database IDs, foreign keys, and audit timestamps are intentionally excluded from the public response.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Site settings fetched successfully.",
+      "data": {
+          "site_name_en": "Vyapari Darbar",
+          "site_name_hi": "व्यापारी दरबार",
+          "site_title_en": "India Premier Mandi Platform",
+          "site_title_hi": "भारत का प्रमुख मंडी मंच",
+          "site_description_en": "Connecting mandi traders across India.",
+          "site_description_hi": "पूरे भारत के मंडी व्यापारियों को जोड़ना।",
+          "web_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-web.png",
+          "mobile_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-mobile.png"
+      }
+  }
+  ```
+
+---
+
+### 12.2 Get Admin Site Settings
+- **Method:** `GET`
+- **URI:** `/api/admin/site-settings`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` middleware)
+- **Permission:** `site-setting.view`
+- **Behavior:** Fetches current singleton settings directly from database without using public cache.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Site settings fetched successfully.",
+      "data": {
+          "id": 1,
+          "site_name_en": "Vyapari Darbar",
+          "site_name_hi": "व्यापारी दरबार",
+          "site_title_en": "India Premier Mandi Platform",
+          "site_title_hi": "भारत का प्रमुख मंडी मंच",
+          "site_description_en": "Connecting mandi traders across India.",
+          "site_description_hi": "पूरे भारत के मंडी व्यापारियों को जोड़ना।",
+          "web_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-web.png",
+          "mobile_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-mobile.png",
+          "created_at": "2026-09-09T08:00:00.000000Z",
+          "updated_at": "2026-09-09T08:00:00.000000Z"
+      }
+  }
+  ```
+
+---
+
+### 12.3 Update Site Settings
+- **Canonical Method:** `PATCH`
+- **URI:** `/api/admin/site-settings`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` middleware)
+- **Permission:** `site-setting.update`
+- **Multipart Form-Data Method Spoofing (For Logo Uploads):**
+  - Standard PHP engines do not populate `$_FILES` on raw `PUT`/`PATCH` multipart requests.
+  - Clients sending files (`web_logo`, `mobile_logo`) should submit a `POST /api/admin/site-settings` multipart/form-data request with `_method = PATCH`.
+  - For text-only updates, clients may send standard JSON with `PATCH /api/admin/site-settings`.
+- **Validation Rules:**
+  - `site_name_en`: `sometimes|required|string|max:150`
+  - `site_name_hi`: `sometimes|nullable|string|max:150`
+  - `site_title_en`: `sometimes|nullable|string|max:255`
+  - `site_title_hi`: `sometimes|nullable|string|max:255`
+  - `site_description_en`: `sometimes|nullable|string|max:5000`
+  - `site_description_hi`: `sometimes|nullable|string|max:5000`
+  - `web_logo`: `sometimes|file|image|mimes:jpg,jpeg,png,webp|max:2048` (SVG rejected; not nullable)
+  - `mobile_logo`: `sometimes|file|image|mimes:jpg,jpeg,png,webp|max:2048` (SVG rejected; not nullable)
+- **File & Concurrency Safety:**
+  - Database row locked via `lockForUpdate()` during transaction.
+  - Newly uploaded files are stored safely in `site-settings/logos` on the `public` storage disk.
+  - If DB update fails, all newly stored files are cleaned up immediately and old files remain untouched.
+  - Old superseded files are deleted only after DB transaction commits.
+  - Public cache key `site_settings:public` is invalidated after successful commit.
+- **Request Body Example (JSON / Text Only):**
+  ```json
+  {
+      "site_name_en": "Vyapari Darbaar Global",
+      "site_title_en": "India Premier Mandi Platform",
+      "site_title_hi": "भारत का प्रमुख मंडी मंच",
+      "site_description_en": "Connecting mandi traders across India.",
+      "site_description_hi": "पूरे भारत के मंडी व्यापारियों को जोड़ना।"
+  }
+  ```
+- **Request Body Example (Multipart / Form Data with Spoofing):**
+  ```http
+  POST /api/admin/site-settings
+  Content-Type: multipart/form-data
+
+  _method=PATCH
+  site_name_en=Vyapari Darbaar Global
+  site_name_hi=व्यापारी दरबार
+  web_logo=[FILE: logo_web.png]
+  mobile_logo=[FILE: logo_mobile.webp]
+  ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Site settings updated successfully.",
+      "data": {
+          "id": 1,
+          "site_name_en": "Vyapari Darbaar Global",
+          "site_name_hi": "व्यापारी दरबार",
+          "site_title_en": "India Premier Mandi Platform",
+          "site_title_hi": "भारत का प्रमुख मंडी मंच",
+          "site_description_en": "Connecting mandi traders across India.",
+          "site_description_hi": "पूरे भारत के मंडी व्यापारियों को जोड़ना।",
+          "web_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/abc123web.png",
+          "mobile_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/def456mobile.webp",
+          "created_at": "2026-09-09T08:00:00.000000Z",
+          "updated_at": "2026-09-09T08:05:00.000000Z"
+      }
+  }
+  ```
+
+
 
 

@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             CommodityCategorySeeder::class,
             CommoditySeeder::class,
             CommoditySubcategorySeeder::class,
+            SiteSettingSeeder::class,
         ]);
     }
 }
