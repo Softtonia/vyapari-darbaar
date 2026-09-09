@@ -2418,6 +2418,145 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
   }
   ```
 
+---
+
+## 17. Trader Company & Company Management Endpoints
+
+### 17.1 View Trader Company Profile (User Side)
+- **Method:** `GET`
+- **URI:** `/api/user/company`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Company details retrieved successfully.",
+      "data": {
+          "id": 1,
+          "name": "Singhania Agro Traders Pvt Ltd",
+          "company_name": "Singhania Agro Traders Pvt Ltd",
+          "contact_person": "Vikram Singhania",
+          "business_type": "Wholesaler",
+          "gstin": "27ABCDE1234F1Z5",
+          "country": "India",
+          "state": "Maharashtra",
+          "city": "Nagpur",
+          "address": "Shop 12, APMC Market Yard",
+          "commodities_handled": ["Wheat", "Soybean", "Cotton"],
+          "trade_preference": "both",
+          "buy_sell_preference": "both",
+          "verification_status": "pending",
+          "created_at": "2026-09-09T12:00:00.000000Z",
+          "updated_at": "2026-09-09T12:00:00.000000Z"
+      }
+  }
+  ```
+
+### 17.2 Update Trader Company Profile (User Side)
+- **Method:** `PUT` / `PATCH`
+- **URI:** `/api/user/company`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Request Body:**
+  ```json
+  {
+      "company_name": "Singhania Global Agro Ltd",
+      "contact_person": "Vikram Singhania",
+      "business_type": "Exporter",
+      "gstin": "27ABCDE1234F1Z5",
+      "city": "Nagpur",
+      "state": "Maharashtra",
+      "address": "APMC Commercial Complex, Wardha Road",
+      "commodities_handled": ["Wheat", "Soybean", "Cotton", "Maize"],
+      "trade_preference": "both"
+  }
+  ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Company profile updated successfully.",
+      "data": {
+          "id": 1,
+          "name": "Singhania Global Agro Ltd",
+          "city": "Nagpur",
+          "commodities_handled": ["Wheat", "Soybean", "Cotton", "Maize"],
+          "trade_preference": "both"
+      }
+  }
+  ```
+
+### 17.3 Admin List Companies
+- **Method:** `GET`
+- **URI:** `/api/admin/companies`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` guard, `companies.view` permission)
+- **Query Parameters:**
+  - `search`: search term in name, contact_person, gstin, city, state
+  - `verification_status`: `pending`, `verified`, `rejected`
+  - `state`: filter by state
+  - `city`: filter by city
+  - `per_page`: items per page (default: 20)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Companies retrieved successfully.",
+      "data": {
+          "items": [
+              {
+                  "id": 1,
+                  "name": "Singhania Agro Traders Pvt Ltd",
+                  "contact_person": "Vikram Singhania",
+                  "business_type": "Wholesaler",
+                  "gstin": "27ABCDE1234F1Z5",
+                  "city": "Nagpur",
+                  "state": "Maharashtra",
+                  "verification_status": "pending",
+                  "created_at": "2026-09-09T12:00:00.000000Z"
+              }
+          ],
+          "pagination": {
+              "current_page": 1,
+              "per_page": 20,
+              "total": 1,
+              "last_page": 1
+          }
+      }
+  }
+  ```
+
+### 17.4 Admin View Single Company
+- **Method:** `GET`
+- **URI:** `/api/admin/companies/{id}`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` guard, `companies.view` permission)
+
+### 17.5 Admin Update Company Verification Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/companies/{id}/status`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` guard, `companies.update` permission)
+- **Request Body:**
+  ```json
+  {
+      "verification_status": "verified"
+  }
+  ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Company verification status updated to 'verified' successfully.",
+      "data": {
+          "id": 1,
+          "verification_status": "verified"
+      }
+  }
+  ```
+
+### 17.6 Admin Delete Company
+- **Method:** `DELETE`
+- **URI:** `/api/admin/companies/{id}`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` guard, `companies.delete` permission)
+
+
 
 
 

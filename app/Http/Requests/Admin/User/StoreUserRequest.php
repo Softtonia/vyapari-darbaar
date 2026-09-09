@@ -29,6 +29,18 @@ class StoreUserRequest extends FormRequest
             'phone_number' => ['required', 'string', 'max:20', 'regex:/^\+?[0-9\s\-()]{7,20}$/'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'role' => ['sometimes', 'nullable', 'string', 'exists:roles,name'],
+            'company_name' => ['nullable', 'string', 'max:255'],
+            'contact_person' => ['nullable', 'string', 'max:150'],
+            'business_type' => ['nullable', 'string', 'max:100'],
+            'gstin' => ['nullable', 'string', 'max:20'],
+            'country' => ['nullable', 'string', 'max:100'],
+            'state' => ['nullable', 'string', 'max:100'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'address' => ['nullable', 'string', 'max:1000'],
+            'commodities_handled' => ['nullable'],
+            'trade_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
+            'buy_sell_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
+            'verification_status' => ['nullable', 'string', 'in:pending,verified,rejected'],
         ];
     }
 
@@ -53,7 +65,7 @@ class StoreUserRequest extends FormRequest
     /**
      * Get validated data with normalized fields.
      *
-     * @return array{first_name: string, last_name: string, name: string, phone_number: string, email: string, role: string}
+     * @return array<string, mixed>
      */
     public function validatedUserData(): array
     {
@@ -63,7 +75,7 @@ class StoreUserRequest extends FormRequest
         $email = strtolower(trim((string) $this->input('email')));
         $role = $this->filled('role') ? trim((string) $this->input('role')) : 'user';
 
-        return [
+        $data = [
             'first_name' => $firstName,
             'last_name' => $lastName,
             'name' => trim("{$firstName} {$lastName}"),
@@ -71,6 +83,14 @@ class StoreUserRequest extends FormRequest
             'email' => $email,
             'role' => $role,
         ];
+
+        foreach (['company_name', 'contact_person', 'business_type', 'gstin', 'country', 'state', 'city', 'address', 'commodities_handled', 'trade_preference', 'buy_sell_preference', 'verification_status'] as $field) {
+            if ($this->has($field)) {
+                $data[$field] = $this->input($field);
+            }
+        }
+
+        return $data;
     }
 
     /**

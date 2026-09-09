@@ -3373,6 +3373,145 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "Companies Management",
+                    "item": [
+                        {
+                            "name": "List Companies",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/companies?verification_status=pending&per_page=20&page=1",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "companies"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "verification_status",
+                                            "value": "pending"
+                                        },
+                                        {
+                                            "key": "per_page",
+                                            "value": "20"
+                                        },
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "View Company Details",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/companies/{{company_id}}",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "companies",
+                                        "{{company_id}}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Update Company Verification Status",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"verification_status\": \"verified\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/companies/{{company_id}}/status",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "companies",
+                                        "{{company_id}}",
+                                        "status"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Delete Company",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/companies/{{company_id}}",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "companies",
+                                        "{{company_id}}"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -4099,6 +4238,73 @@
                                         "user",
                                         "notifications",
                                         "read"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Company Profile",
+                    "item": [
+                        {
+                            "name": "Get Trader Company Profile",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{user_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/user/company",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "user",
+                                        "company"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Update Trader Company Profile",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{user_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"company_name\": \"Singhania Global Agro Ltd\",\n    \"contact_person\": \"Vikram Singhania\",\n    \"business_type\": \"Exporter\",\n    \"gstin\": \"27ABCDE1234F1Z5\",\n    \"city\": \"Nagpur\",\n    \"state\": \"Maharashtra\",\n    \"address\": \"APMC Commercial Complex\",\n    \"commodities_handled\": [\"Wheat\", \"Soybean\", \"Cotton\"],\n    \"trade_preference\": \"both\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/user/company",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "user",
+                                        "company"
                                     ]
                                 }
                             }

@@ -211,6 +211,7 @@ class UserRegistrationAndOtpTest extends TestCase
             'password_confirmation' => 'Password#2026',
             'otp' => '000000',
             'role' => 'trader',
+            'company_name' => 'Ramesh Agro Traders',
         ]);
 
         $response->assertStatus(422)
@@ -232,6 +233,7 @@ class UserRegistrationAndOtpTest extends TestCase
             'password_confirmation' => 'Password#2026',
             'otp' => $otpData['otp'],
             'role' => 'trader',
+            'company_name' => 'Ramesh Agro Traders',
             'device_name' => 'Postman Test Device',
         ]);
 

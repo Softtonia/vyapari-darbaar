@@ -87,7 +87,35 @@ class CreateUserAction
             // syncRoles handles pivot creation cleanly and prevents duplicate role assignments
             $newUser->syncRoles([$targetRole]);
 
-            return $newUser->fresh(['roles']);
+            // Create and attach company for trader role if company details provided
+            if ($targetRole === 'trader' && ! empty($data['company_name'])) {
+                $commodities = $data['commodities_handled'] ?? [];
+                if (is_string($commodities)) {
+                    $decoded = json_decode($commodities, true);
+                    $commodities = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode(',', $commodities)));
+                }
+
+                $company = \App\Models\Company::create([
+                    'name' => trim((string) $data['company_name']),
+                    'contact_person' => trim((string) ($data['contact_person'] ?? $data['name'])),
+                    'business_type' => isset($data['business_type']) ? trim((string) $data['business_type']) : null,
+                    'gstin' => isset($data['gstin']) ? strtoupper(trim((string) $data['gstin'])) : null,
+                    'country' => isset($data['country']) ? trim((string) $data['country']) : 'India',
+                    'state' => isset($data['state']) ? trim((string) $data['state']) : null,
+                    'city' => isset($data['city']) ? trim((string) $data['city']) : null,
+                    'address' => isset($data['address']) ? trim((string) $data['address']) : null,
+                    'commodities_handled' => $commodities,
+                    'trade_preference' => strtolower((string) ($data['trade_preference'] ?? $data['buy_sell_preference'] ?? 'both')),
+                    'verification_status' => isset($data['verification_status']) ? trim((string) $data['verification_status']) : 'verified',
+                ]);
+
+                $newUser->companies()->attach($company->id, [
+                    'role' => 'owner',
+                    'is_primary' => true,
+                ]);
+            }
+
+            return $newUser->fresh(['roles', 'companies']);
         });
 
         // Step 6: Dispatch encrypted credential email job after commit

@@ -31,6 +31,24 @@ class RegisterUserRequest extends FormRequest
             'otp' => ['required', 'string', 'size:6'],
             'role' => ['required', 'string', 'in:user,trader,subscriber,advertiser,guest,USER,TRADER,SUBSCRIBER,ADVERTISER,GUEST'],
             'device_name' => ['nullable', 'string', 'max:255'],
+
+            // Trader Company Fields (validated when role is trader)
+            'company_name' => [
+                \Illuminate\Validation\Rule::requiredIf(fn () => in_array(strtolower((string) $this->input('role')), ['trader'], true) && empty($this->input('company.name'))),
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'contact_person' => ['nullable', 'string', 'max:150'],
+            'business_type' => ['nullable', 'string', 'max:100'],
+            'gstin' => ['nullable', 'string', 'max:20'],
+            'country' => ['nullable', 'string', 'max:100'],
+            'state' => ['nullable', 'string', 'max:100'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'address' => ['nullable', 'string', 'max:1000'],
+            'commodities_handled' => ['nullable'],
+            'trade_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
+            'buy_sell_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
         ];
     }
 
@@ -42,6 +60,7 @@ class RegisterUserRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'company_name.required' => 'The company name field is required for trader accounts.',
             'role.required' => 'Please select a role (user, trader, subscriber, advertiser, guest).',
             'role.in' => 'The selected role is invalid. Allowed roles are: user, trader, subscriber, advertiser, guest.',
             'email.unique' => 'An account with this email already exists.',

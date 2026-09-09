@@ -72,6 +72,10 @@ class PermissionSeeder extends Seeder
             'smtp-setting.update',
             'smtp-setting.test',
             'notification.send',
+            'companies.view',
+            'companies.create',
+            'companies.update',
+            'companies.delete',
         ];
 
         foreach ($adminPermissions as $permissionName) {

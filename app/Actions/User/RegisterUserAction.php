@@ -78,6 +78,35 @@ class RegisterUserAction
                 $user->assignRole($role);
             }
 
+            // Create Company & Association for Trader role only
+            if ($roleName === 'trader') {
+                $companyName = trim((string) ($data['company_name'] ?? $data['company']['name'] ?? ($fullName.' Enterprise')));
+                $commodities = $data['commodities_handled'] ?? [];
+                if (is_string($commodities)) {
+                    $decoded = json_decode($commodities, true);
+                    $commodities = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode(',', $commodities)));
+                }
+
+                $company = \App\Models\Company::create([
+                    'name' => $companyName,
+                    'contact_person' => trim((string) ($data['contact_person'] ?? $fullName)),
+                    'business_type' => isset($data['business_type']) ? trim((string) $data['business_type']) : null,
+                    'gstin' => isset($data['gstin']) ? strtoupper(trim((string) $data['gstin'])) : null,
+                    'country' => isset($data['country']) ? trim((string) $data['country']) : 'India',
+                    'state' => isset($data['state']) ? trim((string) $data['state']) : null,
+                    'city' => isset($data['city']) ? trim((string) $data['city']) : null,
+                    'address' => isset($data['address']) ? trim((string) $data['address']) : null,
+                    'commodities_handled' => $commodities,
+                    'trade_preference' => strtolower((string) ($data['trade_preference'] ?? $data['buy_sell_preference'] ?? 'both')),
+                    'verification_status' => 'pending',
+                ]);
+
+                $user->companies()->attach($company->id, [
+                    'role' => 'owner',
+                    'is_primary' => true,
+                ]);
+            }
+
             // Issue Sanctum token
             $expiresMinutes = (int) (config('sanctum.expiration') ?? 1440);
             $tokenResult = $user->createToken($deviceName, ['*'], now()->addMinutes($expiresMinutes));

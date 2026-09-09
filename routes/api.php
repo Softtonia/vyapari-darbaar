@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\AdminAuthController;
+use App\Http\Controllers\Api\Admin\AdminCompanyController;
 use App\Http\Controllers\Api\Admin\AdminNotificationController;
 use App\Http\Controllers\Api\Admin\AdminProfileController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Api\Admin\SmtpSettingController;
 use App\Http\Controllers\Api\SiteSettingController;
 use App\Http\Controllers\Api\User\UserActivityController;
 use App\Http\Controllers\Api\User\UserAuthController;
+use App\Http\Controllers\Api\User\UserCompanyController;
 use App\Http\Controllers\Api\User\UserNotificationController;
 use App\Http\Controllers\Api\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
@@ -254,6 +256,20 @@ Route::prefix('admin')->group(function () {
             Route::post('send', [AdminNotificationController::class, 'send'])
                 ->name('admin.notifications.send');
         });
+
+        // Company Management
+        Route::prefix('companies')->group(function () {
+            Route::get('/', [AdminCompanyController::class, 'index'])
+                ->name('admin.companies.index');
+            Route::get('{id}', [AdminCompanyController::class, 'show'])
+                ->name('admin.companies.show');
+            Route::put('{id}', [AdminCompanyController::class, 'update'])
+                ->name('admin.companies.update');
+            Route::patch('{id}/status', [AdminCompanyController::class, 'updateStatus'])
+                ->name('admin.companies.update-status');
+            Route::delete('{id}', [AdminCompanyController::class, 'destroy'])
+                ->name('admin.companies.destroy');
+        });
     });
 });
 
@@ -345,6 +361,15 @@ Route::prefix('user')->group(function () {
             Route::delete('/', [UserNotificationController::class, 'clearRead']);
             Route::delete('{id}', [UserNotificationController::class, 'destroy'])
                 ->name('user.notifications.destroy');
+        });
+
+        // Trader Company Profile
+        Route::prefix('company')->group(function () {
+            Route::get('/', [UserCompanyController::class, 'show'])
+                ->name('user.company.show');
+            Route::put('/', [UserCompanyController::class, 'update'])
+                ->name('user.company.update');
+            Route::patch('/', [UserCompanyController::class, 'update']);
         });
     });
 });
