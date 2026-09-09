@@ -42,9 +42,13 @@ class AdminRoleTest extends TestCase
         $this->seed(RoleSeeder::class);
         $this->seed(RoleSeeder::class); // Run second time to test idempotency
 
-        $this->assertDatabaseCount('roles', 3);
+        $this->assertDatabaseCount('roles', 7);
         $this->assertDatabaseHas('roles', ['name' => 'admin', 'guard_name' => 'admin', 'is_system' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'editor', 'guard_name' => 'admin', 'is_system' => true, 'status' => true]);
         $this->assertDatabaseHas('roles', ['name' => 'user', 'guard_name' => 'web', 'is_system' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'trader', 'guard_name' => 'web', 'is_system' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'subscriber', 'guard_name' => 'web', 'is_system' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'advertiser', 'guard_name' => 'web', 'is_system' => true, 'status' => true]);
         $this->assertDatabaseHas('roles', ['name' => 'guest', 'guard_name' => 'web', 'is_system' => true, 'status' => true]);
     }
 
@@ -193,7 +197,7 @@ class AdminRoleTest extends TestCase
                 ],
             ]);
 
-        $this->assertEquals(3, $response->json('data.total'));
+        $this->assertEquals(7, $response->json('data.total'));
     }
 
     public function test_admin_can_search_and_filter_roles(): void
@@ -215,7 +219,7 @@ class AdminRoleTest extends TestCase
 
         // Filter by is_system
         $res3 = $this->withToken($this->adminToken)->getJson('/api/admin/roles?is_system=1');
-        $this->assertCount(3, $res3->json('data.data'));
+        $this->assertCount(7, $res3->json('data.data'));
 
         // Sorting by name asc
         $res4 = $this->withToken($this->adminToken)->getJson('/api/admin/roles?sort_by=name&sort_order=asc');
