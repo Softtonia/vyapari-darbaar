@@ -103,7 +103,6 @@ class UserNotificationTest extends TestCase
             'title' => 'Read Message',
             'message' => 'This will be marked read',
         ]));
-
         $notificationToRead = $user->notifications()->first();
         $notificationToRead->markAsRead();
 
