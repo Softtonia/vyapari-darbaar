@@ -56,7 +56,7 @@ return [
 
     'frontend_admin_url' => env('FRONTEND_ADMIN_URL', 'http://localhost:3000'),
 
-    'support_email' => env('SUPPORT_EMAIL', 'support@vyaparidarbaar.com'),
+    'support_email' => env('SUPPORT_EMAIL', 'support@vyaparidarbar.com'),
 
     /*
     |--------------------------------------------------------------------------

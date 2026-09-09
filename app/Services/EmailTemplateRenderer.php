@@ -43,7 +43,7 @@ class EmailTemplateRenderer
             'tag' => '{{SupportEmail}}',
             'label' => 'Support Email',
             'description' => 'The official support contact email address.',
-            'example' => 'support@vyaparidarbaar.com',
+            'example' => 'support@vyaparidarbar.com',
         ],
     ];
 
@@ -172,7 +172,7 @@ class EmailTemplateRenderer
     {
         return [
             'CompanyName' => (string) config('app.name', 'Vyapari Darbaar'),
-            'SupportEmail' => (string) config('app.support_email', config('mail.from.address', 'support@vyaparidarbaar.com')),
+            'SupportEmail' => (string) config('app.support_email', config('mail.from.address', 'support@vyaparidarbar.com')),
         ];
     }
 

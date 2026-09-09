@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\Admin\CommodityVarietyController;
 use App\Http\Controllers\Api\Admin\EmailTemplateController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\SiteSettingController as AdminSiteSettingController;
+use App\Http\Controllers\Api\Admin\SmtpSettingController;
 use App\Http\Controllers\Api\SiteSettingController;
 use App\Http\Controllers\Api\User\UserAuthController;
 use App\Http\Controllers\Api\User\UserProfileController;
@@ -234,6 +235,15 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.site-settings.show');
             Route::patch('/', [AdminSiteSettingController::class, 'update'])
                 ->name('admin.site-settings.update');
+        });
+
+        // SMTP Settings management
+        Route::prefix('settings/smtp')->group(function () {
+            Route::get('/', [SmtpSettingController::class, 'show'])->name('admin.settings.smtp.show');
+            Route::put('/', [SmtpSettingController::class, 'update'])->name('admin.settings.smtp.update');
+            Route::post('test', [SmtpSettingController::class, 'test'])
+                ->middleware('throttle:admin-smtp-test')
+                ->name('admin.settings.smtp.test');
         });
     });
 });

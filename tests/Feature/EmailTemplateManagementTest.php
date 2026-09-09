@@ -398,8 +398,8 @@ class EmailTemplateManagementTest extends TestCase
                 'body' => 'Hello {{UserName}}, your username is {{Username}} and temp password is {{TemporaryPassword}}. Contact {{SupportEmail}}.',
             ]);
 
-        $expectedCompanyName = (string) config('app.name', 'Vyapari Darbaar');
-        $expectedSupportEmail = (string) config('app.support_email', config('mail.from.address', 'support@vyaparidarbaar.com'));
+        $expectedCompanyName = (string) config('app.name', 'Vyapari Darbar');
+        $expectedSupportEmail = (string) config('app.support_email', config('mail.from.address', 'support@vyaparidarbar.com'));
 
         $response->assertStatus(200)
             ->assertJson([

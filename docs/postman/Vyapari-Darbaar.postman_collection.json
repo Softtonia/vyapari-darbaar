@@ -3463,6 +3463,112 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "SMTP Settings",
+            "item": [
+                {
+                    "name": "Get SMTP Settings",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/admin/settings/smtp",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "settings",
+                                "smtp"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update SMTP Settings",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"host\": \"smtp.zoho.in\",\n    \"port\": 465,\n    \"scheme\": \"smtps\",\n    \"username\": \"noreply@vyaparidarbar.com\",\n    \"password\": \"{{smtp_password}}\",\n    \"from_address\": \"noreply@vyaparidarbar.com\",\n    \"from_name\": \"Vyapari Darbar\",\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/settings/smtp",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "settings",
+                                "smtp"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Test SMTP Settings",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"recipient\": \"admin@vyaparidarbar.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/settings/smtp/test",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "settings",
+                                "smtp",
+                                "test"
+                            ]
+                        }
+                    }
+                }
+            ]
         }
     ]
 }

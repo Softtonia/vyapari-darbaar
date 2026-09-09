@@ -1978,6 +1978,123 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
   }
   ```
 
+---
+
+## 13. Dynamic SMTP Settings Endpoints
+
+Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) allowing administrators to dynamically configure and test SMTP mail transport credentials without mutating environment files.
+
+### 13.1 Get SMTP Settings
+- **Method:** `GET`
+- **URI:** `/api/admin/settings/smtp`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` middleware)
+- **Permission:** `smtp-setting.view`
+- **Behavior:** Returns the current dynamic SMTP settings. The password is never exposed; `password_configured: true/false` indicates status.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "SMTP settings fetched successfully.",
+      "data": {
+          "host": "smtp.zoho.in",
+          "port": 465,
+          "scheme": "smtps",
+          "username": "noreply@vyaparidarbar.com",
+          "from_address": "noreply@vyaparidarbar.com",
+          "from_name": "Vyapari Darbar",
+          "status": true,
+          "password_configured": true
+      }
+  }
+  ```
+
+---
+
+### 13.2 Update SMTP Settings
+- **Method:** `PUT`
+- **URI:** `/api/admin/settings/smtp`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` middleware)
+- **Permission:** `smtp-setting.update`
+- **Validation Rules:**
+  - `host`: `required|string|max:255`
+  - `port`: `required|integer|min:1|max:65535`
+  - `scheme`: `required|in:smtp,smtps`
+  - `username`: `required|string|max:255`
+  - `password`: `required` on initial setup; `nullable` on updates (omitted or `"********"` retains existing password)
+  - `from_address`: `required|email|max:255`
+  - `from_name`: `required|string|max:150`
+  - `status`: `required|boolean`
+- **Request Body Example:**
+  ```json
+  {
+      "host": "smtp.zoho.in",
+      "port": 465,
+      "scheme": "smtps",
+      "username": "noreply@vyaparidarbar.com",
+      "password": "your-smtp-password",
+      "from_address": "noreply@vyaparidarbar.com",
+      "from_name": "Vyapari Darbar",
+      "status": true
+  }
+  ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "SMTP settings updated successfully.",
+      "data": {
+          "host": "smtp.zoho.in",
+          "port": 465,
+          "scheme": "smtps",
+          "username": "noreply@vyaparidarbar.com",
+          "from_address": "noreply@vyaparidarbar.com",
+          "from_name": "Vyapari Darbar",
+          "status": true,
+          "password_configured": true
+      }
+  }
+  ```
+
+---
+
+### 13.3 Test SMTP Settings
+- **Method:** `POST`
+- **URI:** `/api/admin/settings/smtp/test`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` middleware)
+- **Permission:** `smtp-setting.test`
+- **Throttle:** `admin-smtp-test` (5 attempts / minute / admin)
+- **Behavior:** Loads the saved database SMTP configuration (even if `status` is currently `false`), rebuilds the transport, and sends a diagnostic HTML test email to the recipient.
+- **Request Body:**
+  ```json
+  {
+      "recipient": "admin@vyaparidarbar.com"
+  }
+  ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "SMTP test email sent successfully."
+  }
+  ```
+- **Configuration Missing (422 Unprocessable Entity):**
+  ```json
+  {
+      "status": false,
+      "message": "SMTP configuration is not configured.",
+      "error": "SMTP_CONFIGURATION_MISSING"
+  }
+  ```
+- **Delivery Failure (422 Unprocessable Entity):**
+  ```json
+  {
+      "status": false,
+      "message": "Unable to send SMTP test email.",
+      "error": "SMTP_TEST_FAILED"
+  }
+  ```
+
+
 
 
 

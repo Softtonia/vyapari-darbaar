@@ -3,8 +3,11 @@
 namespace App\Providers;
 
 use App\Models\Admin;
+use App\Services\DynamicMailConfigService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,7 +18,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(DynamicMailConfigService::class, function () {
+            return new DynamicMailConfigService;
+        });
     }
 
     /**
@@ -24,6 +29,25 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureRateLimiting();
+        $this->configureMailSynchronization();
+    }
+
+    /**
+     * Configure dynamic SMTP queue synchronization and boot initialization.
+     */
+    protected function configureMailSynchronization(): void
+    {
+        try {
+            app(DynamicMailConfigService::class)->apply();
+        } catch (\Throwable) {
+            // Failsafe during setup/migrations before table exists
+        }
+
+        Queue::before(function (JobProcessing $event) {
+            if ($event->job->getQueue() === 'emails') {
+                app(DynamicMailConfigService::class)->apply();
+            }
+        });
     }
 
     /**
@@ -55,6 +79,22 @@ class AppServiceProvider extends ServiceProvider
                     return response()->json([
                         'status' => false,
                         'message' => 'Too many password reset attempts. Please try again later.',
+                    ], 429, $headers);
+                });
+        });
+
+        RateLimiter::for('admin-smtp-test', function (Request $request) {
+            $user = $request->user();
+            $key = ($user instanceof Admin)
+                ? 'admin-smtp-test:'.$user->id
+                : 'guest:'.$request->ip();
+
+            return Limit::perMinute(5)
+                ->by($key)
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Too many SMTP test attempts. Please try again later.',
                     ], 429, $headers);
                 });
         });
