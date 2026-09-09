@@ -50,6 +50,13 @@ class UpdateUserProfileAction
 
             $user->save();
 
+            \App\Services\UserActivityService::log(
+                $user,
+                'profile_update',
+                'User updated profile information',
+                array_keys($data)
+            );
+
             return $user->fresh(['roles']);
         });
     }

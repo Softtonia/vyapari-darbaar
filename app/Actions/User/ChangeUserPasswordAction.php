@@ -52,6 +52,12 @@ class ChangeUserPasswordAction
             'must_change_password' => false,
         ]);
 
+        \App\Services\UserActivityService::log(
+            $user,
+            'password_change',
+            'User changed account password'
+        );
+
         // Revoke all OTHER device tokens while preserving current token
         $currentTokenId = $user->currentAccessToken()?->id;
         if ($currentTokenId) {

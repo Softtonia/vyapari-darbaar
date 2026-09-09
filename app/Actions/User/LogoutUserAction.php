@@ -14,6 +14,12 @@ class LogoutUserAction
      */
     public function execute(User $user): void
     {
+        \App\Services\UserActivityService::log(
+            $user,
+            'logout',
+            'User logged out'
+        );
+
         $user->currentAccessToken()?->delete();
     }
 }

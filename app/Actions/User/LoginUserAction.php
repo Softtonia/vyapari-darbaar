@@ -67,6 +67,13 @@ class LoginUserAction
             ->latest('id')
             ->first();
 
+        \App\Services\UserActivityService::log(
+            $user,
+            'login',
+            "User logged in from device '{$deviceName}'",
+            ['device_name' => $deviceName]
+        );
+
         if ($activeToken && ! empty($activeToken->plain_token)) {
             return [
                 'success' => true,

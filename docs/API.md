@@ -2243,6 +2243,216 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
   }
   ```
 
+---
+
+## 15. User Activity Tracking Endpoints
+
+### 15.1 Get User Activity Log
+- **Method:** `GET`
+- **URI:** `/api/user/activities`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Query Parameters:**
+  - `event`: optional string filter (e.g., `login`, `logout`, `register`, `password_change`, `password_reset`, `profile_update`)
+  - `per_page`: optional integer (1-100, default: 20)
+  - `page`: optional integer (default: 1)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "User activities retrieved successfully.",
+      "data": {
+          "items": [
+              {
+                  "id": 1,
+                  "event": "login",
+                  "description": "User logged in successfully",
+                  "ip_address": "127.0.0.1",
+                  "user_agent": "Mozilla/5.0 ...",
+                  "properties": {
+                      "device_name": "Chrome Mobile"
+                  },
+                  "created_at": "2026-09-09T12:00:00.000000Z"
+              }
+          ],
+          "pagination": {
+              "current_page": 1,
+              "per_page": 20,
+              "total": 1,
+              "last_page": 1
+          }
+      }
+  }
+  ```
+
+---
+
+## 16. In-App Notification Endpoints
+
+### 16.1 List User Notifications
+- **Method:** `GET`
+- **URI:** `/api/user/notifications`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Query Parameters:**
+  - `status`: optional string filter (`all`, `unread`, `read`; default: `all`)
+  - `per_page`: optional integer (1-100, default: 20)
+  - `page`: optional integer (default: 1)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Notifications retrieved successfully.",
+      "data": {
+          "items": [
+              {
+                  "id": "c1f729b4-5f53-4889-b7b5-27473950efec",
+                  "title": "Welcome to Vyapari Darbaar",
+                  "message": "Start trading and tracking commodity mandi prices.",
+                  "action_url": "https://vyaparidarbaar.com/dashboard",
+                  "type": "general",
+                  "metadata": {},
+                  "is_read": false,
+                  "read_at": null,
+                  "created_at": "2026-09-09T12:00:00.000000Z"
+              }
+          ],
+          "unread_count": 1,
+          "pagination": {
+              "current_page": 1,
+              "per_page": 20,
+              "total": 1,
+              "last_page": 1
+          }
+      }
+  }
+  ```
+
+### 16.2 Get Unread Notification Count
+- **Method:** `GET`
+- **URI:** `/api/user/notifications/unread-count`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Unread notification count retrieved successfully.",
+      "data": {
+          "unread_count": 5
+      }
+  }
+  ```
+
+### 16.3 Mark Notification as Read
+- **Method:** `PATCH`
+- **URI:** `/api/user/notifications/{id}/read`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Notification marked as read successfully.",
+      "data": {
+          "id": "c1f729b4-5f53-4889-b7b5-27473950efec",
+          "title": "Welcome to Vyapari Darbaar",
+          "message": "Start trading and tracking commodity mandi prices.",
+          "action_url": "https://vyaparidarbaar.com/dashboard",
+          "type": "general",
+          "metadata": {},
+          "is_read": true,
+          "read_at": "2026-09-09T12:05:00.000000Z",
+          "created_at": "2026-09-09T12:00:00.000000Z"
+      }
+  }
+  ```
+
+### 16.4 Mark All Notifications as Read
+- **Method:** `PATCH`
+- **URI:** `/api/user/notifications/read-all`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "All notifications marked as read successfully.",
+      "data": {
+          "unread_count": 0
+      }
+  }
+  ```
+
+### 16.5 Delete Specific Notification
+- **Method:** `DELETE`
+- **URI:** `/api/user/notifications/{id}`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Notification deleted successfully."
+  }
+  ```
+
+### 16.6 Clear All Read Notifications
+- **Method:** `DELETE`
+- **URI:** `/api/user/notifications/read`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Read notifications cleared successfully.",
+      "data": {
+          "deleted_count": 8
+      }
+  }
+  ```
+
+### 16.7 Admin Send / Broadcast Notification
+- **Method:** `POST`
+- **URI:** `/api/admin/notifications/send`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` guard, `notification.send` permission or `admin` role)
+- **Request Body Options:**
+  - **Single User:**
+    ```json
+    {
+        "recipient_type": "single",
+        "user_id": 15,
+        "title": "Account Alert",
+        "message": "Your KYC documents have been approved.",
+        "type": "kyc_approval",
+        "action_url": "https://vyaparidarbaar.com/account/kyc"
+    }
+    ```
+  - **Role Broadcast:**
+    ```json
+    {
+        "recipient_type": "role",
+        "role": "trader",
+        "title": "Mandi Rates Updated",
+        "message": "Today's mandi trading prices have been updated.",
+        "type": "market_rates"
+    }
+    ```
+  - **All Users Broadcast:**
+    ```json
+    {
+        "recipient_type": "all",
+        "title": "System Update Notice",
+        "message": "Vyapari Darbaar will undergo scheduled maintenance at 02:00 AM.",
+        "type": "maintenance_announcement"
+    }
+    ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Notification sent successfully to 120 user(s).",
+      "data": {
+          "recipient_count": 120
+      }
+  }
+  ```
+
+
 
 
 

@@ -3719,6 +3719,381 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "Admin Notifications",
+            "item": [
+                {
+                    "name": "Send Notification (Single User)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"recipient_type\": \"single\",\n    \"user_id\": 1,\n    \"title\": \"Account Alert\",\n    \"message\": \"Your KYC documents have been reviewed.\",\n    \"type\": \"kyc_notice\",\n    \"action_url\": \"https://vyaparidarbaar.com/dashboard\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/notifications/send",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "notifications",
+                                "send"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Broadcast Notification (Role)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"recipient_type\": \"role\",\n    \"role\": \"trader\",\n    \"title\": \"Mandi Price Bulletin\",\n    \"message\": \"Today's commodity prices updated.\",\n    \"type\": \"market_update\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/notifications/send",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "notifications",
+                                "send"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Broadcast Notification (All Users)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"recipient_type\": \"all\",\n    \"title\": \"Platform Announcement\",\n    \"message\": \"Scheduled system maintenance tonight at 02:00 AM IST.\",\n    \"type\": \"system_alert\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/notifications/send",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "notifications",
+                                "send"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "User Activities",
+            "item": [
+                {
+                    "name": "Get User Activities",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/user/activities?per_page=20&page=1",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "activities"
+                            ],
+                            "query": [
+                                {
+                                    "key": "per_page",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Filter User Activities by Event",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/user/activities?event=login",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "activities"
+                            ],
+                            "query": [
+                                {
+                                    "key": "event",
+                                    "value": "login"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "User Notifications",
+            "item": [
+                {
+                    "name": "List User Notifications",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/user/notifications?status=all&per_page=20&page=1",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "notifications"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "all"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Unread Notification Count",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/user/notifications/unread-count",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "notifications",
+                                "unread-count"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Mark Notification as Read",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/user/notifications/{{notification_id}}/read",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "notifications",
+                                "{{notification_id}}",
+                                "read"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Mark All Notifications as Read",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/user/notifications/read-all",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "notifications",
+                                "read-all"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Notification",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/user/notifications/{{notification_id}}",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "notifications",
+                                "{{notification_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Clear Read Notifications",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{user_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/user/notifications/read",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "notifications",
+                                "read"
+                            ]
+                        }
+                    }
+                }
+            ]
         }
     ]
 }

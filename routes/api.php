@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\AdminAuthController;
+use App\Http\Controllers\Api\Admin\AdminNotificationController;
 use App\Http\Controllers\Api\Admin\AdminProfileController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\Admin\CommodityCategoryController;
@@ -13,7 +14,9 @@ use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\SiteSettingController as AdminSiteSettingController;
 use App\Http\Controllers\Api\Admin\SmtpSettingController;
 use App\Http\Controllers\Api\SiteSettingController;
+use App\Http\Controllers\Api\User\UserActivityController;
 use App\Http\Controllers\Api\User\UserAuthController;
+use App\Http\Controllers\Api\User\UserNotificationController;
 use App\Http\Controllers\Api\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -245,6 +248,12 @@ Route::prefix('admin')->group(function () {
                 ->middleware('throttle:admin-smtp-test')
                 ->name('admin.settings.smtp.test');
         });
+
+        // Notifications management
+        Route::prefix('notifications')->group(function () {
+            Route::post('send', [AdminNotificationController::class, 'send'])
+                ->name('admin.notifications.send');
+        });
     });
 });
 
@@ -316,5 +325,26 @@ Route::prefix('user')->group(function () {
 
         Route::post('logout', [UserAuthController::class, 'logout'])
             ->name('user.logout');
+
+        // User activities
+        Route::get('activities', [UserActivityController::class, 'index'])
+            ->name('user.activities.index');
+
+        // In-app notifications
+        Route::prefix('notifications')->group(function () {
+            Route::get('/', [UserNotificationController::class, 'index'])
+                ->name('user.notifications.index');
+            Route::get('unread-count', [UserNotificationController::class, 'unreadCount'])
+                ->name('user.notifications.unread-count');
+            Route::patch('read-all', [UserNotificationController::class, 'markAllAsRead'])
+                ->name('user.notifications.read-all');
+            Route::patch('{id}/read', [UserNotificationController::class, 'markAsRead'])
+                ->name('user.notifications.read');
+            Route::delete('read', [UserNotificationController::class, 'clearRead'])
+                ->name('user.notifications.clear-read');
+            Route::delete('/', [UserNotificationController::class, 'clearRead']);
+            Route::delete('{id}', [UserNotificationController::class, 'destroy'])
+                ->name('user.notifications.destroy');
+        });
     });
 });

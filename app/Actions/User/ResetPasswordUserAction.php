@@ -60,6 +60,12 @@ class ResetPasswordUserAction
             // Security: Ensure all active login tokens across all devices are deleted
             $user->tokens()->delete();
 
+            \App\Services\UserActivityService::log(
+                $user,
+                'password_reset',
+                'User reset account password'
+            );
+
             return [
                 'success' => true,
                 'message' => 'Your password has been reset successfully.',

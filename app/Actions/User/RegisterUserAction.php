@@ -89,6 +89,13 @@ class RegisterUserAction
                     'plain_token' => $tokenResult->plainTextToken,
                 ]);
 
+            \App\Services\UserActivityService::log(
+                $user,
+                'register',
+                'User registered new account',
+                ['role' => $roleName, 'device_name' => $deviceName]
+            );
+
             return [
                 'token' => $tokenResult->plainTextToken,
                 'user' => $user->fresh(['roles']),
