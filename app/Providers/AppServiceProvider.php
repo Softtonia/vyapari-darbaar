@@ -194,6 +194,45 @@ class AppServiceProvider extends ServiceProvider
                 });
         });
 
+        RateLimiter::for('user-send-otp', function (Request $request) {
+            $email = strtolower(trim((string) $request->input('email', '')));
+            $identifier = sha1($email.'|'.$request->ip());
+
+            return Limit::perMinute(6)
+                ->by('user-send-otp:'.$identifier)
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Too many OTP requests. Please try again later.',
+                    ], 429, $headers);
+                });
+        });
+
+        RateLimiter::for('user-verify-otp', function (Request $request) {
+            $email = strtolower(trim((string) $request->input('email', '')));
+            $identifier = sha1($email.'|'.$request->ip());
+
+            return Limit::perMinute(10)
+                ->by('user-verify-otp:'.$identifier)
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Too many OTP verification attempts. Please try again later.',
+                    ], 429, $headers);
+                });
+        });
+
+        RateLimiter::for('user-register', function (Request $request) {
+            return Limit::perMinute(10)
+                ->by('user-register:'.$request->ip())
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Too many registration requests. Please try again later.',
+                    ], 429, $headers);
+                });
+        });
+
         RateLimiter::for('user-api', function (Request $request) {
             $user = $request->user();
             $key = ($user instanceof \App\Models\User)

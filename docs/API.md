@@ -2100,6 +2100,150 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
   }
   ```
 
+---
+
+## 14. User Registration, OTP & Authentication
+
+### 14.1 Send OTP
+- **Method:** `POST`
+- **URI:** `/api/user/send-otp` (Alias: `/api/user/otp/send`)
+- **Throttle:** `user-send-otp` (6 requests / minute / IP)
+- **Request Body:**
+  ```json
+  {
+      "email": "ramesh.kumar@example.com",
+      "purpose": "registration"
+  }
+  ```
+- **Validation:**
+  - `email`: `required|email|max:255` (must be unique if `purpose` is `registration`)
+  - `purpose`: `nullable|in:registration,register,login,verification,password_reset` (default `registration`)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "OTP has been sent to the email address. Valid for 10 minutes.",
+      "data": {
+          "expires_in_seconds": 600,
+          "cooldown_seconds": 60
+      }
+  }
+  ```
+
+---
+
+### 14.2 Verify OTP
+- **Method:** `POST`
+- **URI:** `/api/user/verify-otp` (Alias: `/api/user/otp/verify`)
+- **Throttle:** `user-verify-otp` (10 attempts / minute / IP)
+- **Request Body:**
+  ```json
+  {
+      "email": "ramesh.kumar@example.com",
+      "otp": "123456",
+      "purpose": "registration"
+  }
+  ```
+- **Validation:**
+  - `email`: `required|email|max:255`
+  - `otp`: `required|string|size:6`
+  - `purpose`: `nullable|string` (default `registration`)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "OTP verified successfully.",
+      "data": {
+          "email": "ramesh.kumar@example.com",
+          "verified": true
+      }
+  }
+  ```
+
+---
+
+### 14.3 User Registration
+- **Method:** `POST`
+- **URI:** `/api/user/register`
+- **Throttle:** `user-register` (10 requests / minute)
+- **Request Body:**
+  ```json
+  {
+      "first_name": "Ramesh",
+      "last_name": "Kumar",
+      "email": "ramesh.kumar@example.com",
+      "phone_number": "+919876543210",
+      "username": "ramesh.kumar",
+      "password": "Password#2026",
+      "password_confirmation": "Password#2026",
+      "otp": "123456",
+      "role": "trader",
+      "device_name": "Mobile Android App"
+  }
+  ```
+- **Validation:**
+  - `first_name`: `required|string|max:100`
+  - `last_name`: `nullable|string|max:100`
+  - `email`: `required|email|max:255|unique:users,email`
+  - `phone_number`: `nullable|string|max:20|unique:users,phone_number`
+  - `username`: `nullable|string|max:50|alpha_dash|unique:users,username`
+  - `password`: `required|string|min:8|confirmed`
+  - `otp`: `required|string|size:6` (must match active OTP and is consumed upon registration)
+  - `role`: `nullable|in:user,trader,subscriber,advertiser` (default `user`)
+  - `device_name`: `nullable|string|max:255`
+- **Success (201 Created):**
+  ```json
+  {
+      "status": true,
+      "message": "User registered successfully.",
+      "data": {
+          "token": "1|abcdef123456...",
+          "token_type": "Bearer",
+          "user": {
+              "id": 1,
+              "first_name": "Ramesh",
+              "last_name": "Kumar",
+              "name": "Ramesh Kumar",
+              "full_name": "Ramesh Kumar",
+              "phone_number": "+919876543210",
+              "username": "ramesh.kumar",
+              "email": "ramesh.kumar@example.com",
+              "status": "active",
+              "must_change_password": false,
+              "roles": [
+                  {
+                      "id": 4,
+                      "name": "trader",
+                      "guard_name": "web"
+                  }
+              ],
+              "created_at": "2026-09-09T12:00:00.000000Z",
+              "updated_at": "2026-09-09T12:00:00.000000Z"
+          }
+      }
+  }
+  ```
+
+---
+
+### 14.4 Refresh Token
+- **Method:** `POST`
+- **URI:** `/api/user/refresh-token`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Behavior:** Revokes the current token and issues a fresh token for the device.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Token refreshed successfully.",
+      "data": {
+          "token": "2|fedcba654321...",
+          "token_type": "Bearer"
+      }
+  }
+  ```
+
+
 
 
 

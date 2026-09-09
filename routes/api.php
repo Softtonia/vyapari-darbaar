@@ -262,6 +262,26 @@ Route::get('site-settings', [SiteSettingController::class, 'show'])
 |--------------------------------------------------------------------------
 */
 Route::prefix('user')->group(function () {
+    // OTP Management
+    Route::post('send-otp', [UserAuthController::class, 'sendOtp'])
+        ->middleware('throttle:user-send-otp')
+        ->name('user.send-otp');
+    Route::post('otp/send', [UserAuthController::class, 'sendOtp'])
+        ->middleware('throttle:user-send-otp')
+        ->name('user.otp.send');
+
+    Route::post('verify-otp', [UserAuthController::class, 'verifyOtp'])
+        ->middleware('throttle:user-verify-otp')
+        ->name('user.verify-otp');
+    Route::post('otp/verify', [UserAuthController::class, 'verifyOtp'])
+        ->middleware('throttle:user-verify-otp')
+        ->name('user.otp.verify');
+
+    // Registration
+    Route::post('register', [UserAuthController::class, 'register'])
+        ->middleware('throttle:user-register')
+        ->name('user.register');
+
     // Public user authentication & password recovery
     Route::post('login', [UserAuthController::class, 'login'])
         ->middleware('throttle:user-login')
@@ -277,6 +297,10 @@ Route::prefix('user')->group(function () {
 
     // Protected user endpoints
     Route::middleware(['auth:sanctum', 'user'])->group(function () {
+        // Token management
+        Route::post('refresh-token', [UserAuthController::class, 'refreshToken'])
+            ->name('user.refresh-token');
+
         // Profile management
         Route::get('profile', [UserProfileController::class, 'profile'])
             ->middleware('throttle:user-api')
