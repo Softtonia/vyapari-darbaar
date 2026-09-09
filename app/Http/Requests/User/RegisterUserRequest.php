@@ -29,7 +29,7 @@ class RegisterUserRequest extends FormRequest
             'username' => ['nullable', 'string', 'max:50', 'alpha_dash', 'unique:users,username'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'otp' => ['required', 'string', 'size:6'],
-            'role' => ['nullable', 'string', 'in:user,trader,subscriber,advertiser'],
+            'role' => ['required', 'string', 'in:user,trader,subscriber,advertiser,guest,USER,TRADER,SUBSCRIBER,ADVERTISER,GUEST'],
             'device_name' => ['nullable', 'string', 'max:255'],
         ];
     }
@@ -42,6 +42,8 @@ class RegisterUserRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'role.required' => 'Please select a role (user, trader, subscriber, advertiser, guest).',
+            'role.in' => 'The selected role is invalid. Allowed roles are: user, trader, subscriber, advertiser, guest.',
             'email.unique' => 'An account with this email already exists.',
             'phone_number.unique' => 'An account with this phone number already exists.',
             'username.unique' => 'This username is already taken.',

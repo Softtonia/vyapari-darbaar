@@ -50,7 +50,7 @@ class RegisterUserAction
             ? strtolower(trim((string) $data['role']))
             : 'user';
 
-        $allowedRoles = ['user', 'trader', 'subscriber', 'advertiser'];
+        $allowedRoles = ['user', 'trader', 'subscriber', 'advertiser', 'guest'];
         $roleName = in_array($requestedRole, $allowedRoles, true) ? $requestedRole : 'user';
 
         // 4. Create User and issue token in transaction
@@ -70,7 +70,6 @@ class RegisterUserAction
                 'password' => Hash::make((string) $data['password']),
                 'status' => 'active',
                 'must_change_password' => false,
-                'email_verified_at' => now(),
             ]);
 
             // Assign Spatie role

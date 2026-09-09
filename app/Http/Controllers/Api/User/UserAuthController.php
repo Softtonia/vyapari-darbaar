@@ -135,8 +135,6 @@ class UserAuthController extends Controller
             'message' => 'Login successful.',
             'data' => [
                 'token' => $result['token'],
-                'token_type' => 'Bearer',
-                'user' => new UserProfileResource($result['user']),
             ],
         ], 200);
     }

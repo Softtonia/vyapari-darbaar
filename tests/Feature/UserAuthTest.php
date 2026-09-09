@@ -49,20 +49,13 @@ class UserAuthTest extends TestCase
                 'status' => true,
                 'message' => 'Login successful.',
                 'data' => [
-                    'token_type' => 'Bearer',
-                    'user' => [
-                        'id' => $this->user->id,
-                        'full_name' => 'Ajay Kumar',
-                        'username' => 'ajay.kumar',
-                        'email' => 'ajay.kumar@example.com',
-                        'status' => 'active',
-                        'must_change_password' => true,
-                    ],
+                    'token' => $response->json('data.token'),
                 ],
             ]);
 
         $this->assertNotEmpty($response->json('data.token'));
-        $this->assertArrayNotHasKey('password', $response->json('data.user'));
+        $this->assertNull($response->json('data.user'));
+        $this->assertNull($response->json('data.token_type'));
     }
 
     public function test_email_cannot_be_used_as_login_identifier(): void

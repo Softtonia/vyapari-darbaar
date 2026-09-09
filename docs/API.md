@@ -171,19 +171,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
       "status": true,
       "message": "Login successful.",
       "data": {
-          "token": "2|user_sanctum_token...",
-          "token_type": "Bearer",
-          "user": {
-              "id": 1,
-              "first_name": "Ajay",
-              "last_name": "Kumar",
-              "full_name": "Ajay Kumar",
-              "phone_number": "+919876543210",
-              "username": "ajay.kumar",
-              "email": "ajay@example.com",
-              "status": "active",
-              "must_change_password": true
-          }
+          "token": "2|user_sanctum_token..."
       }
   }
   ```
@@ -2189,7 +2177,7 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
   - `username`: `nullable|string|max:50|alpha_dash|unique:users,username`
   - `password`: `required|string|min:8|confirmed`
   - `otp`: `required|string|size:6` (must match active OTP and is consumed upon registration)
-  - `role`: `nullable|in:user,trader,subscriber,advertiser` (default `user`)
+  - `role`: `required|in:user,trader,subscriber,advertiser,guest`
   - `device_name`: `nullable|string|max:255`
 - **Success (201 Created):**
   ```json

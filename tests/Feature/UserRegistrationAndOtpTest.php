@@ -197,7 +197,7 @@ class UserRegistrationAndOtpTest extends TestCase
         $response = $this->postJson('/api/user/register', []);
 
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['first_name', 'email', 'password', 'otp']);
+            ->assertJsonValidationErrors(['first_name', 'email', 'password', 'otp', 'role']);
     }
 
     public function test_user_registration_fails_with_invalid_otp(): void
@@ -210,6 +210,7 @@ class UserRegistrationAndOtpTest extends TestCase
             'password' => 'Password#2026',
             'password_confirmation' => 'Password#2026',
             'otp' => '000000',
+            'role' => 'trader',
         ]);
 
         $response->assertStatus(422)
@@ -268,23 +269,36 @@ class UserRegistrationAndOtpTest extends TestCase
         $this->assertFalse($otpService->verify('ramesh.kumar@example.com', $otpData['otp'], 'registration'));
     }
 
-    public function test_user_registers_with_default_user_role_if_role_omitted(): void
+    public function test_user_registration_requires_valid_role(): void
     {
         $otpService = app(OtpService::class);
-        $otpData = $otpService->getOrCreateOtp('default.role@example.com', 'registration');
+        $otpData = $otpService->getOrCreateOtp('role.test@example.com', 'registration');
 
         $response = $this->postJson('/api/user/register', [
             'first_name' => 'Aakash',
-            'email' => 'default.role@example.com',
+            'email' => 'role.test@example.com',
             'password' => 'Password#2026',
             'password_confirmation' => 'Password#2026',
             'otp' => $otpData['otp'],
+            'role' => 'invalid_role_name',
         ]);
 
-        $response->assertStatus(201);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['role']);
 
-        $user = User::where('email', 'default.role@example.com')->firstOrFail();
-        $this->assertTrue($user->hasRole('user'));
+        // Test with valid selected role
+        $responseValid = $this->postJson('/api/user/register', [
+            'first_name' => 'Aakash',
+            'email' => 'role.test@example.com',
+            'password' => 'Password#2026',
+            'password_confirmation' => 'Password#2026',
+            'otp' => $otpData['otp'],
+            'role' => 'subscriber',
+        ]);
+
+        $responseValid->assertStatus(201);
+        $user = User::where('email', 'role.test@example.com')->firstOrFail();
+        $this->assertTrue($user->hasRole('subscriber'));
     }
 
     // ==========================================

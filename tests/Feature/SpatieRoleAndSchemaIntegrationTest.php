@@ -101,7 +101,6 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
                 'message',
                 'data' => [
                     'token',
-                    'user' => ['id', 'username', 'email'],
                 ],
             ]);
 
