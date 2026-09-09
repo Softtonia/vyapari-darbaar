@@ -101,17 +101,25 @@ class CommoditySubcategoryController extends Controller
         CommoditySubcategory $commoditySubcategory,
         CommoditySubcategoryService $service
     ): JsonResponse {
-        $updatedSubcategory = $service->updateCommoditySubcategory(
-            $commoditySubcategory,
-            $request->validated(),
-            $request->user()?->id
-        );
+        try {
+            $updatedSubcategory = $service->updateCommoditySubcategory(
+                $commoditySubcategory,
+                $request->validated(),
+                $request->user()?->id
+            );
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Commodity subcategory updated successfully.',
-            'data' => new CommoditySubcategoryResource($updatedSubcategory),
-        ], 200);
+            return response()->json([
+                'status' => true,
+                'message' => 'Commodity subcategory updated successfully.',
+                'data' => new CommoditySubcategoryResource($updatedSubcategory),
+            ], 200);
+        } catch (\DomainException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+                'error' => 'COMMODITY_SUBCATEGORY_IN_USE',
+            ], 409);
+        }
     }
 
     /**
@@ -164,12 +172,20 @@ class CommoditySubcategoryController extends Controller
         CommoditySubcategory $commoditySubcategory,
         CommoditySubcategoryService $service
     ): JsonResponse {
-        $service->deleteCommoditySubcategory($commoditySubcategory);
+        try {
+            $service->deleteCommoditySubcategory($commoditySubcategory);
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Commodity subcategory deleted successfully.',
-        ], 200);
+            return response()->json([
+                'status' => true,
+                'message' => 'Commodity subcategory deleted successfully.',
+            ], 200);
+        } catch (\DomainException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+                'error' => 'COMMODITY_SUBCATEGORY_IN_USE',
+            ], 409);
+        }
     }
 
     /**
@@ -179,13 +195,23 @@ class CommoditySubcategoryController extends Controller
         BulkDeleteCommoditySubcategoryRequest $request,
         CommoditySubcategoryService $service
     ): JsonResponse {
-        $deletedCount = $service->bulkDeleteCommoditySubcategories($request->validated('ids'));
+        $result = $service->bulkDeleteCommoditySubcategories($request->validated('ids'));
+
+        if (! empty($result['blocked_ids'])) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Some commodity subcategories cannot be deleted because they have varieties assigned.',
+                'data' => [
+                    'blocked_ids' => $result['blocked_ids'],
+                ],
+            ], 409);
+        }
 
         return response()->json([
             'status' => true,
             'message' => 'Commodity subcategories deleted successfully.',
             'data' => [
-                'deleted_count' => $deletedCount,
+                'deleted_count' => $result['deleted_count'],
             ],
         ], 200);
     }

@@ -6,10 +6,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Commodity extends Model
+class CommodityVariety extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -18,7 +17,7 @@ class Commodity extends Model
      *
      * @var string
      */
-    protected $table = 'commodities';
+    protected $table = 'commodity_varieties';
 
     /**
      * The attributes that are mass assignable.
@@ -26,7 +25,8 @@ class Commodity extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'commodity_category_id',
+        'commodity_id',
+        'commodity_subcategory_id',
         'name_en',
         'name_hi',
         'slug',
@@ -45,10 +45,11 @@ class Commodity extends Model
      */
     public const ALLOWED_SORT_COLUMNS = [
         'id',
+        'commodity_id',
+        'commodity_subcategory_id',
         'name_en',
         'name_hi',
         'slug',
-        'commodity_category_id',
         'sort_order',
         'status',
         'created_at',
@@ -63,44 +64,35 @@ class Commodity extends Model
     protected function casts(): array
     {
         return [
-            'commodity_category_id' => 'integer',
+            'commodity_id' => 'integer',
+            'commodity_subcategory_id' => 'integer',
             'status' => 'boolean',
             'sort_order' => 'integer',
         ];
     }
 
     /**
-     * Get the parent commodity category.
+     * Get the parent commodity.
      *
-     * @return BelongsTo<CommodityCategory, $this>
+     * @return BelongsTo<Commodity, $this>
      */
-    public function category(): BelongsTo
+    public function commodity(): BelongsTo
     {
-        return $this->belongsTo(CommodityCategory::class, 'commodity_category_id');
+        return $this->belongsTo(Commodity::class, 'commodity_id');
     }
 
     /**
-     * Get the subcategories belonging to this commodity.
+     * Get the optional parent commodity subcategory.
      *
-     * @return HasMany<CommoditySubcategory, $this>
+     * @return BelongsTo<CommoditySubcategory, $this>
      */
-    public function subcategories(): HasMany
+    public function subcategory(): BelongsTo
     {
-        return $this->hasMany(CommoditySubcategory::class, 'commodity_id');
+        return $this->belongsTo(CommoditySubcategory::class, 'commodity_subcategory_id');
     }
 
     /**
-     * Get the varieties belonging to this commodity.
-     *
-     * @return HasMany<CommodityVariety, $this>
-     */
-    public function varieties(): HasMany
-    {
-        return $this->hasMany(CommodityVariety::class, 'commodity_id');
-    }
-
-    /**
-     * Get the administrator who created the commodity.
+     * Get the administrator who created the commodity variety.
      *
      * @return BelongsTo<Admin, $this>
      */
@@ -110,7 +102,7 @@ class Commodity extends Model
     }
 
     /**
-     * Get the administrator who last updated the commodity.
+     * Get the administrator who last updated the commodity variety.
      *
      * @return BelongsTo<Admin, $this>
      */
@@ -120,10 +112,10 @@ class Commodity extends Model
     }
 
     /**
-     * Scope query to only include active commodities.
+     * Scope query to only include active commodity varieties.
      *
-     * @param  Builder<Commodity>  $query
-     * @return Builder<Commodity>
+     * @param  Builder<CommodityVariety>  $query
+     * @return Builder<CommodityVariety>
      */
     public function scopeActive(Builder $query): Builder
     {
@@ -133,8 +125,8 @@ class Commodity extends Model
     /**
      * Scope query to filter by status if supplied.
      *
-     * @param  Builder<Commodity>  $query
-     * @return Builder<Commodity>
+     * @param  Builder<CommodityVariety>  $query
+     * @return Builder<CommodityVariety>
      */
     public function scopeStatus(Builder $query, mixed $status): Builder
     {
@@ -146,15 +138,47 @@ class Commodity extends Model
     }
 
     /**
-     * Scope query to filter by commodity category if supplied.
+     * Scope query to filter by commodity if supplied.
      *
-     * @param  Builder<Commodity>  $query
-     * @return Builder<Commodity>
+     * @param  Builder<CommodityVariety>  $query
+     * @return Builder<CommodityVariety>
+     */
+    public function scopeCommodity(Builder $query, mixed $commodityId): Builder
+    {
+        if ($commodityId !== null && $commodityId !== '') {
+            $query->where('commodity_id', (int) $commodityId);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Scope query to filter by commodity subcategory if supplied.
+     *
+     * @param  Builder<CommodityVariety>  $query
+     * @return Builder<CommodityVariety>
+     */
+    public function scopeSubcategory(Builder $query, mixed $subcategoryId): Builder
+    {
+        if ($subcategoryId !== null && $subcategoryId !== '') {
+            $query->where('commodity_subcategory_id', (int) $subcategoryId);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Scope query to filter by commodity category (through parent commodity) if supplied.
+     *
+     * @param  Builder<CommodityVariety>  $query
+     * @return Builder<CommodityVariety>
      */
     public function scopeCategory(Builder $query, mixed $categoryId): Builder
     {
         if ($categoryId !== null && $categoryId !== '') {
-            $query->where('commodity_category_id', (int) $categoryId);
+            $query->whereHas('commodity', function (Builder $q) use ($categoryId) {
+                $q->where('commodity_category_id', (int) $categoryId);
+            });
         }
 
         return $query;
@@ -163,8 +187,8 @@ class Commodity extends Model
     /**
      * Scope query to search by English name, Hindi name, or slug.
      *
-     * @param  Builder<Commodity>  $query
-     * @return Builder<Commodity>
+     * @param  Builder<CommodityVariety>  $query
+     * @return Builder<CommodityVariety>
      */
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
@@ -184,8 +208,8 @@ class Commodity extends Model
     /**
      * Scope query to sort by a whitelisted column and order.
      *
-     * @param  Builder<Commodity>  $query
-     * @return Builder<Commodity>
+     * @param  Builder<CommodityVariety>  $query
+     * @return Builder<CommodityVariety>
      */
     public function scopeSorted(Builder $query, ?string $sortBy = 'sort_order', ?string $sortOrder = 'asc'): Builder
     {

@@ -50,6 +50,14 @@ class PermissionSeeder extends Seeder
             'commodity-subcategories.create',
             'commodity-subcategories.update',
             'commodity-subcategories.delete',
+            'commodity-variety.view',
+            'commodity-variety.create',
+            'commodity-variety.update',
+            'commodity-variety.delete',
+            'commodity-varieties.view',
+            'commodity-varieties.create',
+            'commodity-varieties.update',
+            'commodity-varieties.delete',
         ];
 
         foreach ($adminPermissions as $permissionName) {

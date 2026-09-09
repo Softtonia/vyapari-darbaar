@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\CommoditySubcategory;
+use App\Models\CommodityVariety;
+use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -116,7 +118,7 @@ class CommoditySubcategoryService
             ]);
         });
 
-        $this->clearCache($commodityId);
+        $this->clearCache($commodityId, [], (int) $subcat->id);
 
         return $subcat->load([
             'commodity:id,commodity_category_id,name_en,name_hi,slug',
@@ -128,10 +130,18 @@ class CommoditySubcategoryService
      * Update an existing commodity subcategory.
      *
      * @param  array<string, mixed>  $data
+     * @throws DomainException
      */
     public function updateCommoditySubcategory(CommoditySubcategory $commoditySubcategory, array $data, ?int $adminId = null): CommoditySubcategory
     {
         $oldCommodityId = (int) $commoditySubcategory->commodity_id;
+
+        // Subcategory Reparenting Protection: If moving to another commodity, ensure no non-deleted varieties are assigned
+        if (array_key_exists('commodity_id', $data) && (int) $data['commodity_id'] !== $oldCommodityId) {
+            if (CommodityVariety::query()->where('commodity_subcategory_id', $commoditySubcategory->id)->exists()) {
+                throw new DomainException('Commodity subcategory cannot be moved because varieties are assigned to it.');
+            }
+        }
 
         $updatedSubcategory = DB::transaction(function () use ($commoditySubcategory, $data, $adminId) {
             $updateData = [];
@@ -185,7 +195,7 @@ class CommoditySubcategoryService
 
         $newCommodityId = (int) $updatedSubcategory->commodity_id;
         $affectedCommodityIds = array_unique([$oldCommodityId, $newCommodityId]);
-        $this->clearCache(null, $affectedCommodityIds);
+        $this->clearCache(null, $affectedCommodityIds, (int) $updatedSubcategory->id);
 
         return $updatedSubcategory;
     }
@@ -196,6 +206,7 @@ class CommoditySubcategoryService
     public function updateStatus(CommoditySubcategory $commoditySubcategory, bool $status, ?int $adminId = null): CommoditySubcategory
     {
         $commodityId = (int) $commoditySubcategory->commodity_id;
+        $subcategoryId = (int) $commoditySubcategory->id;
 
         $updatedSubcategory = DB::transaction(function () use ($commoditySubcategory, $status, $adminId) {
             $commoditySubcategory->update([
@@ -209,7 +220,7 @@ class CommoditySubcategoryService
             ]);
         });
 
-        $this->clearCache($commodityId);
+        $this->clearCache($commodityId, [], $subcategoryId);
 
         return $updatedSubcategory;
     }
@@ -242,35 +253,57 @@ class CommoditySubcategoryService
                 ]);
         });
 
-        $this->clearCache(null, $affectedCommodityIds);
+        $this->clearCache(null, $affectedCommodityIds, null, $ids);
 
         return $updatedCount;
     }
 
     /**
      * Soft delete a single commodity subcategory safely.
+     *
+     * @throws DomainException
      */
     public function deleteCommoditySubcategory(CommoditySubcategory $commoditySubcategory): void
     {
+        if (CommodityVariety::query()->where('commodity_subcategory_id', $commoditySubcategory->id)->exists()) {
+            throw new DomainException('Commodity subcategory cannot be deleted because it has varieties assigned.');
+        }
+
         $commodityId = (int) $commoditySubcategory->commodity_id;
+        $subcategoryId = (int) $commoditySubcategory->id;
 
         DB::transaction(function () use ($commoditySubcategory) {
             $commoditySubcategory->delete();
         });
 
-        $this->clearCache($commodityId);
+        $this->clearCache($commodityId, [], $subcategoryId);
     }
 
     /**
      * Bulk soft delete multiple commodity subcategories atomically across potentially multiple commodities.
      *
      * @param  list<int>  $ids
-     * @return int Number of deleted commodity subcategories
+     * @return array{deleted_count: int, blocked_ids: list<int>}
      */
-    public function bulkDeleteCommoditySubcategories(array $ids): int
+    public function bulkDeleteCommoditySubcategories(array $ids): array
     {
         if (empty($ids)) {
-            return 0;
+            return ['deleted_count' => 0, 'blocked_ids' => []];
+        }
+
+        // Check if any subcategory has assigned non-deleted varieties
+        $blockedIds = CommodityVariety::query()
+            ->whereIn('commodity_subcategory_id', $ids)
+            ->distinct()
+            ->pluck('commodity_subcategory_id')
+            ->map(fn ($id) => (int) $id)
+            ->toArray();
+
+        if (! empty($blockedIds)) {
+            return [
+                'deleted_count' => 0,
+                'blocked_ids' => array_values($blockedIds),
+            ];
         }
 
         // Retrieve affected commodity IDs before mutation
@@ -287,9 +320,12 @@ class CommoditySubcategoryService
                 ->delete();
         });
 
-        $this->clearCache(null, $affectedCommodityIds);
+        $this->clearCache(null, $affectedCommodityIds, null, $ids);
 
-        return $deletedCount;
+        return [
+            'deleted_count' => $deletedCount,
+            'blocked_ids' => [],
+        ];
     }
 
     /**
@@ -317,13 +353,19 @@ class CommoditySubcategoryService
     }
 
     /**
-     * Invalidate commodity subcategory options caches.
+     * Invalidate commodity subcategory and cross-module variety options caches.
      *
      * @param  int|null  $commodityId Single commodity ID to invalidate
      * @param  list<int>  $commodityIds List of commodity IDs to invalidate
+     * @param  int|null  $subcategoryId Single subcategory ID to invalidate
+     * @param  list<int>  $subcategoryIds List of subcategory IDs to invalidate
      */
-    public function clearCache(?int $commodityId = null, array $commodityIds = []): void
-    {
+    public function clearCache(
+        ?int $commodityId = null,
+        array $commodityIds = [],
+        ?int $subcategoryId = null,
+        array $subcategoryIds = []
+    ): void {
         try {
             Cache::forget(self::CACHE_KEY_OPTIONS_ALL);
 
@@ -334,6 +376,29 @@ class CommoditySubcategoryService
             foreach ($commodityIds as $commId) {
                 if ($commId) {
                     Cache::forget(self::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commId);
+                }
+            }
+
+            // Cross-module cache invalidation for CommodityVarieties
+            Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_ALL);
+
+            if ($commodityId !== null) {
+                Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commodityId);
+            }
+
+            foreach ($commodityIds as $commId) {
+                if ($commId) {
+                    Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commId);
+                }
+            }
+
+            if ($subcategoryId !== null) {
+                Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subcategoryId);
+            }
+
+            foreach ($subcategoryIds as $subId) {
+                if ($subId) {
+                    Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subId);
                 }
             }
         } catch (\Throwable $e) {

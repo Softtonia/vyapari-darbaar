@@ -1363,3 +1363,246 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   }
   ```
 
+---
+
+## 10. Commodity Varieties Management (Admin)
+*All endpoints require `Authorization: Bearer <admin_token>`, `EnsureAdmin` middleware, and `throttle:admin-api`.*
+
+### Database Schema & Hierarchy
+- **Hierarchy:** `CommodityCategory` -> `Commodity` -> `CommoditySubcategory` (optional) -> `CommodityVariety`
+- **Foreign Keys:**
+  - `commodity_id` (`BIGINT UNSIGNED`, required, FK -> `commodities.id`, `restrictOnDelete`)
+  - `commodity_subcategory_id` (`BIGINT UNSIGNED`, nullable, FK -> `commodity_subcategories.id`, `restrictOnDelete`)
+- **Uniqueness:** `UNIQUE(commodity_id, slug)` (enforces unique slugs per commodity).
+
+---
+
+### 10.1 List Commodity Varieties
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-varieties`
+- **Query Parameters:**
+  - `page`: integer, min:1 (default: 1)
+  - `per_page`: integer, min:1, max:100 (default: 20)
+  - `search`: string, max:150 (searches `name_en`, `name_hi`, `slug`)
+  - `commodity_category_id`: integer, filter through commodity relationship
+  - `commodity_id`: integer, filter by parent commodity
+  - `commodity_subcategory_id`: integer, filter by parent subcategory
+  - `status`: boolean (1 or 0)
+  - `sort_by`: `id`, `commodity_id`, `commodity_subcategory_id`, `name_en`, `name_hi`, `slug`, `sort_order`, `status`, `created_at`, `updated_at` (default: `sort_order`)
+  - `sort_order`: `asc` or `desc` (default: `asc`)
+- **Relational Consistency:** Returns `422 Unprocessable Entity` if combined category/commodity/subcategory filters do not match.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity varieties fetched successfully.",
+      "data": {
+          "items": [
+              {
+                  "id": 1,
+                  "commodity_id": 5,
+                  "commodity_subcategory_id": 8,
+                  "commodity": {
+                      "id": 5,
+                      "commodity_category_id": 1,
+                      "name_en": "Wheat",
+                      "name_hi": "गेहूं",
+                      "slug": "wheat",
+                      "category": {
+                          "id": 1,
+                          "name_en": "Grains",
+                          "name_hi": "अनाज",
+                          "slug": "grains"
+                      }
+                  },
+                  "subcategory": {
+                      "id": 8,
+                      "commodity_id": 5,
+                      "name_en": "Milling Wheat",
+                      "name_hi": "मिलिंग गेहूं",
+                      "slug": "milling-wheat"
+                  },
+                  "name_en": "HD-2967",
+                  "name_hi": "एचडी-2967",
+                  "slug": "hd-2967",
+                  "sort_order": 1,
+                  "status": true,
+                  "created_at": "2026-09-09T10:00:00.000000Z",
+                  "updated_at": "2026-09-09T10:00:00.000000Z"
+              }
+          ],
+          "pagination": {
+              "current_page": 1,
+              "per_page": 20,
+              "total": 1,
+              "last_page": 1
+          }
+      }
+  }
+  ```
+
+---
+
+### 10.2 Commodity Variety Options (Dropdown)
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-varieties/options`
+- **Query Parameters (Optional):**
+  - `commodity_id`: integer
+  - `commodity_subcategory_id`: integer
+- **Effective Active Visibility:** Varieties only appear if `variety.status = 1`, `commodity.status = 1`, `category.status = 1`, and if assigned to a subcategory, `subcategory.status = 1`.
+- **Cache:** Redis cached (`TTL = 3600s`).
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity variety options retrieved successfully.",
+      "data": [
+          {
+              "id": 1,
+              "commodity_id": 5,
+              "commodity_subcategory_id": 8,
+              "name_en": "HD-2967",
+              "name_hi": "एचडी-2967",
+              "slug": "hd-2967"
+          }
+      ]
+  }
+  ```
+
+---
+
+### 10.3 Create Commodity Variety
+- **Method:** `POST`
+- **URI:** `/api/admin/commodity-varieties`
+- **Request Body (Direct Commodity Variety):**
+  ```json
+  {
+      "commodity_id": 5,
+      "commodity_subcategory_id": null,
+      "name_en": "HD-2967",
+      "name_hi": "एचडी-2967",
+      "slug": "hd-2967",
+      "description_en": "High yield semi-dwarf wheat variety.",
+      "description_hi": "उच्च उपज देने वाली अर्ध-बौनी गेहूं किस्म।",
+      "sort_order": 1,
+      "status": true
+  }
+  ```
+- **Request Body (Subcategory Variety):**
+  ```json
+  {
+      "commodity_id": 5,
+      "commodity_subcategory_id": 8,
+      "name_en": "Lokwan Premium",
+      "name_hi": "लोकवान प्रीमियम",
+      "slug": "lokwan-premium",
+      "sort_order": 2,
+      "status": true
+  }
+  ```
+- **Success (201 Created):** Returns `CommodityVarietyResource`.
+
+---
+
+### 10.4 Get Commodity Variety Detail
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-varieties/{id}`
+- **Success (200 OK):** Returns detailed `CommodityVarietyResource`.
+
+---
+
+### 10.5 Update Commodity Variety
+- **Method:** `PUT`
+- **URI:** `/api/admin/commodity-varieties/{id}`
+- **Request Body:**
+  ```json
+  {
+      "commodity_id": 5,
+      "commodity_subcategory_id": 8,
+      "name_en": "HD-2967 (Certified)",
+      "name_hi": "एचडी-2967 (प्रमाणित)",
+      "slug": "hd-2967-certified",
+      "description_en": "Updated description.",
+      "sort_order": 1,
+      "status": true
+  }
+  ```
+- **Reassignment Rules:**
+  - If `commodity_id` changes, request MUST explicitly specify `commodity_subcategory_id` (either `null` or a valid subcategory belonging to the new commodity).
+  - Explicit `commodity_subcategory_id = null` detaches the variety from subcategory, while omitting the field retains existing subcategory.
+- **Success (200 OK):** Returns updated `CommodityVarietyResource`.
+
+---
+
+### 10.6 Update Commodity Variety Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/commodity-varieties/{id}/status`
+- **Request Body:**
+  ```json
+  {
+      "status": false
+  }
+  ```
+- **Success (200 OK):** Returns updated `CommodityVarietyResource`.
+
+---
+
+### 10.7 Bulk Update Commodity Variety Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/commodity-varieties/bulk-status`
+- **Request Body:**
+  ```json
+  {
+      "ids": [1, 2, 3],
+      "status": true
+  }
+  ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity varieties status updated successfully.",
+      "data": {
+          "updated_count": 3
+      }
+  }
+  ```
+
+---
+
+### 10.8 Delete Commodity Variety
+- **Method:** `DELETE`
+- **URI:** `/api/admin/commodity-varieties/{id}`
+- **Behavior:** Soft deletes variety and invalidates parent options caches.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity variety deleted successfully."
+  }
+  ```
+
+---
+
+### 10.9 Bulk Delete Commodity Varieties
+- **Method:** `POST`
+- **URI:** `/api/admin/commodity-varieties/bulk-delete`
+- **Request Body:**
+  ```json
+  {
+      "ids": [1, 2, 3]
+  }
+  ```
+- **Behavior:** Validates IDs (max 100, non-deleted, existing), atomically soft-deletes in a single transaction, and purges all affected parent options caches.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Commodity varieties deleted successfully.",
+      "data": {
+          "deleted_count": 3
+      }
+  }
+  ```
+
+

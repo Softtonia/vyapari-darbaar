@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\Admin\CommodityCategoryController;
 use App\Http\Controllers\Api\Admin\CommodityController;
 use App\Http\Controllers\Api\Admin\CommoditySubcategoryController;
+use App\Http\Controllers\Api\Admin\CommodityVarietyController;
 use App\Http\Controllers\Api\Admin\EmailTemplateController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\User\UserAuthController;
@@ -178,6 +179,28 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.commodity-subcategories.destroy');
             Route::patch('{commoditySubcategory}/status', [CommoditySubcategoryController::class, 'updateStatus'])
                 ->name('admin.commodity-subcategories.update-status');
+        });
+
+        // Commodity Variety management
+        Route::prefix('commodity-varieties')->group(function () {
+            Route::get('options', [CommodityVarietyController::class, 'options'])
+                ->name('admin.commodity-varieties.options');
+            Route::get('/', [CommodityVarietyController::class, 'index'])
+                ->name('admin.commodity-varieties.index');
+            Route::post('/', [CommodityVarietyController::class, 'store'])
+                ->name('admin.commodity-varieties.store');
+            Route::post('bulk-delete', [CommodityVarietyController::class, 'bulkDestroy'])
+                ->name('admin.commodity-varieties.bulk-delete');
+            Route::patch('bulk-status', [CommodityVarietyController::class, 'bulkStatus'])
+                ->name('admin.commodity-varieties.bulk-status');
+            Route::get('{commodityVariety}', [CommodityVarietyController::class, 'show'])
+                ->name('admin.commodity-varieties.show');
+            Route::put('{commodityVariety}', [CommodityVarietyController::class, 'update'])
+                ->name('admin.commodity-varieties.update');
+            Route::delete('{commodityVariety}', [CommodityVarietyController::class, 'destroy'])
+                ->name('admin.commodity-varieties.destroy');
+            Route::patch('{commodityVariety}/status', [CommodityVarietyController::class, 'updateStatus'])
+                ->name('admin.commodity-varieties.update-status');
         });
     });
 });

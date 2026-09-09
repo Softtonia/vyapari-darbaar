@@ -2615,6 +2615,364 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "Commodity Varieties",
+            "item": [
+                {
+                    "name": "List Commodity Varieties",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-varieties?page=1&per_page=20&commodity_category_id={{commodity_category_id}}&commodity_id={{commodity_id}}&commodity_subcategory_id={{commodity_subcategory_id}}&search=&status=1&sort_by=sort_order&sort_order=asc",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-varieties"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "commodity_category_id",
+                                    "value": "{{commodity_category_id}}"
+                                },
+                                {
+                                    "key": "commodity_id",
+                                    "value": "{{commodity_id}}"
+                                },
+                                {
+                                    "key": "commodity_subcategory_id",
+                                    "value": "{{commodity_subcategory_id}}"
+                                },
+                                {
+                                    "key": "search",
+                                    "value": ""
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "sort_by",
+                                    "value": "sort_order"
+                                },
+                                {
+                                    "key": "sort_order",
+                                    "value": "asc"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Commodity Variety Options",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-varieties/options?commodity_id={{commodity_id}}&commodity_subcategory_id={{commodity_subcategory_id}}",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-varieties",
+                                "options"
+                            ],
+                            "query": [
+                                {
+                                    "key": "commodity_id",
+                                    "value": "{{commodity_id}}"
+                                },
+                                {
+                                    "key": "commodity_subcategory_id",
+                                    "value": "{{commodity_subcategory_id}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Commodity Variety",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "var jsonData = pm.response.json();",
+                                    "if (jsonData.status === true && jsonData.data && jsonData.data.id) {",
+                                    "    pm.environment.set('commodity_variety_id', jsonData.data.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"commodity_subcategory_id\": {{commodity_subcategory_id}},\n    \"name_en\": \"HD-2967\",\n    \"name_hi\": \"एचडी-2967\",\n    \"slug\": \"hd-2967\",\n    \"description_en\": \"High yielding semi-dwarf wheat variety.\",\n    \"description_hi\": \"उच्च उपज देने वाली अर्ध-बौनी गेहूं की किस्म।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-varieties",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-varieties"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Commodity Variety Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-varieties/{{commodity_variety_id}}",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-varieties",
+                                "{{commodity_variety_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Commodity Variety",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"commodity_subcategory_id\": {{commodity_subcategory_id}},\n    \"name_en\": \"HD-2967 (Certified)\",\n    \"name_hi\": \"एचडी-2967 (प्रमाणित)\",\n    \"slug\": \"hd-2967-certified\",\n    \"description_en\": \"Certified grade high yielding wheat variety.\",\n    \"description_hi\": \"प्रमाणित ग्रेड उच्च उपज गेहूं किस्म।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-varieties/{{commodity_variety_id}}",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-varieties",
+                                "{{commodity_variety_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Commodity Variety Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-varieties/{{commodity_variety_id}}/status",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-varieties",
+                                "{{commodity_variety_id}}",
+                                "status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Bulk Update Commodity Variety Status",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"ids\": [1, 2, 3],\n    \"status\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-varieties/bulk-status",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-varieties",
+                                "bulk-status"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Commodity Variety",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-varieties/{{commodity_variety_id}}",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-varieties",
+                                "{{commodity_variety_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Bulk Delete Commodity Varieties",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{admin_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"ids\": [2, 3, 4]\n}"
+                        },
+                        "url": {
+                            "raw": "{{live}}/api/admin/commodity-varieties/bulk-delete",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "commodity-varieties",
+                                "bulk-delete"
+                            ]
+                        }
+                    }
+                }
+            ]
         }
     ]
 }

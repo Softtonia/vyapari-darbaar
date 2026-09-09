@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CommoditySubcategory extends Model
@@ -76,6 +77,16 @@ class CommoditySubcategory extends Model
     public function commodity(): BelongsTo
     {
         return $this->belongsTo(Commodity::class, 'commodity_id');
+    }
+
+    /**
+     * Get the varieties belonging to this commodity subcategory.
+     *
+     * @return HasMany<CommodityVariety, $this>
+     */
+    public function varieties(): HasMany
+    {
+        return $this->hasMany(CommodityVariety::class, 'commodity_subcategory_id');
     }
 
     /**

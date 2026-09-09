@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Commodity;
 use App\Models\CommoditySubcategory;
+use App\Models\CommodityVariety;
 use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -237,8 +238,11 @@ class CommodityService
      */
     public function deleteCommodity(Commodity $commodity): void
     {
-        if (CommoditySubcategory::query()->where('commodity_id', $commodity->id)->exists()) {
-            throw new DomainException('Commodity cannot be deleted because it has subcategories assigned.');
+        if (
+            CommoditySubcategory::query()->where('commodity_id', $commodity->id)->exists() ||
+            CommodityVariety::query()->where('commodity_id', $commodity->id)->exists()
+        ) {
+            throw new DomainException('Commodity cannot be deleted because it has subcategories or varieties assigned.');
         }
 
         $categoryId = (int) $commodity->commodity_category_id;
@@ -263,18 +267,29 @@ class CommodityService
             return ['deleted_count' => 0, 'blocked_ids' => []];
         }
 
-        // Check if any commodity has assigned subcategories (regardless of subcategory status)
-        $blockedIds = CommoditySubcategory::query()
+        // Check if any commodity has assigned subcategories
+        $blockedSubcategoryIds = CommoditySubcategory::query()
             ->whereIn('commodity_id', $ids)
             ->distinct()
             ->pluck('commodity_id')
             ->map(fn ($id) => (int) $id)
             ->toArray();
 
+        // Check if any commodity has assigned direct or indirect varieties
+        $blockedVarietyIds = CommodityVariety::query()
+            ->whereIn('commodity_id', $ids)
+            ->distinct()
+            ->pluck('commodity_id')
+            ->map(fn ($id) => (int) $id)
+            ->toArray();
+
+        $blockedIds = array_values(array_unique(array_merge($blockedSubcategoryIds, $blockedVarietyIds)));
+        sort($blockedIds);
+
         if (! empty($blockedIds)) {
             return [
                 'deleted_count' => 0,
-                'blocked_ids' => array_values($blockedIds),
+                'blocked_ids' => $blockedIds,
             ];
         }
 
@@ -324,7 +339,7 @@ class CommodityService
     }
 
     /**
-     * Invalidate commodity options caches and subcategory options caches.
+     * Invalidate commodity options caches, subcategory options caches, and variety options caches.
      *
      * @param  int|null  $categoryId Single category ID to invalidate
      * @param  list<int>  $categoryIds List of category IDs to invalidate
@@ -349,17 +364,36 @@ class CommodityService
             // Cross-module cache invalidation for CommoditySubcategories
             Cache::forget(CommoditySubcategoryService::CACHE_KEY_OPTIONS_ALL);
 
-            if ($commodityId !== null) {
-                Cache::forget(CommoditySubcategoryService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commodityId);
-            }
+            $allCommIds = array_values(array_filter(array_unique(array_merge(
+                $commodityId !== null ? [$commodityId] : [],
+                $commodityIds
+            ))));
 
-            foreach ($commodityIds as $commId) {
-                if ($commId) {
+            if (! empty($allCommIds)) {
+                foreach ($allCommIds as $commId) {
                     Cache::forget(CommoditySubcategoryService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commId);
                 }
+
+                // Invalidate subcategory options for varieties and variety options for all affected commodities
+                $subcatIds = CommoditySubcategory::query()
+                    ->whereIn('commodity_id', $allCommIds)
+                    ->pluck('id')
+                    ->map(fn ($id) => (int) $id)
+                    ->toArray();
+
+                Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_ALL);
+                foreach ($allCommIds as $commId) {
+                    Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commId);
+                }
+                foreach ($subcatIds as $subId) {
+                    Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subId);
+                }
+            } else {
+                Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_ALL);
             }
         } catch (\Throwable $e) {
             // Non-blocking cache exception
         }
     }
 }
+

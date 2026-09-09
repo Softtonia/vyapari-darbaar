@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Commodity;
 use App\Models\CommodityCategory;
+use App\Models\CommoditySubcategory;
 use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -290,7 +291,7 @@ class CommodityCategoryService
     }
 
     /**
-     * Invalidate commodity category Redis caches, corresponding commodity options, and subcategory options.
+     * Invalidate commodity category Redis caches, corresponding commodity options, subcategory options, and variety options.
      *
      * @param  int|null  $categoryId
      * @param  list<int>  $categoryIds
@@ -318,14 +319,32 @@ class CommodityCategoryService
                 $affectedCommodityIds = Commodity::query()
                     ->whereIn('commodity_category_id', $allCatIds)
                     ->pluck('id')
+                    ->map(fn ($id) => (int) $id)
                     ->toArray();
 
                 Cache::forget(CommoditySubcategoryService::CACHE_KEY_OPTIONS_ALL);
                 foreach ($affectedCommodityIds as $commId) {
                     Cache::forget(CommoditySubcategoryService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commId);
                 }
+
+                // Cross-module cache invalidation for Commodity Varieties
+                Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_ALL);
+                foreach ($affectedCommodityIds as $commId) {
+                    Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_COMMODITY_PREFIX.$commId);
+                }
+
+                $affectedSubcategoryIds = CommoditySubcategory::query()
+                    ->whereIn('commodity_id', $affectedCommodityIds)
+                    ->pluck('id')
+                    ->map(fn ($id) => (int) $id)
+                    ->toArray();
+
+                foreach ($affectedSubcategoryIds as $subId) {
+                    Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_SUBCATEGORY_PREFIX.$subId);
+                }
             } else {
                 Cache::forget(CommoditySubcategoryService::CACHE_KEY_OPTIONS_ALL);
+                Cache::forget(CommodityVarietyService::CACHE_KEY_OPTIONS_ALL);
             }
         } catch (\Throwable $e) {
             // Non-blocking cache exception
