@@ -38,7 +38,7 @@ return new class extends Migration
                 $table->id();
                 $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
                 $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-                $table->string('role', 50)->default('owner'); // 'owner', 'manager', 'employee'
+                $table->string('role', 50)->default('trader');
                 $table->boolean('is_primary')->default(true);
                 $table->timestamps();
 

@@ -110,7 +110,7 @@ class CreateUserAction
                 ]);
 
                 $newUser->companies()->attach($company->id, [
-                    'role' => 'owner',
+                    'role' => 'trader',
                     'is_primary' => true,
                 ]);
             }

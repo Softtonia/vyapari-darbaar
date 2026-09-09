@@ -85,7 +85,7 @@ class CompanyManagementTest extends TestCase
         $this->assertDatabaseHas('user_has_companies', [
             'user_id' => $user->id,
             'company_id' => $company->id,
-            'role' => 'owner',
+            'role' => 'trader',
             'is_primary' => true,
         ]);
 
@@ -155,7 +155,7 @@ class CompanyManagementTest extends TestCase
             'commodities_handled' => ['Wheat'],
         ]);
 
-        $user->companies()->attach($company->id, ['role' => 'owner', 'is_primary' => true]);
+        $user->companies()->attach($company->id, ['role' => 'trader', 'is_primary' => true]);
 
         Sanctum::actingAs($user, ['*']);
 
