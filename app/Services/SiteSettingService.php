@@ -22,9 +22,27 @@ class SiteSettingService
      */
     public function getPublicSettings(): ?SiteSetting
     {
-        return Cache::remember(self::PUBLIC_CACHE_KEY, self::PUBLIC_CACHE_TTL, function () {
-            return SiteSetting::query()->find(1) ?? SiteSetting::query()->first();
-        });
+        try {
+            $setting = Cache::get(self::PUBLIC_CACHE_KEY);
+
+            if ($setting instanceof SiteSetting) {
+                return $setting;
+            }
+
+            if ($setting !== null) {
+                Cache::forget(self::PUBLIC_CACHE_KEY);
+            }
+        } catch (Throwable) {
+            Cache::forget(self::PUBLIC_CACHE_KEY);
+        }
+
+        $setting = SiteSetting::query()->find(1) ?? SiteSetting::query()->first();
+
+        if ($setting) {
+            Cache::put(self::PUBLIC_CACHE_KEY, $setting, self::PUBLIC_CACHE_TTL);
+        }
+
+        return $setting;
     }
 
     /**

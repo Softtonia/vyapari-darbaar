@@ -38,9 +38,27 @@ class DynamicMailConfigService
      */
     public function getSettings(): ?SmtpSetting
     {
-        return Cache::remember(self::CACHE_KEY, self::CACHE_TTL, function () {
-            return SmtpSetting::query()->find(1);
-        });
+        try {
+            $setting = Cache::get(self::CACHE_KEY);
+
+            if ($setting instanceof SmtpSetting) {
+                return $setting;
+            }
+
+            if ($setting !== null) {
+                Cache::forget(self::CACHE_KEY);
+            }
+        } catch (Throwable) {
+            Cache::forget(self::CACHE_KEY);
+        }
+
+        $setting = SmtpSetting::query()->find(1);
+
+        if ($setting) {
+            Cache::put(self::CACHE_KEY, $setting, self::CACHE_TTL);
+        }
+
+        return $setting;
     }
 
     /**
