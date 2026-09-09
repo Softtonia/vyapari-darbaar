@@ -50,7 +50,7 @@ class DynamicMailConfigService
     {
         $smtp = $this->getSettings();
 
-        if ($smtp && $smtp->status) {
+        if ($smtp && $smtp->isActive()) {
             $this->applyConfiguration($smtp);
         } else {
             $this->restoreFallback();
@@ -92,18 +92,28 @@ class DynamicMailConfigService
      */
     protected function applyConfiguration(SmtpSetting $smtp): void
     {
+        $scheme = match (strtolower((string) $smtp->encryption)) {
+            'ssl', 'smtps' => 'smtps',
+            default => 'smtp',
+        };
+
+        $mailer = $smtp->mailer ?: 'smtp';
+        $fromEmail = $smtp->from_email ?? $smtp->from_address;
+        $fromName = $smtp->from_name ?: config('app.name', 'Vyapari Darbar');
+
         config([
-            'mail.default' => 'smtp',
+            'mail.default' => $mailer,
 
             'mail.mailers.smtp.transport' => 'smtp',
-            'mail.mailers.smtp.scheme' => $smtp->scheme,
+            'mail.mailers.smtp.scheme' => $scheme,
             'mail.mailers.smtp.host' => $smtp->host,
             'mail.mailers.smtp.port' => (int) $smtp->port,
             'mail.mailers.smtp.username' => $smtp->username,
             'mail.mailers.smtp.password' => $smtp->password,
+            'mail.mailers.smtp.encryption' => in_array(strtolower((string) $smtp->encryption), ['tls', 'ssl', 'starttls'], true) ? $smtp->encryption : null,
 
-            'mail.from.address' => $smtp->from_address,
-            'mail.from.name' => $smtp->from_name,
+            'mail.from.address' => $fromEmail,
+            'mail.from.name' => $fromName,
         ]);
 
         app(MailManager::class)->purge('smtp');
@@ -119,6 +129,21 @@ class DynamicMailConfigService
      */
     public function updateSettings(array $data): SmtpSetting
     {
+        // Normalize from_address to from_email if needed
+        if (! isset($data['from_email']) && isset($data['from_address'])) {
+            $data['from_email'] = $data['from_address'];
+        }
+
+        // Normalize status
+        if (isset($data['status'])) {
+            $raw = $data['status'];
+            if ($raw === true || $raw === '1' || $raw === 1 || strtolower((string) $raw) === 'active') {
+                $data['status'] = 'active';
+            } elseif ($raw === false || $raw === '0' || $raw === 0 || strtolower((string) $raw) === 'pending' || strtolower((string) $raw) === 'inactive') {
+                $data['status'] = 'pending';
+            }
+        }
+
         $setting = DB::transaction(function () use ($data) {
             /** @var SmtpSetting|null $existing */
             $existing = SmtpSetting::query()->whereKey(1)->lockForUpdate()->first();
@@ -168,9 +193,10 @@ class DynamicMailConfigService
 
         $subject = 'Vyapari Darbar — SMTP Diagnostic Test Email';
         $appName = $smtp->from_name ?: config('app.name', 'Vyapari Darbar');
-        $fromAddress = $smtp->from_address;
-        $fromName = $smtp->from_name;
+        $fromAddress = $smtp->from_email ?? $smtp->from_address;
+        $fromName = $smtp->from_name ?: $appName;
         $timestamp = now()->toDateTimeString();
+        $encryption = $smtp->encryption ?: 'none';
 
         $htmlBody = <<<HTML
 <!DOCTYPE html>
@@ -189,8 +215,9 @@ class DynamicMailConfigService
         <div style="background-color: #f8fafc; border-left: 4px solid #38a169; padding: 12px 16px; margin: 20px 0;">
             <strong>Test Details:</strong>
             <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+                <li><strong>Mailer:</strong> {$smtp->mailer}</li>
                 <li><strong>Host:</strong> {$smtp->host}:{$smtp->port}</li>
-                <li><strong>Scheme:</strong> {$smtp->scheme}</li>
+                <li><strong>Encryption:</strong> {$encryption}</li>
                 <li><strong>From:</strong> {$fromName} &lt;{$fromAddress}&gt;</li>
                 <li><strong>Timestamp:</strong> {$timestamp} UTC</li>
             </ul>

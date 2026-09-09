@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -22,13 +23,15 @@ class SmtpSetting extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'mailer',
         'host',
         'port',
-        'scheme',
         'username',
         'password',
+        'from_email',
         'from_address',
         'from_name',
+        'encryption',
         'status',
     ];
 
@@ -51,7 +54,25 @@ class SmtpSetting extends Model
         return [
             'password' => 'encrypted',
             'port' => 'integer',
-            'status' => 'boolean',
         ];
+    }
+
+    /**
+     * Accessor & Mutator for from_address alias.
+     */
+    protected function fromAddress(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value, array $attributes) => $attributes['from_email'] ?? $value ?? null,
+            set: fn ($value) => ['from_email' => $value],
+        );
+    }
+
+    /**
+     * Check whether the SMTP setting is active.
+     */
+    public function isActive(): bool
+    {
+        return in_array(strtolower((string) $this->status), ['active', '1', 'true'], true);
     }
 }

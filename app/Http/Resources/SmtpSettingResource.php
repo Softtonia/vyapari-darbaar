@@ -15,13 +15,15 @@ class SmtpSettingResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'mailer' => $this->mailer ?? 'smtp',
             'host' => $this->host,
             'port' => (int) $this->port,
-            'scheme' => $this->scheme,
             'username' => $this->username,
-            'from_address' => $this->from_address,
+            'from_email' => $this->from_email ?? $this->from_address,
+            'from_address' => $this->from_email ?? $this->from_address,
             'from_name' => $this->from_name,
-            'status' => (bool) $this->status,
+            'encryption' => $this->encryption,
+            'status' => $this->status ?? 'active',
             'password_configured' => ! empty($this->password),
         ];
     }

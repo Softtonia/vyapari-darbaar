@@ -13,14 +13,15 @@ return new class extends Migration
     {
         Schema::create('smtp_settings', function (Blueprint $table) {
             $table->id();
+            $table->string('mailer', 50)->default('smtp');
             $table->string('host', 255);
             $table->unsignedSmallInteger('port')->default(587);
-            $table->string('scheme', 10)->default('smtp');
             $table->string('username', 255);
             $table->text('password');
-            $table->string('from_address', 255);
-            $table->string('from_name', 150);
-            $table->boolean('status')->default(true);
+            $table->string('from_email', 255);
+            $table->string('from_name', 150)->nullable();
+            $table->string('encryption', 20)->nullable();
+            $table->string('status', 20)->default('active');
             $table->timestamps();
         });
     }

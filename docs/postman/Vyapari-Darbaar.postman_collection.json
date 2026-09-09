@@ -3515,7 +3515,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"host\": \"smtp.zoho.in\",\n    \"port\": 465,\n    \"scheme\": \"smtps\",\n    \"username\": \"noreply@vyaparidarbar.com\",\n    \"password\": \"{{smtp_password}}\",\n    \"from_address\": \"noreply@vyaparidarbar.com\",\n    \"from_name\": \"Vyapari Darbar\",\n    \"status\": true\n}"
+                            "raw": "{\n    \"mailer\": \"smtp\",\n    \"host\": \"smtp.gmail.com\",\n    \"port\": 587,\n    \"username\": \"user@example.com\",\n    \"password\": \"{{smtp_password}}\",\n    \"from_email\": \"noreply@vyaparidarbar.com\",\n    \"from_name\": \"Vyapari Darbar\",\n    \"encryption\": \"tls\",\n    \"status\": \"active\"\n}"
                         },
                         "url": {
                             "raw": "{{live}}/api/admin/settings/smtp",

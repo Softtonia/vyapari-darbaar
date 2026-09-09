@@ -1996,13 +1996,15 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
       "status": true,
       "message": "SMTP settings fetched successfully.",
       "data": {
-          "host": "smtp.zoho.in",
-          "port": 465,
-          "scheme": "smtps",
-          "username": "noreply@vyaparidarbar.com",
+          "mailer": "smtp",
+          "host": "smtp.gmail.com",
+          "port": 587,
+          "username": "user@example.com",
+          "from_email": "noreply@vyaparidarbar.com",
           "from_address": "noreply@vyaparidarbar.com",
           "from_name": "Vyapari Darbar",
-          "status": true,
+          "encryption": "tls",
+          "status": "active",
           "password_configured": true
       }
   }
@@ -2016,25 +2018,27 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
 - **Authentication:** Bearer token (`auth:sanctum`, `admin` middleware)
 - **Permission:** `smtp-setting.update`
 - **Validation Rules:**
-  - `host`: `required|string|max:255`
-  - `port`: `required|integer|min:1|max:65535`
-  - `scheme`: `required|in:smtp,smtps`
+  - `mailer`: `required|string|max:50` (e.g. `smtp`)
+  - `host`: `required|string|max:255` (e.g. `smtp.gmail.com`)
+  - `port`: `required|integer|min:1|max:65535` (e.g. `587`, `465`)
   - `username`: `required|string|max:255`
   - `password`: `required` on initial setup; `nullable` on updates (omitted or `"********"` retains existing password)
-  - `from_address`: `required|email|max:255`
-  - `from_name`: `required|string|max:150`
-  - `status`: `required|boolean`
+  - `from_email`: `required|email|max:255` (supports `from_address` interchangeably)
+  - `from_name`: `nullable|string|max:150` (optional)
+  - `encryption`: `nullable|string|max:20|in:tls,ssl,starttls,none,smtp,smtps` (optional dropdown)
+  - `status`: `required|string|in:active,pending` (supports `'active'`, `'pending'`, `1`, `0`, `true`, `false`)
 - **Request Body Example:**
   ```json
   {
-      "host": "smtp.zoho.in",
-      "port": 465,
-      "scheme": "smtps",
-      "username": "noreply@vyaparidarbar.com",
+      "mailer": "smtp",
+      "host": "smtp.gmail.com",
+      "port": 587,
+      "username": "user@example.com",
       "password": "your-smtp-password",
-      "from_address": "noreply@vyaparidarbar.com",
+      "from_email": "noreply@vyaparidarbar.com",
       "from_name": "Vyapari Darbar",
-      "status": true
+      "encryption": "tls",
+      "status": "active"
   }
   ```
 - **Success (200 OK):**
@@ -2043,13 +2047,15 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
       "status": true,
       "message": "SMTP settings updated successfully.",
       "data": {
-          "host": "smtp.zoho.in",
-          "port": 465,
-          "scheme": "smtps",
-          "username": "noreply@vyaparidarbar.com",
+          "mailer": "smtp",
+          "host": "smtp.gmail.com",
+          "port": 587,
+          "username": "user@example.com",
+          "from_email": "noreply@vyaparidarbar.com",
           "from_address": "noreply@vyaparidarbar.com",
           "from_name": "Vyapari Darbar",
-          "status": true,
+          "encryption": "tls",
+          "status": "active",
           "password_configured": true
       }
   }

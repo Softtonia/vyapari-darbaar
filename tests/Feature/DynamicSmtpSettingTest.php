@@ -11,11 +11,9 @@ use App\Services\DynamicMailConfigService;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class DynamicSmtpSettingTest extends TestCase
@@ -119,14 +117,15 @@ class DynamicSmtpSettingTest extends TestCase
     public function test_get_smtp_settings_returns_safe_data_without_password(): void
     {
         SmtpSetting::create([
+            'mailer' => 'smtp',
             'host' => 'smtp.zoho.in',
             'port' => 465,
-            'scheme' => 'smtps',
             'username' => 'noreply@vyaparidarbar.com',
             'password' => 'secret-smtp-pass',
-            'from_address' => 'noreply@vyaparidarbar.com',
+            'from_email' => 'noreply@vyaparidarbar.com',
             'from_name' => 'Vyapari Darbar',
-            'status' => true,
+            'encryption' => 'ssl',
+            'status' => 'active',
         ]);
 
         $response = $this->getJson('/api/admin/settings/smtp', $this->authHeaders());
@@ -136,13 +135,14 @@ class DynamicSmtpSettingTest extends TestCase
                 'status' => true,
                 'message' => 'SMTP settings fetched successfully.',
                 'data' => [
+                    'mailer' => 'smtp',
                     'host' => 'smtp.zoho.in',
                     'port' => 465,
-                    'scheme' => 'smtps',
                     'username' => 'noreply@vyaparidarbar.com',
-                    'from_address' => 'noreply@vyaparidarbar.com',
+                    'from_email' => 'noreply@vyaparidarbar.com',
                     'from_name' => 'Vyapari Darbar',
-                    'status' => true,
+                    'encryption' => 'ssl',
+                    'status' => 'active',
                     'password_configured' => true,
                 ],
             ]);
@@ -158,13 +158,14 @@ class DynamicSmtpSettingTest extends TestCase
     public function test_initial_put_requires_password(): void
     {
         $this->putJson('/api/admin/settings/smtp', [
+            'mailer' => 'smtp',
             'host' => 'smtp.zoho.in',
             'port' => 465,
-            'scheme' => 'smtps',
             'username' => 'noreply@vyaparidarbar.com',
-            'from_address' => 'noreply@vyaparidarbar.com',
+            'from_email' => 'noreply@vyaparidarbar.com',
             'from_name' => 'Vyapari Darbar',
-            'status' => true,
+            'encryption' => 'ssl',
+            'status' => 'active',
         ], $this->authHeaders())
             ->assertStatus(422)
             ->assertJsonValidationErrors(['password']);
@@ -174,18 +175,21 @@ class DynamicSmtpSettingTest extends TestCase
     {
         // 1. Initial creation
         $res1 = $this->putJson('/api/admin/settings/smtp', [
+            'mailer' => 'smtp',
             'host' => 'smtp.zoho.in',
             'port' => 465,
-            'scheme' => 'smtps',
             'username' => 'noreply@vyaparidarbar.com',
             'password' => 'first-pass',
-            'from_address' => 'noreply@vyaparidarbar.com',
+            'from_email' => 'noreply@vyaparidarbar.com',
             'from_name' => 'Vyapari Darbar',
-            'status' => true,
+            'encryption' => 'ssl',
+            'status' => 'active',
         ], $this->authHeaders());
 
         $res1->assertStatus(200)
             ->assertJsonPath('data.host', 'smtp.zoho.in')
+            ->assertJsonPath('data.mailer', 'smtp')
+            ->assertJsonPath('data.status', 'active')
             ->assertJsonPath('data.password_configured', true);
 
         $this->assertEquals(1, SmtpSetting::count());
@@ -198,17 +202,19 @@ class DynamicSmtpSettingTest extends TestCase
 
         // 2. Update omitting password retains old password
         $res2 = $this->putJson('/api/admin/settings/smtp', [
+            'mailer' => 'smtp',
             'host' => 'smtp.mailgun.org',
             'port' => 587,
-            'scheme' => 'smtp',
             'username' => 'postmaster@vyaparidarbar.com',
-            'from_address' => 'noreply@vyaparidarbar.com',
+            'from_email' => 'noreply@vyaparidarbar.com',
             'from_name' => 'Vyapari Darbar Mailgun',
-            'status' => true,
+            'encryption' => 'tls',
+            'status' => 'pending',
         ], $this->authHeaders());
 
         $res2->assertStatus(200)
             ->assertJsonPath('data.host', 'smtp.mailgun.org')
+            ->assertJsonPath('data.status', 'pending')
             ->assertJsonPath('data.password_configured', true);
 
         $settingFresh = SmtpSetting::find(1);
@@ -217,28 +223,30 @@ class DynamicSmtpSettingTest extends TestCase
 
         // 3. Update with placeholder "********" also retains old password
         $this->putJson('/api/admin/settings/smtp', [
+            'mailer' => 'smtp',
             'host' => 'smtp.mailgun.org',
             'port' => 587,
-            'scheme' => 'smtp',
             'username' => 'postmaster@vyaparidarbar.com',
             'password' => '********',
-            'from_address' => 'noreply@vyaparidarbar.com',
+            'from_email' => 'noreply@vyaparidarbar.com',
             'from_name' => 'Vyapari Darbar Mailgun',
-            'status' => true,
+            'encryption' => 'tls',
+            'status' => 'active',
         ], $this->authHeaders())->assertStatus(200);
 
         $this->assertEquals('first-pass', SmtpSetting::find(1)->password);
 
         // 4. Update with new password replaces it securely
         $this->putJson('/api/admin/settings/smtp', [
+            'mailer' => 'smtp',
             'host' => 'smtp.mailgun.org',
             'port' => 587,
-            'scheme' => 'smtp',
             'username' => 'postmaster@vyaparidarbar.com',
             'password' => 'new-secret-2026',
-            'from_address' => 'noreply@vyaparidarbar.com',
+            'from_email' => 'noreply@vyaparidarbar.com',
             'from_name' => 'Vyapari Darbar Mailgun',
-            'status' => true,
+            'encryption' => 'tls',
+            'status' => 'active',
         ], $this->authHeaders())->assertStatus(200);
 
         $this->assertEquals('new-secret-2026', SmtpSetting::find(1)->password);
@@ -249,45 +257,31 @@ class DynamicSmtpSettingTest extends TestCase
     {
         // Invalid port
         $this->putJson('/api/admin/settings/smtp', [
+            'mailer' => 'smtp',
             'host' => 'smtp.example.com',
             'port' => 70000,
-            'scheme' => 'smtp',
             'username' => 'user',
             'password' => 'pass',
-            'from_address' => 'user@example.com',
+            'from_email' => 'user@example.com',
             'from_name' => 'Name',
-            'status' => true,
+            'status' => 'active',
         ], $this->authHeaders())
             ->assertStatus(422)
             ->assertJsonValidationErrors(['port']);
 
-        // Invalid scheme
-        $this->putJson('/api/admin/settings/smtp', [
-            'host' => 'smtp.example.com',
-            'port' => 587,
-            'scheme' => 'http',
-            'username' => 'user',
-            'password' => 'pass',
-            'from_address' => 'user@example.com',
-            'from_name' => 'Name',
-            'status' => true,
-        ], $this->authHeaders())
-            ->assertStatus(422)
-            ->assertJsonValidationErrors(['scheme']);
-
         // Invalid email
         $this->putJson('/api/admin/settings/smtp', [
+            'mailer' => 'smtp',
             'host' => 'smtp.example.com',
             'port' => 587,
-            'scheme' => 'smtp',
             'username' => 'user',
             'password' => 'pass',
-            'from_address' => 'not-an-email',
+            'from_email' => 'not-an-email',
             'from_name' => 'Name',
-            'status' => true,
+            'status' => 'active',
         ], $this->authHeaders())
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['from_address']);
+            ->assertJsonValidationErrors(['from_email']);
     }
 
     // ==========================================
@@ -300,14 +294,15 @@ class DynamicSmtpSettingTest extends TestCase
 
         // 1. Create active DB SMTP
         SmtpSetting::create([
+            'mailer' => 'smtp',
             'host' => 'smtp.dynamic-db.com',
             'port' => 2525,
-            'scheme' => 'smtp',
             'username' => 'dyn_user',
             'password' => 'dyn_pass',
-            'from_address' => 'dyn@vyaparidarbar.com',
+            'from_email' => 'dyn@vyaparidarbar.com',
             'from_name' => 'Dynamic DB Sender',
-            'status' => true,
+            'encryption' => 'tls',
+            'status' => 'active',
         ]);
 
         $service->apply();
@@ -319,8 +314,8 @@ class DynamicSmtpSettingTest extends TestCase
         $this->assertEquals('dyn@vyaparidarbar.com', config('mail.from.address'));
         $this->assertEquals('Dynamic DB Sender', config('mail.from.name'));
 
-        // 2. Disable DB SMTP (status = false)
-        SmtpSetting::find(1)->update(['status' => false]);
+        // 2. Disable DB SMTP (status = pending)
+        SmtpSetting::find(1)->update(['status' => 'pending']);
         Cache::forget(DynamicMailConfigService::CACHE_KEY);
 
         $service->apply();
@@ -366,20 +361,21 @@ class DynamicSmtpSettingTest extends TestCase
             ]);
     }
 
-    public function test_test_endpoint_tests_saved_db_smtp_even_if_status_disabled(): void
+    public function test_test_endpoint_tests_saved_db_smtp_even_if_status_pending(): void
     {
         Mail::fake();
 
         // Create disabled SMTP record
         SmtpSetting::create([
+            'mailer' => 'smtp',
             'host' => 'smtp.disabled-test.com',
             'port' => 465,
-            'scheme' => 'smtps',
             'username' => 'disabled_user',
             'password' => 'secret',
-            'from_address' => 'disabled@vyaparidarbar.com',
+            'from_email' => 'disabled@vyaparidarbar.com',
             'from_name' => 'Disabled Sender',
-            'status' => false,
+            'encryption' => 'ssl',
+            'status' => 'pending',
         ]);
 
         $response = $this->postJson('/api/admin/settings/smtp/test', [
@@ -402,14 +398,15 @@ class DynamicSmtpSettingTest extends TestCase
         Mail::fake();
 
         SmtpSetting::create([
+            'mailer' => 'smtp',
             'host' => 'smtp.zoho.in',
             'port' => 465,
-            'scheme' => 'smtps',
             'username' => 'noreply@vyaparidarbar.com',
             'password' => 'secret',
-            'from_address' => 'noreply@vyaparidarbar.com',
+            'from_email' => 'noreply@vyaparidarbar.com',
             'from_name' => 'Vyapari Darbar',
-            'status' => true,
+            'encryption' => 'ssl',
+            'status' => 'active',
         ]);
 
         // 5 allowed attempts
