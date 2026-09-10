@@ -26,6 +26,14 @@ class UpdateUserStatusAction
                 $user->tokens()->delete();
             }
 
+            // Automated Account Status Notification
+            \App\Jobs\SendUserNotificationJob::dispatch(
+                $user->id,
+                'Account Status Updated',
+                "Hello {{user_first_name}}, your account status has been updated to '{$status}'.",
+                \App\Enums\NotificationType::PUSH_AND_IN_APP
+            );
+
             return $user->fresh();
         });
     }

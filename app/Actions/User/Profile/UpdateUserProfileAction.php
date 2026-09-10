@@ -57,6 +57,14 @@ class UpdateUserProfileAction
                 array_keys($data)
             );
 
+            // In-App Notification: Profile Updated
+            \App\Jobs\SendUserNotificationJob::dispatch(
+                $user->id,
+                'Profile Updated',
+                'Hello {{user_first_name}}, your profile details have been updated successfully.',
+                \App\Enums\NotificationType::IN_APP
+            );
+
             return $user->fresh(['roles']);
         });
     }

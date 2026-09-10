@@ -90,29 +90,38 @@ class FirebaseWebConfigParserService
     }
 
     /**
-     * Extract only approved properties and validate presence.
+     * Extract only approved properties and validate presence of FCM-essential fields.
      *
      * @param  array<string, mixed>  $data
      * @return array{apiKey: string, authDomain: string, projectId: string, storageBucket: ?string, messagingSenderId: string, appId: string}
      */
     protected function extractAndValidate(array $data): array
     {
-        $apiKey = (string) ($data['apiKey'] ?? $data['api_key'] ?? '');
-        $authDomain = (string) ($data['authDomain'] ?? $data['auth_domain'] ?? '');
-        $projectId = (string) ($data['projectId'] ?? $data['project_id'] ?? '');
-        $storageBucket = isset($data['storageBucket']) ? (string) $data['storageBucket'] : (isset($data['storage_bucket']) ? (string) $data['storage_bucket'] : null);
-        $messagingSenderId = (string) ($data['messagingSenderId'] ?? $data['messaging_sender_id'] ?? '');
-        $appId = (string) ($data['appId'] ?? $data['app_id'] ?? '');
+        $apiKey = trim((string) ($data['apiKey'] ?? $data['api_key'] ?? ''));
+        $projectId = trim((string) ($data['projectId'] ?? $data['project_id'] ?? ''));
+        $messagingSenderId = trim((string) ($data['messagingSenderId'] ?? $data['messaging_sender_id'] ?? ''));
+        $appId = trim((string) ($data['appId'] ?? $data['app_id'] ?? ''));
 
-        if ($apiKey === '' || $authDomain === '' || $projectId === '' || $messagingSenderId === '' || $appId === '') {
-            throw new InvalidArgumentException('Missing required Firebase configuration parameters (apiKey, authDomain, projectId, messagingSenderId, appId).');
+        if ($apiKey === '' || $projectId === '' || $messagingSenderId === '' || $appId === '') {
+            throw new InvalidArgumentException('Missing required Firebase configuration parameters (apiKey, projectId, messagingSenderId, appId).');
+        }
+
+        // authDomain and storageBucket are optional for FCM; auto-derive defaults if omitted
+        $authDomain = trim((string) ($data['authDomain'] ?? $data['auth_domain'] ?? ''));
+        if ($authDomain === '') {
+            $authDomain = $projectId.'.firebaseapp.com';
+        }
+
+        $storageBucket = isset($data['storageBucket']) ? trim((string) $data['storageBucket']) : (isset($data['storage_bucket']) ? trim((string) $data['storage_bucket']) : null);
+        if ($storageBucket === '') {
+            $storageBucket = null;
         }
 
         return [
             'apiKey' => $apiKey,
             'authDomain' => $authDomain,
             'projectId' => $projectId,
-            'storageBucket' => $storageBucket !== '' ? $storageBucket : null,
+            'storageBucket' => $storageBucket,
             'messagingSenderId' => $messagingSenderId,
             'appId' => $appId,
         ];

@@ -185,6 +185,16 @@ class AdminCompanyController extends Controller
         $status = strtolower((string) $validated['verification_status']);
         $company->update(['verification_status' => $status]);
 
+        // Notify associated company users
+        foreach ($company->users as $companyUser) {
+            \App\Jobs\SendUserNotificationJob::dispatch(
+                $companyUser->id,
+                'Company Status Updated',
+                "Hello {{user_first_name}}, your company {$company->name} status has been updated to '{$status}'.",
+                \App\Enums\NotificationType::PUSH_AND_IN_APP
+            );
+        }
+
         return response()->json([
             'status' => true,
             'message' => "Company verification status updated to '{$status}' successfully.",

@@ -58,7 +58,15 @@ class ChangeUserPasswordAction
             'User changed account password'
         );
 
-        // Revoke all OTHER device tokens while preserving current token
+        // Security Alert: Password Changed Notification
+        \App\Jobs\SendUserNotificationJob::dispatch(
+            $user->id,
+            'Security Alert: Password Changed',
+            'Hello {{user_first_name}}, your account password was changed successfully. If you did not make this change, please contact support immediately.',
+            \App\Enums\NotificationType::PUSH_AND_IN_APP
+        );
+
+        // Security: Revoke all other device tokens except the currently authenticated session
         $currentTokenId = $user->currentAccessToken()?->id;
         if ($currentTokenId) {
             $user->tokens()->where('id', '!=', $currentTokenId)->delete();

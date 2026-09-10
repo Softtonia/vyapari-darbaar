@@ -70,14 +70,15 @@ class FirebaseConfigService
         $setting = DB::transaction(function () use ($data) {
             $existing = FirebaseSetting::query()->lockForUpdate()->find(1);
 
+            $projectId = (string) $data['project_id'];
             $attributes = [
-                'api_key' => $data['api_key'],
-                'auth_domain' => $data['auth_domain'],
-                'project_id' => $data['project_id'],
+                'api_key' => (string) $data['api_key'],
+                'auth_domain' => (string) ($data['auth_domain'] ?? ($projectId.'.firebaseapp.com')),
+                'project_id' => $projectId,
                 'storage_bucket' => $data['storage_bucket'] ?? null,
-                'messaging_sender_id' => $data['messaging_sender_id'],
-                'app_id' => $data['app_id'],
-                'vapid_key' => $data['vapid_key'],
+                'messaging_sender_id' => (string) $data['messaging_sender_id'],
+                'app_id' => (string) $data['app_id'],
+                'vapid_key' => (string) $data['vapid_key'],
                 'status' => (bool) $data['status'],
             ];
 

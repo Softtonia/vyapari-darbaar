@@ -2522,12 +2522,14 @@ The Firebase / FCM notification module enables dynamic configuration of Firebase
       "status": true,
       "message": "Firebase settings retrieved successfully.",
       "data": {
-          "api_key": "AIzaSy...",
-          "auth_domain": "vyapari-darbaar.firebaseapp.com",
-          "project_id": "vyapari-darbaar",
-          "storage_bucket": "vyapari-darbaar.appspot.com",
-          "messaging_sender_id": "123456789012",
-          "app_id": "1:123456789012:web:abcdef123456",
+          "web_config": {
+              "apiKey": "AIzaSy...",
+              "authDomain": "vyapari-darbaar.firebaseapp.com",
+              "projectId": "vyapari-darbaar",
+              "storageBucket": "vyapari-darbaar.appspot.com",
+              "messagingSenderId": "123456789012",
+              "appId": "1:123456789012:web:abcdef123456"
+          },
           "vapid_key": "BN...",
           "service_account_configured": true,
           "status": true
@@ -2538,27 +2540,27 @@ The Firebase / FCM notification module enables dynamic configuration of Firebase
 ---
 
 ### 18.3 Admin — Update Firebase Settings
-- **Method:** `PUT`
+- **Method:** `POST` or `PUT`
 - **URI:** `/api/admin/settings/firebase`
+- **Content-Type:** `multipart/form-data` (recommended for file uploads) or `application/json`
 - **Authentication:** Bearer token (`auth:sanctum`, `admin` guard, `firebase-setting.update` permission)
-- **Request Body:**
-  ```json
-  {
-      "api_key": "AIzaSy...",
-      "auth_domain": "vyapari-darbaar.firebaseapp.com",
-      "project_id": "vyapari-darbaar",
-      "storage_bucket": "vyapari-darbaar.appspot.com",
-      "messaging_sender_id": "123456789012",
-      "app_id": "1:123456789012:web:abcdef123456",
-      "vapid_key": "BN...",
-      "service_account_json": "{\n  \"type\": \"service_account\",\n  \"project_id\": \"vyapari-darbaar\",\n  \"private_key_id\": \"...\",\n  \"private_key\": \"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n\",\n  \"client_email\": \"firebase-adminsdk@vyapari-darbaar.iam.gserviceaccount.com\",\n  \"client_id\": \"...\",\n  \"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",\n  \"token_uri\": \"https://oauth2.googleapis.com/token\",\n  \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",\n  \"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/...\"\n}",
-      "status": true
-  }
+- **Request Form Data / Body:**
+  - `web_config` (required, string): Firebase Web SDK JS snippet (e.g. `const firebaseConfig = { ... };`) or JSON string. Only 4 fields are strictly required: `apiKey`, `projectId`, `messagingSenderId`, `appId`. `authDomain` and `storageBucket` are optional and auto-derived if omitted.
+  - `service_account` (file, optional on update, required on first setup): Uploaded Google Service Account `.json` private key file (Max 512 KB). Evaluated in memory and encrypted directly without temporary disk persistence. (Alternative: string `service_account_json` also accepted).
+  - `vapid_key` (required, string): Web Push Certificate key.
+  - `status` (required, boolean / `1` or `0`): Enable/disable Firebase integration.
+- **Example Request (Multipart):**
+  ```
+  web_config: const firebaseConfig = { apiKey: "AIzaSy...", projectId: "vyapari-darbaar", messagingSenderId: "123456789012", appId: "1:123456789012:web:abcdef" };
+  service_account: [vyapari-darbaar-firebase-adminsdk.json]
+  vapid_key: BN7u9_...
+  status: 1
   ```
 - **Validation & Password-Like Semantics:**
-  - `api_key`, `auth_domain`, `project_id`, `messaging_sender_id`, `app_id`, `vapid_key`, `status` are required.
-  - `service_account_json`: Required on initial setup. On updates, if omitted, `null`, empty string, or `"********"`, the existing encrypted service-account credentials are preserved.
-  - When provided, validates JSON structure, `type === 'service_account'`, required keys (`project_id`, `private_key`, `client_email`, `token_uri`), and verifies that `project_id` matches the configured `project_id`.
+  - `web_config`, `vapid_key`, and `status` are required.
+  - `service_account`: Required on initial setup. On updates, if omitted or empty, the existing encrypted service-account credentials are securely preserved.
+  - Safe parsing without `eval`. Validates JSON structure, `type === 'service_account'`, required private key attributes, and verifies that `project_id` in the service account strictly matches the `projectId` from `web_config`.
+  - Plain-English validation error messages with dual error keys attached to both `service_account` and `service_account_json`.
 - **Cache Invalidation:** Flushes Redis key `settings:firebase:public` only after successful database transaction commit.
 
 ---

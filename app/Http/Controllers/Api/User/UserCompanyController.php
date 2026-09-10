@@ -109,6 +109,14 @@ class UserCompanyController extends Controller
             array_keys($updateData)
         );
 
+        // In-App Notification: Company Profile Updated
+        \App\Jobs\SendUserNotificationJob::dispatch(
+            $user->id,
+            'Company Profile Updated',
+            'Hello {{user_first_name}}, your company details have been updated successfully.',
+            \App\Enums\NotificationType::IN_APP
+        );
+
         return response()->json([
             'status' => true,
             'message' => 'Company profile updated successfully.',

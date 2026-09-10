@@ -15,6 +15,14 @@ class FirebaseSettingResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'web_config' => [
+                'apiKey' => $this->api_key,
+                'projectId' => $this->project_id,
+                'messagingSenderId' => $this->messaging_sender_id,
+                'appId' => $this->app_id,
+                'authDomain' => $this->auth_domain,
+                'storageBucket' => $this->storage_bucket,
+            ],
             'api_key' => $this->api_key,
             'auth_domain' => $this->auth_domain,
             'project_id' => $this->project_id,

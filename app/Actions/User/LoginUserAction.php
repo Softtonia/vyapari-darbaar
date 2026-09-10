@@ -74,6 +74,14 @@ class LoginUserAction
             ['device_name' => $deviceName]
         );
 
+        // Security Alert: New Login Notification
+        \App\Jobs\SendUserNotificationJob::dispatch(
+            $user->id,
+            'Security Alert: New Login Detected',
+            "Hello {{user_first_name}}, a new login was detected from device '{$deviceName}'.",
+            \App\Enums\NotificationType::PUSH_AND_IN_APP
+        );
+
         if ($activeToken && ! empty($activeToken->plain_token)) {
             return [
                 'success' => true,

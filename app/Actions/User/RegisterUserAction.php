@@ -124,6 +124,14 @@ class RegisterUserAction
                 ['role' => $roleName, 'device_name' => $deviceName]
             );
 
+            // Automated Welcome Notification
+            \App\Jobs\SendUserNotificationJob::dispatch(
+                $user->id,
+                'Welcome to {{app_name}}!',
+                'Hello {{user_first_name}}, your account has been successfully created. Welcome to Vyapari Darbaar!',
+                \App\Enums\NotificationType::PUSH_AND_IN_APP
+            );
+
             return [
                 'token' => $tokenResult->plainTextToken,
                 'user' => $user->fresh(['roles']),

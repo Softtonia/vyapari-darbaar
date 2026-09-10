@@ -63,7 +63,15 @@ class ResetPasswordUserAction
             \App\Services\UserActivityService::log(
                 $user,
                 'password_reset',
-                'User reset account password'
+                'User reset account password via password broker'
+            );
+
+            // Security Alert: Password Reset Successful Notification
+            \App\Jobs\SendUserNotificationJob::dispatch(
+                $user->id,
+                'Security Alert: Password Reset Successful',
+                'Hello {{user_first_name}}, your account password has been reset successfully.',
+                \App\Enums\NotificationType::PUSH_AND_IN_APP
             );
 
             return [

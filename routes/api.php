@@ -264,7 +264,7 @@ Route::prefix('admin')->group(function () {
         // Firebase Settings management
         Route::prefix('settings/firebase')->group(function () {
             Route::get('/', [FirebaseSettingController::class, 'show'])->name('admin.settings.firebase.show');
-            Route::put('/', [FirebaseSettingController::class, 'update'])->name('admin.settings.firebase.update');
+            Route::match(['put', 'post'], '/', [FirebaseSettingController::class, 'update'])->name('admin.settings.firebase.update');
             Route::post('test', [FirebaseSettingController::class, 'test'])
                 ->middleware('throttle:admin-firebase-test')
                 ->name('admin.settings.firebase.test');
