@@ -2522,13 +2522,15 @@ The Firebase / FCM notification module enables dynamic configuration of Firebase
       "status": true,
       "message": "Firebase settings retrieved successfully.",
       "data": {
-          "api_key": "AIzaSy...",
-          "auth_domain": "vyapari-darbaar.firebaseapp.com",
-          "project_id": "vyapari-darbaar",
-          "storage_bucket": "vyapari-darbaar.appspot.com",
-          "messaging_sender_id": "123456789012",
-          "app_id": "1:123456789012:web:abcdef123456",
-          "vapid_key": "BN...",
+          "web_config": {
+              "apiKey": "AIzaSy...",
+              "authDomain": "vyapari-darbaar.firebaseapp.com",
+              "projectId": "vyapari-darbaar",
+              "storageBucket": "vyapari-darbaar.firebasestorage.app",
+              "messagingSenderId": "449566278614",
+              "appId": "1:449566278614:web:f4e39959a5121a2e7b5a77"
+          },
+          "vapid_key": "BOdpBrmn_e6aff...",
           "service_account_configured": true,
           "status": true
       }
@@ -2537,28 +2539,34 @@ The Firebase / FCM notification module enables dynamic configuration of Firebase
 
 ---
 
-### 18.3 Admin — Update Firebase Settings
+### 18.3 Admin — Update Firebase Settings (Simplified Admin Setup)
 - **Method:** `PUT`
 - **URI:** `/api/admin/settings/firebase`
 - **Authentication:** Bearer token (`auth:sanctum`, `admin` guard, `firebase-setting.update` permission)
-- **Request Body:**
+- **Preferred Request Body (Zero Manual Field Mapping):**
   ```json
   {
-      "api_key": "AIzaSy...",
-      "auth_domain": "vyapari-darbaar.firebaseapp.com",
-      "project_id": "vyapari-darbaar",
-      "storage_bucket": "vyapari-darbaar.appspot.com",
-      "messaging_sender_id": "123456789012",
-      "app_id": "1:123456789012:web:abcdef123456",
-      "vapid_key": "BN...",
-      "service_account_json": "{\n  \"type\": \"service_account\",\n  \"project_id\": \"vyapari-darbaar\",\n  \"private_key_id\": \"...\",\n  \"private_key\": \"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n\",\n  \"client_email\": \"firebase-adminsdk@vyapari-darbaar.iam.gserviceaccount.com\",\n  \"client_id\": \"...\",\n  \"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",\n  \"token_uri\": \"https://oauth2.googleapis.com/token\",\n  \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",\n  \"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/...\"\n}",
-      "status": true
+      "web_config": "const firebaseConfig = {\n  apiKey: \"AIzaSy...\",\n  authDomain: \"vyapari-darbaar.firebaseapp.com\",\n  projectId: \"vyapari-darbaar\",\n  storageBucket: \"vyapari-darbaar.firebasestorage.app\",\n  messagingSenderId: \"449566278614\",\n  appId: \"1:449566278614:web:f4e39959a5121a2e7b5a77\"\n};",
+      "vapid_key": "BOdpBrmn_e6aff...",
+      "service_account_json": "{\n  \"type\": \"service_account\",\n  \"project_id\": \"vyapari-darbaar\",\n  \"private_key_id\": \"...\",\n  \"private_key\": \"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n\",\n  \"client_email\": \"firebase-adminsdk-fbsvc@vyapari-darbaar.iam.gserviceaccount.com\",\n  \"client_id\": \"...\",\n  \"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",\n  \"token_uri\": \"https://oauth2.googleapis.com/token\",\n  \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",\n  \"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/...\"\n}",
+      "status": false
   }
   ```
+
+> [!NOTE]
+> `web_config` also accepts a JSON string or a structured JSON object (`{"apiKey": "...", "authDomain": "...", ...}`).
+> Backward compatibility: If individual fields (`api_key`, `auth_domain`, etc.) are passed instead of `web_config`, they are normalized automatically.
+
+- **Non-Technical Admin Setup Flow (Admin UI):**
+  1. **Field 1 (Firebase Web App Configuration):** Large textarea. Admin simply pastes the snippet copied from *Firebase Console ➔ Project Settings ➔ General ➔ Your apps ➔ SDK setup and configuration*. The backend automatically extracts `apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, and `appId`.
+  2. **Field 2 (Service Account JSON):** Large textarea / File drop. Admin pastes the contents of the `.json` file generated from *Firebase Console ➔ Project Settings ➔ Service Accounts ➔ Generate new private key*.
+  3. **Field 3 (Web Push / VAPID Key):** Text input. Admin pastes the Key Pair from *Firebase Console ➔ Project Settings ➔ Cloud Messaging ➔ Web Push certificates*.
+  4. **Field 4 (Enable Toggle):** Toggle switch (`status: false` initially ➔ test notification ➔ `status: true`).
+
 - **Validation & Password-Like Semantics:**
-  - `api_key`, `auth_domain`, `project_id`, `messaging_sender_id`, `app_id`, `vapid_key`, `status` are required.
+  - `web_config`: Required on initial setup. Backend safely parses properties without dynamic JS execution.
   - `service_account_json`: Required on initial setup. On updates, if omitted, `null`, empty string, or `"********"`, the existing encrypted service-account credentials are preserved.
-  - When provided, validates JSON structure, `type === 'service_account'`, required keys (`project_id`, `private_key`, `client_email`, `token_uri`), and verifies that `project_id` matches the configured `project_id`.
+  - **Cross-Validation:** Ensures `web_config.projectId` matches `service_account_json.project_id`. Mismatches return HTTP 422 with `"The Firebase Web App and Service Account belong to different Firebase projects."`.
 - **Cache Invalidation:** Flushes Redis key `settings:firebase:public` only after successful database transaction commit.
 
 ---

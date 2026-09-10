@@ -3500,7 +3500,7 @@
                 },
                 {
                     "name": "Firebase Settings & FCM",
-                    "description": "Dynamic Firebase configuration and push notification test endpoints for administrators.",
+                    "description": "Simplified dynamic Firebase configuration and push notification test endpoints for administrators.",
                     "item": [
                         {
                             "name": "Get Firebase Settings",
@@ -3528,11 +3528,11 @@
                                         "firebase"
                                     ]
                                 },
-                                "description": "Retrieve singleton Firebase settings. Sensitive service account credentials are never exposed."
+                                "description": "Retrieve singleton Firebase settings. Returns structured web_config and service_account_configured flag. Sensitive service account credentials are never exposed."
                             }
                         },
                         {
-                            "name": "Update Firebase Settings",
+                            "name": "Update Firebase Settings (Simplified Copy-Paste)",
                             "request": {
                                 "method": "PUT",
                                 "header": [
@@ -3551,7 +3551,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"api_key\": \"{{firebaseApiKey}}\",\n    \"auth_domain\": \"vyapari-darbaar.firebaseapp.com\",\n    \"project_id\": \"vyapari-darbaar\",\n    \"storage_bucket\": \"vyapari-darbaar.appspot.com\",\n    \"messaging_sender_id\": \"123456789012\",\n    \"app_id\": \"1:123456789012:web:abcdef123456\",\n    \"vapid_key\": \"{{firebaseVapidKey}}\",\n    \"service_account_json\": \"{\\n  \\\"type\\\": \\\"service_account\\\",\\n  \\\"project_id\\\": \\\"vyapari-darbaar\\\",\\n  \\\"private_key_id\\\": \\\"fake_key_id\\\",\\n  \\\"private_key\\\": \\\"-----BEGIN PRIVATE KEY-----\\\\nFAKE_KEY\\\\n-----END PRIVATE KEY-----\\\\n\\\",\\n  \\\"client_email\\\": \\\"firebase-adminsdk@vyapari-darbaar.iam.gserviceaccount.com\\\",\\n  \\\"client_id\\\": \\\"123456789\\\",\\n  \\\"auth_uri\\\": \\\"https://accounts.google.com/o/oauth2/auth\\\",\\n  \\\"token_uri\\\": \\\"https://oauth2.googleapis.com/token\\\",\\n  \\\"auth_provider_x509_cert_url\\\": \\\"https://www.googleapis.com/oauth2/v1/certs\\\",\\n  \\\"client_x509_cert_url\\\": \\\"https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk%40vyapari-darbaar.iam.gserviceaccount.com\\\"\\n}\",\n    \"status\": true\n}"
+                                    "raw": "{\n    \"web_config\": \"const firebaseConfig = {\\n  apiKey: \\\"YOUR_API_KEY\\\",\\n  authDomain: \\\"YOUR_PROJECT.firebaseapp.com\\\",\\n  projectId: \\\"YOUR_PROJECT\\\",\\n  storageBucket: \\\"YOUR_BUCKET.appspot.com\\\",\\n  messagingSenderId: \\\"YOUR_SENDER_ID\\\",\\n  appId: \\\"YOUR_APP_ID\\\"\\n};\",\n    \"vapid_key\": \"{{firebaseVapidKey}}\",\n    \"service_account_json\": \"{{firebaseServiceAccountJson}}\",\n    \"status\": false\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/settings/firebase",
@@ -3565,7 +3565,7 @@
                                         "firebase"
                                     ]
                                 },
-                                "description": "Update Firebase web config and encrypted service account credentials. Omit or pass ******** to retain existing credentials."
+                                "description": "Update Firebase settings using direct copy-paste from Firebase Console. Backend auto-extracts all web parameters without manual field mapping."
                             }
                         },
                         {
