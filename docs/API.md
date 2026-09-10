@@ -2522,15 +2522,13 @@ The Firebase / FCM notification module enables dynamic configuration of Firebase
       "status": true,
       "message": "Firebase settings retrieved successfully.",
       "data": {
-          "web_config": {
-              "apiKey": "AIzaSy...",
-              "authDomain": "vyapari-darbaar.firebaseapp.com",
-              "projectId": "vyapari-darbaar",
-              "storageBucket": "vyapari-darbaar.firebasestorage.app",
-              "messagingSenderId": "449566278614",
-              "appId": "1:449566278614:web:f4e39959a5121a2e7b5a77"
-          },
-          "vapid_key": "BOdpBrmn_e6aff...",
+          "api_key": "AIzaSy...",
+          "auth_domain": "vyapari-darbaar.firebaseapp.com",
+          "project_id": "vyapari-darbaar",
+          "storage_bucket": "vyapari-darbaar.appspot.com",
+          "messaging_sender_id": "123456789012",
+          "app_id": "1:123456789012:web:abcdef123456",
+          "vapid_key": "BN...",
           "service_account_configured": true,
           "status": true
       }
@@ -2539,34 +2537,28 @@ The Firebase / FCM notification module enables dynamic configuration of Firebase
 
 ---
 
-### 18.3 Admin — Update Firebase Settings (Simplified Admin Setup)
+### 18.3 Admin — Update Firebase Settings
 - **Method:** `PUT`
 - **URI:** `/api/admin/settings/firebase`
 - **Authentication:** Bearer token (`auth:sanctum`, `admin` guard, `firebase-setting.update` permission)
-- **Preferred Request Body (Zero Manual Field Mapping):**
+- **Request Body:**
   ```json
   {
-      "web_config": "const firebaseConfig = {\n  apiKey: \"AIzaSy...\",\n  authDomain: \"vyapari-darbaar.firebaseapp.com\",\n  projectId: \"vyapari-darbaar\",\n  storageBucket: \"vyapari-darbaar.firebasestorage.app\",\n  messagingSenderId: \"449566278614\",\n  appId: \"1:449566278614:web:f4e39959a5121a2e7b5a77\"\n};",
-      "vapid_key": "BOdpBrmn_e6aff...",
-      "service_account_json": "{\n  \"type\": \"service_account\",\n  \"project_id\": \"vyapari-darbaar\",\n  \"private_key_id\": \"...\",\n  \"private_key\": \"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n\",\n  \"client_email\": \"firebase-adminsdk-fbsvc@vyapari-darbaar.iam.gserviceaccount.com\",\n  \"client_id\": \"...\",\n  \"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",\n  \"token_uri\": \"https://oauth2.googleapis.com/token\",\n  \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",\n  \"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/...\"\n}",
-      "status": false
+      "api_key": "AIzaSy...",
+      "auth_domain": "vyapari-darbaar.firebaseapp.com",
+      "project_id": "vyapari-darbaar",
+      "storage_bucket": "vyapari-darbaar.appspot.com",
+      "messaging_sender_id": "123456789012",
+      "app_id": "1:123456789012:web:abcdef123456",
+      "vapid_key": "BN...",
+      "service_account_json": "{\n  \"type\": \"service_account\",\n  \"project_id\": \"vyapari-darbaar\",\n  \"private_key_id\": \"...\",\n  \"private_key\": \"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n\",\n  \"client_email\": \"firebase-adminsdk@vyapari-darbaar.iam.gserviceaccount.com\",\n  \"client_id\": \"...\",\n  \"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",\n  \"token_uri\": \"https://oauth2.googleapis.com/token\",\n  \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",\n  \"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/...\"\n}",
+      "status": true
   }
   ```
-
-> [!NOTE]
-> `web_config` also accepts a JSON string or a structured JSON object (`{"apiKey": "...", "authDomain": "...", ...}`).
-> Backward compatibility: If individual fields (`api_key`, `auth_domain`, etc.) are passed instead of `web_config`, they are normalized automatically.
-
-- **Non-Technical Admin Setup Flow (Admin UI):**
-  1. **Field 1 (Firebase Web App Configuration):** Large textarea. Admin simply pastes the snippet copied from *Firebase Console ➔ Project Settings ➔ General ➔ Your apps ➔ SDK setup and configuration*. The backend automatically extracts `apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, and `appId`.
-  2. **Field 2 (Service Account JSON):** Large textarea / File drop. Admin pastes the contents of the `.json` file generated from *Firebase Console ➔ Project Settings ➔ Service Accounts ➔ Generate new private key*.
-  3. **Field 3 (Web Push / VAPID Key):** Text input. Admin pastes the Key Pair from *Firebase Console ➔ Project Settings ➔ Cloud Messaging ➔ Web Push certificates*.
-  4. **Field 4 (Enable Toggle):** Toggle switch (`status: false` initially ➔ test notification ➔ `status: true`).
-
 - **Validation & Password-Like Semantics:**
-  - `web_config`: Required on initial setup. Backend safely parses properties without dynamic JS execution.
+  - `api_key`, `auth_domain`, `project_id`, `messaging_sender_id`, `app_id`, `vapid_key`, `status` are required.
   - `service_account_json`: Required on initial setup. On updates, if omitted, `null`, empty string, or `"********"`, the existing encrypted service-account credentials are preserved.
-  - **Cross-Validation:** Ensures `web_config.projectId` matches `service_account_json.project_id`. Mismatches return HTTP 422 with `"The Firebase Web App and Service Account belong to different Firebase projects."`.
+  - When provided, validates JSON structure, `type === 'service_account'`, required keys (`project_id`, `private_key`, `client_email`, `token_uri`), and verifies that `project_id` matches the configured `project_id`.
 - **Cache Invalidation:** Flushes Redis key `settings:firebase:public` only after successful database transaction commit.
 
 ---
@@ -2733,7 +2725,252 @@ Production push notifications are dispatched asynchronously via `SendFcmNotifica
        })
    });
    ```
+### 18.10 Frontend Integration & Service Worker Pattern
+1. Frontend makes `GET /api/firebase/config` to fetch public keys.
+2. Initialize Firebase Web SDK dynamically:
+   ```javascript
+   import { initializeApp } from "firebase/app";
+   import { getMessaging, getToken } from "firebase/messaging";
+
+   const res = await fetch("/api/firebase/config");
+   const { data: firebaseConfig } = await res.json();
+
+   const app = initializeApp(firebaseConfig);
+   const messaging = getMessaging(app);
+
+   const currentToken = await getToken(messaging, {
+       vapidKey: firebaseConfig.vapid_key,
+       serviceWorkerRegistration: await navigator.serviceWorker.register("/firebase-messaging-sw.js")
+   });
+
+   // Register token with backend
+   await fetch("/api/notifications/devices", {
+       method: "POST",
+       headers: {
+           "Content-Type": "application/json",
+           "Authorization": `Bearer ${userToken}`
+       },
+       body: JSON.stringify({
+           fcm_token: currentToken,
+           device_type: "web",
+           browser: "Chrome"
+       })
+   });
+   ```
 3. `firebase-messaging-sw.js` (hosted at frontend root origin) only uses public configuration, never service-account secrets.
+
+---
+
+## 19. Notification Management Module (Admin & In-App)
+
+Comprehensive enterprise notification management module supporting push notifications, in-app notifications, dynamic templates with safe placeholder injection, targeted audiences (single user, selected users, topics, all users), scheduled delivery, batch processing via Redis queue workers, delivery logging with deduplication, and device management with masked tokens.
+
+### 19.1 Admin Notification Dashboard
+- **Method:** `GET`
+- **URI:** `/api/admin/notifications/dashboard`
+- **Permission:** `notification.view`
+- **Cache:** Redis key `admin:notifications:dashboard` (TTL 60s)
+- **Response (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Notification dashboard metrics retrieved successfully.",
+      "data": {
+          "total_sent": 1250,
+          "total_failed": 12,
+          "total_delivered": 1238,
+          "total_devices": 450,
+          "active_devices": 420,
+          "batches_count": 85,
+          "templates_count": 14,
+          "topics_count": 6,
+          "recent_batches": [ ... ],
+          "delivery_breakdown": {
+              "push": 850,
+              "in_app": 388
+          }
+      }
+  }
+  ```
+
+---
+
+### 19.2 Notification Send & Preview
+
+#### 19.2.1 Preview Notification
+- **Method:** `POST`
+- **URI:** `/api/admin/notifications/preview`
+- **Rate Limit:** `30 req/min` (`throttle:admin-notification-preview`)
+- **Permission:** `notification.view`
+- **Payload:**
+  ```json
+  {
+      "template_id": 1,
+      "preview_user_id": 10,
+      "title": "Welcome {{user_name}}",
+      "body": "Hello {{user_first_name}}, your mandi status is active."
+  }
+  ```
+- **Response (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Notification preview rendered successfully.",
+      "data": {
+          "title": "Welcome John Doe",
+          "body": "Hello John, your mandi status is active.",
+          "image_url": null,
+          "click_url": null,
+          "recipient": {
+              "id": 10,
+              "name": "John Doe",
+              "email": "john@example.com"
+          },
+          "resolved_placeholders": {
+              "user_name": "John Doe",
+              "user_first_name": "John",
+              "app_name": "Vyapari Darbaar"
+          }
+      }
+  }
+  ```
+
+#### 19.2.2 Send / Schedule Notification
+- **Method:** `POST`
+- **URI:** `/api/admin/notifications/send`
+- **Rate Limit:** `10 req/min` (`throttle:admin-notification-send`)
+- **Permission:** `notification.send`
+- **Payload (Immediate / Send Now):**
+  ```json
+  {
+      "notification_type": "both",
+      "audience_type": "selected_users",
+      "user_ids": [10, 12, 15],
+      "title": "Mandatory Price Alert",
+      "body": "Market rates for Mustard have increased.",
+      "send_now": true
+  }
+  ```
+- **Payload (Scheduled Delivery):**
+  ```json
+  {
+      "notification_type": "push",
+      "audience_type": "topic",
+      "topic_id": 3,
+      "title": "Evening Mandi Wrap-up",
+      "body": "Check today's closing prices.",
+      "send_now": false,
+      "scheduled_at": "2026-09-10 18:00:00"
+  }
+  ```
+- **Response (201 Created):**
+  ```json
+  {
+      "status": true,
+      "message": "Notification batch queued successfully.",
+      "data": {
+          "id": 14,
+          "uuid": "7c82e6d9-f538-4f01-9f93-41bb746a67f1",
+          "title": "Mandatory Price Alert",
+          "notification_type": "both",
+          "audience_type": "selected_users",
+          "target_count": 3,
+          "status": "queued",
+          "scheduled_at": null,
+          "created_at": "2026-09-10T11:45:00.000000Z"
+      }
+  }
+  ```
+
+---
+
+### 19.3 Notification Templates
+
+- `GET /api/admin/notifications/templates` - List templates with pagination & search
+- `POST /api/admin/notifications/templates` - Create template
+- `GET /api/admin/notifications/templates/{id}` - Show template details
+- `PUT /api/admin/notifications/templates/{id}` - Update template
+- `DELETE /api/admin/notifications/templates/{id}` - Delete template
+- `POST /api/admin/notifications/templates/bulk-delete` (or `DELETE .../bulk`) - Bulk delete templates (`ids: [1, 2, 3]`)
+
+**Allowed Template Channels:** `push`, `in_app`, `both`, `email`.
+**Safe Placeholders:** `{{user_name}}`, `{{user_first_name}}`, `{{user_last_name}}`, `{{user_email}}`, `{{user_phone}}`, `{{app_name}}`, `{{app_url}}`, `{{current_date}}`, `{{current_year}}`.
+
+---
+
+### 19.4 Notification Batches
+
+- `GET /api/admin/notifications/batches` - List batches with filter (`status`, `notification_type`, `audience_type`, date range)
+- `GET /api/admin/notifications/batches/{id}` - Batch details including user progress & error summary
+- `POST /api/admin/notifications/batches/{id}/cancel` - Cancel queued/processing batch (aborts pending chunk jobs)
+- `POST /api/admin/notifications/batches/{id}/retry-failed` - Create child retry batch targeting only failed/partial users, preserving original audit history
+
+**Batch Statuses:** `draft`, `scheduled`, `queued`, `processing`, `completed`, `partially_failed`, `failed`, `cancelled`.
+**Counter Invariant:** `processed_count = success_count + partial_count + failed_count + skipped_count`.
+
+---
+
+### 19.5 Notification Topics
+
+- `GET /api/admin/notifications/topics` - List topics with subscriber count
+- `POST /api/admin/notifications/topics` - Create topic (`name`, `code`, `description`, `status`)
+- `GET /api/admin/notifications/topics/{id}` - Show topic details
+- `PUT /api/admin/notifications/topics/{id}` - Update topic
+- `DELETE /api/admin/notifications/topics/{id}` - Delete topic
+- `POST /api/admin/notifications/topics/{id}/users` - Add users to topic (`user_ids: [1, 2, 3]`)
+- `DELETE /api/admin/notifications/topics/{id}/users` - Remove users from topic (`user_ids: [1, 2, 3]`)
+
+---
+
+### 19.6 Notification Devices (Admin & Security Masking)
+
+- `GET /api/admin/notifications/devices` - List registered devices (filters: `device_type`, `is_active`, `search` by user name/email/device/browser/IP)
+- `GET /api/admin/notifications/devices/{id}` - Show device with masked token (e.g. `eJYQfXU*************A9TU`)
+- `PATCH /api/admin/notifications/devices/{id}/status` - Toggle device active status (`is_active: true|false`)
+- `DELETE /api/admin/notifications/devices/{id}` - Delete device registration
+- `POST /api/admin/notifications/devices/bulk-delete` (or `DELETE .../bulk`) - Bulk delete device registrations
+
+> **Security Rule:** The raw FCM token and `fcm_token_hash` are NEVER exposed in any admin API response.
+
+---
+
+### 19.7 Notification Delivery Logs (Audit Trail)
+
+- `GET /api/admin/notifications/logs` - List logs with filters (`channel`, `status`, `notification_batch_id`, `user_id`, date range)
+- `GET /api/admin/notifications/logs/{id}` - Detailed delivery log with provider message ID, error codes, and sanitized payload
+
+**Log Statuses:** `sent`, `delivered`, `failed`, `skipped`.
+
+---
+
+### 19.8 User In-App Notification Endpoints
+*Requires `Authorization: Bearer <user_token>`*
+
+- `GET /api/notifications` (or `/api/user/notifications`) - User inbox with pagination and unread count
+- `GET /api/notifications/unread-count` (or `/api/user/notifications/unread-count`) - Quick unread badge count
+- `PATCH /api/notifications/{id}/read` (or `/api/user/notifications/{id}/read`) - Mark single item as read
+- `PATCH /api/notifications/read-all` (or `/api/user/notifications/read-all`) - Mark all inbox items as read
+- `DELETE /api/notifications/{id}` (or `/api/user/notifications/{id}`) - Delete single notification
+- `DELETE /api/notifications` (or `/api/user/notifications/read`) - Clear all read notifications
+
+---
+
+### 19.9 Background Queue Workers & Scheduled Processing
+
+1. **Redis Queues:**
+   - `notifications-bulk`: Orchestrates large batch preparation, audience snapshotting, and 200-recipient chunking (`ProcessNotificationBatchJob`).
+   - `notifications`: Executes individualized device pushes, template interpolation, in-app insertions, and atomic counter updates (`SendNotificationChunkJob`, `SendFcmNotificationJob`).
+2. **Worker Commands:**
+   ```bash
+   # Bulk batch dispatcher
+   php artisan queue:work redis --queue=notifications-bulk,notifications --tries=3 --timeout=120
+   ```
+3. **Scheduler:**
+   Scheduled notifications are picked up every minute by `ProcessScheduledNotificationsCommand` (`notification:process-scheduled`) with atomic `withoutOverlapping()` protection:
+   ```bash
+   php artisan schedule:run
+   ```
+
 
 
 

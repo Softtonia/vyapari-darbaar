@@ -124,6 +124,38 @@ class AppServiceProvider extends ServiceProvider
                 });
         });
 
+        RateLimiter::for('admin-notification-send', function (Request $request) {
+            $user = $request->user();
+            $key = ($user instanceof Admin)
+                ? 'admin-notification-send:'.$user->id
+                : 'guest:'.$request->ip();
+
+            return Limit::perMinute(10)
+                ->by($key)
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Too many notification send requests. Please try again later.',
+                    ], 429, $headers);
+                });
+        });
+
+        RateLimiter::for('admin-notification-preview', function (Request $request) {
+            $user = $request->user();
+            $key = ($user instanceof Admin)
+                ? 'admin-notification-preview:'.$user->id
+                : 'guest:'.$request->ip();
+
+            return Limit::perMinute(30)
+                ->by($key)
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Too many notification preview requests. Please try again later.',
+                    ], 429, $headers);
+                });
+        });
+
         RateLimiter::for('admin-user-create', function (Request $request) {
             $user = $request->user();
             $key = ($user instanceof Admin)

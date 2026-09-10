@@ -2,7 +2,8 @@
 
 use App\Http\Controllers\Api\Admin\AdminAuthController;
 use App\Http\Controllers\Api\Admin\AdminCompanyController;
-use App\Http\Controllers\Api\Admin\AdminNotificationController;
+use App\Http\Controllers\Api\Admin\AdminInAppNotificationController;
+use App\Http\Controllers\Api\Admin\AdminNotificationDeviceController;
 use App\Http\Controllers\Api\Admin\AdminProfileController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\Admin\CommodityCategoryController;
@@ -12,16 +13,22 @@ use App\Http\Controllers\Api\Admin\CommoditySubcategoryController;
 use App\Http\Controllers\Api\Admin\CommodityVarietyController;
 use App\Http\Controllers\Api\Admin\EmailTemplateController;
 use App\Http\Controllers\Api\Admin\FirebaseSettingController;
+use App\Http\Controllers\Api\Admin\NotificationBatchController;
+use App\Http\Controllers\Api\Admin\NotificationDashboardController;
+use App\Http\Controllers\Api\Admin\NotificationLogController;
+use App\Http\Controllers\Api\Admin\NotificationSendController;
+use App\Http\Controllers\Api\Admin\NotificationTemplateController;
+use App\Http\Controllers\Api\Admin\NotificationTopicController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\SiteSettingController as AdminSiteSettingController;
 use App\Http\Controllers\Api\Admin\SmtpSettingController;
 use App\Http\Controllers\Api\PublicFirebaseConfigController;
 use App\Http\Controllers\Api\SiteSettingController;
+use App\Http\Controllers\Api\User\InAppNotificationController;
 use App\Http\Controllers\Api\User\NotificationDeviceController;
 use App\Http\Controllers\Api\User\UserActivityController;
 use App\Http\Controllers\Api\User\UserAuthController;
 use App\Http\Controllers\Api\User\UserCompanyController;
-use App\Http\Controllers\Api\User\UserNotificationController;
 use App\Http\Controllers\Api\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -263,10 +270,101 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.settings.firebase.test');
         });
 
-        // Notifications management
+        // Notifications Management
         Route::prefix('notifications')->group(function () {
-            Route::post('send', [AdminNotificationController::class, 'send'])
+            // Dashboard
+            Route::get('dashboard', [NotificationDashboardController::class, 'index'])
+                ->name('admin.notifications.dashboard');
+
+            // Send & Preview
+            Route::post('preview', [NotificationSendController::class, 'preview'])
+                ->middleware('throttle:admin-notification-preview')
+                ->name('admin.notifications.preview');
+            Route::post('send', [NotificationSendController::class, 'send'])
+                ->middleware('throttle:admin-notification-send')
                 ->name('admin.notifications.send');
+
+            // In-App
+            Route::prefix('in-app')->group(function () {
+                Route::get('/', [AdminInAppNotificationController::class, 'index'])
+                    ->name('admin.notifications.in-app.index');
+                Route::get('{id}', [AdminInAppNotificationController::class, 'show'])
+                    ->name('admin.notifications.in-app.show');
+            });
+
+            // Templates
+            Route::prefix('templates')->group(function () {
+                Route::get('/', [NotificationTemplateController::class, 'index'])
+                    ->name('admin.notifications.templates.index');
+                Route::post('/', [NotificationTemplateController::class, 'store'])
+                    ->name('admin.notifications.templates.store');
+                Route::post('bulk-delete', [NotificationTemplateController::class, 'bulkDestroy'])
+                    ->name('admin.notifications.templates.bulk-delete');
+                Route::delete('bulk-delete', [NotificationTemplateController::class, 'bulkDestroy']);
+                Route::post('bulk', [NotificationTemplateController::class, 'bulkDestroy']);
+                Route::delete('bulk', [NotificationTemplateController::class, 'bulkDestroy']);
+                Route::get('{template}', [NotificationTemplateController::class, 'show'])
+                    ->name('admin.notifications.templates.show');
+                Route::put('{template}', [NotificationTemplateController::class, 'update'])
+                    ->name('admin.notifications.templates.update');
+                Route::delete('{template}', [NotificationTemplateController::class, 'destroy'])
+                    ->name('admin.notifications.templates.destroy');
+            });
+
+            // Batches
+            Route::prefix('batches')->group(function () {
+                Route::get('/', [NotificationBatchController::class, 'index'])
+                    ->name('admin.notifications.batches.index');
+                Route::get('{batch}', [NotificationBatchController::class, 'show'])
+                    ->name('admin.notifications.batches.show');
+                Route::post('{batch}/cancel', [NotificationBatchController::class, 'cancel'])
+                    ->name('admin.notifications.batches.cancel');
+                Route::post('{batch}/retry-failed', [NotificationBatchController::class, 'retryFailed'])
+                    ->name('admin.notifications.batches.retry-failed');
+            });
+
+            // Logs
+            Route::prefix('logs')->group(function () {
+                Route::get('/', [NotificationLogController::class, 'index'])
+                    ->name('admin.notifications.logs.index');
+                Route::get('{id}', [NotificationLogController::class, 'show'])
+                    ->name('admin.notifications.logs.show');
+            });
+
+            // Devices
+            Route::prefix('devices')->group(function () {
+                Route::get('/', [AdminNotificationDeviceController::class, 'index'])
+                    ->name('admin.notifications.devices.index');
+                Route::post('bulk-delete', [AdminNotificationDeviceController::class, 'bulkDestroy'])
+                    ->name('admin.notifications.devices.bulk-delete');
+                Route::delete('bulk-delete', [AdminNotificationDeviceController::class, 'bulkDestroy']);
+                Route::post('bulk', [AdminNotificationDeviceController::class, 'bulkDestroy']);
+                Route::delete('bulk', [AdminNotificationDeviceController::class, 'bulkDestroy']);
+                Route::get('{device}', [AdminNotificationDeviceController::class, 'show'])
+                    ->name('admin.notifications.devices.show');
+                Route::patch('{device}/status', [AdminNotificationDeviceController::class, 'updateStatus'])
+                    ->name('admin.notifications.devices.update-status');
+                Route::delete('{device}', [AdminNotificationDeviceController::class, 'destroy'])
+                    ->name('admin.notifications.devices.destroy');
+            });
+
+            // Topics
+            Route::prefix('topics')->group(function () {
+                Route::get('/', [NotificationTopicController::class, 'index'])
+                    ->name('admin.notifications.topics.index');
+                Route::post('/', [NotificationTopicController::class, 'store'])
+                    ->name('admin.notifications.topics.store');
+                Route::get('{topic}', [NotificationTopicController::class, 'show'])
+                    ->name('admin.notifications.topics.show');
+                Route::put('{topic}', [NotificationTopicController::class, 'update'])
+                    ->name('admin.notifications.topics.update');
+                Route::delete('{topic}', [NotificationTopicController::class, 'destroy'])
+                    ->name('admin.notifications.topics.destroy');
+                Route::post('{topic}/users', [NotificationTopicController::class, 'addUsers'])
+                    ->name('admin.notifications.topics.add-users');
+                Route::delete('{topic}/users', [NotificationTopicController::class, 'removeUsers'])
+                    ->name('admin.notifications.topics.remove-users');
+            });
         });
 
         // Company Management
@@ -306,6 +404,27 @@ Route::middleware(['auth:sanctum', 'user'])->prefix('notifications/devices')->gr
         ->name('notifications.devices.store');
     Route::delete('/', [NotificationDeviceController::class, 'destroy'])
         ->name('notifications.devices.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated User In-App Notification Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth:sanctum', 'user'])->prefix('notifications')->group(function () {
+    Route::get('/', [InAppNotificationController::class, 'index'])
+        ->name('notifications.index');
+    Route::get('unread-count', [InAppNotificationController::class, 'unreadCount'])
+        ->name('notifications.unread-count');
+    Route::patch('read-all', [InAppNotificationController::class, 'markAllAsRead'])
+        ->name('notifications.read-all');
+    Route::patch('{id}/read', [InAppNotificationController::class, 'markAsRead'])
+        ->name('notifications.read');
+    Route::delete('read', [InAppNotificationController::class, 'clearRead'])
+        ->name('notifications.clear-read');
+    Route::delete('/', [InAppNotificationController::class, 'clearRead']);
+    Route::delete('{id}', [InAppNotificationController::class, 'destroy'])
+        ->name('notifications.destroy');
 });
 
 /*
@@ -375,18 +494,18 @@ Route::prefix('user')->group(function () {
 
         // In-app notifications
         Route::prefix('notifications')->group(function () {
-            Route::get('/', [UserNotificationController::class, 'index'])
+            Route::get('/', [InAppNotificationController::class, 'index'])
                 ->name('user.notifications.index');
-            Route::get('unread-count', [UserNotificationController::class, 'unreadCount'])
+            Route::get('unread-count', [InAppNotificationController::class, 'unreadCount'])
                 ->name('user.notifications.unread-count');
-            Route::patch('read-all', [UserNotificationController::class, 'markAllAsRead'])
+            Route::patch('read-all', [InAppNotificationController::class, 'markAllAsRead'])
                 ->name('user.notifications.read-all');
-            Route::patch('{id}/read', [UserNotificationController::class, 'markAsRead'])
+            Route::patch('{id}/read', [InAppNotificationController::class, 'markAsRead'])
                 ->name('user.notifications.read');
-            Route::delete('read', [UserNotificationController::class, 'clearRead'])
+            Route::delete('read', [InAppNotificationController::class, 'clearRead'])
                 ->name('user.notifications.clear-read');
-            Route::delete('/', [UserNotificationController::class, 'clearRead']);
-            Route::delete('{id}', [UserNotificationController::class, 'destroy'])
+            Route::delete('/', [InAppNotificationController::class, 'clearRead']);
+            Route::delete('{id}', [InAppNotificationController::class, 'destroy'])
                 ->name('user.notifications.destroy');
         });
 

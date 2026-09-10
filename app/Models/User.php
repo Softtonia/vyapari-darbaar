@@ -164,5 +164,46 @@ class User extends Authenticatable
     {
         return $this->hasMany(NotificationDevice::class)->where('is_active', true);
     }
+
+    /**
+     * In-app notifications for this user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\InAppNotification, $this>
+     */
+    public function inAppNotifications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(InAppNotification::class);
+    }
+
+    /**
+     * Unread in-app notifications for this user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\InAppNotification, $this>
+     */
+    public function unreadInAppNotifications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(InAppNotification::class)->whereNull('read_at');
+    }
+
+    /**
+     * Topics subscribed by this user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\NotificationTopic, $this>
+     */
+    public function notificationTopics(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(NotificationTopic::class, 'notification_topic_users', 'user_id', 'notification_topic_id')
+            ->withPivot('created_at');
+    }
+
+    /**
+     * Notification delivery logs for this user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\NotificationLog, $this>
+     */
+    public function notificationLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(NotificationLog::class);
+    }
 }
 

@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Admin\Notification;
 
+use App\Enums\AudienceType;
+use App\Enums\NotificationType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SendNotificationRequest extends FormRequest
 {
@@ -15,6 +18,16 @@ class SendNotificationRequest extends FormRequest
     }
 
     /**
+     * Prepare data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('send_now')) {
+            $this->merge(['send_now' => filter_var($this->input('send_now'), FILTER_VALIDATE_BOOLEAN)]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -22,14 +35,47 @@ class SendNotificationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'recipient_type' => ['required', 'string', 'in:single,all,role'],
-            'user_id' => ['required_if:recipient_type,single', 'nullable', 'integer', 'exists:users,id'],
-            'role' => ['required_if:recipient_type,role', 'nullable', 'string', 'in:user,trader,subscriber,advertiser'],
-            'title' => ['required', 'string', 'max:150'],
-            'message' => ['required', 'string', 'max:2000'],
-            'action_url' => ['nullable', 'string', 'url', 'max:500'],
-            'type' => ['nullable', 'string', 'max:50'],
-            'metadata' => ['nullable', 'array'],
+            'notification_type' => ['required', 'string', Rule::enum(NotificationType::class)],
+            'audience_type' => ['required', 'string', Rule::enum(AudienceType::class)],
+            'user_id' => [
+                'nullable',
+                'integer',
+                Rule::requiredIf(fn () => $this->input('audience_type') === AudienceType::SINGLE_USER->value),
+                'exists:users,id',
+            ],
+            'user_ids' => [
+                'nullable',
+                'array',
+                Rule::requiredIf(fn () => $this->input('audience_type') === AudienceType::SELECTED_USERS->value),
+            ],
+            'user_ids.*' => ['integer', 'exists:users,id'],
+            'topic_id' => [
+                'nullable',
+                'integer',
+                Rule::requiredIf(fn () => $this->input('audience_type') === AudienceType::TOPIC->value),
+                'exists:notification_topics,id',
+            ],
+            'template_id' => ['nullable', 'integer', 'exists:notification_templates,id'],
+            'title' => [
+                'nullable',
+                'string',
+                'max:200',
+                Rule::requiredIf(fn () => empty($this->input('template_id'))),
+            ],
+            'body' => [
+                'nullable',
+                'string',
+                Rule::requiredIf(fn () => empty($this->input('template_id'))),
+            ],
+            'image_url' => ['nullable', 'url', 'max:2048'],
+            'click_url' => ['nullable', 'url', 'max:2048'],
+            'data' => ['nullable', 'array'],
+            'send_now' => ['nullable', 'boolean'],
+            'scheduled_at' => [
+                'nullable',
+                'date',
+                Rule::requiredIf(fn () => $this->has('send_now') && ! $this->input('send_now')),
+            ],
         ];
     }
 }

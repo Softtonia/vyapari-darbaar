@@ -30,6 +30,7 @@ class NotificationDevice extends Model
         'device_type',
         'device_name',
         'browser',
+        'ip_address',
         'is_active',
         'last_used_at',
     ];

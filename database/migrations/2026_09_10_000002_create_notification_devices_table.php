@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('device_type', 20);
             $table->string('device_name', 150)->nullable();
             $table->string('browser', 100)->nullable();
+            $table->string('ip_address', 45)->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamp('last_used_at')->nullable();
             $table->timestamps();

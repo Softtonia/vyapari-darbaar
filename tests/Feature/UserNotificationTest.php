@@ -29,17 +29,21 @@ class UserNotificationTest extends TestCase
         $user = User::factory()->create(['status' => 'active']);
         $user->assignRole('user');
 
-        $user->notify(new DatabaseCustomNotification([
+        \App\Models\InAppNotification::create([
+            'user_id' => $user->id,
             'title' => 'Welcome Notice',
-            'message' => 'Welcome to the platform!',
+            'body' => 'Welcome to the platform!',
             'type' => 'system',
-        ]));
+            'is_read' => false,
+        ]);
 
-        $user->notify(new DatabaseCustomNotification([
+        \App\Models\InAppNotification::create([
+            'user_id' => $user->id,
             'title' => 'Important Alert',
-            'message' => 'Please verify your details.',
+            'body' => 'Please verify your details.',
             'type' => 'alert',
-        ]));
+            'is_read' => false,
+        ]);
 
         Sanctum::actingAs($user, ['*']);
 
@@ -60,10 +64,7 @@ class UserNotificationTest extends TestCase
                         '*' => [
                             'id',
                             'title',
-                            'message',
-                            'type',
-                            'action_url',
-                            'metadata',
+                            'body',
                             'is_read',
                             'read_at',
                             'created_at',
@@ -94,17 +95,20 @@ class UserNotificationTest extends TestCase
         $user = User::factory()->create(['status' => 'active']);
         $user->assignRole('user');
 
-        $user->notify(new DatabaseCustomNotification([
+        \App\Models\InAppNotification::create([
+            'user_id' => $user->id,
             'title' => 'Unread Message',
-            'message' => 'This is unread',
-        ]));
+            'body' => 'This is unread',
+            'is_read' => false,
+        ]);
 
-        $user->notify(new DatabaseCustomNotification([
+        \App\Models\InAppNotification::create([
+            'user_id' => $user->id,
             'title' => 'Read Message',
-            'message' => 'This will be marked read',
-        ]));
-        $notificationToRead = $user->notifications()->first();
-        $notificationToRead->markAsRead();
+            'body' => 'This will be marked read',
+            'is_read' => true,
+            'read_at' => now(),
+        ]);
 
         Sanctum::actingAs($user, ['*']);
 
@@ -122,12 +126,12 @@ class UserNotificationTest extends TestCase
         $user = User::factory()->create(['status' => 'active']);
         $user->assignRole('user');
 
-        $user->notify(new DatabaseCustomNotification([
+        $notification = \App\Models\InAppNotification::create([
+            'user_id' => $user->id,
             'title' => 'Test Notification',
-            'message' => 'Read me',
-        ]));
-
-        $notification = $user->unreadNotifications()->first();
+            'body' => 'Read me',
+            'read_at' => null,
+        ]);
 
         Sanctum::actingAs($user, ['*']);
 
@@ -143,7 +147,7 @@ class UserNotificationTest extends TestCase
                 ],
             ]);
 
-        $this->assertEquals(0, $user->unreadNotifications()->count());
+        $this->assertEquals(0, $user->unreadInAppNotifications()->count());
     }
 
     public function test_user_can_mark_all_notifications_as_read(): void
@@ -151,10 +155,20 @@ class UserNotificationTest extends TestCase
         $user = User::factory()->create(['status' => 'active']);
         $user->assignRole('user');
 
-        $user->notify(new DatabaseCustomNotification(['title' => 'One', 'message' => 'First']));
-        $user->notify(new DatabaseCustomNotification(['title' => 'Two', 'message' => 'Second']));
+        \App\Models\InAppNotification::create([
+            'user_id' => $user->id,
+            'title' => 'One',
+            'body' => 'First',
+            'read_at' => null,
+        ]);
+        \App\Models\InAppNotification::create([
+            'user_id' => $user->id,
+            'title' => 'Two',
+            'body' => 'Second',
+            'read_at' => null,
+        ]);
 
-        $this->assertEquals(2, $user->unreadNotifications()->count());
+        $this->assertEquals(2, $user->unreadInAppNotifications()->count());
 
         Sanctum::actingAs($user, ['*']);
 
@@ -169,7 +183,7 @@ class UserNotificationTest extends TestCase
                 ],
             ]);
 
-        $this->assertEquals(0, $user->unreadNotifications()->count());
+        $this->assertEquals(0, $user->unreadInAppNotifications()->count());
     }
 
     public function test_user_can_delete_single_notification(): void
@@ -177,8 +191,12 @@ class UserNotificationTest extends TestCase
         $user = User::factory()->create(['status' => 'active']);
         $user->assignRole('user');
 
-        $user->notify(new DatabaseCustomNotification(['title' => 'To Delete', 'message' => 'Delete this']));
-        $notification = $user->notifications()->first();
+        $notification = \App\Models\InAppNotification::create([
+            'user_id' => $user->id,
+            'title' => 'To Delete',
+            'body' => 'Delete this',
+            'read_at' => null,
+        ]);
 
         Sanctum::actingAs($user, ['*']);
 
@@ -190,7 +208,7 @@ class UserNotificationTest extends TestCase
                 'message' => 'Notification deleted successfully.',
             ]);
 
-        $this->assertDatabaseMissing('notifications', ['id' => $notification->id]);
+        $this->assertDatabaseMissing('in_app_notifications', ['id' => $notification->id]);
     }
 
     public function test_user_can_clear_read_notifications(): void
@@ -198,10 +216,18 @@ class UserNotificationTest extends TestCase
         $user = User::factory()->create(['status' => 'active']);
         $user->assignRole('user');
 
-        $user->notify(new DatabaseCustomNotification(['title' => 'Keep Unread', 'message' => 'Unread']));
-        $user->notify(new DatabaseCustomNotification(['title' => 'To Clear', 'message' => 'Read']));
-
-        $user->notifications()->where('data', 'like', '%To Clear%')->first()->markAsRead();
+        \App\Models\InAppNotification::create([
+            'user_id' => $user->id,
+            'title' => 'Keep Unread',
+            'body' => 'Unread',
+            'read_at' => null,
+        ]);
+        \App\Models\InAppNotification::create([
+            'user_id' => $user->id,
+            'title' => 'To Clear',
+            'body' => 'Read',
+            'read_at' => now(),
+        ]);
 
         Sanctum::actingAs($user, ['*']);
 
@@ -216,8 +242,7 @@ class UserNotificationTest extends TestCase
                 ],
             ]);
 
-        $this->assertEquals(1, $user->notifications()->count());
-        $this->assertEquals('Keep Unread', $user->notifications()->first()->data['title']);
+        $this->assertEquals(1, $user->inAppNotifications()->count());
     }
 
     public function test_user_cannot_access_or_modify_another_users_notification(): void
@@ -228,8 +253,12 @@ class UserNotificationTest extends TestCase
         $user2 = User::factory()->create(['status' => 'active']);
         $user2->assignRole('user');
 
-        $user2->notify(new DatabaseCustomNotification(['title' => 'Secret', 'message' => 'For user 2 only']));
-        $user2Notification = $user2->notifications()->first();
+        $user2Notification = \App\Models\InAppNotification::create([
+            'user_id' => $user2->id,
+            'title' => 'Secret',
+            'body' => 'For user 2 only',
+            'is_read' => false,
+        ]);
 
         Sanctum::actingAs($user1, ['*']);
 
@@ -259,29 +288,29 @@ class UserNotificationTest extends TestCase
 
         $response = $this->withHeader('Authorization', "Bearer {$token}")
             ->postJson('/api/admin/notifications/send', [
-                'recipient_type' => 'single',
+                'notification_type' => 'in_app',
+                'audience_type' => 'single_user',
                 'user_id' => $user->id,
                 'title' => 'Admin Direct Message',
-                'message' => 'Hello User from Admin',
-                'type' => 'admin_notice',
-                'action_url' => 'https://vyaparidarbar.com/dashboard',
+                'body' => 'Hello User from Admin',
+                'send_now' => true,
             ]);
 
         $response->assertStatus(200)
             ->assertJson([
                 'status' => true,
                 'data' => [
-                    'recipient_count' => 1,
+                    'target_count' => 1,
                 ],
             ]);
 
-        $this->assertEquals(1, $user->notifications()->count());
-        $notif = $user->notifications()->first();
-        $this->assertEquals('Admin Direct Message', $notif->data['title']);
-        $this->assertEquals('https://vyaparidarbar.com/dashboard', $notif->data['action_url']);
+        $this->assertDatabaseHas('in_app_notifications', [
+            'user_id' => $user->id,
+            'title' => 'Admin Direct Message',
+        ]);
     }
 
-    public function test_admin_can_broadcast_notification_to_role(): void
+    public function test_admin_can_broadcast_notification_to_selected_users(): void
     {
         $admin = Admin::create([
             'first_name' => 'Super',
@@ -296,33 +325,34 @@ class UserNotificationTest extends TestCase
         $token = $admin->createToken('admin-token', ['*'])->plainTextToken;
 
         $trader1 = User::factory()->create(['status' => 'active']);
-        $trader1->assignRole('trader');
-
         $trader2 = User::factory()->create(['status' => 'active']);
-        $trader2->assignRole('trader');
-
-        $normalUser = User::factory()->create(['status' => 'active']);
-        $normalUser->assignRole('user');
 
         $response = $this->withHeader('Authorization', "Bearer {$token}")
             ->postJson('/api/admin/notifications/send', [
-                'recipient_type' => 'role',
-                'role' => 'trader',
+                'notification_type' => 'in_app',
+                'audience_type' => 'selected_users',
+                'user_ids' => [$trader1->id, $trader2->id],
                 'title' => 'Mandi Price Update',
-                'message' => 'New prices published for traders.',
+                'body' => 'New prices published for traders.',
+                'send_now' => true,
             ]);
 
         $response->assertStatus(200)
             ->assertJson([
                 'status' => true,
                 'data' => [
-                    'recipient_count' => 2,
+                    'target_count' => 2,
                 ],
             ]);
 
-        $this->assertEquals(1, $trader1->notifications()->count());
-        $this->assertEquals(1, $trader2->notifications()->count());
-        $this->assertEquals(0, $normalUser->notifications()->count());
+        $this->assertDatabaseHas('in_app_notifications', [
+            'user_id' => $trader1->id,
+            'title' => 'Mandi Price Update',
+        ]);
+        $this->assertDatabaseHas('in_app_notifications', [
+            'user_id' => $trader2->id,
+            'title' => 'Mandi Price Update',
+        ]);
     }
 
     public function test_admin_can_broadcast_notification_to_all_active_users(): void
@@ -340,31 +370,32 @@ class UserNotificationTest extends TestCase
         $token = $admin->createToken('admin-token', ['*'])->plainTextToken;
 
         $activeUser1 = User::factory()->create(['status' => 'active']);
-        $activeUser1->assignRole('user');
-
         $activeUser2 = User::factory()->create(['status' => 'active']);
-        $activeUser2->assignRole('trader');
-
-        $inactiveUser = User::factory()->create(['status' => 'inactive']);
-        $inactiveUser->assignRole('user');
 
         $response = $this->withHeader('Authorization', "Bearer {$token}")
             ->postJson('/api/admin/notifications/send', [
-                'recipient_type' => 'all',
+                'notification_type' => 'in_app',
+                'audience_type' => 'all_users',
                 'title' => 'System Maintenance Alert',
-                'message' => 'Platform maintenance at midnight.',
+                'body' => 'Platform maintenance at midnight.',
+                'send_now' => true,
             ]);
 
         $response->assertStatus(200)
             ->assertJson([
                 'status' => true,
                 'data' => [
-                    'recipient_count' => 2,
+                    'target_count' => 2,
                 ],
             ]);
 
-        $this->assertEquals(1, $activeUser1->notifications()->count());
-        $this->assertEquals(1, $activeUser2->notifications()->count());
-        $this->assertEquals(0, $inactiveUser->notifications()->count());
+        $this->assertDatabaseHas('in_app_notifications', [
+            'user_id' => $activeUser1->id,
+            'title' => 'System Maintenance Alert',
+        ]);
+        $this->assertDatabaseHas('in_app_notifications', [
+            'user_id' => $activeUser2->id,
+            'title' => 'System Maintenance Alert',
+        ]);
     }
 }

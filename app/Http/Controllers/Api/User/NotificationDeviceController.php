@@ -22,7 +22,7 @@ class NotificationDeviceController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $device = $service->registerDevice($user, $request->validated());
+        $device = $service->registerDevice($user, $request->validated(), $request->ip());
 
         return response()->json([
             'status' => true,
