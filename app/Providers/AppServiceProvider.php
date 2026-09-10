@@ -21,6 +21,15 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(DynamicMailConfigService::class, function () {
             return new DynamicMailConfigService;
         });
+
+        $this->app->singleton(\App\Services\Firebase\FirebaseConfigService::class, function () {
+            return new \App\Services\Firebase\FirebaseConfigService;
+        });
+
+        $this->app->singleton(
+            \App\Services\Firebase\Contracts\FirebaseAccessTokenProvider::class,
+            \App\Services\Firebase\GoogleFirebaseAccessTokenProvider::class
+        );
     }
 
     /**
@@ -95,6 +104,22 @@ class AppServiceProvider extends ServiceProvider
                     return response()->json([
                         'status' => false,
                         'message' => 'Too many SMTP test attempts. Please try again later.',
+                    ], 429, $headers);
+                });
+        });
+
+        RateLimiter::for('admin-firebase-test', function (Request $request) {
+            $user = $request->user();
+            $key = ($user instanceof Admin)
+                ? 'admin-firebase-test:'.$user->id
+                : 'guest:'.$request->ip();
+
+            return Limit::perMinute(5)
+                ->by($key)
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Too many Firebase test attempts. Please try again later.',
                     ], 429, $headers);
                 });
         });

@@ -3497,6 +3497,116 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "Firebase Settings & FCM",
+                    "description": "Dynamic Firebase configuration and push notification test endpoints for administrators.",
+                    "item": [
+                        {
+                            "name": "Get Firebase Settings",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/settings/firebase",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "settings",
+                                        "firebase"
+                                    ]
+                                },
+                                "description": "Retrieve singleton Firebase settings. Sensitive service account credentials are never exposed."
+                            }
+                        },
+                        {
+                            "name": "Update Firebase Settings",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"api_key\": \"{{firebaseApiKey}}\",\n    \"auth_domain\": \"vyapari-darbaar.firebaseapp.com\",\n    \"project_id\": \"vyapari-darbaar\",\n    \"storage_bucket\": \"vyapari-darbaar.appspot.com\",\n    \"messaging_sender_id\": \"123456789012\",\n    \"app_id\": \"1:123456789012:web:abcdef123456\",\n    \"vapid_key\": \"{{firebaseVapidKey}}\",\n    \"service_account_json\": \"{\\n  \\\"type\\\": \\\"service_account\\\",\\n  \\\"project_id\\\": \\\"vyapari-darbaar\\\",\\n  \\\"private_key_id\\\": \\\"fake_key_id\\\",\\n  \\\"private_key\\\": \\\"-----BEGIN PRIVATE KEY-----\\\\nFAKE_KEY\\\\n-----END PRIVATE KEY-----\\\\n\\\",\\n  \\\"client_email\\\": \\\"firebase-adminsdk@vyapari-darbaar.iam.gserviceaccount.com\\\",\\n  \\\"client_id\\\": \\\"123456789\\\",\\n  \\\"auth_uri\\\": \\\"https://accounts.google.com/o/oauth2/auth\\\",\\n  \\\"token_uri\\\": \\\"https://oauth2.googleapis.com/token\\\",\\n  \\\"auth_provider_x509_cert_url\\\": \\\"https://www.googleapis.com/oauth2/v1/certs\\\",\\n  \\\"client_x509_cert_url\\\": \\\"https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk%40vyapari-darbaar.iam.gserviceaccount.com\\\"\\n}\",\n    \"status\": true\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/settings/firebase",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "settings",
+                                        "firebase"
+                                    ]
+                                },
+                                "description": "Update Firebase web config and encrypted service account credentials. Omit or pass ******** to retain existing credentials."
+                            }
+                        },
+                        {
+                            "name": "Test Firebase Notification",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"fcm_token\": \"{{testFcmToken}}\",\n    \"title\": \"Vyapari Darbaar Test Notification\",\n    \"body\": \"Firebase notification configuration is working.\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/settings/firebase/test",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "settings",
+                                        "firebase",
+                                        "test"
+                                    ]
+                                },
+                                "description": "Send a test FCM push notification using saved Firebase configuration (works even if status is false). Throttled to 5 requests/minute."
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -4292,6 +4402,108 @@
                                         "company"
                                     ]
                                 }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Firebase & Push Devices",
+                    "description": "Public Firebase web configuration and authenticated device token registration/deactivation.",
+                    "item": [
+                        {
+                            "name": "Get Public Firebase Config",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/firebase/config",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "firebase",
+                                        "config"
+                                    ]
+                                },
+                                "description": "Retrieve safe public Firebase web configuration for client initialization. Cached in Redis (3600s TTL). Returns 503 if unconfigured/disabled."
+                            }
+                        },
+                        {
+                            "name": "Register Notification Device",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{user_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"fcm_token\": \"{{testFcmToken}}\",\n    \"device_type\": \"web\",\n    \"device_name\": \"Chrome on Windows\",\n    \"browser\": \"Chrome\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/notifications/devices",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "notifications",
+                                        "devices"
+                                    ]
+                                },
+                                "description": "Register or reactivate FCM device token for authenticated user. Safely reassigns token if registered from another account."
+                            }
+                        },
+                        {
+                            "name": "Deactivate Notification Device",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{user_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"fcm_token\": \"{{testFcmToken}}\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/notifications/devices",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "notifications",
+                                        "devices"
+                                    ]
+                                },
+                                "description": "Deactivate notification device token for the authenticated user."
                             }
                         }
                     ]

@@ -144,4 +144,25 @@ class User extends Authenticatable
     {
         $this->notify(new \App\Notifications\UserResetPasswordNotification($token));
     }
+
+    /**
+     * Get all notification devices registered for this user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\NotificationDevice, $this>
+     */
+    public function notificationDevices(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(NotificationDevice::class);
+    }
+
+    /**
+     * Get active notification devices registered for this user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\NotificationDevice, $this>
+     */
+    public function activeNotificationDevices(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(NotificationDevice::class)->where('is_active', true);
+    }
 }
+

@@ -464,7 +464,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 ### 4.3 View User Detail
 - **Method:** `GET`
 - **URI:** `/api/admin/users/{id}`
-- **Behavior:** Selectively loads creator summary (`creator:id,first_name,last_name,name`) and assigned roles (`roles:id,name,guard_name`).
+- **Behavior:** Selectively loads creator summary (`creator:id,first_name,last_name,name`), assigned roles (`roles:id,name,guard_name`), and associated `company` details if the user has the `trader` role.
 
 ### 4.4 Update User
 - **Method:** `PUT`
@@ -2496,6 +2496,237 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
 - **Method:** `DELETE`
 - **URI:** `/api/admin/companies/{id}`
 - **Authentication:** Bearer token (`auth:sanctum`, `admin` guard, `companies.delete` permission)
+
+---
+
+## 18. Firebase Settings & FCM Push Notifications
+
+### 18.1 Overview & Security Model
+The Firebase / FCM notification module enables dynamic configuration of Firebase Cloud Messaging without hardcoded keys in frontend or backend codebases.
+
+- **Dynamic Source of Truth:** Singleton `firebase_settings` table (ID = 1).
+- **Zero Secret Exposure:** The complete Google Service Account JSON is encrypted at rest using application-level encryption (`encrypted` cast), hidden from model serialization, excluded from API resources, never logged, never cached decrypted in Redis, and never serialized into queued job payloads.
+- **Frontend Safe Contract:** Frontend web/mobile clients fetch only safe public configuration (`api_key`, `auth_domain`, `project_id`, `storage_bucket`, `messaging_sender_id`, `app_id`, `vapid_key`).
+- **FCM HTTP v1 Standard:** FCM push delivery strictly targets Google FCM HTTP v1 (`https://fcm.googleapis.com/v1/projects/{project_id}/messages:send`) authenticated with short-lived OAuth2 bearer tokens.
+- **Token Hashing & Multi-Device:** Devices are indexed by SHA-256 hash (`fcm_token_hash`), while raw tokens are encrypted at rest. Shared browser logins automatically reassign the device token to the newly authenticated user.
+
+---
+
+### 18.2 Admin — Get Firebase Settings
+- **Method:** `GET`
+- **URI:** `/api/admin/settings/firebase`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` guard, `firebase-setting.view` permission)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Firebase settings retrieved successfully.",
+      "data": {
+          "api_key": "AIzaSy...",
+          "auth_domain": "vyapari-darbaar.firebaseapp.com",
+          "project_id": "vyapari-darbaar",
+          "storage_bucket": "vyapari-darbaar.appspot.com",
+          "messaging_sender_id": "123456789012",
+          "app_id": "1:123456789012:web:abcdef123456",
+          "vapid_key": "BN...",
+          "service_account_configured": true,
+          "status": true
+      }
+  }
+  ```
+
+---
+
+### 18.3 Admin — Update Firebase Settings
+- **Method:** `PUT`
+- **URI:** `/api/admin/settings/firebase`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` guard, `firebase-setting.update` permission)
+- **Request Body:**
+  ```json
+  {
+      "api_key": "AIzaSy...",
+      "auth_domain": "vyapari-darbaar.firebaseapp.com",
+      "project_id": "vyapari-darbaar",
+      "storage_bucket": "vyapari-darbaar.appspot.com",
+      "messaging_sender_id": "123456789012",
+      "app_id": "1:123456789012:web:abcdef123456",
+      "vapid_key": "BN...",
+      "service_account_json": "{\n  \"type\": \"service_account\",\n  \"project_id\": \"vyapari-darbaar\",\n  \"private_key_id\": \"...\",\n  \"private_key\": \"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n\",\n  \"client_email\": \"firebase-adminsdk@vyapari-darbaar.iam.gserviceaccount.com\",\n  \"client_id\": \"...\",\n  \"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",\n  \"token_uri\": \"https://oauth2.googleapis.com/token\",\n  \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",\n  \"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/...\"\n}",
+      "status": true
+  }
+  ```
+- **Validation & Password-Like Semantics:**
+  - `api_key`, `auth_domain`, `project_id`, `messaging_sender_id`, `app_id`, `vapid_key`, `status` are required.
+  - `service_account_json`: Required on initial setup. On updates, if omitted, `null`, empty string, or `"********"`, the existing encrypted service-account credentials are preserved.
+  - When provided, validates JSON structure, `type === 'service_account'`, required keys (`project_id`, `private_key`, `client_email`, `token_uri`), and verifies that `project_id` matches the configured `project_id`.
+- **Cache Invalidation:** Flushes Redis key `settings:firebase:public` only after successful database transaction commit.
+
+---
+
+### 18.4 Admin — Test Firebase Notification
+- **Method:** `POST`
+- **URI:** `/api/admin/settings/firebase/test`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` guard, `firebase-setting.test` permission)
+- **Throttle:** `admin-firebase-test` (5 requests / minute per authenticated admin)
+- **Request Body:**
+  ```json
+  {
+      "fcm_token": "fcm_device_token_string...",
+      "title": "Vyapari Darbaar Test Notification",
+      "body": "Firebase notification configuration is working."
+  }
+  ```
+- **Behavior:**
+  - Sends a real synchronous FCM HTTP v1 notification to verify credentials.
+  - Works on saved configuration even when `status = false` (enabling a save-disabled -> test -> enable admin workflow).
+  - If no configuration exists, returns HTTP 422 with `FIREBASE_CONFIGURATION_MISSING`.
+
+---
+
+### 18.5 Public — Get Firebase Public Config
+- **Method:** `GET`
+- **URI:** `/api/firebase/config`
+- **Authentication:** Public (No auth required)
+- **Caching:** Redis key `settings:firebase:public`, TTL 3600 seconds.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Firebase configuration retrieved successfully.",
+      "data": {
+          "api_key": "AIzaSy...",
+          "auth_domain": "vyapari-darbaar.firebaseapp.com",
+          "project_id": "vyapari-darbaar",
+          "storage_bucket": "vyapari-darbaar.appspot.com",
+          "messaging_sender_id": "123456789012",
+          "app_id": "1:123456789012:web:abcdef123456",
+          "vapid_key": "BN..."
+      }
+  }
+  ```
+- **Error (503 Service Unavailable):**
+  When settings do not exist or `status = false`:
+  ```json
+  {
+      "status": false,
+      "message": "Firebase notifications are currently unavailable.",
+      "error": "FIREBASE_NOT_AVAILABLE"
+  }
+  ```
+
+---
+
+### 18.6 User — Register / Reactivate Notification Device
+- **Method:** `POST`
+- **URI:** `/api/notifications/devices`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Request Body:**
+  ```json
+  {
+      "fcm_token": "fcm_device_registration_token...",
+      "device_type": "web",
+      "device_name": "Chrome on Windows 11",
+      "browser": "Chrome"
+  }
+  ```
+- **Validation:**
+  - `fcm_token`: required, string
+  - `device_type`: required, in: `web`, `android`, `ios`
+  - `device_name`: optional, string, max:150
+  - `browser`: optional, string, max:100
+- **Behavior:**
+  - Calculates SHA-256 token hash (`fcm_token_hash`).
+  - Upserts device record, marks `is_active = true`, updates metadata and `last_used_at = now()`.
+  - Reassigns ownership to the current user if token was previously registered by another account on a shared browser.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Notification device registered successfully.",
+      "data": {
+          "id": 1,
+          "device_type": "web",
+          "device_name": "Chrome on Windows 11",
+          "browser": "Chrome",
+          "is_active": true,
+          "last_used_at": "2026-09-10T10:00:00.000000Z",
+          "created_at": "2026-09-10T09:00:00.000000Z"
+      }
+  }
+  ```
+
+---
+
+### 18.7 User — Deactivate Notification Device
+- **Method:** `DELETE`
+- **URI:** `/api/notifications/devices`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Request Body:**
+  ```json
+  {
+      "fcm_token": "fcm_device_registration_token..."
+  }
+  ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Notification device deactivated successfully."
+  }
+  ```
+
+---
+
+### 18.8 User Logout Integration
+When logging out via `POST /api/user/logout`, clients may optionally pass their current `fcm_token` in the request body. If passed, only that device is marked `is_active = false`, leaving the user's other devices active.
+
+---
+
+### 18.9 Queue Architecture & Workers
+Production push notifications are dispatched asynchronously via `SendFcmNotificationJob`:
+- **Queue:** `notifications`
+- **Configuration:** `$tries = 3`, `$timeout = 60`, `$backoff = [10, 30, 60]`.
+- **Worker Command:**
+  ```bash
+  php artisan queue:work redis --queue=notifications --tries=3 --timeout=60
+  ```
+
+---
+
+### 18.10 Frontend Integration & Service Worker Pattern
+1. Frontend makes `GET /api/firebase/config` to fetch public keys.
+2. Initialize Firebase Web SDK dynamically:
+   ```javascript
+   import { initializeApp } from "firebase/app";
+   import { getMessaging, getToken } from "firebase/messaging";
+
+   const res = await fetch("/api/firebase/config");
+   const { data: firebaseConfig } = await res.json();
+
+   const app = initializeApp(firebaseConfig);
+   const messaging = getMessaging(app);
+
+   const currentToken = await getToken(messaging, {
+       vapidKey: firebaseConfig.vapid_key,
+       serviceWorkerRegistration: await navigator.serviceWorker.register("/firebase-messaging-sw.js")
+   });
+
+   // Register token with backend
+   await fetch("/api/notifications/devices", {
+       method: "POST",
+       headers: {
+           "Content-Type": "application/json",
+           "Authorization": `Bearer ${userToken}`
+       },
+       body: JSON.stringify({
+           fcm_token: currentToken,
+           device_type: "web",
+           browser: "Chrome"
+       })
+   });
+   ```
+3. `firebase-messaging-sw.js` (hosted at frontend root origin) only uses public configuration, never service-account secrets.
+
 
 
 

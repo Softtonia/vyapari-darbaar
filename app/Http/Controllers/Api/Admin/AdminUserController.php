@@ -138,7 +138,7 @@ class AdminUserController extends Controller
         /** @var Admin $admin */
         $admin = $request->user();
         $user = $action->execute($admin, $request->validatedUserData());
-        $user->loadMissing(['creator:id,first_name,last_name,name', 'roles']);
+        $user->loadMissing(['creator:id,first_name,last_name,name', 'roles', 'companies']);
 
         return response()->json([
             'status' => true,
@@ -152,7 +152,7 @@ class AdminUserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
-        $user->loadMissing(['creator:id,first_name,last_name,name', 'roles']);
+        $user->loadMissing(['creator:id,first_name,last_name,name', 'roles', 'companies']);
 
         return response()->json([
             'status' => true,
@@ -167,7 +167,7 @@ class AdminUserController extends Controller
     public function update(UpdateUserRequest $request, User $user, UpdateUserAction $action): JsonResponse
     {
         $updatedUser = $action->execute($user, $request->validatedUserData());
-        $updatedUser->loadMissing(['creator:id,first_name,last_name,name', 'roles']);
+        $updatedUser->loadMissing(['creator:id,first_name,last_name,name', 'roles', 'companies']);
 
         return response()->json([
             'status' => true,
@@ -185,7 +185,7 @@ class AdminUserController extends Controller
         UpdateUserStatusAction $action
     ): JsonResponse {
         $updatedUser = $action->execute($user, (string) $request->input('status'));
-        $updatedUser->loadMissing(['creator:id,first_name,last_name,name', 'roles']);
+        $updatedUser->loadMissing(['creator:id,first_name,last_name,name', 'roles', 'companies']);
 
         return response()->json([
             'status' => true,

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Jobs\SendUserCredentialsEmailJob;
 use App\Models\Admin;
+use App\Models\Company;
 use App\Models\EmailTemplate;
 use App\Models\User;
 use App\Services\UsernameGenerator;
@@ -471,6 +472,84 @@ class AdminUserManagementTest extends TestCase
         $creatorData = $response->json('data.creator');
         $this->assertArrayNotHasKey('email', $creatorData);
         $this->assertArrayNotHasKey('password', $creatorData);
+    }
+
+    public function test_user_detail_includes_company_details_when_user_role_is_trader(): void
+    {
+        $user = User::create([
+            'first_name' => 'Trader',
+            'last_name' => 'User',
+            'name' => 'Trader User',
+            'phone_number' => '+919876543210',
+            'username' => 'trader.user',
+            'email' => 'trader.user@example.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+        ]);
+        $user->assignRole('trader');
+
+        $company = Company::create([
+            'name' => 'Agro Traders Pvt Ltd',
+            'contact_person' => 'Trader User',
+            'business_type' => 'Wholesaler',
+            'gstin' => '27AAAAA0000A1Z5',
+            'country' => 'India',
+            'state' => 'Maharashtra',
+            'city' => 'Mumbai',
+            'address' => 'APMC Market Yard',
+            'commodities_handled' => ['wheat', 'chana'],
+            'trade_preference' => 'both',
+            'verification_status' => 'verified',
+        ]);
+
+        $user->companies()->attach($company->id, [
+            'role' => 'owner',
+            'is_primary' => true,
+        ]);
+
+        $response = $this->withToken($this->adminToken)
+            ->getJson("/api/admin/users/{$user->id}");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'data' => [
+                    'id' => $user->id,
+                    'role' => 'trader',
+                    'company' => [
+                        'id' => $company->id,
+                        'name' => 'Agro Traders Pvt Ltd',
+                        'company_name' => 'Agro Traders Pvt Ltd',
+                        'contact_person' => 'Trader User',
+                        'business_type' => 'Wholesaler',
+                        'gstin' => '27AAAAA0000A1Z5',
+                        'city' => 'Mumbai',
+                        'state' => 'Maharashtra',
+                        'verification_status' => 'verified',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_user_detail_omits_company_key_when_user_role_is_not_trader(): void
+    {
+        $user = User::create([
+            'first_name' => 'Regular',
+            'last_name' => 'Member',
+            'name' => 'Regular Member',
+            'phone_number' => '+919876543211',
+            'username' => 'regular.member',
+            'email' => 'regular.member@example.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+        ]);
+        $user->assignRole('user');
+
+        $response = $this->withToken($this->adminToken)
+            ->getJson("/api/admin/users/{$user->id}");
+
+        $response->assertStatus(200);
+        $this->assertArrayNotHasKey('company', $response->json('data'));
     }
 
     public function test_update_user_name_with_immutable_username_and_email(): void

@@ -217,8 +217,9 @@ class UserAuthController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
+        $fcmToken = $request->input('fcm_token');
 
-        $action->execute($user);
+        $action->execute($user, is_string($fcmToken) ? $fcmToken : null);
 
         return response()->json([
             'status' => true,

@@ -17,6 +17,9 @@ class AdminUserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $roleName = $this->roles->first()?->name ?? 'user';
+        $isTrader = $roleName === 'trader' || ($this->relationLoaded('roles') ? $this->roles->contains('name', 'trader') : $this->hasRole('trader'));
+
         return [
             'id' => $this->id,
             'first_name' => $this->first_name,
@@ -27,7 +30,14 @@ class AdminUserResource extends JsonResource
             'email' => $this->email,
             'status' => $this->status,
             'must_change_password' => (bool) $this->must_change_password,
-            'role' => $this->roles->first()?->name ?? 'user',
+            'role' => $roleName,
+            'company' => $this->when($isTrader, function () {
+                $company = $this->relationLoaded('companies')
+                    ? ($this->companies->firstWhere('pivot.is_primary', true) ?? $this->companies->first())
+                    : $this->company;
+
+                return $company ? new CompanyResource($company) : null;
+            }),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             'creator' => $this->whenLoaded('creator', function () {

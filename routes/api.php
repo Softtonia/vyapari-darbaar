@@ -11,10 +11,13 @@ use App\Http\Controllers\Api\Admin\CommodityGradeController;
 use App\Http\Controllers\Api\Admin\CommoditySubcategoryController;
 use App\Http\Controllers\Api\Admin\CommodityVarietyController;
 use App\Http\Controllers\Api\Admin\EmailTemplateController;
+use App\Http\Controllers\Api\Admin\FirebaseSettingController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\SiteSettingController as AdminSiteSettingController;
 use App\Http\Controllers\Api\Admin\SmtpSettingController;
+use App\Http\Controllers\Api\PublicFirebaseConfigController;
 use App\Http\Controllers\Api\SiteSettingController;
+use App\Http\Controllers\Api\User\NotificationDeviceController;
 use App\Http\Controllers\Api\User\UserActivityController;
 use App\Http\Controllers\Api\User\UserAuthController;
 use App\Http\Controllers\Api\User\UserCompanyController;
@@ -251,6 +254,15 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.settings.smtp.test');
         });
 
+        // Firebase Settings management
+        Route::prefix('settings/firebase')->group(function () {
+            Route::get('/', [FirebaseSettingController::class, 'show'])->name('admin.settings.firebase.show');
+            Route::put('/', [FirebaseSettingController::class, 'update'])->name('admin.settings.firebase.update');
+            Route::post('test', [FirebaseSettingController::class, 'test'])
+                ->middleware('throttle:admin-firebase-test')
+                ->name('admin.settings.firebase.test');
+        });
+
         // Notifications management
         Route::prefix('notifications')->group(function () {
             Route::post('send', [AdminNotificationController::class, 'send'])
@@ -275,11 +287,26 @@ Route::prefix('admin')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Public Site Settings Route
+| Public Routes
 |--------------------------------------------------------------------------
 */
 Route::get('site-settings', [SiteSettingController::class, 'show'])
     ->name('site-settings.show');
+
+Route::get('firebase/config', [PublicFirebaseConfigController::class, 'show'])
+    ->name('firebase.config');
+
+/*
+|--------------------------------------------------------------------------
+| Authenticated Push Notification Device Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth:sanctum', 'user'])->prefix('notifications/devices')->group(function () {
+    Route::post('/', [NotificationDeviceController::class, 'store'])
+        ->name('notifications.devices.store');
+    Route::delete('/', [NotificationDeviceController::class, 'destroy'])
+        ->name('notifications.devices.destroy');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -361,6 +388,14 @@ Route::prefix('user')->group(function () {
             Route::delete('/', [UserNotificationController::class, 'clearRead']);
             Route::delete('{id}', [UserNotificationController::class, 'destroy'])
                 ->name('user.notifications.destroy');
+        });
+
+        // Push notification devices
+        Route::prefix('notifications/devices')->group(function () {
+            Route::post('/', [NotificationDeviceController::class, 'store'])
+                ->name('user.notifications.devices.store');
+            Route::delete('/', [NotificationDeviceController::class, 'destroy'])
+                ->name('user.notifications.devices.destroy');
         });
 
         // Trader Company Profile
