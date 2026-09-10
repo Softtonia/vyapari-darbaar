@@ -16,11 +16,9 @@ return new class extends Migration
             $table->foreignId('commodity_id')->constrained('commodities')->restrictOnDelete();
             $table->foreignId('commodity_subcategory_id')->nullable()->constrained('commodity_subcategories')->restrictOnDelete();
             $table->foreignId('commodity_variety_id')->nullable()->constrained('commodity_varieties')->restrictOnDelete();
-            $table->string('name_en', 150);
-            $table->string('name_hi', 150)->nullable();
+            $table->string('name', 150);
             $table->string('slug', 180);
-            $table->text('description_en')->nullable();
-            $table->text('description_hi')->nullable();
+            $table->text('description')->nullable();
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->boolean('status')->default(true);
             $table->foreignId('created_by')->nullable()->constrained('admins')->nullOnDelete();

@@ -27,11 +27,9 @@ class CommodityVariety extends Model
     protected $fillable = [
         'commodity_id',
         'commodity_subcategory_id',
-        'name_en',
-        'name_hi',
+        'name',
         'slug',
-        'description_en',
-        'description_hi',
+        'description',
         'sort_order',
         'status',
         'created_by',
@@ -47,8 +45,7 @@ class CommodityVariety extends Model
         'id',
         'commodity_id',
         'commodity_subcategory_id',
-        'name_en',
-        'name_hi',
+        'name',
         'slug',
         'sort_order',
         'status',
@@ -195,7 +192,7 @@ class CommodityVariety extends Model
     }
 
     /**
-     * Scope query to search by English name, Hindi name, or slug.
+     * Scope query to search by name or slug.
      *
      * @param  Builder<CommodityVariety>  $query
      * @return Builder<CommodityVariety>
@@ -206,8 +203,7 @@ class CommodityVariety extends Model
 
         if ($term !== '') {
             $query->where(function (Builder $q) use ($term) {
-                $q->where('name_en', 'LIKE', "%{$term}%")
-                    ->orWhere('name_hi', 'LIKE', "%{$term}%")
+                $q->where('name', 'LIKE', "%{$term}%")
                     ->orWhere('slug', 'LIKE', "%{$term}%");
             });
         }

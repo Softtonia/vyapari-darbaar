@@ -28,14 +28,9 @@ class UpdateCommodityRequest extends FormRequest
             $sanitized['commodity_category_id'] = ($catId !== null && $catId !== '') ? (int) $catId : null;
         }
 
-        if ($this->has('name_en')) {
-            $nameEn = trim((string) $this->input('name_en'));
-            $sanitized['name_en'] = $nameEn !== '' ? $nameEn : null;
-        }
-
-        if ($this->has('name_hi')) {
-            $nameHi = trim((string) $this->input('name_hi'));
-            $sanitized['name_hi'] = $nameHi !== '' ? $nameHi : null;
+        if ($this->has('name')) {
+            $name = trim((string) $this->input('name'));
+            $sanitized['name'] = $name !== '' ? $name : null;
         }
 
         if ($this->has('slug')) {
@@ -43,14 +38,9 @@ class UpdateCommodityRequest extends FormRequest
             $sanitized['slug'] = $slug !== '' ? Str::slug($slug) : null;
         }
 
-        if ($this->has('description_en')) {
-            $descEn = trim((string) $this->input('description_en'));
-            $sanitized['description_en'] = $descEn !== '' ? $descEn : null;
-        }
-
-        if ($this->has('description_hi')) {
-            $descHi = trim((string) $this->input('description_hi'));
-            $sanitized['description_hi'] = $descHi !== '' ? $descHi : null;
+        if ($this->has('description')) {
+            $desc = trim((string) $this->input('description'));
+            $sanitized['description'] = $desc !== '' ? $desc : null;
         }
 
         if ($this->has('sort_order')) {
@@ -89,11 +79,9 @@ class UpdateCommodityRequest extends FormRequest
 
         return [
             'commodity_category_id' => $categoryRule,
-            'name_en' => ['sometimes', 'required', 'string', 'max:150'],
-            'name_hi' => ['nullable', 'string', 'max:150'],
+            'name' => ['sometimes', 'required', 'string', 'max:150'],
             'slug' => ['sometimes', 'nullable', 'string', 'max:180', Rule::unique('commodities', 'slug')->ignore($commodityId)],
-            'description_en' => ['nullable', 'string'],
-            'description_hi' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
             'status' => ['nullable', 'boolean'],
         ];

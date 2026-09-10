@@ -80,8 +80,8 @@ class CommoditySubcategoryController extends Controller
     public function show(CommoditySubcategory $commoditySubcategory): JsonResponse
     {
         $commoditySubcategory->load([
-            'commodity:id,commodity_category_id,name_en,name_hi,slug',
-            'commodity.category:id,name_en,name_hi,slug',
+            'commodity:id,commodity_category_id,name,slug',
+            'commodity.category:id,name,slug',
             'creator',
             'updater',
         ]);

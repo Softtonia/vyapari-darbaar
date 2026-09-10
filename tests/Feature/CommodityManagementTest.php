@@ -47,15 +47,13 @@ class CommodityManagementTest extends TestCase
         $this->adminToken = $this->admin->createToken('admin-token')->plainTextToken;
 
         $this->categoryGrains = CommodityCategory::create([
-            'name_en' => 'Grains',
-            'name_hi' => 'अनाज',
+            'name' => 'Grains',
             'slug' => 'grains',
             'status' => true,
         ]);
 
         $this->categoryPulses = CommodityCategory::create([
-            'name_en' => 'Pulses',
-            'name_hi' => 'दलहन',
+            'name' => 'Pulses',
             'slug' => 'pulses',
             'status' => true,
         ]);
@@ -101,14 +99,14 @@ class CommodityManagementTest extends TestCase
     {
         Commodity::create([
             'commodity_category_id' => $this->categoryGrains->id,
-            'name_en' => 'Wheat',
+            'name' => 'Wheat',
             'slug' => 'wheat',
             'sort_order' => 1,
             'status' => true,
         ]);
         Commodity::create([
             'commodity_category_id' => $this->categoryPulses->id,
-            'name_en' => 'Chana',
+            'name' => 'Chana',
             'slug' => 'chana',
             'sort_order' => 2,
             'status' => true,
@@ -125,9 +123,8 @@ class CommodityManagementTest extends TestCase
                         '*' => [
                             'id',
                             'commodity_category_id',
-                            'category' => ['id', 'name_en', 'name_hi', 'slug'],
-                            'name_en',
-                            'name_hi',
+                            'category' => ['id', 'name',  'slug'],
+                            'name',
                             'slug',
                             'sort_order',
                             'status',
@@ -177,19 +174,19 @@ class CommodityManagementTest extends TestCase
 
     public function test_search_and_category_filtering(): void
     {
-        Commodity::create(['commodity_category_id' => $this->categoryGrains->id, 'name_en' => 'Wheat', 'name_hi' => 'गेहूं', 'slug' => 'wheat', 'status' => true]);
-        Commodity::create(['commodity_category_id' => $this->categoryGrains->id, 'name_en' => 'Rice', 'name_hi' => 'चावल', 'slug' => 'rice', 'status' => true]);
-        Commodity::create(['commodity_category_id' => $this->categoryPulses->id, 'name_en' => 'Chana', 'name_hi' => 'चना', 'slug' => 'chana', 'status' => true]);
+        Commodity::create(['commodity_category_id' => $this->categoryGrains->id, 'name' => 'Wheat', 'slug' => 'wheat', 'status' => true]);
+        Commodity::create(['commodity_category_id' => $this->categoryGrains->id, 'name' => 'Rice', 'slug' => 'rice', 'status' => true]);
+        Commodity::create(['commodity_category_id' => $this->categoryPulses->id, 'name' => 'Chana', 'slug' => 'chana', 'status' => true]);
 
-        // Search English
-        $resEn = $this->withToken($this->adminToken)->getJson('/api/admin/commodities?search=wheat')->assertStatus(200);
-        $this->assertCount(1, $resEn->json('data.items'));
-        $this->assertEquals('Wheat', $resEn->json('data.items.0.name_en'));
+        // Search Name
+        $resName = $this->withToken($this->adminToken)->getJson('/api/admin/commodities?search=wheat')->assertStatus(200);
+        $this->assertCount(1, $resName->json('data.items'));
+        $this->assertEquals('Wheat', $resName->json('data.items.0.name'));
 
-        // Search Hindi
-        $resHi = $this->withToken($this->adminToken)->getJson('/api/admin/commodities?search=चना')->assertStatus(200);
-        $this->assertCount(1, $resHi->json('data.items'));
-        $this->assertEquals('Chana', $resHi->json('data.items.0.name_en'));
+        // Search Slug
+        $resSlug = $this->withToken($this->adminToken)->getJson('/api/admin/commodities?search=chana')->assertStatus(200);
+        $this->assertCount(1, $resSlug->json('data.items'));
+        $this->assertEquals('Chana', $resSlug->json('data.items.0.name'));
 
         // Filter Category
         $resCat = $this->withToken($this->adminToken)->getJson("/api/admin/commodities?commodity_category_id={$this->categoryGrains->id}")->assertStatus(200);
@@ -200,9 +197,8 @@ class CommodityManagementTest extends TestCase
     {
         $payload = [
             'commodity_category_id' => $this->categoryGrains->id,
-            'name_en' => '  Barley Malt  ',
-            'name_hi' => '  जौ माल्ट  ',
-            'description_en' => '  Barley grains for brewing  ',
+            'name' => '  Barley Malt  ',
+            'description' => '  Barley grains for brewing  ',
             'sort_order' => 5,
             'status' => true,
         ];
@@ -215,8 +211,7 @@ class CommodityManagementTest extends TestCase
                 'message' => 'Commodity created successfully.',
                 'data' => [
                     'commodity_category_id' => $this->categoryGrains->id,
-                    'name_en' => 'Barley Malt',
-                    'name_hi' => 'जौ माल्ट',
+                    'name' => 'Barley Malt',
                     'slug' => 'barley-malt',
                     'sort_order' => 5,
                     'status' => true,
@@ -224,7 +219,7 @@ class CommodityManagementTest extends TestCase
             ]);
 
         $this->assertDatabaseHas('commodities', [
-            'name_en' => 'Barley Malt',
+            'name' => 'Barley Malt',
             'slug' => 'barley-malt',
             'created_by' => $this->admin->id,
         ]);
@@ -232,15 +227,15 @@ class CommodityManagementTest extends TestCase
 
     public function test_store_rejects_inactive_or_soft_deleted_category(): void
     {
-        $inactiveCat = CommodityCategory::create(['name_en' => 'Inactive Cat', 'slug' => 'inactive-cat', 'status' => false]);
-        $deletedCat = CommodityCategory::create(['name_en' => 'Deleted Cat', 'slug' => 'deleted-cat', 'status' => true]);
+        $inactiveCat = CommodityCategory::create(['name' => 'Inactive Cat', 'slug' => 'inactive-cat', 'status' => false]);
+        $deletedCat = CommodityCategory::create(['name' => 'Deleted Cat', 'slug' => 'deleted-cat', 'status' => true]);
         $deletedCat->delete();
 
         // Inactive category rejected on store
         $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodities', [
                 'commodity_category_id' => $inactiveCat->id,
-                'name_en' => 'Test Item',
+                'name' => 'Test Item',
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['commodity_category_id']);
@@ -249,7 +244,7 @@ class CommodityManagementTest extends TestCase
         $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodities', [
                 'commodity_category_id' => $deletedCat->id,
-                'name_en' => 'Test Item 2',
+                'name' => 'Test Item 2',
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['commodity_category_id']);
@@ -259,7 +254,7 @@ class CommodityManagementTest extends TestCase
     {
         $existing = Commodity::create([
             'commodity_category_id' => $this->categoryGrains->id,
-            'name_en' => 'Maize',
+            'name' => 'Maize',
             'slug' => 'maize',
         ]);
 
@@ -267,7 +262,7 @@ class CommodityManagementTest extends TestCase
         $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodities', [
                 'commodity_category_id' => $this->categoryGrains->id,
-                'name_en' => 'Other Maize',
+                'name' => 'Other Maize',
                 'slug' => 'maize',
             ])
             ->assertStatus(422)
@@ -279,7 +274,7 @@ class CommodityManagementTest extends TestCase
         $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodities', [
                 'commodity_category_id' => $this->categoryGrains->id,
-                'name_en' => 'New Maize',
+                'name' => 'New Maize',
                 'slug' => 'maize',
             ])
             ->assertStatus(422)
@@ -296,9 +291,9 @@ class CommodityManagementTest extends TestCase
     {
         $commodity = Commodity::create([
             'commodity_category_id' => $this->categoryGrains->id,
-            'name_en' => 'Detailed Wheat',
+            'name' => 'Detailed Wheat',
             'slug' => 'detailed-wheat',
-            'description_en' => 'Full specification description text.',
+            'description' => 'Full specification description text.',
             'created_by' => $this->admin->id,
         ]);
 
@@ -309,12 +304,12 @@ class CommodityManagementTest extends TestCase
                 'status' => true,
                 'data' => [
                     'id' => $commodity->id,
-                    'name_en' => 'Detailed Wheat',
+                    'name' => 'Detailed Wheat',
                     'slug' => 'detailed-wheat',
-                    'description_en' => 'Full specification description text.',
+                    'description' => 'Full specification description text.',
                     'category' => [
                         'id' => $this->categoryGrains->id,
-                        'name_en' => 'Grains',
+                        'name' => 'Grains',
                     ],
                     'creator' => [
                         'id' => $this->admin->id,
@@ -328,7 +323,7 @@ class CommodityManagementTest extends TestCase
     {
         $this->withToken($this->adminToken)->getJson('/api/admin/commodities/99999')->assertStatus(404);
 
-        $commodity = Commodity::create(['commodity_category_id' => $this->categoryGrains->id, 'name_en' => 'Deleted Item', 'slug' => 'deleted-item']);
+        $commodity = Commodity::create(['commodity_category_id' => $this->categoryGrains->id, 'name' => 'Deleted Item', 'slug' => 'deleted-item']);
         $commodity->delete();
 
         $this->withToken($this->adminToken)->getJson("/api/admin/commodities/{$commodity->id}")->assertStatus(404);
@@ -338,17 +333,17 @@ class CommodityManagementTest extends TestCase
     {
         $commodity = Commodity::create([
             'commodity_category_id' => $this->categoryGrains->id,
-            'name_en' => 'Original Grain Item',
+            'name' => 'Original Grain Item',
             'slug' => 'original-grain-item',
         ]);
 
         // 1. Update without slug retains existing slug
         $response1 = $this->withToken($this->adminToken)
             ->putJson("/api/admin/commodities/{$commodity->id}", [
-                'name_en' => 'Updated Grain Item',
+                'name' => 'Updated Grain Item',
             ])
             ->assertStatus(200);
-        $this->assertEquals('Updated Grain Item', $response1->json('data.name_en'));
+        $this->assertEquals('Updated Grain Item', $response1->json('data.name'));
         $this->assertEquals('original-grain-item', $response1->json('data.slug'));
 
         // 2. Reassign to valid active category
@@ -362,24 +357,24 @@ class CommodityManagementTest extends TestCase
 
     public function test_editing_ordinary_fields_under_existing_inactive_parent_is_allowed(): void
     {
-        $inactiveCat = CommodityCategory::create(['name_en' => 'Old Inactive Cat', 'slug' => 'old-inactive-cat', 'status' => false]);
+        $inactiveCat = CommodityCategory::create(['name' => 'Old Inactive Cat', 'slug' => 'old-inactive-cat', 'status' => false]);
         $commodity = Commodity::create([
             'commodity_category_id' => $inactiveCat->id,
-            'name_en' => 'Existing Item',
+            'name' => 'Existing Item',
             'slug' => 'existing-item',
         ]);
 
         // Editing name without changing category should succeed
         $response = $this->withToken($this->adminToken)
             ->putJson("/api/admin/commodities/{$commodity->id}", [
-                'name_en' => 'Existing Item Updated',
+                'name' => 'Existing Item Updated',
             ])
             ->assertStatus(200);
 
-        $this->assertEquals('Existing Item Updated', $response->json('data.name_en'));
+        $this->assertEquals('Existing Item Updated', $response->json('data.name'));
 
         // Attempting to change to ANOTHER inactive category is rejected
-        $anotherInactiveCat = CommodityCategory::create(['name_en' => 'Another Inactive', 'slug' => 'another-inactive', 'status' => false]);
+        $anotherInactiveCat = CommodityCategory::create(['name' => 'Another Inactive', 'slug' => 'another-inactive', 'status' => false]);
         $this->withToken($this->adminToken)
             ->putJson("/api/admin/commodities/{$commodity->id}", [
                 'commodity_category_id' => $anotherInactiveCat->id,
@@ -390,8 +385,8 @@ class CommodityManagementTest extends TestCase
 
     public function test_status_update_and_bulk_status_update(): void
     {
-        $c1 = Commodity::create(['commodity_category_id' => $this->categoryGrains->id, 'name_en' => 'C1', 'slug' => 'c1', 'status' => true]);
-        $c2 = Commodity::create(['commodity_category_id' => $this->categoryPulses->id, 'name_en' => 'C2', 'slug' => 'c2', 'status' => true]);
+        $c1 = Commodity::create(['commodity_category_id' => $this->categoryGrains->id, 'name' => 'C1', 'slug' => 'c1', 'status' => true]);
+        $c2 = Commodity::create(['commodity_category_id' => $this->categoryPulses->id, 'name' => 'C2', 'slug' => 'c2', 'status' => true]);
 
         // Single status
         $this->withToken($this->adminToken)
@@ -414,8 +409,8 @@ class CommodityManagementTest extends TestCase
 
     public function test_single_delete_and_bulk_delete_with_cache_invalidation(): void
     {
-        $c1 = Commodity::create(['commodity_category_id' => $this->categoryGrains->id, 'name_en' => 'Del 1', 'slug' => 'del-1']);
-        $c2 = Commodity::create(['commodity_category_id' => $this->categoryPulses->id, 'name_en' => 'Del 2', 'slug' => 'del-2']);
+        $c1 = Commodity::create(['commodity_category_id' => $this->categoryGrains->id, 'name' => 'Del 1', 'slug' => 'del-1']);
+        $c2 = Commodity::create(['commodity_category_id' => $this->categoryPulses->id, 'name' => 'Del 2', 'slug' => 'del-2']);
 
         Cache::put(CommodityService::CACHE_KEY_OPTIONS_ALL, ['cached']);
         Cache::put(CommodityService::CACHE_KEY_OPTIONS_CATEGORY_PREFIX.$this->categoryGrains->id, ['cached']);
@@ -453,21 +448,21 @@ class CommodityManagementTest extends TestCase
             'almonds' => 'Almonds',
         ];
 
-        foreach ($expected as $slug => $nameEn) {
+        foreach ($expected as $slug => $name) {
             $this->assertDatabaseHas('commodities', [
                 'slug' => $slug,
-                'name_en' => $nameEn,
+                'name' => $name,
             ]);
         }
     }
 
     public function test_options_excludes_commodities_whose_parent_category_is_inactive(): void
     {
-        $activeCat = CommodityCategory::create(['name_en' => 'Active Cat', 'slug' => 'active-cat-opt', 'status' => true]);
-        $inactiveCat = CommodityCategory::create(['name_en' => 'Inactive Cat', 'slug' => 'inactive-cat-opt', 'status' => false]);
+        $activeCat = CommodityCategory::create(['name' => 'Active Cat', 'slug' => 'active-cat-opt', 'status' => true]);
+        $inactiveCat = CommodityCategory::create(['name' => 'Inactive Cat', 'slug' => 'inactive-cat-opt', 'status' => false]);
 
-        $commActive = Commodity::create(['commodity_category_id' => $activeCat->id, 'name_en' => 'Active Comm', 'slug' => 'active-comm', 'status' => true]);
-        $commUnderInactive = Commodity::create(['commodity_category_id' => $inactiveCat->id, 'name_en' => 'Hidden Comm', 'slug' => 'hidden-comm', 'status' => true]);
+        $commActive = Commodity::create(['commodity_category_id' => $activeCat->id, 'name' => 'Active Comm', 'slug' => 'active-comm', 'status' => true]);
+        $commUnderInactive = Commodity::create(['commodity_category_id' => $inactiveCat->id, 'name' => 'Hidden Comm', 'slug' => 'hidden-comm', 'status' => true]);
 
         // Options call
         $response = $this->withToken($this->adminToken)->getJson('/api/admin/commodities/options')->assertStatus(200);
@@ -488,8 +483,8 @@ class CommodityManagementTest extends TestCase
 
     public function test_category_with_commodities_cannot_be_deleted_returning_409(): void
     {
-        $cat = CommodityCategory::create(['name_en' => 'Protected Cat', 'slug' => 'protected-cat', 'status' => true]);
-        $commodity = Commodity::create(['commodity_category_id' => $cat->id, 'name_en' => 'Child Comm', 'slug' => 'child-comm']);
+        $cat = CommodityCategory::create(['name' => 'Protected Cat', 'slug' => 'protected-cat', 'status' => true]);
+        $commodity = Commodity::create(['commodity_category_id' => $cat->id, 'name' => 'Child Comm', 'slug' => 'child-comm']);
 
         // Single delete category blocked
         $response = $this->withToken($this->adminToken)
@@ -504,7 +499,7 @@ class CommodityManagementTest extends TestCase
         $this->assertDatabaseHas('commodity_categories', ['id' => $cat->id, 'deleted_at' => null]);
 
         // Bulk delete category blocked atomically
-        $catFree = CommodityCategory::create(['name_en' => 'Free Cat', 'slug' => 'free-cat', 'status' => true]);
+        $catFree = CommodityCategory::create(['name' => 'Free Cat', 'slug' => 'free-cat', 'status' => true]);
 
         $bulkRes = $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodity-categories/bulk-delete', [

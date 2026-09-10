@@ -21,34 +21,19 @@ class UpdateSiteSettingRequest extends FormRequest
     {
         $sanitized = [];
 
-        if ($this->has('site_name_en') && is_string($this->input('site_name_en'))) {
-            $nameEn = trim($this->input('site_name_en'));
-            $sanitized['site_name_en'] = $nameEn !== '' ? $nameEn : null;
+        if ($this->has('site_name') && is_string($this->input('site_name'))) {
+            $name = trim($this->input('site_name'));
+            $sanitized['site_name'] = $name !== '' ? $name : null;
         }
 
-        if ($this->has('site_name_hi') && is_string($this->input('site_name_hi'))) {
-            $nameHi = trim($this->input('site_name_hi'));
-            $sanitized['site_name_hi'] = $nameHi !== '' ? $nameHi : null;
+        if ($this->has('site_title') && is_string($this->input('site_title'))) {
+            $title = trim($this->input('site_title'));
+            $sanitized['site_title'] = $title !== '' ? $title : null;
         }
 
-        if ($this->has('site_title_en') && is_string($this->input('site_title_en'))) {
-            $titleEn = trim($this->input('site_title_en'));
-            $sanitized['site_title_en'] = $titleEn !== '' ? $titleEn : null;
-        }
-
-        if ($this->has('site_title_hi') && is_string($this->input('site_title_hi'))) {
-            $titleHi = trim($this->input('site_title_hi'));
-            $sanitized['site_title_hi'] = $titleHi !== '' ? $titleHi : null;
-        }
-
-        if ($this->has('site_description_en') && is_string($this->input('site_description_en'))) {
-            $descEn = trim($this->input('site_description_en'));
-            $sanitized['site_description_en'] = $descEn !== '' ? $descEn : null;
-        }
-
-        if ($this->has('site_description_hi') && is_string($this->input('site_description_hi'))) {
-            $descHi = trim($this->input('site_description_hi'));
-            $sanitized['site_description_hi'] = $descHi !== '' ? $descHi : null;
+        if ($this->has('site_description') && is_string($this->input('site_description'))) {
+            $desc = trim($this->input('site_description'));
+            $sanitized['site_description'] = $desc !== '' ? $desc : null;
         }
 
         if (! empty($sanitized)) {
@@ -64,12 +49,9 @@ class UpdateSiteSettingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'site_name_en' => ['sometimes', 'required', 'string', 'max:150'],
-            'site_name_hi' => ['sometimes', 'nullable', 'string', 'max:150'],
-            'site_title_en' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'site_title_hi' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'site_description_en' => ['sometimes', 'nullable', 'string', 'max:5000'],
-            'site_description_hi' => ['sometimes', 'nullable', 'string', 'max:5000'],
+            'site_name' => ['sometimes', 'required', 'string', 'max:150'],
+            'site_title' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'site_description' => ['sometimes', 'nullable', 'string', 'max:5000'],
             'web_logo' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'mobile_logo' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];

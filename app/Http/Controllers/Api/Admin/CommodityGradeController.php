@@ -149,10 +149,10 @@ class CommodityGradeController extends Controller
     public function show(CommodityGrade $commodityGrade): JsonResponse
     {
         $commodityGrade->load([
-            'commodity:id,commodity_category_id,name_en,name_hi,slug',
-            'commodity.category:id,name_en,name_hi,slug',
-            'subcategory:id,commodity_id,name_en,name_hi,slug',
-            'variety:id,commodity_id,commodity_subcategory_id,name_en,name_hi,slug',
+            'commodity:id,commodity_category_id,name,slug',
+            'commodity.category:id,name,slug',
+            'subcategory:id,commodity_id,name,slug',
+            'variety:id,commodity_id,commodity_subcategory_id,name,slug',
             'creator',
             'updater',
         ]);

@@ -1393,7 +1393,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"name_en\": \"Grains\",\n    \"name_hi\": \"अनाज\",\n    \"slug\": \"grains\",\n    \"description_en\": \"Wheat, Paddy/Rice, Maize, Barley, Millet and other cereal grains.\",\n    \"description_hi\": \"गेहूं, धान/चावल, मक्का, जौ, बाजरा एवं अन्य अनाज।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                    "raw": "{\n    \"name\": \"Grains\",\n    \"slug\": \"grains\",\n    \"description\": \"Wheat, Paddy/Rice, Maize, Barley, Millet and other cereal grains.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/commodity-categories",
@@ -1456,7 +1456,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"name_en\": \"Grains & Cereals\",\n    \"name_hi\": \"अनाज व खाद्यान्न\",\n    \"slug\": \"grains-cereals\",\n    \"description_en\": \"Updated grain commodities list.\",\n    \"description_hi\": \"अद्यतन अनाज कमोडिटी सूची।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                    "raw": "{\n    \"name\": \"Grains & Cereals\",\n    \"slug\": \"grains-cereals\",\n    \"description\": \"Updated grain commodities list.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/commodity-categories/{{commodity_category_id}}",
@@ -1743,7 +1743,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name_en\": \"Lokwan Wheat\",\n    \"name_hi\": \"लोकवान गेहूं\",\n    \"slug\": \"lokwan-wheat\",\n    \"description_en\": \"High grade Lokwan wheat.\",\n    \"description_hi\": \"उत्कृष्ट श्रेणी लोकवान गेहूं।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                    "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name\": \"Lokwan Wheat\",\n    \"slug\": \"lokwan-wheat\",\n    \"description\": \"High grade Lokwan wheat.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/commodity-subcategories",
@@ -1806,7 +1806,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name_en\": \"Lokwan Wheat (Grade A)\",\n    \"name_hi\": \"लोकवान गेहूं (ग्रेड ए)\",\n    \"slug\": \"lokwan-wheat-grade-a\",\n    \"description_en\": \"High grade milling Lokwan wheat.\",\n    \"description_hi\": \"उत्कृष्ट श्रेणी मिलिंग लोकवान गेहूं।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                    "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name\": \"Lokwan Wheat (Grade A)\",\n    \"slug\": \"lokwan-wheat-grade-a\",\n    \"description\": \"High grade milling Lokwan wheat.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/commodity-subcategories/{{commodity_subcategory_id}}",
@@ -2089,7 +2089,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"commodity_category_id\": {{commodity_category_id}},\n    \"name_en\": \"Wheat\",\n    \"name_hi\": \"गेहूं\",\n    \"slug\": \"wheat\",\n    \"description_en\": \"Standard milling wheat.\",\n    \"description_hi\": \"मानक मिलिंग गेहूं।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                    "raw": "{\n    \"commodity_category_id\": {{commodity_category_id}},\n    \"name\": \"Wheat\",\n    \"slug\": \"wheat\",\n    \"description\": \"Standard milling wheat.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/commodities",
@@ -2152,7 +2152,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"commodity_category_id\": {{commodity_category_id}},\n    \"name_en\": \"Wheat (Premium Lokwan)\",\n    \"name_hi\": \"गेहूं (प्रीमियम लोकवान)\",\n    \"slug\": \"wheat-premium-lokwan\",\n    \"description_en\": \"High grade milling wheat.\",\n    \"description_hi\": \"उत्कृष्ट श्रेणी मिलिंग गेहूं।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                    "raw": "{\n    \"commodity_category_id\": {{commodity_category_id}},\n    \"name\": \"Wheat (Premium Lokwan)\",\n    \"slug\": \"wheat-premium-lokwan\",\n    \"description\": \"High grade milling wheat.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/commodities/{{commodity_id}}",
@@ -2447,7 +2447,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"commodity_subcategory_id\": {{commodity_subcategory_id}},\n    \"name_en\": \"HD-2967\",\n    \"name_hi\": \"एचडी-2967\",\n    \"slug\": \"hd-2967\",\n    \"description_en\": \"High yielding semi-dwarf wheat variety.\",\n    \"description_hi\": \"उच्च उपज देने वाली अर्ध-बौनी गेहूं की किस्म।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                    "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"commodity_subcategory_id\": {{commodity_subcategory_id}},\n    \"name\": \"HD-2967\",\n    \"slug\": \"hd-2967\",\n    \"description\": \"High yielding semi-dwarf wheat variety.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/commodity-varieties",
@@ -2510,7 +2510,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"commodity_subcategory_id\": {{commodity_subcategory_id}},\n    \"name_en\": \"HD-2967 (Certified)\",\n    \"name_hi\": \"एचडी-2967 (प्रमाणित)\",\n    \"slug\": \"hd-2967-certified\",\n    \"description_en\": \"Certified grade high yielding wheat variety.\",\n    \"description_hi\": \"प्रमाणित ग्रेड उच्च उपज गेहूं किस्म।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                    "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"commodity_subcategory_id\": {{commodity_subcategory_id}},\n    \"name\": \"HD-2967 (Certified)\",\n    \"slug\": \"hd-2967-certified\",\n    \"description\": \"Certified grade high yielding wheat variety.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/commodity-varieties/{{commodity_variety_id}}",
@@ -2771,7 +2771,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"commodity_id\": 1,\n    \"commodity_subcategory_id\": 1,\n    \"commodity_variety_id\": 1,\n    \"name_en\": \"Super Grade A\",\n    \"name_hi\": \"सुपर ग्रेड ए\",\n    \"slug\": \"super-grade-a\",\n    \"description_en\": \"Top quality wheat grade.\",\n    \"description_hi\": \"उच्चतम गुणवत्ता वाला गेहूं ग्रेड।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                    "raw": "{\n    \"commodity_id\": 1,\n    \"commodity_subcategory_id\": 1,\n    \"commodity_variety_id\": 1,\n    \"name\": \"Super Grade A\",\n    \"slug\": \"super-grade-a\",\n    \"description\": \"Top quality wheat grade.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/commodity-grades",
@@ -2834,7 +2834,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"commodity_id\": 1,\n    \"commodity_subcategory_id\": 1,\n    \"commodity_variety_id\": 1,\n    \"name_en\": \"Super Grade A Premium\",\n    \"name_hi\": \"सुपर ग्रेड ए प्रीमियम\",\n    \"slug\": \"super-grade-a-premium\",\n    \"description_en\": \"Updated premium grade description.\",\n    \"description_hi\": \"संशोधित विवरण।\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                    "raw": "{\n    \"commodity_id\": 1,\n    \"commodity_subcategory_id\": 1,\n    \"commodity_variety_id\": 1,\n    \"name\": \"Super Grade A Premium\",\n    \"slug\": \"super-grade-a-premium\",\n    \"description\": \"Updated premium grade description.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/commodity-grades/{{commodity_grade_id}}",
@@ -3061,7 +3061,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"site_name_en\": \"Vyapari Darbar\",\n    \"site_name_hi\": \"व्यापारी दरबार\",\n    \"site_title_en\": \"India Premier Mandi Platform\",\n    \"site_title_hi\": \"भारत का प्रमुख मंडी मंच\",\n    \"site_description_en\": \"Connecting mandi traders across India.\",\n    \"site_description_hi\": \"पूरे भारत के मंडी व्यापारियों को जोड़ना।\"\n}"
+                                    "raw": "{\n    \"site_name\": \"Vyapari Darbar\",\n    \"site_title\": \"India Premier Mandi Platform\",\n    \"site_description\": \"Connecting mandi traders across India.\",\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/site-settings",
@@ -3099,33 +3099,18 @@
                                             "type": "text"
                                         },
                                         {
-                                            "key": "site_name_en",
+                                            "key": "site_name",
                                             "value": "Vyapari Darbar",
                                             "type": "text"
                                         },
                                         {
-                                            "key": "site_name_hi",
-                                            "value": "व्यापारी दरबार",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "site_title_en",
+                                            "key": "site_title",
                                             "value": "India Premier Mandi Platform",
                                             "type": "text"
                                         },
                                         {
-                                            "key": "site_title_hi",
-                                            "value": "भारत का प्रमुख मंडी मंच",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "site_description_en",
+                                            "key": "site_description",
                                             "value": "Connecting mandi traders across India.",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "site_description_hi",
-                                            "value": "पूरे भारत के मंडी व्यापारियों को जोड़ना।",
                                             "type": "text"
                                         },
                                         {

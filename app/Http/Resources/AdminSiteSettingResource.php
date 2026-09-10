@@ -16,12 +16,9 @@ class AdminSiteSettingResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'site_name_en' => $this->site_name_en,
-            'site_name_hi' => $this->site_name_hi,
-            'site_title_en' => $this->site_title_en,
-            'site_title_hi' => $this->site_title_hi,
-            'site_description_en' => $this->site_description_en,
-            'site_description_hi' => $this->site_description_hi,
+            'site_name' => $this->site_name,
+            'site_title' => $this->site_title,
+            'site_description' => $this->site_description,
             'web_logo' => $this->web_logo_url,
             'mobile_logo' => $this->mobile_logo_url,
             'created_at' => $this->created_at?->toISOString(),

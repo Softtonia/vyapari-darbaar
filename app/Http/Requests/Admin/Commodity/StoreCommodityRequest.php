@@ -21,25 +21,21 @@ class StoreCommodityRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $nameEn = $this->has('name_en') ? trim((string) $this->input('name_en')) : null;
-        $nameHi = $this->has('name_hi') ? trim((string) $this->input('name_hi')) : null;
+        $name = $this->has('name') ? trim((string) $this->input('name')) : null;
         $slug = $this->has('slug') && $this->input('slug') !== null ? trim((string) $this->input('slug')) : null;
-        $descEn = $this->has('description_en') ? trim((string) $this->input('description_en')) : null;
-        $descHi = $this->has('description_hi') ? trim((string) $this->input('description_hi')) : null;
+        $desc = $this->has('description') ? trim((string) $this->input('description')) : null;
 
         $normalizedSlug = null;
         if (! empty($slug)) {
             $normalizedSlug = Str::slug($slug);
-        } elseif (! empty($nameEn)) {
-            $normalizedSlug = Str::slug($nameEn);
+        } elseif (! empty($name)) {
+            $normalizedSlug = Str::slug($name);
         }
 
         $this->merge([
-            'name_en' => $nameEn !== '' ? $nameEn : null,
-            'name_hi' => $nameHi !== '' ? $nameHi : null,
+            'name' => $name !== '' ? $name : null,
             'slug' => $normalizedSlug,
-            'description_en' => $descEn !== '' ? $descEn : null,
-            'description_hi' => $descHi !== '' ? $descHi : null,
+            'description' => $desc !== '' ? $desc : null,
             'status' => $this->has('status') ? filter_var($this->input('status'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true : true,
             'sort_order' => $this->has('sort_order') && $this->input('sort_order') !== null && $this->input('sort_order') !== '' ? (int) $this->input('sort_order') : 0,
         ]);
@@ -60,11 +56,9 @@ class StoreCommodityRequest extends FormRequest
                     ->whereNull('deleted_at')
                     ->where('status', true),
             ],
-            'name_en' => ['required', 'string', 'max:150'],
-            'name_hi' => ['nullable', 'string', 'max:150'],
+            'name' => ['required', 'string', 'max:150'],
             'slug' => ['nullable', 'string', 'max:180', Rule::unique('commodities', 'slug')],
-            'description_en' => ['nullable', 'string'],
-            'description_hi' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
             'status' => ['nullable', 'boolean'],
         ];

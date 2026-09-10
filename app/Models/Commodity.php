@@ -27,11 +27,9 @@ class Commodity extends Model
      */
     protected $fillable = [
         'commodity_category_id',
-        'name_en',
-        'name_hi',
+        'name',
         'slug',
-        'description_en',
-        'description_hi',
+        'description',
         'sort_order',
         'status',
         'created_by',
@@ -45,8 +43,7 @@ class Commodity extends Model
      */
     public const ALLOWED_SORT_COLUMNS = [
         'id',
-        'name_en',
-        'name_hi',
+        'name',
         'slug',
         'commodity_category_id',
         'sort_order',
@@ -171,7 +168,7 @@ class Commodity extends Model
     }
 
     /**
-     * Scope query to search by English name, Hindi name, or slug.
+     * Scope query to search by name or slug.
      *
      * @param  Builder<Commodity>  $query
      * @return Builder<Commodity>
@@ -182,8 +179,7 @@ class Commodity extends Model
 
         if ($term !== '') {
             $query->where(function (Builder $q) use ($term) {
-                $q->where('name_en', 'LIKE', "%{$term}%")
-                    ->orWhere('name_hi', 'LIKE', "%{$term}%")
+                $q->where('name', 'LIKE', "%{$term}%")
                     ->orWhere('slug', 'LIKE', "%{$term}%");
             });
         }

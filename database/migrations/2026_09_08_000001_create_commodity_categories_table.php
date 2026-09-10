@@ -13,11 +13,9 @@ return new class extends Migration
     {
         Schema::create('commodity_categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name_en', 150);
-            $table->string('name_hi', 150)->nullable();
+            $table->string('name', 150);
             $table->string('slug', 180)->unique();
-            $table->text('description_en')->nullable();
-            $table->text('description_hi')->nullable();
+            $table->text('description')->nullable();
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->boolean('status')->default(true);
             $table->foreignId('created_by')->nullable()->constrained('admins')->nullOnDelete();

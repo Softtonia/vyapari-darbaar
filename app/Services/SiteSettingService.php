@@ -53,8 +53,7 @@ class SiteSettingService
         return SiteSetting::query()->find(1) ?? SiteSetting::query()->firstOrCreate(
             ['id' => 1],
             [
-                'site_name_en' => 'Vyapari Darbar',
-                'site_name_hi' => 'व्यापारी दरबार',
+                'site_name' => 'Vyapari Darbar',
             ]
         );
     }
@@ -113,8 +112,7 @@ class SiteSettingService
                 if (! $setting) {
                     $setting = SiteSetting::create([
                         'id' => 1,
-                        'site_name_en' => 'Vyapari Darbar',
-                        'site_name_hi' => 'व्यापारी दरबार',
+                        'site_name' => 'Vyapari Darbar',
                         'created_by' => $adminId,
                         'updated_by' => $adminId,
                     ]);
@@ -126,12 +124,9 @@ class SiteSettingService
                 $updatePayload = [];
 
                 $textFields = [
-                    'site_name_en',
-                    'site_name_hi',
-                    'site_title_en',
-                    'site_title_hi',
-                    'site_description_en',
-                    'site_description_hi',
+                    'site_name',
+                    'site_title',
+                    'site_description',
                 ];
 
                 foreach ($textFields as $field) {

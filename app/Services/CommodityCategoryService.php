@@ -44,11 +44,9 @@ class CommodityCategoryService
         $query = CommodityCategory::query()
             ->select([
                 'id',
-                'name_en',
-                'name_hi',
+                'name',
                 'slug',
-                'description_en',
-                'description_hi',
+                'description',
                 'sort_order',
                 'status',
                 'created_by',
@@ -73,7 +71,7 @@ class CommodityCategoryService
         return Cache::remember(self::CACHE_KEY_OPTIONS, self::CACHE_TTL_SECONDS, function () {
             return CommodityCategory::query()
                 ->active()
-                ->select(['id', 'name_en', 'name_hi', 'slug'])
+                ->select(['id', 'name', 'slug'])
                 ->orderBy('sort_order', 'asc')
                 ->orderBy('id', 'asc')
                 ->get()
@@ -89,15 +87,13 @@ class CommodityCategoryService
     public function createCategory(array $data, ?int $adminId = null): CommodityCategory
     {
         $category = DB::transaction(function () use ($data, $adminId) {
-            $slug = ! empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['name_en']);
+            $slug = ! empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['name']);
             $slug = $this->generateUniqueSlug($slug);
 
             return CommodityCategory::create([
-                'name_en' => $data['name_en'],
-                'name_hi' => $data['name_hi'] ?? null,
+                'name' => $data['name'],
                 'slug' => $slug,
-                'description_en' => $data['description_en'] ?? null,
-                'description_hi' => $data['description_hi'] ?? null,
+                'description' => $data['description'] ?? null,
                 'sort_order' => $data['sort_order'] ?? 0,
                 'status' => $data['status'] ?? true,
                 'created_by' => $adminId,
@@ -120,24 +116,16 @@ class CommodityCategoryService
         $updatedCategory = DB::transaction(function () use ($category, $data, $adminId) {
             $updateData = [];
 
-            if (array_key_exists('name_en', $data)) {
-                $updateData['name_en'] = $data['name_en'];
-            }
-
-            if (array_key_exists('name_hi', $data)) {
-                $updateData['name_hi'] = $data['name_hi'];
+            if (array_key_exists('name', $data)) {
+                $updateData['name'] = $data['name'];
             }
 
             if (array_key_exists('slug', $data) && ! empty($data['slug'])) {
                 $updateData['slug'] = Str::slug($data['slug']);
             }
 
-            if (array_key_exists('description_en', $data)) {
-                $updateData['description_en'] = $data['description_en'];
-            }
-
-            if (array_key_exists('description_hi', $data)) {
-                $updateData['description_hi'] = $data['description_hi'];
+            if (array_key_exists('description', $data)) {
+                $updateData['description'] = $data['description'];
             }
 
             if (array_key_exists('sort_order', $data)) {

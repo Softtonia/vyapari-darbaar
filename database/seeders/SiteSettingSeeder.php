@@ -15,8 +15,7 @@ class SiteSettingSeeder extends Seeder
         SiteSetting::updateOrCreate(
             ['id' => 1],
             [
-                'site_name_en' => 'Vyapari Darbar',
-                'site_name_hi' => 'व्यापारी दरबार',
+                'site_name' => 'Vyapari Darbar',
             ]
         );
     }

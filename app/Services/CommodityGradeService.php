@@ -43,18 +43,17 @@ class CommodityGradeService
 
         $query = CommodityGrade::query()
             ->with([
-                'commodity:id,commodity_category_id,name_en,name_hi,slug',
-                'commodity.category:id,name_en,name_hi,slug',
-                'subcategory:id,commodity_id,name_en,name_hi,slug',
-                'variety:id,commodity_id,commodity_subcategory_id,name_en,name_hi,slug',
+                'commodity:id,commodity_category_id,name,slug',
+                'commodity.category:id,name,slug',
+                'subcategory:id,commodity_id,name,slug',
+                'variety:id,commodity_id,commodity_subcategory_id,name,slug',
             ])
             ->select([
                 'id',
                 'commodity_id',
                 'commodity_subcategory_id',
                 'commodity_variety_id',
-                'name_en',
-                'name_hi',
+                'name',
                 'slug',
                 'sort_order',
                 'status',
@@ -114,7 +113,7 @@ class CommodityGradeService
                 ->when($commodityId !== null, fn (Builder $q) => $q->where('commodity_id', $commodityId))
                 ->when($subcategoryId !== null, fn (Builder $q) => $q->where('commodity_subcategory_id', $subcategoryId))
                 ->when($varietyId !== null, fn (Builder $q) => $q->where('commodity_variety_id', $varietyId))
-                ->select(['id', 'commodity_id', 'commodity_subcategory_id', 'commodity_variety_id', 'name_en', 'name_hi', 'slug'])
+                ->select(['id', 'commodity_id', 'commodity_subcategory_id', 'commodity_variety_id', 'name', 'slug'])
                 ->orderBy('sort_order', 'asc')
                 ->orderBy('id', 'asc')
                 ->get()
@@ -134,18 +133,16 @@ class CommodityGradeService
         $varietyId = ! empty($data['commodity_variety_id']) ? (int) $data['commodity_variety_id'] : null;
 
         $grade = DB::transaction(function () use ($data, $commodityId, $subcategoryId, $varietyId, $adminId) {
-            $slug = ! empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['name_en']);
+            $slug = ! empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['name']);
             $slug = $this->generateUniqueSlug($slug, $commodityId);
 
             return CommodityGrade::create([
                 'commodity_id' => $commodityId,
                 'commodity_subcategory_id' => $subcategoryId,
                 'commodity_variety_id' => $varietyId,
-                'name_en' => $data['name_en'],
-                'name_hi' => $data['name_hi'] ?? null,
+                'name' => $data['name'],
                 'slug' => $slug,
-                'description_en' => $data['description_en'] ?? null,
-                'description_hi' => $data['description_hi'] ?? null,
+                'description' => $data['description'] ?? null,
                 'sort_order' => $data['sort_order'] ?? 0,
                 'status' => $data['status'] ?? true,
                 'created_by' => $adminId,
@@ -156,10 +153,10 @@ class CommodityGradeService
         $this->clearCache($commodityId, [], $subcategoryId, [], $varietyId, []);
 
         return $grade->load([
-            'commodity:id,commodity_category_id,name_en,name_hi,slug',
-            'commodity.category:id,name_en,name_hi,slug',
-            'subcategory:id,commodity_id,name_en,name_hi,slug',
-            'variety:id,commodity_id,commodity_subcategory_id,name_en,name_hi,slug',
+            'commodity:id,commodity_category_id,name,slug',
+            'commodity.category:id,name,slug',
+            'subcategory:id,commodity_id,name,slug',
+            'variety:id,commodity_id,commodity_subcategory_id,name,slug',
         ]);
     }
 
@@ -189,24 +186,16 @@ class CommodityGradeService
                 $updateData['commodity_variety_id'] = $data['commodity_variety_id'] !== null ? (int) $data['commodity_variety_id'] : null;
             }
 
-            if (array_key_exists('name_en', $data)) {
-                $updateData['name_en'] = $data['name_en'];
-            }
-
-            if (array_key_exists('name_hi', $data)) {
-                $updateData['name_hi'] = $data['name_hi'];
+            if (array_key_exists('name', $data)) {
+                $updateData['name'] = $data['name'];
             }
 
             if (array_key_exists('slug', $data) && ! empty($data['slug'])) {
                 $updateData['slug'] = Str::slug($data['slug']);
             }
 
-            if (array_key_exists('description_en', $data)) {
-                $updateData['description_en'] = $data['description_en'];
-            }
-
-            if (array_key_exists('description_hi', $data)) {
-                $updateData['description_hi'] = $data['description_hi'];
+            if (array_key_exists('description', $data)) {
+                $updateData['description'] = $data['description'];
             }
 
             if (array_key_exists('sort_order', $data)) {
@@ -224,10 +213,10 @@ class CommodityGradeService
             $commodityGrade->update($updateData);
 
             return $commodityGrade->fresh([
-                'commodity:id,commodity_category_id,name_en,name_hi,slug',
-                'commodity.category:id,name_en,name_hi,slug',
-                'subcategory:id,commodity_id,name_en,name_hi,slug',
-                'variety:id,commodity_id,commodity_subcategory_id,name_en,name_hi,slug',
+                'commodity:id,commodity_category_id,name,slug',
+                'commodity.category:id,name,slug',
+                'subcategory:id,commodity_id,name,slug',
+                'variety:id,commodity_id,commodity_subcategory_id,name,slug',
                 'creator',
                 'updater',
             ]);
@@ -262,10 +251,10 @@ class CommodityGradeService
             ]);
 
             return $commodityGrade->fresh([
-                'commodity:id,commodity_category_id,name_en,name_hi,slug',
-                'commodity.category:id,name_en,name_hi,slug',
-                'subcategory:id,commodity_id,name_en,name_hi,slug',
-                'variety:id,commodity_id,commodity_subcategory_id,name_en,name_hi,slug',
+                'commodity:id,commodity_category_id,name,slug',
+                'commodity.category:id,name,slug',
+                'subcategory:id,commodity_id,name,slug',
+                'variety:id,commodity_id,commodity_subcategory_id,name,slug',
             ]);
         });
 

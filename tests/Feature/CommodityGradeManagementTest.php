@@ -68,47 +68,41 @@ class CommodityGradeManagementTest extends TestCase
         $this->adminToken = $this->admin->createToken('admin-token')->plainTextToken;
 
         $this->categoryGrains = CommodityCategory::create([
-            'name_en' => 'Grains',
-            'name_hi' => 'अनाज',
+            'name' => 'Grains',
             'slug' => 'grains',
             'status' => true,
         ]);
 
         $this->categoryPulses = CommodityCategory::create([
-            'name_en' => 'Pulses',
-            'name_hi' => 'दलहन',
+            'name' => 'Pulses',
             'slug' => 'pulses',
             'status' => true,
         ]);
 
         $this->commodityWheat = Commodity::create([
             'commodity_category_id' => $this->categoryGrains->id,
-            'name_en' => 'Wheat',
-            'name_hi' => 'गेहूं',
+            'name' => 'Wheat',
             'slug' => 'wheat',
             'status' => true,
         ]);
 
         $this->commodityChana = Commodity::create([
             'commodity_category_id' => $this->categoryPulses->id,
-            'name_en' => 'Chana',
-            'name_hi' => 'चना',
+            'name' => 'Chana',
             'slug' => 'chana',
             'status' => true,
         ]);
 
         $this->subcatMillingWheat = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Milling Wheat',
-            'name_hi' => 'मिलिंग गेहूं',
+            'name' => 'Milling Wheat',
             'slug' => 'milling-wheat',
             'status' => true,
         ]);
 
         $this->subcatDesiChana = CommoditySubcategory::create([
             'commodity_id' => $this->commodityChana->id,
-            'name_en' => 'Desi Chana',
-            'name_hi' => 'देसी चना',
+            'name' => 'Desi Chana',
             'slug' => 'desi-chana',
             'status' => true,
         ]);
@@ -116,8 +110,7 @@ class CommodityGradeManagementTest extends TestCase
         $this->varietyDirectWheat = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => null,
-            'name_en' => 'Direct Wheat Variety',
-            'name_hi' => 'डायरेक्ट गेहूं',
+            'name' => 'Direct Wheat Variety',
             'slug' => 'direct-wheat-variety',
             'status' => true,
         ]);
@@ -125,8 +118,7 @@ class CommodityGradeManagementTest extends TestCase
         $this->varietyMillingWheatHD = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
-            'name_en' => 'HD-2967',
-            'name_hi' => 'एचडी-2967',
+            'name' => 'HD-2967',
             'slug' => 'hd-2967',
             'status' => true,
         ]);
@@ -134,8 +126,7 @@ class CommodityGradeManagementTest extends TestCase
         $this->varietyDesiChanaAvrodhi = CommodityVariety::create([
             'commodity_id' => $this->commodityChana->id,
             'commodity_subcategory_id' => $this->subcatDesiChana->id,
-            'name_en' => 'Avrodhi',
-            'name_hi' => 'अवरोधी',
+            'name' => 'Avrodhi',
             'slug' => 'avrodhi',
             'status' => true,
         ]);
@@ -191,24 +182,21 @@ class CommodityGradeManagementTest extends TestCase
         // 1. Direct Commodity Grade
         $res1 = $this->postJson('/api/admin/commodity-grades', [
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Grade Direct Wheat',
-            'name_hi' => 'डायरेक्ट गेहूं ग्रेड',
-            'description_en' => 'Wheat direct grade description',
-            'description_hi' => 'विवरण',
+            'name' => 'Grade Direct Wheat',
+            'description' => 'Wheat direct grade description',
         ], $this->authHeaders());
 
         $res1->assertStatus(201)
             ->assertJsonPath('status', true)
             ->assertJsonPath('data.commodity_subcategory_id', null)
             ->assertJsonPath('data.commodity_variety_id', null)
-            ->assertJsonPath('data.name_hi', 'डायरेक्ट गेहूं ग्रेड')
             ->assertJsonPath('data.slug', 'grade-direct-wheat');
 
         // 2. Subcategory Grade
         $res2 = $this->postJson('/api/admin/commodity-grades', [
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
-            'name_en' => 'Grade Milling Wheat',
+            'name' => 'Grade Milling Wheat',
         ], $this->authHeaders());
 
         $res2->assertStatus(201)
@@ -220,7 +208,7 @@ class CommodityGradeManagementTest extends TestCase
         $res3 = $this->postJson('/api/admin/commodity-grades', [
             'commodity_id' => $this->commodityWheat->id,
             'commodity_variety_id' => $this->varietyDirectWheat->id,
-            'name_en' => 'Grade Direct Variety',
+            'name' => 'Grade Direct Variety',
         ], $this->authHeaders());
 
         $res3->assertStatus(201)
@@ -233,7 +221,7 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => $this->varietyMillingWheatHD->id,
-            'name_en' => 'Grade HD-2967 Premium',
+            'name' => 'Grade HD-2967 Premium',
         ], $this->authHeaders());
 
         $res4->assertStatus(201)
@@ -252,7 +240,7 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => $this->varietyDirectWheat->id,
-            'name_en' => 'Invalid Combination 1',
+            'name' => 'Invalid Combination 1',
         ], $this->authHeaders());
 
         $res1->assertStatus(422)
@@ -262,7 +250,7 @@ class CommodityGradeManagementTest extends TestCase
         $res2 = $this->postJson('/api/admin/commodity-grades', [
             'commodity_id' => $this->commodityWheat->id,
             'commodity_variety_id' => $this->varietyMillingWheatHD->id,
-            'name_en' => 'Invalid Combination 2',
+            'name' => 'Invalid Combination 2',
         ], $this->authHeaders());
 
         $res2->assertStatus(422)
@@ -272,7 +260,7 @@ class CommodityGradeManagementTest extends TestCase
         $this->categoryGrains->update(['status' => false]);
         $resInactive = $this->postJson('/api/admin/commodity-grades', [
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Grade Inactive Parent',
+            'name' => 'Grade Inactive Parent',
         ], $this->authHeaders());
 
         $resInactive->assertStatus(422)
@@ -288,14 +276,13 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => $this->varietyMillingWheatHD->id,
-            'name_en' => 'Wheat Super Grade',
-            'name_hi' => 'सुपर ग्रेड',
+            'name' => 'Wheat Super Grade',
             'slug' => 'wheat-super-grade',
             'status' => true,
         ]);
 
-        // Search by Hindi name
-        $resSearch = $this->getJson('/api/admin/commodity-grades?search=सुपर', $this->authHeaders());
+        // Search by name
+        $resSearch = $this->getJson('/api/admin/commodity-grades?search=Super', $this->authHeaders());
         $resSearch->assertStatus(200)
             ->assertJsonCount(1, 'data.items');
 
@@ -322,7 +309,7 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => $this->varietyMillingWheatHD->id,
-            'name_en' => 'HD Option Grade',
+            'name' => 'HD Option Grade',
             'slug' => 'hd-option-grade',
             'status' => true,
         ]);
@@ -363,7 +350,7 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => $this->varietyMillingWheatHD->id,
-            'name_en' => 'Existing Grade',
+            'name' => 'Existing Grade',
             'slug' => 'existing-grade',
             'status' => true,
         ]);
@@ -376,12 +363,12 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => $this->varietyMillingWheatHD->id,
-            'description_en' => 'Updated Description While Parent Inactive',
+            'description' => 'Updated Description While Parent Inactive',
         ], $this->authHeaders());
 
         $res->assertStatus(200)
             ->assertJsonPath('status', true)
-            ->assertJsonPath('data.description_en', 'Updated Description While Parent Inactive');
+            ->assertJsonPath('data.description', 'Updated Description While Parent Inactive');
     }
 
     /**
@@ -393,14 +380,14 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => $this->varietyMillingWheatHD->id,
-            'name_en' => 'Hierarchy Grade',
+            'name' => 'Hierarchy Grade',
             'slug' => 'hierarchy-grade',
             'status' => true,
         ]);
 
         // 1. Omitted subcategory and variety -> retains both
         $res1 = $this->putJson("/api/admin/commodity-grades/{$grade->id}", [
-            'description_en' => 'Retain Relationships',
+            'description' => 'Retain Relationships',
         ], $this->authHeaders());
 
         $res1->assertStatus(200)
@@ -435,7 +422,7 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => $this->varietyMillingWheatHD->id,
-            'name_en' => 'HD Subcat Grade',
+            'name' => 'HD Subcat Grade',
             'slug' => 'hd-subcat-grade',
             'status' => true,
         ]);
@@ -468,7 +455,7 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => $this->varietyMillingWheatHD->id,
-            'name_en' => 'Move Test Grade',
+            'name' => 'Move Test Grade',
             'slug' => 'move-test-grade',
             'status' => true,
         ]);
@@ -517,7 +504,7 @@ class CommodityGradeManagementTest extends TestCase
         // Create soft deleted grade under Chana
         $deletedGrade = CommodityGrade::create([
             'commodity_id' => $this->commodityChana->id,
-            'name_en' => 'Special Chana Grade',
+            'name' => 'Special Chana Grade',
             'slug' => 'special-grade',
             'status' => true,
         ]);
@@ -526,7 +513,7 @@ class CommodityGradeManagementTest extends TestCase
         // Create grade under Wheat
         $gradeWheat = CommodityGrade::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Special Wheat Grade',
+            'name' => 'Special Wheat Grade',
             'slug' => 'special-grade',
             'status' => true,
         ]);
@@ -550,14 +537,14 @@ class CommodityGradeManagementTest extends TestCase
     {
         $g1 = CommodityGrade::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Grade 1',
+            'name' => 'Grade 1',
             'slug' => 'grade-1',
             'status' => true,
         ]);
 
         $g2 = CommodityGrade::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Grade 2',
+            'name' => 'Grade 2',
             'slug' => 'grade-2',
             'status' => true,
         ]);
@@ -587,14 +574,14 @@ class CommodityGradeManagementTest extends TestCase
     {
         $g1 = CommodityGrade::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Delete Grade 1',
+            'name' => 'Delete Grade 1',
             'slug' => 'delete-grade-1',
             'status' => true,
         ]);
 
         $g2 = CommodityGrade::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Delete Grade 2',
+            'name' => 'Delete Grade 2',
             'slug' => 'delete-grade-2',
             'status' => true,
         ]);
@@ -632,7 +619,7 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => $this->varietyMillingWheatHD->id,
-            'name_en' => 'Inactive Grade Blocker',
+            'name' => 'Inactive Grade Blocker',
             'slug' => 'inactive-grade-blocker',
             'status' => false, // Inactive still blocks!
         ]);
@@ -667,7 +654,7 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => null, // Direct subcategory grade
-            'name_en' => 'Subcat Blocker Grade',
+            'name' => 'Subcat Blocker Grade',
             'slug' => 'subcat-blocker-grade',
             'status' => false,
         ]);
@@ -693,7 +680,7 @@ class CommodityGradeManagementTest extends TestCase
     {
         $grade = CommodityGrade::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Direct Wheat Grade Blocker',
+            'name' => 'Direct Wheat Grade Blocker',
             'slug' => 'direct-wheat-blocker',
             'status' => true,
         ]);
@@ -712,7 +699,7 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => $this->varietyMillingWheatHD->id,
-            'name_en' => 'Bulk Blocker Grade',
+            'name' => 'Bulk Blocker Grade',
             'slug' => 'bulk-blocker-grade',
             'status' => true,
         ]);
@@ -753,7 +740,7 @@ class CommodityGradeManagementTest extends TestCase
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
             'commodity_variety_id' => $this->varietyMillingWheatHD->id,
-            'name_en' => 'Cached Grade',
+            'name' => 'Cached Grade',
             'slug' => 'cached-grade',
             'status' => true,
         ]);

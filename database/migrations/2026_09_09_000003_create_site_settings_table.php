@@ -13,12 +13,9 @@ return new class extends Migration
     {
         Schema::create('site_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('site_name_en', 150);
-            $table->string('site_name_hi', 150)->nullable();
-            $table->string('site_title_en', 255)->nullable();
-            $table->string('site_title_hi', 255)->nullable();
-            $table->text('site_description_en')->nullable();
-            $table->text('site_description_hi')->nullable();
+            $table->string('site_name', 150);
+            $table->string('site_title', 255)->nullable();
+            $table->text('site_description')->nullable();
             $table->string('web_logo', 500)->nullable();
             $table->string('mobile_logo', 500)->nullable();
             $table->foreignId('created_by')->nullable()->constrained('admins')->nullOnDelete();

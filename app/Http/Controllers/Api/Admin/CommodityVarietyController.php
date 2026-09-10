@@ -104,9 +104,9 @@ class CommodityVarietyController extends Controller
     public function show(CommodityVariety $commodityVariety): JsonResponse
     {
         $commodityVariety->load([
-            'commodity:id,commodity_category_id,name_en,name_hi,slug',
-            'commodity.category:id,name_en,name_hi,slug',
-            'subcategory:id,commodity_id,name_en,name_hi,slug',
+            'commodity:id,commodity_category_id,name,slug',
+            'commodity.category:id,name,slug',
+            'subcategory:id,commodity_id,name,slug',
             'creator',
             'updater',
         ]);

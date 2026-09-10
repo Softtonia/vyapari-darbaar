@@ -14,12 +14,9 @@ class SiteSetting extends Model
     protected $table = 'site_settings';
 
     protected $fillable = [
-        'site_name_en',
-        'site_name_hi',
-        'site_title_en',
-        'site_title_hi',
-        'site_description_en',
-        'site_description_hi',
+        'site_name',
+        'site_title',
+        'site_description',
         'web_logo',
         'mobile_logo',
         'created_by',

@@ -21,8 +21,7 @@ class CommodityGrade extends Model
      */
     public const ALLOWED_SORT_COLUMNS = [
         'id',
-        'name_en',
-        'name_hi',
+        'name',
         'slug',
         'commodity_id',
         'commodity_subcategory_id',
@@ -37,11 +36,9 @@ class CommodityGrade extends Model
         'commodity_id',
         'commodity_subcategory_id',
         'commodity_variety_id',
-        'name_en',
-        'name_hi',
+        'name',
         'slug',
-        'description_en',
-        'description_hi',
+        'description',
         'sort_order',
         'status',
         'created_by',
@@ -141,8 +138,7 @@ class CommodityGrade extends Model
 
         if ($term !== '') {
             $query->where(function ($q) use ($term) {
-                $q->where('name_en', 'LIKE', "%{$term}%")
-                    ->orWhere('name_hi', 'LIKE', "%{$term}%")
+                $q->where('name', 'LIKE', "%{$term}%")
                     ->orWhere('slug', 'LIKE', "%{$term}%");
             });
         }

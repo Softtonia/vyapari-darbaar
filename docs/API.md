@@ -726,9 +726,9 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 - **Query Parameters:**
   - `page`: Page number (default: 1)
   - `per_page`: 1 to 100 (default: 20)
-  - `search`: Filter by `name_en`, `name_hi`, or `slug`
+  - `search`: Filter by `name`, or `slug`
   - `status`: `1` (active) or `0` (inactive)
-  - `sort_by`: `id`, `name_en`, `name_hi`, `slug`, `sort_order`, `status`, `created_at`, `updated_at` (default `sort_order`)
+  - `sort_by`: `id`, `name`, `slug`, `sort_order`, `status`, `created_at`, `updated_at` (default `sort_order`)
   - `sort_order`: `asc` or `desc` (default `asc`)
 - **Success (200 OK):**
   ```json
@@ -739,11 +739,9 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
           "items": [
               {
                   "id": 1,
-                  "name_en": "Grains",
-                  "name_hi": "अनाज",
+                  "name": "Grains",
                   "slug": "grains",
-                  "description_en": "Wheat, Paddy/Rice, Maize, Barley, Millet and other cereal grains.",
-                  "description_hi": "गेहूं, धान/चावल, मक्का, जौ, बाजरा एवं अन्य अनाज।",
+                  "description": "Wheat, Paddy/Rice, Maize, Barley, Millet and other cereal grains.",
                   "sort_order": 1,
                   "status": true,
                   "created_at": "2026-09-08T10:00:00.000000Z",
@@ -772,14 +770,12 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
       "data": [
           {
               "id": 1,
-              "name_en": "Grains",
-              "name_hi": "अनाज",
+              "name": "Grains",
               "slug": "grains"
           },
           {
               "id": 2,
-              "name_en": "Pulses",
-              "name_hi": "दलहन",
+              "name": "Pulses",
               "slug": "pulses"
           }
       ]
@@ -792,21 +788,17 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 - **Request Body:**
   ```json
   {
-      "name_en": "Grains",
-      "name_hi": "अनाज",
+      "name": "Grains",
       "slug": "grains",
-      "description_en": "Grain commodities",
-      "description_hi": "अनाज कमोडिटी",
+      "description": "Grain commodities",
       "sort_order": 1,
       "status": true
   }
   ```
 - **Validation:**
-  - `name_en`: required, string, max:150
-  - `name_hi`: optional/nullable, string, max:150
-  - `slug`: optional (auto-generated from `name_en` if omitted), string, max:180, globally unique (including soft-deleted)
-  - `description_en`: optional, string
-  - `description_hi`: optional, string
+  - `name`: required, string, max:150
+  - `slug`: optional (auto-generated from `name` if omitted), string, max:180, globally unique (including soft-deleted)
+  - `description`: optional, string
   - `sort_order`: optional, integer, min:0, max:65535 (default: 0)
   - `status`: optional, boolean (default: true)
 - **Success (201 Created):**
@@ -816,11 +808,9 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
       "message": "Commodity category created successfully.",
       "data": {
           "id": 1,
-          "name_en": "Grains",
-          "name_hi": "अनाज",
+          "name": "Grains",
           "slug": "grains",
-          "description_en": "Grain commodities",
-          "description_hi": "अनाज कमोडिटी",
+          "description": "Grain commodities",
           "sort_order": 1,
           "status": true,
           "created_at": "2026-09-08T10:00:00.000000Z",
@@ -920,9 +910,9 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   - `page`: Page number (default: 1)
   - `per_page`: 1 to 100 (default: 20)
   - `commodity_category_id`: Filter by parent category ID
-  - `search`: Filter by `name_en`, `name_hi`, or `slug`
+  - `search`: Filter by `name`, or `slug`
   - `status`: `1` (active) or `0` (inactive)
-  - `sort_by`: `id`, `name_en`, `name_hi`, `slug`, `commodity_category_id`, `sort_order`, `status`, `created_at`, `updated_at` (default `sort_order`)
+  - `sort_by`: `id`, `name`, `slug`, `commodity_category_id`, `sort_order`, `status`, `created_at`, `updated_at` (default `sort_order`)
   - `sort_order`: `asc` or `desc` (default `asc`)
 - **Success (200 OK):**
   ```json
@@ -936,12 +926,10 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
                   "commodity_category_id": 1,
                   "category": {
                       "id": 1,
-                      "name_en": "Grains",
-                      "name_hi": "अनाज",
+                      "name": "Grains",
                       "slug": "grains"
                   },
-                  "name_en": "Wheat",
-                  "name_hi": "गेहूं",
+                  "name": "Wheat",
                   "slug": "wheat",
                   "sort_order": 1,
                   "status": true,
@@ -973,15 +961,13 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
           {
               "id": 1,
               "commodity_category_id": 1,
-              "name_en": "Wheat",
-              "name_hi": "गेहूं",
+              "name": "Wheat",
               "slug": "wheat"
           },
           {
               "id": 2,
               "commodity_category_id": 1,
-              "name_en": "Paddy / Rice",
-              "name_hi": "धान / चावल",
+              "name": "Paddy / Rice",
               "slug": "paddy-rice"
           }
       ]
@@ -995,22 +981,18 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   ```json
   {
       "commodity_category_id": 1,
-      "name_en": "Wheat",
-      "name_hi": "गेहूं",
+      "name": "Wheat",
       "slug": "wheat",
-      "description_en": "Standard milling wheat.",
-      "description_hi": "मानक मिलिंग गेहूं।",
+      "description": "Standard milling wheat.",
       "sort_order": 1,
       "status": true
   }
   ```
 - **Validation:**
   - `commodity_category_id`: required, integer, must reference active & non-deleted category
-  - `name_en`: required, string, max:150
-  - `name_hi`: optional, string, max:150
-  - `slug`: optional (auto-generated from `name_en` if omitted), string, max:180, globally unique
-  - `description_en`: optional, string
-  - `description_hi`: optional, string
+  - `name`: required, string, max:150
+  - `slug`: optional (auto-generated from `name` if omitted), string, max:180, globally unique
+  - `description`: optional, string
   - `sort_order`: optional, integer, min:0, max:65535 (default: 0)
   - `status`: optional, boolean (default: true)
 - **Success (201 Created):** Returns created commodity resource.
@@ -1092,9 +1074,9 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   - `per_page`: 1 to 100 (default: 20)
   - `commodity_id`: Filter by parent commodity ID
   - `commodity_category_id`: Filter by grandparent category ID (validated against `commodity_id` if both provided)
-  - `search`: Filter by `name_en`, `name_hi`, or `slug`
+  - `search`: Filter by `name`, or `slug`
   - `status`: `1` (active) or `0` (inactive)
-  - `sort_by`: `id`, `name_en`, `name_hi`, `slug`, `commodity_id`, `sort_order`, `status`, `created_at`, `updated_at` (default `sort_order`)
+  - `sort_by`: `id`, `name`, `slug`, `commodity_id`, `sort_order`, `status`, `created_at`, `updated_at` (default `sort_order`)
   - `sort_order`: `asc` or `desc` (default `asc`)
 - **Success (200 OK):**
   ```json
@@ -1109,18 +1091,15 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
                   "commodity": {
                       "id": 1,
                       "commodity_category_id": 1,
-                      "name_en": "Wheat",
-                      "name_hi": "गेहूं",
+                      "name": "Wheat",
                       "slug": "wheat",
                       "category": {
                           "id": 1,
-                          "name_en": "Grains",
-                          "name_hi": "अनाज",
+                          "name": "Grains",
                           "slug": "grains"
                       }
                   },
-                  "name_en": "Lokwan Wheat",
-                  "name_hi": "लोकवान गेहूं",
+                  "name": "Lokwan Wheat",
                   "slug": "lokwan-wheat",
                   "sort_order": 1,
                   "status": true,
@@ -1153,8 +1132,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
           {
               "id": 1,
               "commodity_id": 1,
-              "name_en": "Lokwan Wheat",
-              "name_hi": "लोकवान गेहूं",
+              "name": "Lokwan Wheat",
               "slug": "lokwan-wheat"
           }
       ]
@@ -1168,22 +1146,18 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   ```json
   {
       "commodity_id": 1,
-      "name_en": "Lokwan Wheat",
-      "name_hi": "लोकवान गेहूं",
+      "name": "Lokwan Wheat",
       "slug": "lokwan-wheat",
-      "description_en": "High quality Lokwan wheat.",
-      "description_hi": "उच्च गुणवत्ता लोकवान गेहूं।",
+      "description": "High quality Lokwan wheat.",
       "sort_order": 1,
       "status": true
   }
   ```
 - **Validation:**
   - `commodity_id`: required, integer, must reference active & non-deleted Commodity whose parent Category is also active & non-deleted
-  - `name_en`: required, string, max:150
-  - `name_hi`: optional, string, max:150
-  - `slug`: optional (auto-generated from `name_en` if omitted), string, max:180, unique per commodity
-  - `description_en`: optional, string
-  - `description_hi`: optional, string
+  - `name`: required, string, max:150
+  - `slug`: optional (auto-generated from `name` if omitted), string, max:180, unique per commodity
+  - `description`: optional, string
   - `sort_order`: optional, integer, min:0, max:65535 (default: 0)
   - `status`: optional, boolean (default: true)
 - **Success (201 Created):** Returns created commodity subcategory resource.
@@ -1371,12 +1345,12 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 - **Query Parameters:**
   - `page`: integer, min:1 (default: 1)
   - `per_page`: integer, min:1, max:100 (default: 20)
-  - `search`: string, max:150 (searches `name_en`, `name_hi`, `slug`)
+  - `search`: string, max:150 (searches `name`, `slug`)
   - `commodity_category_id`: integer, filter through commodity relationship
   - `commodity_id`: integer, filter by parent commodity
   - `commodity_subcategory_id`: integer, filter by parent subcategory
   - `status`: boolean (1 or 0)
-  - `sort_by`: `id`, `commodity_id`, `commodity_subcategory_id`, `name_en`, `name_hi`, `slug`, `sort_order`, `status`, `created_at`, `updated_at` (default: `sort_order`)
+  - `sort_by`: `id`, `commodity_id`, `commodity_subcategory_id`, `name`, `slug`, `sort_order`, `status`, `created_at`, `updated_at` (default: `sort_order`)
   - `sort_order`: `asc` or `desc` (default: `asc`)
 - **Relational Consistency:** Returns `422 Unprocessable Entity` if combined category/commodity/subcategory filters do not match.
 - **Success (200 OK):**
@@ -1393,25 +1367,21 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
                   "commodity": {
                       "id": 5,
                       "commodity_category_id": 1,
-                      "name_en": "Wheat",
-                      "name_hi": "गेहूं",
+                      "name": "Wheat",
                       "slug": "wheat",
                       "category": {
                           "id": 1,
-                          "name_en": "Grains",
-                          "name_hi": "अनाज",
+                          "name": "Grains",
                           "slug": "grains"
                       }
                   },
                   "subcategory": {
                       "id": 8,
                       "commodity_id": 5,
-                      "name_en": "Milling Wheat",
-                      "name_hi": "मिलिंग गेहूं",
+                      "name": "Milling Wheat",
                       "slug": "milling-wheat"
                   },
-                  "name_en": "HD-2967",
-                  "name_hi": "एचडी-2967",
+                  "name": "HD-2967",
                   "slug": "hd-2967",
                   "sort_order": 1,
                   "status": true,
@@ -1449,8 +1419,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
               "id": 1,
               "commodity_id": 5,
               "commodity_subcategory_id": 8,
-              "name_en": "HD-2967",
-              "name_hi": "एचडी-2967",
+              "name": "HD-2967",
               "slug": "hd-2967"
           }
       ]
@@ -1467,11 +1436,9 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   {
       "commodity_id": 5,
       "commodity_subcategory_id": null,
-      "name_en": "HD-2967",
-      "name_hi": "एचडी-2967",
+      "name": "HD-2967",
       "slug": "hd-2967",
-      "description_en": "High yield semi-dwarf wheat variety.",
-      "description_hi": "उच्च उपज देने वाली अर्ध-बौनी गेहूं किस्म।",
+      "description": "High yield semi-dwarf wheat variety.",
       "sort_order": 1,
       "status": true
   }
@@ -1481,8 +1448,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   {
       "commodity_id": 5,
       "commodity_subcategory_id": 8,
-      "name_en": "Lokwan Premium",
-      "name_hi": "लोकवान प्रीमियम",
+      "name": "Lokwan Premium",
       "slug": "lokwan-premium",
       "sort_order": 2,
       "status": true
@@ -1507,10 +1473,9 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   {
       "commodity_id": 5,
       "commodity_subcategory_id": 8,
-      "name_en": "HD-2967 (Certified)",
-      "name_hi": "एचडी-2967 (प्रमाणित)",
+      "name": "HD-2967 (Certified)",
       "slug": "hd-2967-certified",
-      "description_en": "Updated description.",
+      "description": "Updated description.",
       "sort_order": 1,
       "status": true
   }
@@ -1614,9 +1579,9 @@ Supported 3-Tier Hierarchy:
   - `commodity_subcategory_id`: Filter by subcategory
   - `commodity_variety_id`: Filter by variety
   - `commodity_category_id`: Filter by parent category
-  - `search`: Filter by `name_en`, `name_hi`, or `slug`
+  - `search`: Filter by `name`, or `slug`
   - `status`: `1` (active) or `0` (inactive)
-  - `sort_by`: `id`, `name_en`, `name_hi`, `slug`, `commodity_id`, `commodity_subcategory_id`, `commodity_variety_id`, `sort_order`, `status`, `created_at`, `updated_at` (default `sort_order`)
+  - `sort_by`: `id`, `name`, `slug`, `commodity_id`, `commodity_subcategory_id`, `commodity_variety_id`, `sort_order`, `status`, `created_at`, `updated_at` (default `sort_order`)
   - `sort_order`: `asc` or `desc` (default `asc`)
 - **Success (200 OK):**
   ```json
@@ -1633,33 +1598,28 @@ Supported 3-Tier Hierarchy:
                   "commodity": {
                       "id": 1,
                       "commodity_category_id": 1,
-                      "name_en": "Wheat",
-                      "name_hi": "गेहूं",
+                      "name": "Wheat",
                       "slug": "wheat",
                       "category": {
                           "id": 1,
-                          "name_en": "Grains",
-                          "name_hi": "अनाज",
+                          "name": "Grains",
                           "slug": "grains"
                       }
                   },
                   "subcategory": {
                       "id": 1,
                       "commodity_id": 1,
-                      "name_en": "Milling Wheat",
-                      "name_hi": "मिलिंग गेहूं",
+                      "name": "Milling Wheat",
                       "slug": "milling-wheat"
                   },
                   "variety": {
                       "id": 1,
                       "commodity_id": 1,
                       "commodity_subcategory_id": 1,
-                      "name_en": "HD-2967",
-                      "name_hi": "एचडी-2967",
+                      "name": "HD-2967",
                       "slug": "hd-2967"
                   },
-                  "name_en": "Grade A Premium",
-                  "name_hi": "ग्रेड ए प्रीमियम",
+                  "name": "Grade A Premium",
                   "slug": "grade-a-premium",
                   "sort_order": 1,
                   "status": true,
@@ -1703,8 +1663,7 @@ Supported 3-Tier Hierarchy:
               "commodity_id": 1,
               "commodity_subcategory_id": 1,
               "commodity_variety_id": 1,
-              "name_en": "Grade A Premium",
-              "name_hi": "ग्रेड ए प्रीमियम",
+              "name": "Grade A Premium",
               "slug": "grade-a-premium"
           }
       ]
@@ -1722,11 +1681,9 @@ Supported 3-Tier Hierarchy:
       "commodity_id": 1,
       "commodity_subcategory_id": 1,
       "commodity_variety_id": 1,
-      "name_en": "Grade A Premium",
-      "name_hi": "ग्रेड ए प्रीमियम",
+      "name": "Grade A Premium",
       "slug": "grade-a-premium",
-      "description_en": "High grade milling wheat.",
-      "description_hi": "उच्च श्रेणी का मिलिंग गेहूं।",
+      "description": "High grade milling wheat.",
       "sort_order": 1,
       "status": true
   }
@@ -1751,10 +1708,9 @@ Supported 3-Tier Hierarchy:
       "commodity_id": 1,
       "commodity_subcategory_id": 1,
       "commodity_variety_id": null,
-      "name_en": "Grade A Special",
-      "name_hi": "ग्रेड ए स्पेशल",
+      "name": "Grade A Special",
       "slug": "grade-a-special",
-      "description_en": "Updated grade description.",
+      "description": "Updated grade description.",
       "sort_order": 1,
       "status": true
   }
@@ -1857,12 +1813,9 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
       "status": true,
       "message": "Site settings fetched successfully.",
       "data": {
-          "site_name_en": "Vyapari Darbar",
-          "site_name_hi": "व्यापारी दरबार",
-          "site_title_en": "India Premier Mandi Platform",
-          "site_title_hi": "भारत का प्रमुख मंडी मंच",
-          "site_description_en": "Connecting mandi traders across India.",
-          "site_description_hi": "पूरे भारत के मंडी व्यापारियों को जोड़ना।",
+          "site_name": "Vyapari Darbar",
+          "site_title": "India Premier Mandi Platform",
+          "site_description": "Connecting mandi traders across India.",
           "web_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-web.png",
           "mobile_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-mobile.png"
       }
@@ -1884,12 +1837,9 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
       "message": "Site settings fetched successfully.",
       "data": {
           "id": 1,
-          "site_name_en": "Vyapari Darbar",
-          "site_name_hi": "व्यापारी दरबार",
-          "site_title_en": "India Premier Mandi Platform",
-          "site_title_hi": "भारत का प्रमुख मंडी मंच",
-          "site_description_en": "Connecting mandi traders across India.",
-          "site_description_hi": "पूरे भारत के मंडी व्यापारियों को जोड़ना।",
+          "site_name": "Vyapari Darbar",
+          "site_title": "India Premier Mandi Platform",
+          "site_description": "Connecting mandi traders across India.",
           "web_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-web.png",
           "mobile_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-mobile.png",
           "created_at": "2026-09-09T08:00:00.000000Z",
@@ -1910,12 +1860,9 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
   - Clients sending files (`web_logo`, `mobile_logo`) should submit a `POST /api/admin/site-settings` multipart/form-data request with `_method = PATCH`.
   - For text-only updates, clients may send standard JSON with `PATCH /api/admin/site-settings`.
 - **Validation Rules:**
-  - `site_name_en`: `sometimes|required|string|max:150`
-  - `site_name_hi`: `sometimes|nullable|string|max:150`
-  - `site_title_en`: `sometimes|nullable|string|max:255`
-  - `site_title_hi`: `sometimes|nullable|string|max:255`
-  - `site_description_en`: `sometimes|nullable|string|max:5000`
-  - `site_description_hi`: `sometimes|nullable|string|max:5000`
+  - `site_name`: `sometimes|required|string|max:150`
+  - `site_title`: `sometimes|nullable|string|max:255`
+  - `site_description`: `sometimes|nullable|string|max:5000`
   - `web_logo`: `sometimes|file|image|mimes:jpg,jpeg,png,webp|max:2048` (SVG rejected; not nullable)
   - `mobile_logo`: `sometimes|file|image|mimes:jpg,jpeg,png,webp|max:2048` (SVG rejected; not nullable)
 - **File & Concurrency Safety:**
@@ -1927,11 +1874,9 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
 - **Request Body Example (JSON / Text Only):**
   ```json
   {
-      "site_name_en": "Vyapari Darbaar Global",
-      "site_title_en": "India Premier Mandi Platform",
-      "site_title_hi": "भारत का प्रमुख मंडी मंच",
-      "site_description_en": "Connecting mandi traders across India.",
-      "site_description_hi": "पूरे भारत के मंडी व्यापारियों को जोड़ना।"
+      "site_name": "Vyapari Darbaar Global",
+      "site_title": "India Premier Mandi Platform",
+      "site_description": "Connecting mandi traders across India."
   }
   ```
 - **Request Body Example (Multipart / Form Data with Spoofing):**
@@ -1940,8 +1885,7 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
   Content-Type: multipart/form-data
 
   _method=PATCH
-  site_name_en=Vyapari Darbaar Global
-  site_name_hi=व्यापारी दरबार
+  site_name=Vyapari Darbaar Global
   web_logo=[FILE: logo_web.png]
   mobile_logo=[FILE: logo_mobile.webp]
   ```
@@ -1952,12 +1896,9 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
       "message": "Site settings updated successfully.",
       "data": {
           "id": 1,
-          "site_name_en": "Vyapari Darbaar Global",
-          "site_name_hi": "व्यापारी दरबार",
-          "site_title_en": "India Premier Mandi Platform",
-          "site_title_hi": "भारत का प्रमुख मंडी मंच",
-          "site_description_en": "Connecting mandi traders across India.",
-          "site_description_hi": "पूरे भारत के मंडी व्यापारियों को जोड़ना।",
+          "site_name": "Vyapari Darbaar Global",
+          "site_title": "India Premier Mandi Platform",
+          "site_description": "Connecting mandi traders across India.",
           "web_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/abc123web.png",
           "mobile_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/def456mobile.webp",
           "created_at": "2026-09-09T08:00:00.000000Z",

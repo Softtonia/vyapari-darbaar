@@ -53,31 +53,27 @@ class CommoditySubcategoryManagementTest extends TestCase
         $this->adminToken = $this->admin->createToken('admin-token')->plainTextToken;
 
         $this->categoryGrains = CommodityCategory::create([
-            'name_en' => 'Grains',
-            'name_hi' => 'अनाज',
+            'name' => 'Grains',
             'slug' => 'grains',
             'status' => true,
         ]);
 
         $this->categoryPulses = CommodityCategory::create([
-            'name_en' => 'Pulses',
-            'name_hi' => 'दलहन',
+            'name' => 'Pulses',
             'slug' => 'pulses',
             'status' => true,
         ]);
 
         $this->commodityWheat = Commodity::create([
             'commodity_category_id' => $this->categoryGrains->id,
-            'name_en' => 'Wheat',
-            'name_hi' => 'गेहूं',
+            'name' => 'Wheat',
             'slug' => 'wheat',
             'status' => true,
         ]);
 
         $this->commodityChana = Commodity::create([
             'commodity_category_id' => $this->categoryPulses->id,
-            'name_en' => 'Chana',
-            'name_hi' => 'चना',
+            'name' => 'Chana',
             'slug' => 'chana',
             'status' => true,
         ]);
@@ -123,14 +119,14 @@ class CommoditySubcategoryManagementTest extends TestCase
     {
         CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Lokwan Wheat',
+            'name' => 'Lokwan Wheat',
             'slug' => 'lokwan-wheat',
             'sort_order' => 1,
             'status' => true,
         ]);
         CommoditySubcategory::create([
             'commodity_id' => $this->commodityChana->id,
-            'name_en' => 'Desi Chana Sub',
+            'name' => 'Desi Chana Sub',
             'slug' => 'desi-chana-sub',
             'sort_order' => 2,
             'status' => true,
@@ -150,13 +146,11 @@ class CommoditySubcategoryManagementTest extends TestCase
                             'commodity' => [
                                 'id',
                                 'commodity_category_id',
-                                'name_en',
-                                'name_hi',
+                                'name',
                                 'slug',
-                                'category' => ['id', 'name_en', 'name_hi', 'slug'],
+                                'category' => ['id', 'name',  'slug'],
                             ],
-                            'name_en',
-                            'name_hi',
+                            'name',
                             'slug',
                             'sort_order',
                             'status',
@@ -188,14 +182,14 @@ class CommoditySubcategoryManagementTest extends TestCase
     {
         CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Lokwan Wheat',
+            'name' => 'Lokwan Wheat',
             'slug' => 'lokwan-wheat',
             'sort_order' => 1,
             'status' => true,
         ]);
         CommoditySubcategory::create([
             'commodity_id' => $this->commodityChana->id,
-            'name_en' => 'Desi Chana Sub',
+            'name' => 'Desi Chana Sub',
             'slug' => 'desi-chana-sub',
             'sort_order' => 2,
             'status' => true,
@@ -206,21 +200,21 @@ class CommoditySubcategoryManagementTest extends TestCase
             ->assertStatus(200);
 
         $this->assertCount(1, $response->json('data.items'));
-        $this->assertEquals('Lokwan Wheat', $response->json('data.items.0.name_en'));
+        $this->assertEquals('Lokwan Wheat', $response->json('data.items.0.name'));
     }
 
     public function test_options_api_requires_all_three_statuses_active_and_non_deleted(): void
     {
         $activeSubcat = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Active Subcat',
+            'name' => 'Active Subcat',
             'slug' => 'active-subcat',
             'status' => true,
         ]);
 
         $inactiveSubcat = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Inactive Subcat',
+            'name' => 'Inactive Subcat',
             'slug' => 'inactive-subcat',
             'status' => false,
         ]);
@@ -231,7 +225,7 @@ class CommoditySubcategoryManagementTest extends TestCase
             ->assertStatus(200);
 
         $this->assertCount(1, $response->json('data'));
-        $this->assertEquals('Active Subcat', $response->json('data.0.name_en'));
+        $this->assertEquals('Active Subcat', $response->json('data.0.name'));
 
         // Deactivate parent Commodity -> Options should return empty
         $this->commodityWheat->update(['status' => false]);
@@ -261,10 +255,9 @@ class CommoditySubcategoryManagementTest extends TestCase
     {
         $payload = [
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Sharbati Wheat',
-            'name_hi' => 'शरबती गेहूं',
+            'name' => 'Sharbati Wheat',
             'slug' => 'sharbati-wheat',
-            'description_en' => 'Premium high grade wheat',
+            'description' => 'Premium high grade wheat',
             'sort_order' => 5,
             'status' => true,
         ];
@@ -272,12 +265,12 @@ class CommoditySubcategoryManagementTest extends TestCase
         $response = $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodity-subcategories', $payload)
             ->assertStatus(201)
-            ->assertJsonPath('data.name_en', 'Sharbati Wheat')
+            ->assertJsonPath('data.name', 'Sharbati Wheat')
             ->assertJsonPath('data.slug', 'sharbati-wheat')
             ->assertJsonPath('data.commodity_id', $this->commodityWheat->id);
 
         $this->assertDatabaseHas('commodity_subcategories', [
-            'name_en' => 'Sharbati Wheat',
+            'name' => 'Sharbati Wheat',
             'slug' => 'sharbati-wheat',
             'commodity_id' => $this->commodityWheat->id,
             'created_by' => $this->admin->id,
@@ -288,7 +281,7 @@ class CommoditySubcategoryManagementTest extends TestCase
     {
         $inactiveCommodity = Commodity::create([
             'commodity_category_id' => $this->categoryGrains->id,
-            'name_en' => 'Barley Inactive',
+            'name' => 'Barley Inactive',
             'slug' => 'barley-inactive',
             'status' => false,
         ]);
@@ -296,7 +289,7 @@ class CommoditySubcategoryManagementTest extends TestCase
         $response = $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodity-subcategories', [
                 'commodity_id' => $inactiveCommodity->id,
-                'name_en' => 'Pearl Barley',
+                'name' => 'Pearl Barley',
             ])
             ->assertStatus(422);
 
@@ -304,13 +297,13 @@ class CommoditySubcategoryManagementTest extends TestCase
 
         // Category inactive case
         $inactiveCategory = CommodityCategory::create([
-            'name_en' => 'Oilseeds Inactive',
+            'name' => 'Oilseeds Inactive',
             'slug' => 'oilseeds-inactive',
             'status' => false,
         ]);
         $commodityUnderInactiveCat = Commodity::create([
             'commodity_category_id' => $inactiveCategory->id,
-            'name_en' => 'Mustard Active',
+            'name' => 'Mustard Active',
             'slug' => 'mustard-active',
             'status' => true,
         ]);
@@ -318,7 +311,7 @@ class CommoditySubcategoryManagementTest extends TestCase
         $response2 = $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodity-subcategories', [
                 'commodity_id' => $commodityUnderInactiveCat->id,
-                'name_en' => 'Black Mustard',
+                'name' => 'Black Mustard',
             ])
             ->assertStatus(422);
 
@@ -330,7 +323,7 @@ class CommoditySubcategoryManagementTest extends TestCase
         // Wheat -> premium
         $sub1 = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Premium Wheat Sub',
+            'name' => 'Premium Wheat Sub',
             'slug' => 'premium',
             'status' => true,
         ]);
@@ -339,7 +332,7 @@ class CommoditySubcategoryManagementTest extends TestCase
         $response = $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodity-subcategories', [
                 'commodity_id' => $this->commodityChana->id,
-                'name_en' => 'Premium Chana Sub',
+                'name' => 'Premium Chana Sub',
                 'slug' => 'premium',
             ])
             ->assertStatus(201);
@@ -352,7 +345,7 @@ class CommoditySubcategoryManagementTest extends TestCase
     {
         $existing = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Special Grade',
+            'name' => 'Special Grade',
             'slug' => 'special-grade',
             'status' => true,
         ]);
@@ -361,7 +354,7 @@ class CommoditySubcategoryManagementTest extends TestCase
         $response = $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodity-subcategories', [
                 'commodity_id' => $this->commodityWheat->id,
-                'name_en' => 'Another Special Grade',
+                'name' => 'Another Special Grade',
                 'slug' => 'special-grade',
             ])
             ->assertStatus(422);
@@ -374,7 +367,7 @@ class CommoditySubcategoryManagementTest extends TestCase
         $response2 = $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodity-subcategories', [
                 'commodity_id' => $this->commodityWheat->id,
-                'name_en' => 'Another Special Grade',
+                'name' => 'Another Special Grade',
                 'slug' => 'special-grade',
             ])
             ->assertStatus(422);
@@ -387,7 +380,7 @@ class CommoditySubcategoryManagementTest extends TestCase
         $sub1 = $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodity-subcategories', [
                 'commodity_id' => $this->commodityWheat->id,
-                'name_en' => 'Super Grain',
+                'name' => 'Super Grain',
             ])
             ->assertStatus(201);
         $this->assertEquals('super-grain', $sub1->json('data.slug'));
@@ -395,7 +388,7 @@ class CommoditySubcategoryManagementTest extends TestCase
         $sub2 = $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodity-subcategories', [
                 'commodity_id' => $this->commodityWheat->id,
-                'name_en' => 'Super Grain',
+                'name' => 'Super Grain',
             ])
             ->assertStatus(201);
         $this->assertEquals('super-grain-2', $sub2->json('data.slug'));
@@ -403,7 +396,7 @@ class CommoditySubcategoryManagementTest extends TestCase
         $sub3 = $this->withToken($this->adminToken)
             ->postJson('/api/admin/commodity-subcategories', [
                 'commodity_id' => $this->commodityWheat->id,
-                'name_en' => 'Super Grain',
+                'name' => 'Super Grain',
             ])
             ->assertStatus(201);
         $this->assertEquals('super-grain-3', $sub3->json('data.slug'));
@@ -414,7 +407,7 @@ class CommoditySubcategoryManagementTest extends TestCase
         // Wheat has subcategory with slug 'premium'
         $wheatSubcat = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Premium Wheat Subcat',
+            'name' => 'Premium Wheat Subcat',
             'slug' => 'premium',
             'status' => true,
         ]);
@@ -422,7 +415,7 @@ class CommoditySubcategoryManagementTest extends TestCase
         // Chana ALREADY has subcategory with slug 'premium'
         $chanaSubcat = CommoditySubcategory::create([
             'commodity_id' => $this->commodityChana->id,
-            'name_en' => 'Premium Chana Subcat',
+            'name' => 'Premium Chana Subcat',
             'slug' => 'premium',
             'status' => true,
         ]);
@@ -431,7 +424,7 @@ class CommoditySubcategoryManagementTest extends TestCase
         $response = $this->withToken($this->adminToken)
             ->putJson('/api/admin/commodity-subcategories/'.$wheatSubcat->id, [
                 'commodity_id' => $this->commodityChana->id,
-                'name_en' => 'Moved Wheat Subcat',
+                'name' => 'Moved Wheat Subcat',
             ])
             ->assertStatus(422);
 
@@ -440,7 +433,7 @@ class CommoditySubcategoryManagementTest extends TestCase
         // Verify original record is unchanged
         $wheatSubcat->refresh();
         $this->assertEquals($this->commodityWheat->id, $wheatSubcat->commodity_id);
-        $this->assertEquals('Premium Wheat Subcat', $wheatSubcat->name_en);
+        $this->assertEquals('Premium Wheat Subcat', $wheatSubcat->name);
         $this->assertEquals('premium', $wheatSubcat->slug);
     }
 
@@ -448,7 +441,7 @@ class CommoditySubcategoryManagementTest extends TestCase
     {
         $wheatSubcat = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Unique Wheat Subcat',
+            'name' => 'Unique Wheat Subcat',
             'slug' => 'unique-wheat-subcat',
             'status' => true,
         ]);
@@ -472,7 +465,7 @@ class CommoditySubcategoryManagementTest extends TestCase
     {
         $subcat = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'To Delete Sub',
+            'name' => 'To Delete Sub',
             'slug' => 'to-delete-sub',
             'status' => true,
         ]);
@@ -493,13 +486,13 @@ class CommoditySubcategoryManagementTest extends TestCase
     {
         $sub1 = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Bulk Delete 1',
+            'name' => 'Bulk Delete 1',
             'slug' => 'bulk-delete-1',
             'status' => true,
         ]);
         $sub2 = CommoditySubcategory::create([
             'commodity_id' => $this->commodityChana->id,
-            'name_en' => 'Bulk Delete 2',
+            'name' => 'Bulk Delete 2',
             'slug' => 'bulk-delete-2',
             'status' => true,
         ]);
@@ -520,7 +513,7 @@ class CommoditySubcategoryManagementTest extends TestCase
     {
         $inactiveSubcat = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Milling Wheat',
+            'name' => 'Milling Wheat',
             'slug' => 'milling-wheat',
             'status' => false,
             'deleted_at' => null,
@@ -539,7 +532,7 @@ class CommoditySubcategoryManagementTest extends TestCase
     {
         $subcat = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Soft Deleted Sub',
+            'name' => 'Soft Deleted Sub',
             'slug' => 'soft-deleted-sub',
             'status' => true,
         ]);
@@ -557,7 +550,7 @@ class CommoditySubcategoryManagementTest extends TestCase
     {
         $subcat = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Dependent Sub',
+            'name' => 'Dependent Sub',
             'slug' => 'dependent-sub',
             'status' => false,
         ]);
@@ -578,7 +571,7 @@ class CommoditySubcategoryManagementTest extends TestCase
     {
         $subWheat = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Sub Wheat',
+            'name' => 'Sub Wheat',
             'slug' => 'sub-wheat',
             'status' => true,
         ]);

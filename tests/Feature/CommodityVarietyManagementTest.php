@@ -59,47 +59,41 @@ class CommodityVarietyManagementTest extends TestCase
         $this->adminToken = $this->admin->createToken('admin-token')->plainTextToken;
 
         $this->categoryGrains = CommodityCategory::create([
-            'name_en' => 'Grains',
-            'name_hi' => 'अनाज',
+            'name' => 'Grains',
             'slug' => 'grains',
             'status' => true,
         ]);
 
         $this->categoryPulses = CommodityCategory::create([
-            'name_en' => 'Pulses',
-            'name_hi' => 'दलहन',
+            'name' => 'Pulses',
             'slug' => 'pulses',
             'status' => true,
         ]);
 
         $this->commodityWheat = Commodity::create([
             'commodity_category_id' => $this->categoryGrains->id,
-            'name_en' => 'Wheat',
-            'name_hi' => 'गेहूं',
+            'name' => 'Wheat',
             'slug' => 'wheat',
             'status' => true,
         ]);
 
         $this->commodityChana = Commodity::create([
             'commodity_category_id' => $this->categoryPulses->id,
-            'name_en' => 'Chana',
-            'name_hi' => 'चना',
+            'name' => 'Chana',
             'slug' => 'chana',
             'status' => true,
         ]);
 
         $this->subcatMillingWheat = CommoditySubcategory::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Milling Wheat',
-            'name_hi' => 'मिलिंग गेहूं',
+            'name' => 'Milling Wheat',
             'slug' => 'milling-wheat',
             'status' => true,
         ]);
 
         $this->subcatDesiChana = CommoditySubcategory::create([
             'commodity_id' => $this->commodityChana->id,
-            'name_en' => 'Desi Chana',
-            'name_hi' => 'देसी चना',
+            'name' => 'Desi Chana',
             'slug' => 'desi-chana',
             'status' => true,
         ]);
@@ -144,7 +138,7 @@ class CommodityVarietyManagementTest extends TestCase
     {
         CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Variety B',
+            'name' => 'Variety B',
             'slug' => 'variety-b',
             'sort_order' => 2,
             'status' => true,
@@ -152,7 +146,7 @@ class CommodityVarietyManagementTest extends TestCase
 
         CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Variety A',
+            'name' => 'Variety A',
             'slug' => 'variety-a',
             'sort_order' => 1,
             'status' => true,
@@ -172,8 +166,7 @@ class CommodityVarietyManagementTest extends TestCase
                             'commodity_subcategory_id',
                             'commodity',
                             'subcategory',
-                            'name_en',
-                            'name_hi',
+                            'name',
                             'slug',
                             'sort_order',
                             'status',
@@ -187,29 +180,22 @@ class CommodityVarietyManagementTest extends TestCase
 
         $items = $response->json('data.items');
         $this->assertCount(2, $items);
-        $this->assertEquals('Variety A', $items[0]['name_en']);
-        $this->assertEquals('Variety B', $items[1]['name_en']);
+        $this->assertEquals('Variety A', $items[0]['name']);
+        $this->assertEquals('Variety B', $items[1]['name']);
     }
 
-    public function test_list_varieties_search_by_english_hindi_and_slug(): void
+    public function test_list_varieties_search_by_name_and_slug(): void
     {
         CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Sharbati Gold',
-            'name_hi' => 'शरबती गोल्ड',
+            'name' => 'Sharbati Gold',
             'slug' => 'sharbati-gold',
             'status' => true,
         ]);
 
-        // English search
+        // Name search
         $this->withHeader('Authorization', "Bearer {$this->adminToken}")
             ->getJson('/api/admin/commodity-varieties?search=Gold')
-            ->assertStatus(200)
-            ->assertJsonCount(1, 'data.items');
-
-        // Hindi search
-        $this->withHeader('Authorization', "Bearer {$this->adminToken}")
-            ->getJson('/api/admin/commodity-varieties?search=शरबती')
             ->assertStatus(200)
             ->assertJsonCount(1, 'data.items');
 
@@ -225,7 +211,7 @@ class CommodityVarietyManagementTest extends TestCase
         $v1 = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
-            'name_en' => 'HD-2967',
+            'name' => 'HD-2967',
             'slug' => 'hd-2967',
             'status' => true,
         ]);
@@ -233,7 +219,7 @@ class CommodityVarietyManagementTest extends TestCase
         $v2 = CommodityVariety::create([
             'commodity_id' => $this->commodityChana->id,
             'commodity_subcategory_id' => $this->subcatDesiChana->id,
-            'name_en' => 'JG-11',
+            'name' => 'JG-11',
             'slug' => 'jg-11',
             'status' => false,
         ]);
@@ -293,11 +279,9 @@ class CommodityVarietyManagementTest extends TestCase
         $payload = [
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => null,
-            'name_en' => 'HD-2967',
-            'name_hi' => 'एचडी-2967',
+            'name' => 'HD-2967',
             'slug' => 'hd-2967',
-            'description_en' => 'High yield variety',
-            'description_hi' => 'उच्च उपज किस्म',
+            'description' => 'High yield variety',
             'sort_order' => 1,
             'status' => true,
         ];
@@ -306,7 +290,7 @@ class CommodityVarietyManagementTest extends TestCase
             ->postJson('/api/admin/commodity-varieties', $payload)
             ->assertStatus(201)
             ->assertJsonPath('status', true)
-            ->assertJsonPath('data.name_en', 'HD-2967')
+            ->assertJsonPath('data.name', 'HD-2967')
             ->assertJsonPath('data.slug', 'hd-2967')
             ->assertJsonPath('data.commodity_subcategory_id', null);
 
@@ -322,7 +306,7 @@ class CommodityVarietyManagementTest extends TestCase
         $payload = [
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
-            'name_en' => 'Lokwan Grade A',
+            'name' => 'Lokwan Grade A',
             'slug' => 'lokwan-grade-a',
             'status' => true,
         ];
@@ -343,14 +327,14 @@ class CommodityVarietyManagementTest extends TestCase
     {
         CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Lokwan Wheat',
+            'name' => 'Lokwan Wheat',
             'slug' => 'lokwan-wheat',
             'status' => true,
         ]);
 
         $payload = [
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Lokwan Wheat',
+            'name' => 'Lokwan Wheat',
             'slug' => null,
         ];
 
@@ -364,14 +348,14 @@ class CommodityVarietyManagementTest extends TestCase
     {
         CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Premium Quality',
+            'name' => 'Premium Quality',
             'slug' => 'premium-quality',
             'status' => true,
         ]);
 
         $payload = [
             'commodity_id' => $this->commodityChana->id,
-            'name_en' => 'Premium Quality',
+            'name' => 'Premium Quality',
             'slug' => 'premium-quality',
             'status' => true,
         ];
@@ -386,14 +370,14 @@ class CommodityVarietyManagementTest extends TestCase
     {
         CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'HD-2967',
+            'name' => 'HD-2967',
             'slug' => 'hd-2967',
             'status' => true,
         ]);
 
         $payload = [
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Different Name',
+            'name' => 'Different Name',
             'slug' => 'hd-2967',
         ];
 
@@ -407,7 +391,7 @@ class CommodityVarietyManagementTest extends TestCase
     {
         $variety = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Deleted Variety',
+            'name' => 'Deleted Variety',
             'slug' => 'deleted-slug',
             'status' => true,
         ]);
@@ -415,7 +399,7 @@ class CommodityVarietyManagementTest extends TestCase
 
         $payload = [
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'New Variety',
+            'name' => 'New Variety',
             'slug' => 'deleted-slug',
         ];
 
@@ -432,7 +416,7 @@ class CommodityVarietyManagementTest extends TestCase
             ->postJson('/api/admin/commodity-varieties', [
                 'commodity_id' => $this->commodityWheat->id,
                 'commodity_subcategory_id' => $this->subcatDesiChana->id,
-                'name_en' => 'Cross Test',
+                'name' => 'Cross Test',
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['commodity_subcategory_id']);
@@ -442,7 +426,7 @@ class CommodityVarietyManagementTest extends TestCase
         $this->withHeader('Authorization', "Bearer {$this->adminToken}")
             ->postJson('/api/admin/commodity-varieties', [
                 'commodity_id' => $this->commodityWheat->id,
-                'name_en' => 'Inactive Comm Test',
+                'name' => 'Inactive Comm Test',
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['commodity_id']);
@@ -453,7 +437,7 @@ class CommodityVarietyManagementTest extends TestCase
         $this->withHeader('Authorization', "Bearer {$this->adminToken}")
             ->postJson('/api/admin/commodity-varieties', [
                 'commodity_id' => $this->commodityWheat->id,
-                'name_en' => 'Inactive Cat Test',
+                'name' => 'Inactive Cat Test',
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['commodity_id']);
@@ -465,7 +449,7 @@ class CommodityVarietyManagementTest extends TestCase
             ->postJson('/api/admin/commodity-varieties', [
                 'commodity_id' => $this->commodityWheat->id,
                 'commodity_subcategory_id' => $this->subcatMillingWheat->id,
-                'name_en' => 'Inactive Subcat Test',
+                'name' => 'Inactive Subcat Test',
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['commodity_subcategory_id']);
@@ -476,10 +460,9 @@ class CommodityVarietyManagementTest extends TestCase
         $variety = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
-            'name_en' => 'HD-2967',
-            'name_hi' => 'एचडी-2967',
+            'name' => 'HD-2967',
             'slug' => 'hd-2967',
-            'description_en' => 'High quality',
+            'description' => 'High quality',
             'created_by' => $this->admin->id,
             'updated_by' => $this->admin->id,
             'status' => true,
@@ -489,7 +472,7 @@ class CommodityVarietyManagementTest extends TestCase
             ->getJson("/api/admin/commodity-varieties/{$variety->id}")
             ->assertStatus(200)
             ->assertJsonPath('data.id', $variety->id)
-            ->assertJsonPath('data.name_en', 'HD-2967')
+            ->assertJsonPath('data.name', 'HD-2967')
             ->assertJsonPath('data.commodity.slug', 'wheat')
             ->assertJsonPath('data.subcategory.slug', 'milling-wheat')
             ->assertJsonPath('data.creator.email', $this->admin->email);
@@ -499,7 +482,7 @@ class CommodityVarietyManagementTest extends TestCase
     {
         $variety = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Old Name',
+            'name' => 'Old Name',
             'slug' => 'old-slug',
             'status' => true,
         ]);
@@ -507,7 +490,7 @@ class CommodityVarietyManagementTest extends TestCase
         // Omitted slug retains existing slug
         $this->withHeader('Authorization', "Bearer {$this->adminToken}")
             ->putJson("/api/admin/commodity-varieties/{$variety->id}", [
-                'name_en' => 'New Name',
+                'name' => 'New Name',
             ])
             ->assertStatus(200)
             ->assertJsonPath('data.slug', 'old-slug');
@@ -526,7 +509,7 @@ class CommodityVarietyManagementTest extends TestCase
         $variety = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
-            'name_en' => 'Variety Test',
+            'name' => 'Variety Test',
             'slug' => 'variety-test',
             'status' => true,
         ]);
@@ -534,7 +517,7 @@ class CommodityVarietyManagementTest extends TestCase
         // Omitted subcategory: retains existing subcategory
         $this->withHeader('Authorization', "Bearer {$this->adminToken}")
             ->putJson("/api/admin/commodity-varieties/{$variety->id}", [
-                'name_en' => 'Variety Test Updated',
+                'name' => 'Variety Test Updated',
             ])
             ->assertStatus(200)
             ->assertJsonPath('data.commodity_subcategory_id', $this->subcatMillingWheat->id);
@@ -558,7 +541,7 @@ class CommodityVarietyManagementTest extends TestCase
         $variety = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
-            'name_en' => 'Super Variety',
+            'name' => 'Super Variety',
             'slug' => 'super-variety',
             'status' => true,
         ]);
@@ -583,7 +566,7 @@ class CommodityVarietyManagementTest extends TestCase
         // 3. Changing commodity with target slug collision returns 422
         CommodityVariety::create([
             'commodity_id' => $this->commodityChana->id,
-            'name_en' => 'Existing Chana Variety',
+            'name' => 'Existing Chana Variety',
             'slug' => 'super-variety',
             'status' => true,
         ]);
@@ -629,7 +612,7 @@ class CommodityVarietyManagementTest extends TestCase
     {
         $variety = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Editable Variety',
+            'name' => 'Editable Variety',
             'slug' => 'editable-variety',
             'status' => true,
         ]);
@@ -639,24 +622,24 @@ class CommodityVarietyManagementTest extends TestCase
 
         $this->withHeader('Authorization', "Bearer {$this->adminToken}")
             ->putJson("/api/admin/commodity-varieties/{$variety->id}", [
-                'description_en' => 'Updated Description under inactive parent',
+                'description' => 'Updated Description under inactive parent',
             ])
             ->assertStatus(200)
-            ->assertJsonPath('data.description_en', 'Updated Description under inactive parent');
+            ->assertJsonPath('data.description', 'Updated Description under inactive parent');
     }
 
     public function test_update_variety_status_and_bulk_status(): void
     {
         $v1 = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Variety 1',
+            'name' => 'Variety 1',
             'slug' => 'v1',
             'status' => true,
         ]);
 
         $v2 = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Variety 2',
+            'name' => 'Variety 2',
             'slug' => 'v2',
             'status' => true,
         ]);
@@ -686,14 +669,14 @@ class CommodityVarietyManagementTest extends TestCase
     {
         $v1 = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Variety 1',
+            'name' => 'Variety 1',
             'slug' => 'v1',
             'status' => true,
         ]);
 
         $v2 = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
-            'name_en' => 'Variety 2',
+            'name' => 'Variety 2',
             'slug' => 'v2',
             'status' => true,
         ]);
@@ -722,7 +705,7 @@ class CommodityVarietyManagementTest extends TestCase
         $directVariety = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => null,
-            'name_en' => 'Direct Wheat Variety',
+            'name' => 'Direct Wheat Variety',
             'slug' => 'direct-wheat',
             'status' => true,
         ]);
@@ -730,7 +713,7 @@ class CommodityVarietyManagementTest extends TestCase
         $subcatVariety = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
-            'name_en' => 'Subcat Wheat Variety',
+            'name' => 'Subcat Wheat Variety',
             'slug' => 'subcat-wheat',
             'status' => true,
         ]);
@@ -800,7 +783,7 @@ class CommodityVarietyManagementTest extends TestCase
         $variety = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
-            'name_en' => 'Milling Variety',
+            'name' => 'Milling Variety',
             'slug' => 'milling-variety',
             'status' => true,
         ]);
@@ -861,7 +844,7 @@ class CommodityVarietyManagementTest extends TestCase
         $directVariety = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => null,
-            'name_en' => 'Direct Wheat Variety',
+            'name' => 'Direct Wheat Variety',
             'slug' => 'direct-wheat-var',
             'status' => true,
         ]);
@@ -900,7 +883,7 @@ class CommodityVarietyManagementTest extends TestCase
         $variety = CommodityVariety::create([
             'commodity_id' => $this->commodityWheat->id,
             'commodity_subcategory_id' => $this->subcatMillingWheat->id,
-            'name_en' => 'Cached Variety',
+            'name' => 'Cached Variety',
             'slug' => 'cached-variety',
             'status' => true,
         ]);

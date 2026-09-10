@@ -40,12 +40,11 @@ class CommodityService
         $sortOrder = (string) ($filters['sort_order'] ?? 'asc');
 
         $query = Commodity::query()
-            ->with(['category:id,name_en,name_hi,slug'])
+            ->with(['category:id,name,slug'])
             ->select([
                 'id',
                 'commodity_category_id',
-                'name_en',
-                'name_hi',
+                'name',
                 'slug',
                 'sort_order',
                 'status',
@@ -79,7 +78,7 @@ class CommodityService
                     $query->active();
                 })
                 ->when($categoryId !== null, fn ($q) => $q->where('commodity_category_id', $categoryId))
-                ->select(['id', 'commodity_category_id', 'name_en', 'name_hi', 'slug'])
+                ->select(['id', 'commodity_category_id', 'name', 'slug'])
                 ->orderBy('sort_order', 'asc')
                 ->orderBy('id', 'asc')
                 ->get()
@@ -95,16 +94,14 @@ class CommodityService
     public function createCommodity(array $data, ?int $adminId = null): Commodity
     {
         $commodity = DB::transaction(function () use ($data, $adminId) {
-            $slug = ! empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['name_en']);
+            $slug = ! empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['name']);
             $slug = $this->generateUniqueSlug($slug);
 
             return Commodity::create([
                 'commodity_category_id' => (int) $data['commodity_category_id'],
-                'name_en' => $data['name_en'],
-                'name_hi' => $data['name_hi'] ?? null,
+                'name' => $data['name'],
                 'slug' => $slug,
-                'description_en' => $data['description_en'] ?? null,
-                'description_hi' => $data['description_hi'] ?? null,
+                'description' => $data['description'] ?? null,
                 'sort_order' => $data['sort_order'] ?? 0,
                 'status' => $data['status'] ?? true,
                 'created_by' => $adminId,
@@ -114,7 +111,7 @@ class CommodityService
 
         $this->clearCache((int) $commodity->commodity_category_id, [], (int) $commodity->id);
 
-        return $commodity->load(['category:id,name_en,name_hi,slug']);
+        return $commodity->load(['category:id,name,slug']);
     }
 
     /**
@@ -133,12 +130,8 @@ class CommodityService
                 $updateData['commodity_category_id'] = (int) $data['commodity_category_id'];
             }
 
-            if (array_key_exists('name_en', $data)) {
-                $updateData['name_en'] = $data['name_en'];
-            }
-
-            if (array_key_exists('name_hi', $data)) {
-                $updateData['name_hi'] = $data['name_hi'];
+            if (array_key_exists('name', $data)) {
+                $updateData['name'] = $data['name'];
             }
 
             // If slug is explicitly supplied, normalize and update; otherwise retain old slug
@@ -146,12 +139,8 @@ class CommodityService
                 $updateData['slug'] = Str::slug($data['slug']);
             }
 
-            if (array_key_exists('description_en', $data)) {
-                $updateData['description_en'] = $data['description_en'];
-            }
-
-            if (array_key_exists('description_hi', $data)) {
-                $updateData['description_hi'] = $data['description_hi'];
+            if (array_key_exists('description', $data)) {
+                $updateData['description'] = $data['description'];
             }
 
             if (array_key_exists('sort_order', $data)) {
@@ -168,7 +157,7 @@ class CommodityService
 
             $commodity->update($updateData);
 
-            return $commodity->fresh(['category:id,name_en,name_hi,slug', 'creator', 'updater']);
+            return $commodity->fresh(['category:id,name,slug', 'creator', 'updater']);
         });
 
         $newCategoryId = (int) $updatedCommodity->commodity_category_id;
@@ -191,7 +180,7 @@ class CommodityService
                 'updated_by' => $adminId,
             ]);
 
-            return $commodity->fresh(['category:id,name_en,name_hi,slug']);
+            return $commodity->fresh(['category:id,name,slug']);
         });
 
         $this->clearCache($categoryId, [], (int) $updatedCommodity->id);

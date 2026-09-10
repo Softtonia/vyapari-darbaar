@@ -27,16 +27,13 @@ class CommodityResource extends JsonResource
 
                 return [
                     'id' => $this->category->id,
-                    'name_en' => $this->category->name_en,
-                    'name_hi' => $this->category->name_hi,
+                    'name' => $this->category->name,
                     'slug' => $this->category->slug,
                 ];
             }),
-            'name_en' => $this->name_en,
-            'name_hi' => $this->name_hi,
+            'name' => $this->name,
             'slug' => $this->slug,
-            'description_en' => $this->description_en,
-            'description_hi' => $this->description_hi,
+            'description' => $this->description,
             'sort_order' => (int) $this->sort_order,
             'status' => (bool) $this->status,
             'created_at' => $this->created_at?->toISOString(),

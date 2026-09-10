@@ -20,8 +20,7 @@ class CommoditySubcategoryOptionResource extends JsonResource
         return [
             'id' => $this->id,
             'commodity_id' => $this->commodity_id,
-            'name_en' => $this->name_en,
-            'name_hi' => $this->name_hi,
+            'name' => $this->name,
             'slug' => $this->slug,
         ];
     }

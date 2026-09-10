@@ -28,19 +28,16 @@ class CommoditySubcategoryListResource extends JsonResource
                 return [
                     'id' => $this->commodity->id,
                     'commodity_category_id' => $this->commodity->commodity_category_id,
-                    'name_en' => $this->commodity->name_en,
-                    'name_hi' => $this->commodity->name_hi,
+                    'name' => $this->commodity->name,
                     'slug' => $this->commodity->slug,
                     'category' => $this->commodity->relationLoaded('category') && $this->commodity->category ? [
                         'id' => $this->commodity->category->id,
-                        'name_en' => $this->commodity->category->name_en,
-                        'name_hi' => $this->commodity->category->name_hi,
+                        'name' => $this->commodity->category->name,
                         'slug' => $this->commodity->category->slug,
                     ] : null,
                 ];
             }),
-            'name_en' => $this->name_en,
-            'name_hi' => $this->name_hi,
+            'name' => $this->name,
             'slug' => $this->slug,
             'sort_order' => (int) $this->sort_order,
             'status' => (bool) $this->status,

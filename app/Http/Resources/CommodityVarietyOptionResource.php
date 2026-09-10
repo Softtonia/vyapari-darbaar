@@ -21,8 +21,7 @@ class CommodityVarietyOptionResource extends JsonResource
             'id' => $this->id,
             'commodity_id' => $this->commodity_id,
             'commodity_subcategory_id' => $this->commodity_subcategory_id,
-            'name_en' => $this->name_en,
-            'name_hi' => $this->name_hi,
+            'name' => $this->name,
             'slug' => $this->slug,
         ];
     }

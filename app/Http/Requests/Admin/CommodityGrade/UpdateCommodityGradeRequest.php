@@ -42,14 +42,9 @@ class UpdateCommodityGradeRequest extends FormRequest
             $sanitized['commodity_variety_id'] = ($varietyId !== null && $varietyId !== '') ? (int) $varietyId : null;
         }
 
-        if ($this->has('name_en')) {
-            $nameEn = trim((string) $this->input('name_en'));
-            $sanitized['name_en'] = $nameEn !== '' ? $nameEn : null;
-        }
-
-        if ($this->has('name_hi')) {
-            $nameHi = trim((string) $this->input('name_hi'));
-            $sanitized['name_hi'] = $nameHi !== '' ? $nameHi : null;
+        if ($this->has('name')) {
+            $name = trim((string) $this->input('name'));
+            $sanitized['name'] = $name !== '' ? $name : null;
         }
 
         if ($this->has('slug')) {
@@ -57,14 +52,9 @@ class UpdateCommodityGradeRequest extends FormRequest
             $sanitized['slug'] = $slug !== '' ? Str::slug($slug) : null;
         }
 
-        if ($this->has('description_en')) {
-            $descEn = trim((string) $this->input('description_en'));
-            $sanitized['description_en'] = $descEn !== '' ? $descEn : null;
-        }
-
-        if ($this->has('description_hi')) {
-            $descHi = trim((string) $this->input('description_hi'));
-            $sanitized['description_hi'] = $descHi !== '' ? $descHi : null;
+        if ($this->has('description')) {
+            $desc = trim((string) $this->input('description'));
+            $sanitized['description'] = $desc !== '' ? $desc : null;
         }
 
         if ($this->has('sort_order')) {
@@ -114,11 +104,9 @@ class UpdateCommodityGradeRequest extends FormRequest
                 'integer',
                 Rule::exists('commodity_varieties', 'id')->whereNull('deleted_at'),
             ],
-            'name_en' => ['sometimes', 'required', 'string', 'max:150'],
-            'name_hi' => ['nullable', 'string', 'max:150'],
+            'name' => ['sometimes', 'required', 'string', 'max:150'],
             'slug' => ['sometimes', 'nullable', 'string', 'max:180'],
-            'description_en' => ['nullable', 'string', 'max:2000'],
-            'description_hi' => ['nullable', 'string', 'max:2000'],
+            'description' => ['nullable', 'string', 'max:2000'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
             'status' => ['nullable', 'boolean'],
         ];

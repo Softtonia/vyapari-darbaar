@@ -22,8 +22,7 @@ class CommodityGradeOptionResource extends JsonResource
             'commodity_id' => $this->commodity_id,
             'commodity_subcategory_id' => $this->commodity_subcategory_id,
             'commodity_variety_id' => $this->commodity_variety_id,
-            'name_en' => $this->name_en,
-            'name_hi' => $this->name_hi,
+            'name' => $this->name,
             'slug' => $this->slug,
         ];
     }

@@ -72,12 +72,9 @@ class SiteSettingManagementTest extends TestCase
                 'status' => true,
                 'message' => 'Site settings fetched successfully.',
                 'data' => [
-                    'site_name_en' => 'Vyapari Darbar',
-                    'site_name_hi' => 'व्यापारी दरबार',
-                    'site_title_en' => null,
-                    'site_title_hi' => null,
-                    'site_description_en' => null,
-                    'site_description_hi' => null,
+                    'site_name' => 'Vyapari Darbar',
+                    'site_title' => null,
+                    'site_description' => null,
                     'web_logo' => null,
                     'mobile_logo' => null,
                 ],
@@ -116,18 +113,18 @@ class SiteSettingManagementTest extends TestCase
         $this->assertTrue(Cache::has(SiteSettingService::PUBLIC_CACHE_KEY));
 
         // Directly modify DB without clearing cache
-        DB::table('site_settings')->where('id', 1)->update(['site_name_en' => 'Direct DB Change']);
+        DB::table('site_settings')->where('id', 1)->update(['site_name' => 'Direct DB Change']);
 
         // Next GET should still return cached value
         $response = $this->getJson('/api/site-settings');
         $response->assertStatus(200)
-            ->assertJsonPath('data.site_name_en', 'Vyapari Darbar');
+            ->assertJsonPath('data.site_name', 'Vyapari Darbar');
 
         // Clear cache and verify fresh fetch
         Cache::forget(SiteSettingService::PUBLIC_CACHE_KEY);
         $responseFresh = $this->getJson('/api/site-settings');
         $responseFresh->assertStatus(200)
-            ->assertJsonPath('data.site_name_en', 'Direct DB Change');
+            ->assertJsonPath('data.site_name', 'Direct DB Change');
     }
 
     // ==========================================
@@ -139,7 +136,7 @@ class SiteSettingManagementTest extends TestCase
         $this->getJson('/api/admin/site-settings')
             ->assertStatus(401);
 
-        $this->patchJson('/api/admin/site-settings', ['site_name_en' => 'New Name'])
+        $this->patchJson('/api/admin/site-settings', ['site_name' => 'New Name'])
             ->assertStatus(401);
     }
 
@@ -163,7 +160,7 @@ class SiteSettingManagementTest extends TestCase
         $this->getJson('/api/admin/site-settings', $headers)
             ->assertStatus(403);
 
-        $this->patchJson('/api/admin/site-settings', ['site_name_en' => 'New Name'], $headers)
+        $this->patchJson('/api/admin/site-settings', ['site_name' => 'New Name'], $headers)
             ->assertStatus(403);
     }
 
@@ -194,20 +191,16 @@ class SiteSettingManagementTest extends TestCase
                 'message' => 'Site settings fetched successfully.',
                 'data' => [
                     'id' => 1,
-                    'site_name_en' => 'Vyapari Darbar',
-                    'site_name_hi' => 'व्यापारी दरबार',
+                    'site_name' => 'Vyapari Darbar',
                 ],
             ]);
 
         $response->assertJsonStructure([
             'data' => [
                 'id',
-                'site_name_en',
-                'site_name_hi',
-                'site_title_en',
-                'site_title_hi',
-                'site_description_en',
-                'site_description_hi',
+                'site_name',
+                'site_title',
+                'site_description',
                 'web_logo',
                 'mobile_logo',
                 'created_at',
@@ -230,7 +223,7 @@ class SiteSettingManagementTest extends TestCase
         $token = $adminViewOnly->createToken('view-token')->plainTextToken;
 
         $this->patchJson('/api/admin/site-settings', [
-            'site_name_en' => 'Unauthorized Update',
+            'site_name' => 'Unauthorized Update',
         ], [
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
@@ -244,11 +237,9 @@ class SiteSettingManagementTest extends TestCase
     public function test_admin_can_update_text_fields_partially(): void
     {
         $response = $this->patchJson('/api/admin/site-settings', [
-            'site_name_en' => 'Vyapari Darbaar Global',
-            'site_title_en' => 'India Premier Mandi Platform',
-            'site_title_hi' => 'भारत का प्रमुख मंडी मंच',
-            'site_description_en' => 'Connecting mandi traders across India.',
-            'site_description_hi' => 'पूरे भारत के मंडी व्यापारियों को जोड़ना।',
+            'site_name' => 'Vyapari Darbaar Global',
+            'site_title' => 'India Premier Mandi Platform',
+            'site_description' => 'Connecting mandi traders across India.',
         ], $this->authHeaders());
 
         $response->assertStatus(200)
@@ -256,19 +247,15 @@ class SiteSettingManagementTest extends TestCase
                 'status' => true,
                 'message' => 'Site settings updated successfully.',
                 'data' => [
-                    'site_name_en' => 'Vyapari Darbaar Global',
-                    'site_name_hi' => 'व्यापारी दरबार', // Omitted, retains existing value
-                    'site_title_en' => 'India Premier Mandi Platform',
-                    'site_title_hi' => 'भारत का प्रमुख मंडी मंच',
-                    'site_description_en' => 'Connecting mandi traders across India.',
-                    'site_description_hi' => 'पूरे भारत के मंडी व्यापारियों को जोड़ना।',
+                    'site_name' => 'Vyapari Darbaar Global',
+                    'site_title' => 'India Premier Mandi Platform',
+                    'site_description' => 'Connecting mandi traders across India.',
                 ],
             ]);
 
         $this->assertDatabaseHas('site_settings', [
             'id' => 1,
-            'site_name_en' => 'Vyapari Darbaar Global',
-            'site_name_hi' => 'व्यापारी दरबार',
+            'site_name' => 'Vyapari Darbaar Global',
             'updated_by' => $this->admin->id,
         ]);
     }
@@ -276,41 +263,41 @@ class SiteSettingManagementTest extends TestCase
     public function test_blank_nullable_text_normalizes_to_null(): void
     {
         SiteSetting::find(1)->update([
-            'site_title_en' => 'Initial Title',
-            'site_description_en' => 'Initial Description',
+            'site_title' => 'Initial Title',
+            'site_description' => 'Initial Description',
         ]);
 
         $response = $this->patchJson('/api/admin/site-settings', [
-            'site_title_en' => '   ',
-            'site_description_en' => '',
+            'site_title' => '   ',
+            'site_description' => '',
         ], $this->authHeaders());
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.site_title_en', null)
-            ->assertJsonPath('data.site_description_en', null);
+            ->assertJsonPath('data.site_title', null)
+            ->assertJsonPath('data.site_description', null);
 
         $this->assertDatabaseHas('site_settings', [
             'id' => 1,
-            'site_title_en' => null,
-            'site_description_en' => null,
+            'site_title' => null,
+            'site_description' => null,
         ]);
     }
 
     public function test_validation_rules_enforced(): void
     {
-        // site_name_en cannot be empty string
+        // site_name cannot be empty string
         $this->patchJson('/api/admin/site-settings', [
-            'site_name_en' => '   ',
+            'site_name' => '   ',
         ], $this->authHeaders())
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['site_name_en']);
+            ->assertJsonValidationErrors(['site_name']);
 
-        // site_name_en max 150
+        // site_name max 150
         $this->patchJson('/api/admin/site-settings', [
-            'site_name_en' => str_repeat('a', 151),
+            'site_name' => str_repeat('a', 151),
         ], $this->authHeaders())
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['site_name_en']);
+            ->assertJsonValidationErrors(['site_name']);
     }
 
     // ==========================================
@@ -324,7 +311,7 @@ class SiteSettingManagementTest extends TestCase
         // Upload using POST multipart with _method=PATCH
         $response = $this->post('/api/admin/site-settings', [
             '_method' => 'PATCH',
-            'site_name_en' => 'Vyapari Darbar',
+            'site_name' => 'Vyapari Darbar',
             'web_logo' => $file,
         ], [
             'Authorization' => 'Bearer ' . $this->adminToken,
@@ -470,7 +457,7 @@ class SiteSettingManagementTest extends TestCase
 
         // Update only text
         $this->patchJson('/api/admin/site-settings', [
-            'site_name_en' => 'Updated Name Only',
+            'site_name' => 'Updated Name Only',
         ], $this->authHeaders())->assertStatus(200);
 
         $fresh = SiteSetting::find(1);
@@ -511,7 +498,7 @@ class SiteSettingManagementTest extends TestCase
 
         // Update via Admin API
         $this->patchJson('/api/admin/site-settings', [
-            'site_name_en' => 'Brand New Name',
+            'site_name' => 'Brand New Name',
         ], $this->authHeaders())->assertStatus(200);
 
         // Cache must be invalidated
@@ -520,14 +507,14 @@ class SiteSettingManagementTest extends TestCase
         // Next public GET returns fresh updated data
         $this->getJson('/api/site-settings')
             ->assertStatus(200)
-            ->assertJsonPath('data.site_name_en', 'Brand New Name');
+            ->assertJsonPath('data.site_name', 'Brand New Name');
     }
 
     public function test_singleton_integrity_remains_exact_one_row(): void
     {
-        $this->patchJson('/api/admin/site-settings', ['site_name_en' => 'First Update'], $this->authHeaders())->assertStatus(200);
-        $this->patchJson('/api/admin/site-settings', ['site_name_en' => 'Second Update'], $this->authHeaders())->assertStatus(200);
-        $this->patchJson('/api/admin/site-settings', ['site_name_en' => 'Third Update'], $this->authHeaders())->assertStatus(200);
+        $this->patchJson('/api/admin/site-settings', ['site_name' => 'First Update'], $this->authHeaders())->assertStatus(200);
+        $this->patchJson('/api/admin/site-settings', ['site_name' => 'Second Update'], $this->authHeaders())->assertStatus(200);
+        $this->patchJson('/api/admin/site-settings', ['site_name' => 'Third Update'], $this->authHeaders())->assertStatus(200);
 
         $this->assertEquals(1, SiteSetting::count());
         $this->assertEquals(1, SiteSetting::first()->id);
@@ -543,7 +530,7 @@ class SiteSettingManagementTest extends TestCase
 
         $this->post('/api/admin/site-settings', [
             '_method' => 'PATCH',
-            'site_name_en' => '', // Will fail required validation
+            'site_name' => '', // Will fail required validation
             'web_logo' => $file,
         ], $this->authHeaders())->assertStatus(422);
 
@@ -565,7 +552,7 @@ class SiteSettingManagementTest extends TestCase
             });
 
             $service->updateSettings([
-                'site_name_en' => 'Crash DB',
+                'site_name' => 'Crash DB',
                 'web_logo' => $file,
             ], $this->admin->id);
 
