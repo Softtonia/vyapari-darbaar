@@ -94,7 +94,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('admin-smtp-test', function (Request $request) {
             $user = $request->user();
-            $key = ($user instanceof Admin)
+            $key = ($user instanceof \App\Models\User)
                 ? 'admin-smtp-test:'.$user->id
                 : 'guest:'.$request->ip();
 
@@ -110,7 +110,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('admin-firebase-test', function (Request $request) {
             $user = $request->user();
-            $key = ($user instanceof Admin)
+            $key = ($user instanceof \App\Models\User)
                 ? 'admin-firebase-test:'.$user->id
                 : 'guest:'.$request->ip();
 
@@ -126,7 +126,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('admin-notification-send', function (Request $request) {
             $user = $request->user();
-            $key = ($user instanceof Admin)
+            $key = ($user instanceof \App\Models\User)
                 ? 'admin-notification-send:'.$user->id
                 : 'guest:'.$request->ip();
 
@@ -142,7 +142,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('admin-notification-preview', function (Request $request) {
             $user = $request->user();
-            $key = ($user instanceof Admin)
+            $key = ($user instanceof \App\Models\User)
                 ? 'admin-notification-preview:'.$user->id
                 : 'guest:'.$request->ip();
 
@@ -158,7 +158,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('admin-user-create', function (Request $request) {
             $user = $request->user();
-            $key = ($user instanceof Admin)
+            $key = ($user instanceof \App\Models\User)
                 ? 'admin-user-create:'.$user->id
                 : 'guest:'.$request->ip();
 
@@ -177,7 +177,7 @@ class AppServiceProvider extends ServiceProvider
             $targetUser = $request->route('user');
             $targetUserId = $targetUser instanceof \App\Models\User ? $targetUser->id : (string) $request->route('user');
 
-            $key = ($admin instanceof Admin)
+            $key = ($admin instanceof \App\Models\User)
                 ? 'admin-user-resend:'.$admin->id.':user:'.$targetUserId
                 : 'guest:'.$request->ip();
 
@@ -193,7 +193,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('admin-api', function (Request $request) {
             $user = $request->user();
-            $key = ($user instanceof Admin)
+            $key = ($user instanceof \App\Models\User)
                 ? 'admin:'.$user->id
                 : 'guest:'.$request->ip();
 

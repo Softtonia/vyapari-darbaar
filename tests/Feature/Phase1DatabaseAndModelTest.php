@@ -19,26 +19,9 @@ class Phase1DatabaseAndModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admins_table_has_expected_columns(): void
+    public function test_admins_table_is_removed_in_favor_of_unified_users_table(): void
     {
-        $this->assertTrue(Schema::hasTable('admins'));
-        $expectedColumns = [
-            'id',
-            'name',
-            'email',
-            'password',
-            'status',
-            'last_login_at',
-            'created_at',
-            'updated_at',
-        ];
-
-        foreach ($expectedColumns as $column) {
-            $this->assertTrue(
-                Schema::hasColumn('admins', $column),
-                "admins table missing column: {$column}"
-            );
-        }
+        $this->assertFalse(Schema::hasTable('admins'));
     }
 
     public function test_admin_email_must_be_unique(): void
@@ -73,7 +56,7 @@ class Phase1DatabaseAndModelTest extends TestCase
         $token = $admin->createToken('admin-token');
         $this->assertNotEmpty($token->plainTextToken);
         $this->assertDatabaseHas('personal_access_tokens', [
-            'tokenable_type' => Admin::class,
+            'tokenable_type' => User::class,
             'tokenable_id' => $admin->id,
             'name' => 'admin-token',
         ]);
@@ -84,13 +67,14 @@ class Phase1DatabaseAndModelTest extends TestCase
         $this->assertTrue(Schema::hasTable('users'));
         $expectedColumns = [
             'id',
-            'name',
+            'full_name',
             'username',
             'email',
             'password',
             'status',
             'must_change_password',
-            'created_by_admin_id',
+            'is_default',
+            'created_by',
             'created_at',
             'updated_at',
         ];
@@ -167,16 +151,16 @@ class Phase1DatabaseAndModelTest extends TestCase
             'username' => 'createduser',
             'email' => 'created@example.com',
             'password' => 'secret123',
-            'created_by_admin_id' => $admin->id,
+            'created_by' => $admin->id,
         ]);
 
-        $this->assertEquals($admin->id, $user->created_by_admin_id);
+        $this->assertEquals($admin->id, $user->created_by);
         $this->assertEquals($admin->id, $user->creator->id);
 
         $admin->delete();
 
         $user->refresh();
-        $this->assertNull($user->created_by_admin_id);
+        $this->assertNull($user->created_by);
         $this->assertNull($user->creator);
     }
 
@@ -193,7 +177,7 @@ class Phase1DatabaseAndModelTest extends TestCase
             'username' => 'user1',
             'email' => 'user1@example.com',
             'password' => 'secret123',
-            'created_by_admin_id' => $admin->id,
+            'created_by' => $admin->id,
         ]);
 
         $user2 = User::create([
@@ -201,7 +185,7 @@ class Phase1DatabaseAndModelTest extends TestCase
             'username' => 'user2',
             'email' => 'user2@example.com',
             'password' => 'secret123',
-            'created_by_admin_id' => $admin->id,
+            'created_by' => $admin->id,
         ]);
 
         $this->assertCount(2, $admin->createdUsers);

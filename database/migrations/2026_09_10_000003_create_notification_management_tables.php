@@ -23,7 +23,7 @@ return new class extends Migration
             $table->json('data_json')->nullable();
             $table->string('channel', 30);
             $table->boolean('status')->default(true);
-            $table->foreignId('created_by')->nullable()->constrained('admins')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
             $table->index('status');
@@ -36,7 +36,7 @@ return new class extends Migration
             $table->string('slug', 150)->unique();
             $table->text('description')->nullable();
             $table->boolean('status')->default(true);
-            $table->foreignId('created_by')->nullable()->constrained('admins')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
             $table->index('status');
@@ -77,7 +77,7 @@ return new class extends Migration
             $table->timestamp('scheduled_at')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('admins')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
             $table->index(['status', 'scheduled_at']);

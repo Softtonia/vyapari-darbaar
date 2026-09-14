@@ -2,7 +2,7 @@
 
 namespace App\Actions\Admin;
 
-use App\Models\Admin;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -20,12 +20,12 @@ class LoginAdminAction
         $email = strtolower(trim($credentials['email']));
         $password = $credentials['password'];
 
-        $admin = Admin::query()
-            ->select(['id', 'first_name', 'last_name', 'name', 'email', 'password', 'status', 'last_login_at'])
+        $user = User::query()
+            ->with('roles')
             ->where('email', $email)
             ->first();
 
-        if (! $admin) {
+        if (! $user) {
             return [
                 'success' => false,
                 'message' => 'No account found with this email address.',
@@ -33,7 +33,7 @@ class LoginAdminAction
             ];
         }
 
-        if (! Hash::check($password, $admin->password)) {
+        if (! Hash::check($password, $user->password)) {
             return [
                 'success' => false,
                 'message' => 'Incorrect password.',
@@ -41,7 +41,20 @@ class LoginAdminAction
             ];
         }
 
-        if ($admin->status !== 'active') {
+        // Verify that account has administrative privileges
+        $hasAccess = (bool) $user->is_default
+            || $user->hasAnyRole(['super_admin', 'admin', 'editor'])
+            || $user->getAllPermissions()->isNotEmpty();
+
+        if (! $hasAccess) {
+            return [
+                'success' => false,
+                'message' => 'Unauthorized access.',
+                'code' => 403,
+            ];
+        }
+
+        if ($user->status !== 'active') {
             return [
                 'success' => false,
                 'message' => 'Account is inactive. Please contact the administrator.',
@@ -49,14 +62,14 @@ class LoginAdminAction
             ];
         }
 
-        $admin->update([
+        $user->update([
             'last_login_at' => now(),
         ]);
 
         // Check if an unexpired active token exists for this admin
         $activeToken = DB::table('personal_access_tokens')
-            ->where('tokenable_type', $admin->getMorphClass())
-            ->where('tokenable_id', $admin->getKey())
+            ->where('tokenable_type', $user->getMorphClass())
+            ->where('tokenable_id', $user->getKey())
             ->where('name', $tokenName)
             ->where('expires_at', '>', now())
             ->whereNotNull('plain_token')
@@ -75,7 +88,7 @@ class LoginAdminAction
         }
 
         $expiresMinutes = (int) (config('sanctum.expiration') ?? 1440);
-        $tokenResult = $admin->createToken($tokenName, ['*'], now()->addMinutes($expiresMinutes));
+        $tokenResult = $user->createToken($tokenName, ['*'], now()->addMinutes($expiresMinutes));
 
         DB::table('personal_access_tokens')
             ->where('id', $tokenResult->accessToken->id)

@@ -67,10 +67,10 @@ class NotificationTemplateService
      * Create a new notification template.
      *
      * @param  array<string, mixed>  $data
-     * @param  Admin|null  $admin
+     * @param  User|null  $admin
      * @return NotificationTemplate
      */
-    public function create(array $data, ?Admin $admin = null): NotificationTemplate
+    public function create(array $data, ?User $admin = null): NotificationTemplate
     {
         $data['created_by'] = $admin?->id;
 

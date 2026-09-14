@@ -136,7 +136,9 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
             'email' => 'master@example.com',
             'password' => Hash::make('password123'),
             'status' => 'active',
+            'is_default' => true,
         ]);
+        $admin->assignRole('admin');
         $token = $admin->createToken('admin-token')->plainTextToken;
 
         $response = $this->withToken($token)->postJson('/api/admin/users', [
@@ -177,7 +179,9 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
             'email' => 'master2@example.com',
             'password' => Hash::make('password123'),
             'status' => 'active',
+            'is_default' => true,
         ]);
+        $admin->assignRole('admin');
         $token = $admin->createToken('admin-token')->plainTextToken;
 
         $user = User::create([
@@ -230,7 +234,9 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
             'email' => 'init.admin@example.com',
             'password' => Hash::make('password123'),
             'status' => 'active',
+            'is_default' => true,
         ]);
+        $admin->assignRole('admin');
         $token = $admin->createToken('admin-token')->plainTextToken;
 
         $response = $this->withToken($token)->patchJson('/api/admin/profile', [
@@ -314,11 +320,17 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
             'status' => 'active',
         ]);
 
-        $userRole = Role::where('name', 'user')->where('guard_name', 'web')->firstOrFail();
+        $apiRole = Role::create([
+            'name' => 'api_special_role',
+            'guard_name' => 'api_custom',
+            'slug' => 'api_special_role',
+            'status' => true,
+            'is_default' => false,
+        ]);
 
-        // Attempting to assign 'user' role model (which belongs to 'web' guard) to Admin (which has 'admin' guard)
+        // Attempting to assign 'api_custom' guard role model to Admin (which has 'web' guard)
         $this->expectException(GuardDoesNotMatch::class);
-        $admin->assignRole($userRole);
+        $admin->assignRole($apiRole);
     }
 
     /**
@@ -333,7 +345,9 @@ class SpatieRoleAndSchemaIntegrationTest extends TestCase
             'email' => 'query.auditor@example.com',
             'password' => Hash::make('password123'),
             'status' => 'active',
+            'is_default' => true,
         ]);
+        $admin->assignRole('admin');
         $token = $admin->createToken('admin-token')->plainTextToken;
 
         for ($i = 1; $i <= 5; $i++) {

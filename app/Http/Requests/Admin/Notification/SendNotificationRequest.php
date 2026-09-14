@@ -22,8 +22,50 @@ class SendNotificationRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
+        $merge = [];
+
         if ($this->has('send_now')) {
-            $this->merge(['send_now' => filter_var($this->input('send_now'), FILTER_VALIDATE_BOOLEAN)]);
+            $merge['send_now'] = filter_var($this->input('send_now'), FILTER_VALIDATE_BOOLEAN);
+        }
+
+        // Support recipient_type / recipient alias for audience_type
+        if (! $this->filled('audience_type')) {
+            $recipientType = strtolower((string) ($this->input('recipient_type') ?? $this->input('recipient')));
+            $audienceType = match ($recipientType) {
+                'single', 'single_user', 'user' => AudienceType::SINGLE_USER->value,
+                'selected', 'selected_users', 'multiple' => AudienceType::SELECTED_USERS->value,
+                'all', 'all_users', 'broadcast' => AudienceType::ALL_USERS->value,
+                'topic' => AudienceType::TOPIC->value,
+                default => null,
+            };
+            if ($audienceType) {
+                $merge['audience_type'] = $audienceType;
+            }
+        }
+
+        // Support type / channel alias for notification_type
+        if (! $this->filled('notification_type')) {
+            $type = strtolower((string) ($this->input('type') ?? $this->input('channel')));
+            if (in_array($type, NotificationType::values(), true)) {
+                $merge['notification_type'] = $type;
+            } elseif ($type !== '') {
+                // If custom category type was sent, default notification_type to push_and_in_app
+                $merge['notification_type'] = NotificationType::PUSH_AND_IN_APP->value;
+            }
+        }
+
+        // Support message alias for body
+        if (! $this->filled('body') && $this->filled('message')) {
+            $merge['body'] = (string) $this->input('message');
+        }
+
+        // Support action_url alias for click_url
+        if (! $this->filled('click_url') && $this->filled('action_url')) {
+            $merge['click_url'] = (string) $this->input('action_url');
+        }
+
+        if (! empty($merge)) {
+            $this->merge($merge);
         }
     }
 

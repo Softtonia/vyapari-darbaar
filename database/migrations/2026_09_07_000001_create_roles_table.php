@@ -17,7 +17,7 @@ return new class extends Migration
                 $table->string('name', 100);
                 $table->string('slug', 100)->unique();
                 $table->boolean('status')->default(true)->index();
-                $table->boolean('is_system')->default(false)->index();
+                $table->boolean('is_default')->default(false)->index();
                 $table->timestamps();
                 $table->softDeletes();
 

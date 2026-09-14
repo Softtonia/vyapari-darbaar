@@ -30,13 +30,14 @@ class RoleService
                 'guard_name',
                 'slug',
                 'status',
+                'is_default',
                 'is_system',
                 'created_at',
                 'updated_at',
             ])
             ->search($filters['search'] ?? null)
             ->status($filters['status'] ?? null)
-            ->system($filters['is_system'] ?? null)
+            ->isDefault($filters['is_default'] ?? $filters['is_system'] ?? null)
             ->sort($sortBy, $sortOrder);
 
         return $query->paginate($perPage);
@@ -52,9 +53,10 @@ class RoleService
         return DB::transaction(function () use ($data) {
             $role = Role::create([
                 'name' => $data['name'],
-                'guard_name' => $data['guard_name'] ?? 'admin',
+                'guard_name' => $data['guard_name'] ?? 'web',
                 'slug' => $data['slug'],
                 'status' => $data['status'] ?? true,
+                'is_default' => false,
                 'is_system' => false,
             ]);
 
@@ -118,7 +120,7 @@ class RoleService
      */
     public function deleteRole(Role $role): void
     {
-        if ($role->is_system) {
+        if ($role->is_default || $role->is_system) {
             throw new DomainException('System role cannot be deleted.');
         }
 
@@ -142,10 +144,13 @@ class RoleService
             return 0;
         }
 
-        // Atomic check: Ensure NO protected system roles are within the requested deletion set
+        // Atomic check: Ensure NO protected default/system roles are within the requested deletion set
         $hasSystemRoles = Role::query()
             ->whereIn('id', $ids)
-            ->where('is_system', true)
+            ->where(function ($q) {
+                $q->where('is_default', true)
+                    ->orWhere('is_system', true);
+            })
             ->exists();
 
         if ($hasSystemRoles) {

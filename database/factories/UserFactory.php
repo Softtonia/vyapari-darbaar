@@ -30,6 +30,7 @@ class UserFactory extends Factory
         return [
             'first_name' => $first,
             'last_name' => $last,
+            'full_name' => "{$first} {$last}",
             'name' => "{$first} {$last}",
             'username' => fake()->unique()->userName(),
             'email' => fake()->unique()->safeEmail(),

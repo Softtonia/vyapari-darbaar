@@ -145,7 +145,7 @@ class AutomatedSystemNotificationTest extends TestCase
             'password' => Hash::make('Password@123'),
             'status' => 'active',
         ]);
-        $adminRole = Role::where('name', 'admin')->where('guard_name', 'admin')->first();
+        $adminRole = Role::where('name', 'admin')->first();
         if ($adminRole) {
             $admin->assignRole($adminRole);
         }
@@ -179,7 +179,7 @@ class AutomatedSystemNotificationTest extends TestCase
             'password' => Hash::make('Password@123'),
             'status' => 'active',
         ]);
-        $adminRole = Role::where('name', 'admin')->where('guard_name', 'admin')->first();
+        $adminRole = Role::where('name', 'admin')->first();
         if ($adminRole) {
             $admin->assignRole($adminRole);
         }

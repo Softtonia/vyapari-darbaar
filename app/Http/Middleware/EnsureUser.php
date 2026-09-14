@@ -27,6 +27,14 @@ class EnsureUser
             ], 403);
         }
 
+        $currentToken = $user->currentAccessToken();
+        if ($currentToken && $currentToken->name === 'admin-token') {
+            return new JsonResponse([
+                'status' => false,
+                'message' => 'Unauthorized access.',
+            ], 403);
+        }
+
         // Strictly verify that User account is active
         if ($user->status === 'suspended') {
             return new JsonResponse([

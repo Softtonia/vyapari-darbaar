@@ -20,8 +20,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->boolean('status')->default(true);
-            $table->foreignId('created_by')->nullable()->constrained('admins')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('admins')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
 

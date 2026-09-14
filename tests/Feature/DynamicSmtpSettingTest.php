@@ -41,8 +41,10 @@ class DynamicSmtpSettingTest extends TestCase
             'status' => 'active',
         ]);
 
-        $adminRole = Role::where('name', 'admin')->where('guard_name', 'admin')->first();
-        $this->admin->assignRole($adminRole);
+        $adminRole = Role::where('name', 'admin')->first();
+        if ($adminRole) {
+            $this->admin->assignRole($adminRole);
+        }
 
         $this->adminToken = $this->admin->createToken('admin-token', ['*'])->plainTextToken;
     }

@@ -11,19 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('admin_role')) {
-            Schema::create('admin_role', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('admin_id')->constrained('admins')->cascadeOnDelete();
-                $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
-                $table->timestamps();
-
-                $table->unique(['admin_id', 'role_id']);
-            });
-        }
-
-        if (!Schema::hasTable('role_user')) {
-            Schema::create('role_user', function (Blueprint $table) {
+        if (!Schema::hasTable('user_has_roles')) {
+            Schema::create('user_has_roles', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
                 $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
@@ -39,6 +28,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('user_has_roles');
         Schema::dropIfExists('role_user');
         Schema::dropIfExists('admin_role');
     }

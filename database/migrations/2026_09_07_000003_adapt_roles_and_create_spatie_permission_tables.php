@@ -29,6 +29,7 @@ return new class extends Migration
         $pivotPermission = $columnNames['permission_pivot_key'] ?? 'permission_id';
 
         // 1. Drop old custom pivot tables if they exist
+        Schema::dropIfExists('user_has_roles');
         Schema::dropIfExists('role_user');
         Schema::dropIfExists('admin_role');
 
@@ -36,7 +37,10 @@ return new class extends Migration
         if (Schema::hasTable($tableNames['roles'])) {
             Schema::table($tableNames['roles'], function (Blueprint $table) {
                 if (!Schema::hasColumn('roles', 'guard_name')) {
-                    $table->string('guard_name', 50)->default('admin')->after('name');
+                    $table->string('guard_name', 50)->default('web')->after('name');
+                }
+                if (!Schema::hasColumn('roles', 'is_default') && Schema::hasColumn('roles', 'is_system')) {
+                    $table->renameColumn('is_system', 'is_default');
                 }
             });
 
@@ -50,10 +54,10 @@ return new class extends Migration
             Schema::create($tableNames['roles'], function (Blueprint $table) {
                 $table->id();
                 $table->string('name', 100);
-                $table->string('guard_name', 50)->default('admin');
+                $table->string('guard_name', 50)->default('web');
                 $table->string('slug', 100)->nullable();
                 $table->boolean('status')->default(true)->index();
-                $table->boolean('is_system')->default(false)->index();
+                $table->boolean('is_default')->default(false)->index();
                 $table->timestamps();
                 $table->softDeletes();
 

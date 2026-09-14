@@ -36,7 +36,7 @@ class NotificationSendAndPreviewTest extends TestCase
             'password' => bcrypt('Password@123'),
             'status' => 'active',
         ]);
-        $adminRole = Role::where('name', 'admin')->where('guard_name', 'admin')->first();
+        $adminRole = Role::where('name', 'admin')->first();
         if ($adminRole) {
             $this->admin->assignRole($adminRole);
         }
@@ -187,5 +187,37 @@ class NotificationSendAndPreviewTest extends TestCase
             ->assertJsonPath('data.status', 'scheduled');
 
         Queue::assertNothingPushed();
+    }
+
+    public function test_send_supports_alias_parameters_like_recipient_type_message_and_action_url(): void
+    {
+        Queue::fake();
+
+        $user = User::factory()->create(['status' => 'active']);
+
+        $response = $this->postJson('/api/admin/notifications/send', [
+            'recipient_type' => 'single',
+            'user_id' => $user->id,
+            'title' => 'Account Alert',
+            'message' => 'Your KYC documents have been reviewed.',
+            'type' => 'kyc_notice',
+            'action_url' => 'https://vyaparidarbaar.com/dashboard',
+        ], $this->authHeaders());
+
+        $response->assertOk()
+            ->assertJsonPath('status', true)
+            ->assertJsonPath('data.target_count', 1)
+            ->assertJsonPath('data.status', 'queued')
+            ->assertJsonPath('data.title', 'Account Alert');
+
+        $batchId = $response->json('data.id');
+        $this->assertDatabaseHas('notification_batches', [
+            'id' => $batchId,
+            'title' => 'Account Alert',
+            'body' => 'Your KYC documents have been reviewed.',
+            'click_url' => 'https://vyaparidarbaar.com/dashboard',
+        ]);
+
+        Queue::assertPushedOn('notifications-bulk', ProcessNotificationBatchJob::class);
     }
 }

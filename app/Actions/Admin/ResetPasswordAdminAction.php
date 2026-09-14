@@ -2,7 +2,7 @@
 
 namespace App\Actions\Admin;
 
-use App\Models\Admin;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -19,11 +19,11 @@ class ResetPasswordAdminAction
     {
         $normalizedEmail = strtolower(trim($credentials['email']));
 
-        $admin = Admin::query()
+        $admin = User::query()
             ->where('email', $normalizedEmail)
             ->first();
 
-        if (! $admin) {
+        if (! $admin || ! $admin->hasAnyRole(['super_admin', 'admin', 'editor'])) {
             return [
                 'success' => false,
                 'message' => 'No administrator account found with this email address.',
@@ -46,7 +46,7 @@ class ResetPasswordAdminAction
         $status = DB::transaction(function () use ($credentials) {
             return Password::broker('admins')->reset(
                 $credentials,
-                function (Admin $admin, string $password) {
+                function (User $admin, string $password) {
                     $admin->forceFill([
                         'password' => Hash::make($password),
                     ])->save();

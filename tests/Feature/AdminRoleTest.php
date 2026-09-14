@@ -32,6 +32,7 @@ class AdminRoleTest extends TestCase
             'email' => 'admin@example.com',
             'password' => Hash::make('password123'),
             'status' => 'active',
+            'is_default' => true,
         ]);
 
         $this->adminToken = $this->admin->createToken('admin-test-token')->plainTextToken;
@@ -42,14 +43,15 @@ class AdminRoleTest extends TestCase
         $this->seed(RoleSeeder::class);
         $this->seed(RoleSeeder::class); // Run second time to test idempotency
 
-        $this->assertDatabaseCount('roles', 7);
-        $this->assertDatabaseHas('roles', ['name' => 'admin', 'guard_name' => 'admin', 'is_system' => true, 'status' => true]);
-        $this->assertDatabaseHas('roles', ['name' => 'editor', 'guard_name' => 'admin', 'is_system' => true, 'status' => true]);
-        $this->assertDatabaseHas('roles', ['name' => 'user', 'guard_name' => 'web', 'is_system' => true, 'status' => true]);
-        $this->assertDatabaseHas('roles', ['name' => 'trader', 'guard_name' => 'web', 'is_system' => true, 'status' => true]);
-        $this->assertDatabaseHas('roles', ['name' => 'subscriber', 'guard_name' => 'web', 'is_system' => true, 'status' => true]);
-        $this->assertDatabaseHas('roles', ['name' => 'advertiser', 'guard_name' => 'web', 'is_system' => true, 'status' => true]);
-        $this->assertDatabaseHas('roles', ['name' => 'guest', 'guard_name' => 'web', 'is_system' => true, 'status' => true]);
+        $this->assertDatabaseCount('roles', 8);
+        $this->assertDatabaseHas('roles', ['name' => 'super_admin', 'guard_name' => 'web', 'is_default' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'admin', 'guard_name' => 'web', 'is_default' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'editor', 'guard_name' => 'web', 'is_default' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'user', 'guard_name' => 'web', 'is_default' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'trader', 'guard_name' => 'web', 'is_default' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'subscriber', 'guard_name' => 'web', 'is_default' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'advertiser', 'guard_name' => 'web', 'is_default' => true, 'status' => true]);
+        $this->assertDatabaseHas('roles', ['name' => 'guest', 'guard_name' => 'web', 'is_default' => true, 'status' => true]);
     }
 
     public function test_admin_seeder_assigns_admin_role_via_pivot(): void
@@ -68,7 +70,7 @@ class AdminRoleTest extends TestCase
     public function test_user_and_admin_role_helpers_and_pivot_relationships(): void
     {
         $this->seed(RoleSeeder::class);
-        $adminRole = Role::where('name', 'admin')->where('guard_name', 'admin')->firstOrFail();
+        $adminRole = Role::where('name', 'admin')->where('guard_name', 'web')->firstOrFail();
         $userRole = Role::where('name', 'user')->where('guard_name', 'web')->firstOrFail();
 
         // Admin role assignment & relationships
@@ -125,7 +127,7 @@ class AdminRoleTest extends TestCase
         $this->assertDatabaseHas('roles', [
             'name' => 'Content Editor',
             'slug' => 'content-editor',
-            'is_system' => false,
+            'is_default' => false,
         ]);
     }
 
@@ -197,15 +199,15 @@ class AdminRoleTest extends TestCase
                 ],
             ]);
 
-        $this->assertEquals(7, $response->json('data.total'));
+        $this->assertEquals(8, $response->json('data.total'));
     }
 
     public function test_admin_can_search_and_filter_roles(): void
     {
         $this->seed(RoleSeeder::class);
 
-        Role::create(['name' => 'Auditor', 'slug' => 'auditor', 'status' => false, 'is_system' => false]);
-        Role::create(['name' => 'Compliance Lead', 'slug' => 'compliance-lead', 'status' => true, 'is_system' => false]);
+        Role::create(['name' => 'Auditor', 'slug' => 'auditor', 'status' => false, 'is_default' => false]);
+        Role::create(['name' => 'Compliance Lead', 'slug' => 'compliance-lead', 'status' => true, 'is_default' => false]);
 
         // Search by name
         $res1 = $this->withToken($this->adminToken)->getJson('/api/admin/roles?search=Audit');
@@ -217,9 +219,9 @@ class AdminRoleTest extends TestCase
         $this->assertCount(1, $res2->json('data.data'));
         $this->assertEquals('auditor', $res2->json('data.data.0.slug'));
 
-        // Filter by is_system
+        // Filter by is_system / is_default
         $res3 = $this->withToken($this->adminToken)->getJson('/api/admin/roles?is_system=1');
-        $this->assertCount(7, $res3->json('data.data'));
+        $this->assertCount(8, $res3->json('data.data'));
 
         // Sorting by name asc
         $res4 = $this->withToken($this->adminToken)->getJson('/api/admin/roles?sort_by=name&sort_order=asc');
@@ -235,7 +237,7 @@ class AdminRoleTest extends TestCase
             'name' => 'Viewer',
             'slug' => 'viewer',
             'status' => true,
-            'is_system' => false,
+            'is_default' => false,
         ]);
 
         $response = $this->withToken($this->adminToken)->getJson("/api/admin/roles/{$role->id}");
@@ -257,7 +259,7 @@ class AdminRoleTest extends TestCase
             'name' => 'Editor',
             'slug' => 'editor',
             'status' => true,
-            'is_system' => false,
+            'is_default' => false,
         ]);
 
         $response = $this->withToken($this->adminToken)->putJson("/api/admin/roles/{$role->id}", [
@@ -309,7 +311,7 @@ class AdminRoleTest extends TestCase
             'name' => 'Staff',
             'slug' => 'staff',
             'status' => true,
-            'is_system' => false,
+            'is_default' => false,
         ]);
 
         $response = $this->withToken($this->adminToken)->patchJson("/api/admin/roles/{$role->id}/status", [
@@ -334,7 +336,7 @@ class AdminRoleTest extends TestCase
             'name' => 'Temporary',
             'slug' => 'temporary',
             'status' => true,
-            'is_system' => false,
+            'is_default' => false,
         ]);
 
         $response = $this->withToken($this->adminToken)->deleteJson("/api/admin/roles/{$role->id}");
@@ -366,9 +368,9 @@ class AdminRoleTest extends TestCase
 
     public function test_admin_can_bulk_delete_custom_roles(): void
     {
-        $role1 = Role::create(['name' => 'R1', 'slug' => 'r1', 'status' => true, 'is_system' => false]);
-        $role2 = Role::create(['name' => 'R2', 'slug' => 'r2', 'status' => true, 'is_system' => false]);
-        $role3 = Role::create(['name' => 'R3', 'slug' => 'r3', 'status' => true, 'is_system' => false]);
+        $role1 = Role::create(['name' => 'R1', 'slug' => 'r1', 'status' => true, 'is_default' => false]);
+        $role2 = Role::create(['name' => 'R2', 'slug' => 'r2', 'status' => true, 'is_default' => false]);
+        $role3 = Role::create(['name' => 'R3', 'slug' => 'r3', 'status' => true, 'is_default' => false]);
 
         $response = $this->withToken($this->adminToken)->deleteJson('/api/admin/roles/bulk-delete', [
             'ids' => [$role1->id, $role2->id, $role3->id],
@@ -392,7 +394,7 @@ class AdminRoleTest extends TestCase
     {
         $this->seed(RoleSeeder::class);
         $adminRole = Role::where('slug', 'admin')->firstOrFail();
-        $customRole = Role::create(['name' => 'Custom', 'slug' => 'custom', 'status' => true, 'is_system' => false]);
+        $customRole = Role::create(['name' => 'Custom', 'slug' => 'custom', 'status' => true, 'is_default' => false]);
 
         $response = $this->withToken($this->adminToken)->deleteJson('/api/admin/roles/bulk-delete', [
             'ids' => [$customRole->id, $adminRole->id],

@@ -24,13 +24,13 @@ class CreateUserAction
     /**
      * Provision a new user account, assign Spatie role, render credential email snapshot and queue after commit.
      *
-     * @param  Admin  $admin
-     * @param  array{first_name: string, last_name: string, name: string, phone_number: string, email: string, role?: string}  $data
+     * @param  User  $admin
+     * @param  array{first_name: string, last_name: string, name?: string, full_name?: string, phone_number: string, email: string, role?: string}  $data
      * @return User
      *
      * @throws HttpResponseException
      */
-    public function execute(Admin $admin, array $data): User
+    public function execute(User $admin, array $data): User
     {
         // Step 1: Preflight active USER_ACCOUNT_CREATED template
         $template = EmailTemplate::query()
@@ -47,15 +47,17 @@ class CreateUserAction
             );
         }
 
+        $fullName = $data['full_name'] ?? $data['name'] ?? trim(($data['first_name'] ?? '').' '.($data['last_name'] ?? ''));
+
         // Step 2: Generate unique username server-side with Redis lock
-        $username = $this->usernameGenerator->generate($data['name'], $data['email']);
+        $username = $this->usernameGenerator->generate($fullName, $data['email']);
 
         // Step 3: Generate cryptographically secure temporary password
         $tempPassword = $this->temporaryPasswordGenerator->generate(16);
 
         // Step 4: Render credential email snapshot before DB commit
         $replacements = [
-            'UserName' => $data['name'],
+            'UserName' => $fullName,
             'Username' => $username,
             'TemporaryPassword' => $tempPassword,
         ];
@@ -64,18 +66,18 @@ class CreateUserAction
         $renderedBody = $this->templateRenderer->render($template->body, $replacements, 'USER_ACCOUNT_CREATED');
 
         // Step 5: Persist user and assign Spatie role within DB transaction
-        $user = DB::transaction(function () use ($admin, $data, $username, $tempPassword) {
+        $user = DB::transaction(function () use ($admin, $data, $fullName, $username, $tempPassword) {
             $newUser = User::create([
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'name' => $data['name'],
-                'phone_number' => $data['phone_number'],
+                'first_name' => $data['first_name'] ?? null,
+                'last_name' => $data['last_name'] ?? null,
+                'full_name' => $fullName,
+                'phone_number' => $data['phone_number'] ?? null,
                 'username' => $username,
                 'email' => $data['email'],
                 'password' => Hash::make($tempPassword),
                 'status' => 'active',
                 'must_change_password' => true,
-                'created_by_admin_id' => $admin->id,
+                'created_by' => $admin->id,
             ]);
 
             $roleName = ! empty($data['role']) ? $data['role'] : 'user';

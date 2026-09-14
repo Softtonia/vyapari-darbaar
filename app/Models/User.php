@@ -30,6 +30,30 @@ class User extends Authenticatable
     protected string $guard_name = 'web';
 
     /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (empty($user->attributes['username']) && ! empty($user->attributes['email'])) {
+                $user->attributes['username'] = explode('@', $user->attributes['email'])[0].'_'.substr(md5(uniqid()), 0, 4);
+            }
+            if (empty($user->attributes['full_name'])) {
+                $name = ! empty($user->attributes['name'])
+                    ? $user->attributes['name']
+                    : trim(($user->attributes['first_name'] ?? '').' '.($user->attributes['last_name'] ?? ''));
+                if (empty($name) && ! empty($user->attributes['username'])) {
+                    $name = $user->attributes['username'];
+                }
+                if (empty($name) && ! empty($user->attributes['email'])) {
+                    $name = explode('@', $user->attributes['email'])[0];
+                }
+                $user->attributes['full_name'] = ! empty($name) ? $name : 'User';
+            }
+        });
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -37,6 +61,7 @@ class User extends Authenticatable
     protected $fillable = [
         'first_name',
         'last_name',
+        'full_name',
         'name',
         'phone_number',
         'username',
@@ -45,7 +70,12 @@ class User extends Authenticatable
         'status',
         'suspension_reason',
         'must_change_password',
+        'is_default',
+        'last_login_at',
+        'created_by',
+        'created_by_user_id',
         'created_by_admin_id',
+        'email_verified_at',
     ];
 
     /**
@@ -76,27 +106,46 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
             'must_change_password' => 'boolean',
+            'is_default' => 'boolean',
         ];
     }
 
     /**
      * Get the user's full name.
      */
-    public function getFullNameAttribute(): string
+    public function getFullNameAttribute(?string $value = null): string
     {
-        $fullName = trim(($this->first_name ?? '').' '.($this->last_name ?? ''));
+        if (! empty($value)) {
+            return $value;
+        }
 
-        return $fullName !== '' ? $fullName : ($this->attributes['name'] ?? '');
+        $calculated = trim(($this->first_name ?? '').' '.($this->last_name ?? ''));
+
+        return $calculated !== '' ? $calculated : ($this->attributes['name'] ?? '');
     }
 
     /**
-     * Get or fallback name attribute.
+     * Set the full name and backfill name attribute if needed.
+     */
+    public function setFullNameAttribute(?string $value): void
+    {
+        $this->attributes['full_name'] = trim((string) $value);
+        if (empty($this->attributes['first_name']) && empty($this->attributes['last_name']) && ! empty($value)) {
+            $parts = preg_split('/\s+/', trim((string) $value), 2);
+            $this->attributes['first_name'] = $parts[0] ?? null;
+            $this->attributes['last_name'] = $parts[1] ?? null;
+        }
+    }
+
+    /**
+     * Backward-compatible name attribute getter.
      */
     public function getNameAttribute(?string $value): string
     {
-        if (!empty($value)) {
+        if (! empty($value)) {
             return $value;
         }
 
@@ -104,13 +153,83 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the administrator who created this user account.
+     * Backward-compatible name attribute setter.
+     */
+    public function setNameAttribute(?string $value): void
+    {
+        $this->setFullNameAttribute($value);
+        unset($this->attributes['name']);
+    }
+
+    /**
+     * Helper to check if user has super admin role.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('super_admin');
+    }
+
+    /**
+     * Helper to check if user has administrative access.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasAnyRole(['super_admin', 'admin', 'editor']);
+    }
+
+    /**
+     * Backward-compatible created_by_user_id getter.
+     */
+    public function getCreatedByUserIdAttribute(): ?int
+    {
+        return $this->attributes['created_by'] ?? null;
+    }
+
+    /**
+     * Backward-compatible created_by_user_id setter.
+     */
+    public function setCreatedByUserIdAttribute(?int $value): void
+    {
+        $this->attributes['created_by'] = $value;
+        unset($this->attributes['created_by_user_id']);
+    }
+
+    /**
+     * Backward-compatible created_by_admin_id getter.
+     */
+    public function getCreatedByAdminIdAttribute(): ?int
+    {
+        return $this->attributes['created_by'] ?? null;
+    }
+
+    /**
+     * Backward-compatible created_by_admin_id setter.
+     */
+    public function setCreatedByAdminIdAttribute(?int $value): void
+    {
+        $this->attributes['created_by'] = $value;
+        unset($this->attributes['created_by_admin_id']);
+    }
+
+    /**
+     * Get the administrator/creator who created this user account.
      *
-     * @return BelongsTo<Admin, $this>
+     * @return BelongsTo<User, $this>
      */
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(Admin::class, 'created_by_admin_id');
+        return $this->belongsTo(self::class, 'created_by');
+    }
+
+    /**
+     * Direct relationship to user_has_roles table.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Role, $this>
+     */
+    public function userRoles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'user_has_roles', 'user_id', 'role_id')
+            ->withTimestamps();
     }
 
     /**
@@ -207,4 +326,3 @@ class User extends Authenticatable
         return $this->hasMany(NotificationLog::class);
     }
 }
-

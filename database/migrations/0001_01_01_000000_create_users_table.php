@@ -14,13 +14,21 @@ return new class extends Migration
         if (!Schema::hasTable('users')) {
             Schema::create('users', function (Blueprint $table) {
                 $table->id();
-                $table->string('name', 150);
+                $table->string('first_name', 100)->nullable();
+                $table->string('last_name', 100)->nullable();
+                $table->string('full_name', 150);
+                $table->string('phone_number', 25)->nullable();
                 $table->string('username', 60)->unique();
                 $table->string('email', 191)->unique();
+                $table->timestamp('email_verified_at')->nullable();
                 $table->string('password', 255);
                 $table->string('status', 20)->default('active');
+                $table->string('suspension_reason', 500)->nullable();
                 $table->boolean('must_change_password')->default(true);
-                $table->foreignId('created_by_admin_id')->nullable()->constrained('admins')->nullOnDelete();
+                $table->timestamp('last_login_at')->nullable();
+                $table->boolean('is_default')->default(false)->index();
+                $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+                $table->rememberToken();
                 $table->timestamps();
 
                 $table->index(['status', 'created_at', 'id'], 'users_status_created_at_id_index');

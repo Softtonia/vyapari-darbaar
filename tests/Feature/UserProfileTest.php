@@ -149,7 +149,7 @@ class UserProfileTest extends TestCase
             'id' => $this->user->id,
             'first_name' => 'Rohit',
             'last_name' => 'Verma',
-            'name' => 'Rohit Verma',
+            'full_name' => 'Rohit Verma',
             'phone_number' => '+919988776655',
         ]);
     }

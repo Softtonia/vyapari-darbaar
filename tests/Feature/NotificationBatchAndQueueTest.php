@@ -53,7 +53,7 @@ class NotificationBatchAndQueueTest extends TestCase
             'password' => bcrypt('Password@123'),
             'status' => 'active',
         ]);
-        $adminRole = Role::where('name', 'admin')->where('guard_name', 'admin')->first();
+        $adminRole = Role::where('name', 'admin')->first();
         if ($adminRole) {
             $this->admin->assignRole($adminRole);
         }

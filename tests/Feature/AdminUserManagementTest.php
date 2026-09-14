@@ -45,7 +45,9 @@ class AdminUserManagementTest extends TestCase
             'email' => 'admin.manager@example.com',
             'password' => Hash::make('AdminPass@12345'),
             'status' => 'active',
+            'is_default' => true,
         ]);
+        $this->admin->assignRole('admin');
 
         $this->adminToken = $this->admin->createToken('admin-token')->plainTextToken;
     }
@@ -377,7 +379,7 @@ class AdminUserManagementTest extends TestCase
             ]);
 
         $this->assertCount(2, $response->json('data.data'));
-        $this->assertEquals(5, $response->json('data.total'));
+        $this->assertEquals(6, $response->json('data.total'));
 
         // Assert creator relation is NOT loaded
         $firstItem = $response->json('data.data.0');
@@ -431,10 +433,10 @@ class AdminUserManagementTest extends TestCase
         $this->assertCount(1, $resStatus->json('data.data'));
         $this->assertEquals('Bob Jones', $resStatus->json('data.data.0.full_name'));
 
-        // Sort by name ASC
+        // Sort by name ASC (Admin Manager, Alice Smith, Bob Jones)
         $resSort = $this->withToken($this->adminToken)->getJson('/api/admin/users?sort_by=name&sort_dir=asc');
-        $this->assertEquals('Alice Smith', $resSort->json('data.data.0.full_name'));
-        $this->assertEquals('Bob Jones', $resSort->json('data.data.1.full_name'));
+        $names = array_column($resSort->json('data.data'), 'full_name');
+        $this->assertEquals(['Admin Manager', 'Alice Smith', 'Bob Jones'], $names);
     }
 
     public function test_user_detail_loads_creator_with_only_id_and_name(): void

@@ -101,11 +101,17 @@ class PermissionSeeder extends Seeder
         ];
 
         foreach ($adminPermissions as $permissionName) {
-            Permission::findOrCreate($permissionName, 'admin');
+            Permission::findOrCreate($permissionName, 'web');
+        }
+
+        // Assign permissions to super_admin role
+        $superAdminRole = Role::where('name', 'super_admin')->where('guard_name', 'web')->first();
+        if ($superAdminRole) {
+            $superAdminRole->syncPermissions($adminPermissions);
         }
 
         // Assign permissions to admin role
-        $adminRole = Role::where('name', 'admin')->where('guard_name', 'admin')->first();
+        $adminRole = Role::where('name', 'admin')->where('guard_name', 'web')->first();
         if ($adminRole) {
             $adminRole->syncPermissions($adminPermissions);
         }

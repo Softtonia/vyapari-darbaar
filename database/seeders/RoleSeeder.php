@@ -18,53 +18,60 @@ class RoleSeeder extends Seeder
 
         $roles = [
             [
+                'name' => 'super_admin',
+                'guard_name' => 'web',
+                'slug' => 'super_admin',
+                'status' => true,
+                'is_default' => true,
+            ],
+            [
                 'name' => 'admin',
-                'guard_name' => 'admin',
+                'guard_name' => 'web',
                 'slug' => 'admin',
                 'status' => true,
-                'is_system' => true,
+                'is_default' => true,
             ],
             [
                 'name' => 'editor',
-                'guard_name' => 'admin',
+                'guard_name' => 'web',
                 'slug' => 'editor',
                 'status' => true,
-                'is_system' => true,
-            ],
-            [
-                'name' => 'user',
-                'guard_name' => 'web',
-                'slug' => 'user',
-                'status' => true,
-                'is_system' => true,
+                'is_default' => true,
             ],
             [
                 'name' => 'trader',
                 'guard_name' => 'web',
                 'slug' => 'trader',
                 'status' => true,
-                'is_system' => true,
+                'is_default' => true,
+            ],
+            [
+                'name' => 'user',
+                'guard_name' => 'web',
+                'slug' => 'user',
+                'status' => true,
+                'is_default' => true,
             ],
             [
                 'name' => 'subscriber',
                 'guard_name' => 'web',
                 'slug' => 'subscriber',
                 'status' => true,
-                'is_system' => true,
+                'is_default' => true,
             ],
             [
                 'name' => 'advertiser',
                 'guard_name' => 'web',
                 'slug' => 'advertiser',
                 'status' => true,
-                'is_system' => true,
+                'is_default' => true,
             ],
             [
                 'name' => 'guest',
                 'guard_name' => 'web',
                 'slug' => 'guest',
                 'status' => true,
-                'is_system' => true,
+                'is_default' => true,
             ],
         ];
 
@@ -81,7 +88,7 @@ class RoleSeeder extends Seeder
                     'guard_name' => $roleData['guard_name'],
                     'slug' => $roleData['slug'],
                     'status' => $roleData['status'],
-                    'is_system' => $roleData['is_system'],
+                    'is_default' => $roleData['is_default'],
                 ]);
             } else {
                 Role::create($roleData);

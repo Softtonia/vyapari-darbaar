@@ -6,10 +6,10 @@ use App\Enums\AudienceType;
 use App\Enums\BatchStatus;
 use App\Enums\BatchUserStatus;
 use App\Jobs\ProcessNotificationBatchJob;
-use App\Models\Admin;
 use App\Models\NotificationBatch;
 use App\Models\NotificationBatchUser;
 use App\Models\NotificationLog;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -119,13 +119,13 @@ class NotificationBatchService
     }
 
     /**
-     * Retry failed recipients of a batch by creating a new child batch preserving historical metrics.
+     * Retry failed recipients from a completed/failed batch by creating a new targeted batch.
      *
      * @param  NotificationBatch  $batch
-     * @param  Admin|null  $admin
+     * @param  User|null  $admin
      * @return NotificationBatch
      */
-    public function retryFailed(NotificationBatch $batch, ?Admin $admin = null): NotificationBatch
+    public function retryFailed(NotificationBatch $batch, ?User $admin = null): NotificationBatch
     {
         // Identify failed or partial user IDs
         $failedUserIds = NotificationBatchUser::query()

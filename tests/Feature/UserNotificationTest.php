@@ -278,8 +278,10 @@ class UserNotificationTest extends TestCase
             'password' => Hash::make('AdminPass123!'),
             'status' => 'active',
         ]);
-        $adminRole = Role::where('name', 'admin')->where('guard_name', 'admin')->first();
-        $admin->assignRole($adminRole);
+        $adminRole = Role::where('name', 'admin')->first();
+        if ($adminRole) {
+            $admin->assignRole($adminRole);
+        }
 
         $token = $admin->createToken('admin-token', ['*'])->plainTextToken;
 
@@ -319,8 +321,10 @@ class UserNotificationTest extends TestCase
             'password' => Hash::make('AdminPass123!'),
             'status' => 'active',
         ]);
-        $adminRole = Role::where('name', 'admin')->where('guard_name', 'admin')->first();
-        $admin->assignRole($adminRole);
+        $adminRole = Role::where('name', 'admin')->first();
+        if ($adminRole) {
+            $admin->assignRole($adminRole);
+        }
 
         $token = $admin->createToken('admin-token', ['*'])->plainTextToken;
 
@@ -364,8 +368,10 @@ class UserNotificationTest extends TestCase
             'password' => Hash::make('AdminPass123!'),
             'status' => 'active',
         ]);
-        $adminRole = Role::where('name', 'admin')->where('guard_name', 'admin')->first();
-        $admin->assignRole($adminRole);
+        $adminRole = Role::where('name', 'admin')->first();
+        if ($adminRole) {
+            $admin->assignRole($adminRole);
+        }
 
         $token = $admin->createToken('admin-token', ['*'])->plainTextToken;
 
@@ -385,7 +391,7 @@ class UserNotificationTest extends TestCase
             ->assertJson([
                 'status' => true,
                 'data' => [
-                    'target_count' => 2,
+                    'target_count' => 3,
                 ],
             ]);
 

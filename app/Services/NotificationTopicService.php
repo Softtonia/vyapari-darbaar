@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Admin;
 use App\Models\NotificationTopic;
 use App\Models\NotificationTopicUser;
 use App\Models\User;
@@ -52,10 +51,10 @@ class NotificationTopicService
      * Create a topic.
      *
      * @param  array<string, mixed>  $data
-     * @param  Admin|null  $admin
+     * @param  User|null  $admin
      * @return NotificationTopic
      */
-    public function create(array $data, ?Admin $admin = null): NotificationTopic
+    public function create(array $data, ?User $admin = null): NotificationTopic
     {
         $data['slug'] = ! empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['name']);
         $data['created_by'] = $admin?->id;

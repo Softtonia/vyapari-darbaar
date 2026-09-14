@@ -6,9 +6,9 @@ use App\Enums\AudienceType;
 use App\Enums\BatchStatus;
 use App\Enums\NotificationType;
 use App\Jobs\ProcessNotificationBatchJob;
-use App\Models\Admin;
 use App\Models\NotificationBatch;
 use App\Models\NotificationTemplate;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -67,10 +67,10 @@ class NotificationSendService
      * Create and dispatch notification campaign batch.
      *
      * @param  array<string, mixed>  $data
-     * @param  Admin|null  $admin
+     * @param  User|null  $admin
      * @return NotificationBatch
      */
-    public function send(array $data, ?Admin $admin = null): NotificationBatch
+    public function send(array $data, ?User $admin = null): NotificationBatch
     {
         $resolved = $this->resolveContent($data);
 

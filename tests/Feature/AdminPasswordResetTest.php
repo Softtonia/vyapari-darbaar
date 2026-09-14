@@ -67,7 +67,7 @@ class AdminPasswordResetTest extends TestCase
             }
         );
 
-        $this->assertDatabaseHas('admin_password_reset_tokens', [
+        $this->assertDatabaseHas('password_reset_tokens', [
             'email' => 'active.admin@example.com',
         ]);
     }
@@ -87,7 +87,7 @@ class AdminPasswordResetTest extends TestCase
             ]);
 
         Notification::assertNothingSent();
-        $this->assertDatabaseMissing('admin_password_reset_tokens', [
+        $this->assertDatabaseMissing('password_reset_tokens', [
             'email' => 'nonexistent@example.com',
         ]);
     }
@@ -114,7 +114,7 @@ class AdminPasswordResetTest extends TestCase
             ]);
 
         Notification::assertNothingSent();
-        $this->assertDatabaseMissing('admin_password_reset_tokens', [
+        $this->assertDatabaseMissing('password_reset_tokens', [
             'email' => 'inactive.admin@example.com',
         ]);
     }
@@ -183,8 +183,8 @@ class AdminPasswordResetTest extends TestCase
             'password' => 'NewSecurePassword#2026',
         ])->assertStatus(200);
 
-        // Verify reset token in admin_password_reset_tokens was consumed/deleted
-        $this->assertDatabaseMissing('admin_password_reset_tokens', [
+        // Verify reset token in password_reset_tokens was consumed/deleted
+        $this->assertDatabaseMissing('password_reset_tokens', [
             'email' => 'reset.admin@example.com',
         ]);
     }

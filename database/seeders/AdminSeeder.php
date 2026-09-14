@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Admin;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\PermissionRegistrar;
@@ -19,26 +19,36 @@ class AdminSeeder extends Seeder
 
         $email = env('SEED_ADMIN_EMAIL', 'vijay.kumar@softtonia.com');
         $password = env('SEED_ADMIN_PASSWORD', 'Soft@12345');
-        $firstName = env('SEED_ADMIN_FIRST_NAME', 'System');
-        $lastName = env('SEED_ADMIN_LAST_NAME', 'Administrator');
-        $name = env('SEED_ADMIN_NAME', "{$firstName} {$lastName}");
+        $firstName = env('SEED_ADMIN_FIRST_NAME', 'Super');
+        $lastName = env('SEED_ADMIN_LAST_NAME', 'Admin');
+        $fullName = env('SEED_ADMIN_NAME', "{$firstName} {$lastName}");
+        $username = env('SEED_ADMIN_USERNAME', 'super.admin');
 
-        $admin = Admin::updateOrCreate(
+        $superAdmin = User::updateOrCreate(
             ['email' => $email],
             [
                 'first_name' => $firstName,
                 'last_name' => $lastName,
-                'name' => $name,
+                'full_name' => $fullName,
+                'name' => $fullName,
+                'username' => $username,
                 'password' => Hash::make($password),
                 'status' => 'active',
+                'is_default' => true,
+                'must_change_password' => false,
             ]
         );
 
-        $adminRole = Role::firstOrCreate(
-            ['name' => 'admin', 'guard_name' => 'admin'],
-            ['slug' => 'admin', 'status' => true, 'is_system' => true]
+        $superAdminRole = Role::firstOrCreate(
+            ['name' => 'super_admin', 'guard_name' => 'web'],
+            ['slug' => 'super_admin', 'status' => true, 'is_default' => true]
         );
 
-        $admin->assignRole($adminRole);
+        $adminRole = Role::firstOrCreate(
+            ['name' => 'admin', 'guard_name' => 'web'],
+            ['slug' => 'admin', 'status' => true, 'is_default' => true]
+        );
+
+        $superAdmin->assignRole([$superAdminRole, $adminRole]);
     }
 }

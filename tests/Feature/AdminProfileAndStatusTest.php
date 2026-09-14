@@ -133,7 +133,7 @@ class AdminProfileAndStatusTest extends TestCase
     public function test_admin_email_change_requires_valid_otp_and_cleans_reset_tokens(): void
     {
         // 1. Insert a stale password reset token for current email
-        DB::table('admin_password_reset_tokens')->insert([
+        DB::table('password_reset_tokens')->insert([
             'email' => 'main.admin@example.com',
             'token' => Hash::make('stale-reset-token'),
             'created_at' => now(),
@@ -173,7 +173,7 @@ class AdminProfileAndStatusTest extends TestCase
             ]);
 
         // Verify stale reset token was deleted
-        $this->assertDatabaseMissing('admin_password_reset_tokens', ['email' => 'main.admin@example.com']);
+        $this->assertDatabaseMissing('password_reset_tokens', ['email' => 'main.admin@example.com']);
 
         // Verify current token survives
         auth()->forgetGuards();

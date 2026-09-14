@@ -24,7 +24,8 @@ class RoleResource extends JsonResource
             'guard_name' => $this->guard_name,
             'slug' => $this->slug,
             'status' => (bool) $this->status,
-            'is_system' => (bool) $this->is_system,
+            'is_default' => (bool) ($this->is_default ?? $this->is_system),
+            'is_system' => (bool) ($this->is_system ?? $this->is_default),
             'permissions' => $this->whenLoaded('permissions', function () {
                 return $this->permissions->pluck('name');
             }),

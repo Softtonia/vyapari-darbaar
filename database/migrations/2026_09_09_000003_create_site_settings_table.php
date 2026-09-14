@@ -18,8 +18,8 @@ return new class extends Migration
             $table->text('site_description')->nullable();
             $table->string('web_logo', 500)->nullable();
             $table->string('mobile_logo', 500)->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('admins')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('admins')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }
