@@ -72,6 +72,13 @@ class InAppNotificationController extends Controller
             ], 404);
         }
 
+        \App\Services\UserActivityService::log(
+            $user,
+            'notification_read',
+            "Notification marked as read: '{$notification->title}'",
+            ['notification_id' => $notification->id]
+        );
+
         return response()->json([
             'status' => true,
             'message' => 'Notification marked as read successfully.',
@@ -88,6 +95,13 @@ class InAppNotificationController extends Controller
         $user = $request->user();
 
         $service->markAllAsReadForUser($user);
+
+        \App\Services\UserActivityService::log(
+            $user,
+            'notifications_mark_all_read',
+            'All notifications marked as read',
+            []
+        );
 
         return response()->json([
             'status' => true,
@@ -116,6 +130,13 @@ class InAppNotificationController extends Controller
             ], 404);
         }
 
+        \App\Services\UserActivityService::log(
+            $user,
+            'notification_deleted',
+            "Notification #{$id} dismissed",
+            ['notification_id' => (int) $id]
+        );
+
         return response()->json([
             'status' => true,
             'message' => 'Notification deleted successfully.',
@@ -131,6 +152,13 @@ class InAppNotificationController extends Controller
         $user = $request->user();
 
         $deletedCount = $service->clearReadForUser($user);
+
+        \App\Services\UserActivityService::log(
+            $user,
+            'notifications_cleared',
+            "Cleared {$deletedCount} read notifications",
+            ['deleted_count' => $deletedCount]
+        );
 
         return response()->json([
             'status' => true,

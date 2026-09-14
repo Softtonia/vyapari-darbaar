@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\NotificationType;
 use App\Jobs\SendUserCredentialsEmailJob;
+use App\Jobs\SendUserNotificationJob;
 use App\Models\Admin;
 use App\Models\Company;
 use App\Models\EmailTemplate;
@@ -743,5 +745,162 @@ class AdminUserManagementTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['ids']);
+    }
+
+    public function test_admin_can_suspend_user_with_reason_and_revoke_tokens(): void
+    {
+        Queue::fake();
+
+        $user = User::create([
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'name' => 'John Doe',
+            'username' => 'john.doe',
+            'email' => 'john.doe@example.com',
+            'password' => Hash::make('SecretPass#123'),
+            'status' => 'active',
+            'must_change_password' => false,
+        ]);
+
+        $token = $user->createToken('active-session')->plainTextToken;
+        $this->assertEquals(1, $user->tokens()->count());
+
+        $response = $this->withToken($this->adminToken)
+            ->patchJson("/api/admin/users/{$user->id}/status", [
+                'status' => 'suspended',
+                'reason' => 'Violation of platform trading policies.',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'User status updated successfully.',
+                'data' => [
+                    'id' => $user->id,
+                    'status' => 'suspended',
+                    'suspension_reason' => 'Violation of platform trading policies.',
+                ],
+            ]);
+
+        $user->refresh();
+        $this->assertEquals('suspended', $user->status);
+        $this->assertEquals('Violation of platform trading policies.', $user->suspension_reason);
+        $this->assertEquals(0, $user->tokens()->count());
+
+        // Assert notification dispatched
+        Queue::assertPushed(SendUserNotificationJob::class, function ($job) use ($user) {
+            return $job->userId === $user->id
+                && str_contains($job->title, 'Account Status Updated')
+                && str_contains($job->body, 'Violation of platform trading policies.')
+                && $job->type === NotificationType::PUSH_AND_IN_APP;
+        });
+
+        // Assert user activity logged
+        $this->assertDatabaseHas('user_activities', [
+            'user_id' => $user->id,
+            'event' => 'status_updated',
+        ]);
+    }
+
+    public function test_admin_can_deactivate_and_activate_user_clearing_suspension_reason(): void
+    {
+        Queue::fake();
+
+        $user = User::create([
+            'first_name' => 'Jane',
+            'last_name' => 'Smith',
+            'name' => 'Jane Smith',
+            'username' => 'jane.smith',
+            'email' => 'jane.smith@example.com',
+            'password' => Hash::make('SecretPass#123'),
+            'status' => 'suspended',
+            'suspension_reason' => 'Previous issue resolved',
+            'must_change_password' => false,
+        ]);
+
+        // Activate user
+        $response = $this->withToken($this->adminToken)
+            ->patchJson("/api/admin/users/{$user->id}/status", [
+                'status' => 'active',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'data' => [
+                    'id' => $user->id,
+                    'status' => 'active',
+                    'suspension_reason' => null,
+                ],
+            ]);
+
+        $user->refresh();
+        $this->assertEquals('active', $user->status);
+        $this->assertNull($user->suspension_reason);
+
+        // Deactivate user
+        $responseDeact = $this->withToken($this->adminToken)
+            ->patchJson("/api/admin/users/{$user->id}/status", [
+                'status' => 'inactive',
+            ]);
+
+        $responseDeact->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'data' => [
+                    'id' => $user->id,
+                    'status' => 'inactive',
+                ],
+            ]);
+
+        $user->refresh();
+        $this->assertEquals('inactive', $user->status);
+    }
+
+    public function test_suspended_user_cannot_login_and_receives_suspension_reason(): void
+    {
+        $user = User::create([
+            'first_name' => 'Blocked',
+            'last_name' => 'Trader',
+            'name' => 'Blocked Trader',
+            'username' => 'blocked.trader',
+            'email' => 'blocked@example.com',
+            'password' => Hash::make('ValidPassword#123'),
+            'status' => 'suspended',
+            'suspension_reason' => 'Multiple payment defaults.',
+            'must_change_password' => false,
+        ]);
+
+        $response = $this->postJson('/api/user/login', [
+            'username' => 'blocked.trader',
+            'password' => 'ValidPassword#123',
+        ]);
+
+        $response->assertStatus(403)
+            ->assertJson([
+                'status' => false,
+                'message' => 'Account is suspended. Reason: Multiple payment defaults.',
+            ]);
+    }
+
+    public function test_admin_user_status_update_validation_fails_for_invalid_status(): void
+    {
+        $user = User::create([
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'name' => 'Test User',
+            'username' => 'test.user',
+            'email' => 'test.status@example.com',
+            'password' => Hash::make('password'),
+            'status' => 'active',
+        ]);
+
+        $response = $this->withToken($this->adminToken)
+            ->patchJson("/api/admin/users/{$user->id}/status", [
+                'status' => 'invalid_status',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['status']);
     }
 }

@@ -29,6 +29,7 @@ class AdminUserResource extends JsonResource
             'username' => $this->username,
             'email' => $this->email,
             'status' => $this->status,
+            'suspension_reason' => $this->suspension_reason,
             'must_change_password' => (bool) $this->must_change_password,
             'role' => $roleName,
             'company' => $this->when($isTrader, function () {

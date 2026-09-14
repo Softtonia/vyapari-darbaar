@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Admin\AdminCompanyController;
 use App\Http\Controllers\Api\Admin\AdminInAppNotificationController;
 use App\Http\Controllers\Api\Admin\AdminNotificationDeviceController;
 use App\Http\Controllers\Api\Admin\AdminProfileController;
+use App\Http\Controllers\Api\Admin\AdminUserActivityController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\Admin\CommodityCategoryController;
 use App\Http\Controllers\Api\Admin\CommodityController;
@@ -113,7 +114,13 @@ Route::prefix('admin')->group(function () {
             Route::post('{user}/resend-credentials', [AdminUserController::class, 'resendCredentials'])
                 ->middleware('throttle:admin-user-resend-credentials')
                 ->name('admin.users.resend-credentials');
+            Route::get('{user}/activities', [AdminUserActivityController::class, 'userActivities'])
+                ->name('admin.users.activities');
         });
+
+        // User activity feed
+        Route::get('user-activities', [AdminUserActivityController::class, 'index'])
+            ->name('admin.user-activities.index');
 
         // Role management
         Route::prefix('roles')->group(function () {

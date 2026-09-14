@@ -75,6 +75,13 @@ class ResendUserCredentialsAction
             ]);
 
             $user->tokens()->delete();
+
+            \App\Services\UserActivityService::log(
+                $user,
+                'credentials_resent',
+                'Temporary credentials resent by administrator',
+                ['email' => $user->email]
+            );
         });
 
         // 6. Dispatch encrypted credential job after commit

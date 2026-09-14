@@ -43,6 +43,7 @@ class User extends Authenticatable
         'email',
         'password',
         'status',
+        'suspension_reason',
         'must_change_password',
         'created_by_admin_id',
     ];

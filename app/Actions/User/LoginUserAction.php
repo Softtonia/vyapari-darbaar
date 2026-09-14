@@ -28,6 +28,7 @@ class LoginUserAction
                 'email',
                 'password',
                 'status',
+                'suspension_reason',
                 'must_change_password',
             ])
             ->where('username', $credentials['username'])
@@ -42,6 +43,13 @@ class LoginUserAction
         }
 
         if (! Hash::check($credentials['password'], $user->password)) {
+            \App\Services\UserActivityService::log(
+                $user,
+                'login_failed',
+                "Failed login attempt: incorrect password from device '{$deviceName}'",
+                ['device_name' => $deviceName, 'reason' => 'incorrect_password']
+            );
+
             return [
                 'success' => false,
                 'message' => 'Incorrect password.',
@@ -49,7 +57,33 @@ class LoginUserAction
             ];
         }
 
+        if ($user->status === 'suspended') {
+            $message = ! empty($user->suspension_reason)
+                ? "Account is suspended. Reason: {$user->suspension_reason}"
+                : 'Account is suspended. Please contact administrator.';
+
+            \App\Services\UserActivityService::log(
+                $user,
+                'login_failed',
+                'Failed login attempt: account is suspended',
+                ['device_name' => $deviceName, 'reason' => 'account_suspended']
+            );
+
+            return [
+                'success' => false,
+                'message' => $message,
+                'code' => 403,
+            ];
+        }
+
         if ($user->status !== 'active') {
+            \App\Services\UserActivityService::log(
+                $user,
+                'login_failed',
+                'Failed login attempt: account is inactive',
+                ['device_name' => $deviceName, 'reason' => 'account_inactive']
+            );
+
             return [
                 'success' => false,
                 'message' => 'Account is inactive. Please contact administrator.',

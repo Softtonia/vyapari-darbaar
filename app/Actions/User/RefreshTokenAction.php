@@ -31,6 +31,13 @@ class RefreshTokenAction
                 'plain_token' => $tokenResult->plainTextToken,
             ]);
 
+        \App\Services\UserActivityService::log(
+            $user,
+            'token_refreshed',
+            "User refreshed access token from device '{$deviceName}'",
+            ['device_name' => $deviceName]
+        );
+
         return [
             'token' => $tokenResult->plainTextToken,
             'token_type' => 'Bearer',

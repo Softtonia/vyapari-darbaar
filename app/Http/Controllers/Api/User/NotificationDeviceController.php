@@ -24,6 +24,17 @@ class NotificationDeviceController extends Controller
 
         $device = $service->registerDevice($user, $request->validated(), $request->ip());
 
+        \App\Services\UserActivityService::log(
+            $user,
+            'device_registered',
+            "Notification device registered ({$device->device_type})",
+            [
+                'device_id' => $device->id,
+                'device_type' => $device->device_type,
+                'device_model' => $device->device_model,
+            ]
+        );
+
         return response()->json([
             'status' => true,
             'message' => 'Notification device registered successfully.',
@@ -53,6 +64,13 @@ class NotificationDeviceController extends Controller
                 'error' => 'DEVICE_NOT_FOUND',
             ], 404);
         }
+
+        \App\Services\UserActivityService::log(
+            $user,
+            'device_unregistered',
+            'Notification device deactivated',
+            ['fcm_token_truncated' => substr((string) $request->validated('fcm_token'), 0, 15).'...']
+        );
 
         return response()->json([
             'status' => true,

@@ -61,6 +61,13 @@ class UserProfileController extends Controller
             new UserEmailUpdateOtpNotification($otpData['otp'])
         );
 
+        \App\Services\UserActivityService::log(
+            $request->user(),
+            'email_otp_requested',
+            "User requested email update OTP for '{$targetEmail}'",
+            ['target_email' => $targetEmail]
+        );
+
         return response()->json([
             'status' => true,
             'message' => 'OTP has been sent to the email address. Valid for 10 minutes.',

@@ -184,7 +184,12 @@ class AdminUserController extends Controller
         User $user,
         UpdateUserStatusAction $action
     ): JsonResponse {
-        $updatedUser = $action->execute($user, (string) $request->input('status'));
+        $reason = $request->input('reason') ?? $request->input('suspension_reason');
+        $updatedUser = $action->execute(
+            $user,
+            (string) $request->input('status'),
+            $reason !== null ? (string) $reason : null
+        );
         $updatedUser->loadMissing(['creator:id,first_name,last_name,name', 'roles', 'companies']);
 
         return response()->json([

@@ -48,6 +48,13 @@ class ForgotPasswordUserAction
         }
 
         if ($status === Password::RESET_LINK_SENT) {
+            \App\Services\UserActivityService::log(
+                $user,
+                'password_reset_requested',
+                "User requested password reset link for '{$normalizedEmail}'",
+                ['email' => $normalizedEmail]
+            );
+
             return [
                 'status' => true,
                 'message' => 'A password reset link has been sent to your email address.',

@@ -28,6 +28,13 @@ class EnsureUser
         }
 
         // Strictly verify that User account is active
+        if ($user->status === 'suspended') {
+            return new JsonResponse([
+                'status' => false,
+                'message' => 'Account is suspended. Please contact the administrator.',
+            ], 403);
+        }
+
         if ($user->status !== 'active') {
             return new JsonResponse([
                 'status' => false,

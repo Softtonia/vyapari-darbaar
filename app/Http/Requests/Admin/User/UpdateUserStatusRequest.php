@@ -30,6 +30,16 @@ class UpdateUserStatusRequest extends FormRequest
                 'string',
                 Rule::in(['active', 'inactive', 'suspended']),
             ],
+            'reason' => [
+                'nullable',
+                'string',
+                'max:500',
+            ],
+            'suspension_reason' => [
+                'nullable',
+                'string',
+                'max:500',
+            ],
         ];
     }
 
