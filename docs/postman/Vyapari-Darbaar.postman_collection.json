@@ -4096,6 +4096,1149 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "Location & Mandi Masters",
+                    "item": [
+                        {
+                            "name": "States",
+                            "item": [
+                                {
+                                    "name": "List States",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/states?page=1&per_page=20&sort_by=sort_order&sort_order=asc",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "states"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "page",
+                                                    "value": "1"
+                                                },
+                                                {
+                                                    "key": "per_page",
+                                                    "value": "20"
+                                                },
+                                                {
+                                                    "key": "sort_by",
+                                                    "value": "sort_order"
+                                                },
+                                                {
+                                                    "key": "sort_order",
+                                                    "value": "asc"
+                                                },
+                                                {
+                                                    "key": "search",
+                                                    "value": "Maha",
+                                                    "disabled": true
+                                                },
+                                                {
+                                                    "key": "status",
+                                                    "value": "true",
+                                                    "disabled": true
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "State Options (Cached)",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/states/options",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "states",
+                                                "options"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Create State",
+                                    "event": [
+                                        {
+                                            "listen": "test",
+                                            "script": {
+                                                "exec": [
+                                                    "var res = pm.response.json();",
+                                                    "if (res.status && res.data && res.data.id) {",
+                                                    "    pm.environment.set(\"stateId\", res.data.id);",
+                                                    "    pm.collectionVariables.set(\"stateId\", res.data.id);",
+                                                    "}"
+                                                ],
+                                                "type": "text/javascript"
+                                            }
+                                        }
+                                    ],
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"name\": \"Maharashtra\",\n    \"code\": \"MH\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/states",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "states"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Get State Detail",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/states/{{stateId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "states",
+                                                "{{stateId}}"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Update State",
+                                    "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"name\": \"Maharashtra State\",\n    \"code\": \"MH\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/states/{{stateId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "states",
+                                                "{{stateId}}"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Update State Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"status\": false\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/states/{{stateId}}/status",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "states",
+                                                "{{stateId}}",
+                                                "status"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Bulk Update State Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"ids\": [\n        1,\n        2\n    ],\n    \"status\": true\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/states/bulk-status",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "states",
+                                                "bulk-status"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Delete State",
+                                    "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/states/{{stateId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "states",
+                                                "{{stateId}}"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Bulk Delete States",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"ids\": [\n        2,\n        3\n    ]\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/states/bulk-delete",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "states",
+                                                "bulk-delete"
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Districts",
+                            "item": [
+                                {
+                                    "name": "List Districts",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/districts?state_id={{stateId}}&page=1&per_page=20",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "districts"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "state_id",
+                                                    "value": "{{stateId}}"
+                                                },
+                                                {
+                                                    "key": "page",
+                                                    "value": "1"
+                                                },
+                                                {
+                                                    "key": "per_page",
+                                                    "value": "20"
+                                                },
+                                                {
+                                                    "key": "search",
+                                                    "value": "Nag",
+                                                    "disabled": true
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "District Options (Cached by State)",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/districts/options?state_id={{stateId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "districts",
+                                                "options"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "state_id",
+                                                    "value": "{{stateId}}"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Create District",
+                                    "event": [
+                                        {
+                                            "listen": "test",
+                                            "script": {
+                                                "exec": [
+                                                    "var res = pm.response.json();",
+                                                    "if (res.status && res.data && res.data.id) {",
+                                                    "    pm.environment.set(\"districtId\", res.data.id);",
+                                                    "    pm.collectionVariables.set(\"districtId\", res.data.id);",
+                                                    "}"
+                                                ],
+                                                "type": "text/javascript"
+                                            }
+                                        }
+                                    ],
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"state_id\": 1,\n    \"name\": \"Nagpur\",\n    \"code\": \"NGP\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/districts",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "districts"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Get District Detail",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/districts/{{districtId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "districts",
+                                                "{{districtId}}"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Update District (with State Reassignment)",
+                                    "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"state_id\": 1,\n    \"name\": \"Nagpur Urban\",\n    \"code\": \"NGP-URB\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/districts/{{districtId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "districts",
+                                                "{{districtId}}"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Update District Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"status\": false\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/districts/{{districtId}}/status",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "districts",
+                                                "{{districtId}}",
+                                                "status"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Bulk Update District Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"ids\": [\n        1,\n        2\n    ],\n    \"status\": true\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/districts/bulk-status",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "districts",
+                                                "bulk-status"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Delete District",
+                                    "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/districts/{{districtId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "districts",
+                                                "{{districtId}}"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Bulk Delete Districts",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"ids\": [\n        2,\n        3\n    ]\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/districts/bulk-delete",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "districts",
+                                                "bulk-delete"
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Mandis",
+                            "item": [
+                                {
+                                    "name": "List Mandis",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/mandis?district_id={{districtId}}&page=1&per_page=20",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "mandis"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "district_id",
+                                                    "value": "{{districtId}}"
+                                                },
+                                                {
+                                                    "key": "state_id",
+                                                    "value": "{{stateId}}",
+                                                    "disabled": true
+                                                },
+                                                {
+                                                    "key": "market_type",
+                                                    "value": "apmc",
+                                                    "disabled": true
+                                                },
+                                                {
+                                                    "key": "pincode",
+                                                    "value": "440035",
+                                                    "disabled": true
+                                                },
+                                                {
+                                                    "key": "search",
+                                                    "value": "Kalamna",
+                                                    "disabled": true
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Mandi Options (District / State Scoped)",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/mandis/options?district_id={{districtId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "mandis",
+                                                "options"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "district_id",
+                                                    "value": "{{districtId}}"
+                                                },
+                                                {
+                                                    "key": "state_id",
+                                                    "value": "{{stateId}}",
+                                                    "disabled": true
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Create Mandi",
+                                    "event": [
+                                        {
+                                            "listen": "test",
+                                            "script": {
+                                                "exec": [
+                                                    "var res = pm.response.json();",
+                                                    "if (res.status && res.data && res.data.id) {",
+                                                    "    pm.environment.set(\"mandiId\", res.data.id);",
+                                                    "    pm.collectionVariables.set(\"mandiId\", res.data.id);",
+                                                    "}"
+                                                ],
+                                                "type": "text/javascript"
+                                            }
+                                        }
+                                    ],
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"district_id\": 1,\n    \"name\": \"Nagpur APMC Mandi\",\n    \"code\": \"NGP-APMC\",\n    \"market_type\": \"apmc\",\n    \"address\": \"Kalamna Market Yard, Nagpur\",\n    \"pincode\": \"440035\",\n    \"latitude\": 21.1458,\n    \"longitude\": 79.0882,\n    \"contact_phone\": \"+917122554433\",\n    \"contact_email\": \"info@nagpurapmc.org\",\n    \"website\": \"https://nagpurapmc.org\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/mandis",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "mandis"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Get Mandi Detail",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/mandis/{{mandiId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "mandis",
+                                                "{{mandiId}}"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Update Mandi",
+                                    "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"district_id\": 1,\n    \"name\": \"Nagpur Main APMC Yard\",\n    \"code\": \"NGP-APMC\",\n    \"market_type\": \"principal_yard\",\n    \"address\": \"Kalamna Market Yard, Nagpur\",\n    \"pincode\": \"440035\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/mandis/{{mandiId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "mandis",
+                                                "{{mandiId}}"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Update Mandi Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"status\": false\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/mandis/{{mandiId}}/status",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "mandis",
+                                                "{{mandiId}}",
+                                                "status"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Bulk Update Mandi Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"ids\": [\n        1,\n        2\n    ],\n    \"status\": true\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/mandis/bulk-status",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "mandis",
+                                                "bulk-status"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Delete Mandi",
+                                    "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/mandis/{{mandiId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "mandis",
+                                                "{{mandiId}}"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Bulk Delete Mandis",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"ids\": [\n        2,\n        3\n    ]\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/mandis/bulk-delete",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "mandis",
+                                                "bulk-delete"
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Public Locations",
+                            "item": [
+                                {
+                                    "name": "Get Public States",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/locations/states",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "locations",
+                                                "states"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Get Public Districts (by State)",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/locations/districts?state_id={{stateId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "locations",
+                                                "districts"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "state_id",
+                                                    "value": "{{stateId}}"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Get Public Mandis (by District)",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/locations/mandis?district_id={{districtId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "locations",
+                                                "mandis"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "district_id",
+                                                    "value": "{{districtId}}"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Get Public Mandis (by State)",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/locations/mandis?state_id={{stateId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "locations",
+                                                "mandis"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "state_id",
+                                                    "value": "{{stateId}}"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
                 }
             ]
         },
@@ -5031,6 +6174,23 @@
                     ]
                 }
             ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "stateId",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "districtId",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "mandiId",
+            "value": "1",
+            "type": "string"
         }
     ]
 }

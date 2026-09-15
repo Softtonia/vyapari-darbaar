@@ -19,6 +19,9 @@ class DatabaseSeeder extends Seeder
             CommodityCategorySeeder::class,
             CommoditySeeder::class,
             CommoditySubcategorySeeder::class,
+            StateSeeder::class,
+            DistrictSeeder::class,
+            MandiSeeder::class,
             SiteSettingSeeder::class,
         ]);
     }

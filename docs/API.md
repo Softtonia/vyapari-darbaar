@@ -3214,6 +3214,340 @@ The Commodity Master represents the core agricultural commodities traded on Vyap
 - **Bulk Soft Delete:** `POST /api/admin/commodities/bulk-delete`
   - Payload: `{"ids": [1, 2, 3]}`
 
+---
+
+## 21. Location & Mandi / APMC Market Master Module
+
+The Location & Mandi module manages India's geographic and market hierarchy across 3 normalized tiers:
+1. **States** (e.g. Maharashtra, Madhya Pradesh, Gujarat, Rajasthan)
+2. **Districts** (Belongs to State; scoped slug uniqueness)
+3. **Mandis / APMC Markets** (Belongs to District; `district_id` ONLY, **no `state_id` column**; State is derived via `$mandi->district->state`).
+
+### 21.1 Core Architectural Principles
+- **Strict Normalized Hierarchy:** `mandis` table stores `district_id` ONLY. No denormalized `state_id`.
+- **Eager Loading:** Eager-loaded using `district:id,state_id,name,slug` and `district.state:id,name,slug,code` to prevent N+1 queries.
+- **Market Types:** Supported market types backed by PHP enum `App\Enums\MarketType`:
+  - `apmc` ("APMC Mandi") - Default
+  - `principal_yard` ("Principal Market Yard")
+  - `sub_yard` ("Sub-Yard")
+  - `private_market` ("Private Market Yard")
+- **Code Normalization:** All business codes (`MH`, `NGP`, `NGP-APMC`) are automatically trimmed and uppercase-normalized before persistence.
+- **Slug Uniqueness:** Checked against active and soft-deleted records (`withTrashed()`) to prevent restore collisions:
+  - State: Globally unique.
+  - District: Unique within `state_id`.
+  - Mandi: Unique within `district_id`.
+- **Delete Restrictions (HTTP 409):**
+  - State cannot be deleted if districts exist (`STATE_IN_USE`).
+  - District cannot be deleted if mandis exist (`DISTRICT_IN_USE`).
+- **Bounded Redis Cache (TTL = 3600s):**
+  - States: `locations:states:options`
+  - Districts: `locations:districts:options:state:{stateId}`
+  - Mandis (District-scoped): `locations:mandis:options:district:{districtId}`
+  - Mandis (State-scoped): `locations:mandis:options:state:{stateId}`
+  - Targeted cache purging without `KEYS *`.
+
+---
+
+### 21.2 Admin State APIs
+
+#### 1. List States (Paginated)
+- **Method:** `GET`
+- **URI:** `/api/admin/states`
+- **Headers:** `Authorization: Bearer <admin_token>`, `Accept: application/json`
+- **Query Parameters:** `page`, `per_page` (1-100, default 20), `search` (name/code), `status` (true/false), `sort_by`, `sort_order` (asc/desc)
+- **Response (200 OK):**
+```json
+{
+    "status": true,
+    "message": "States fetched successfully.",
+    "data": {
+        "items": [
+            {
+                "id": 1,
+                "name": "Maharashtra",
+                "slug": "maharashtra",
+                "code": "MH",
+                "sort_order": 1,
+                "status": true,
+                "created_at": "2026-09-16T10:00:00.000000Z",
+                "updated_at": "2026-09-16T10:00:00.000000Z"
+            }
+        ],
+        "pagination": {
+            "current_page": 1,
+            "per_page": 20,
+            "total": 1,
+            "last_page": 1
+        }
+    }
+}
+```
+
+#### 2. State Options (Dropdown)
+- **Method:** `GET`
+- **URI:** `/api/admin/states/options`
+- **Cache:** `locations:states:options` (TTL 3600s)
+- **Response (200 OK):**
+```json
+{
+    "status": true,
+    "message": "State options retrieved successfully.",
+    "data": [
+        {
+            "id": 1,
+            "name": "Maharashtra",
+            "slug": "maharashtra",
+            "code": "MH"
+        }
+    ]
+}
+```
+
+#### 3. Create State
+- **Method:** `POST`
+- **URI:** `/api/admin/states`
+- **Payload:**
+```json
+{
+    "name": "Maharashtra",
+    "code": "MH",
+    "sort_order": 1,
+    "status": true
+}
+```
+- **Response (201 Created):** Returns created `StateResource`.
+
+#### 4. Get State Detail
+- **Method:** `GET`
+- **URI:** `/api/admin/states/{id}`
+- **Response (200 OK):** Returns detailed `StateResource` with `creator` and `updater`.
+
+#### 5. Update State
+- **Method:** `PUT`
+- **URI:** `/api/admin/states/{id}`
+- **Payload:** `name`, `slug` (optional), `code`, `sort_order`, `status`
+- **Response (200 OK):** Returns updated `StateResource`.
+
+#### 6. State Status & Bulk Operations
+- **Single Status Toggle:** `PATCH /api/admin/states/{id}/status` -> `{"status": false}`
+- **Bulk Status Update:** `PATCH /api/admin/states/bulk-status` -> `{"ids": [1, 2], "status": true}`
+- **Single Soft Delete:** `DELETE /api/admin/states/{id}` (409 `STATE_IN_USE` if districts exist)
+- **Bulk Soft Delete:** `POST /api/admin/states/bulk-delete` -> `{"ids": [1, 2]}` (Atomic validation before deletion)
+
+---
+
+### 21.3 Admin District APIs
+
+#### 1. List Districts (Paginated)
+- **Method:** `GET`
+- **URI:** `/api/admin/districts`
+- **Query Parameters:** `state_id`, `search` (name/code), `status`, `page`, `per_page`, `sort_by`, `sort_order`
+- **Response (200 OK):**
+```json
+{
+    "status": true,
+    "message": "Districts fetched successfully.",
+    "data": {
+        "items": [
+            {
+                "id": 1,
+                "state_id": 1,
+                "state": {
+                    "id": 1,
+                    "name": "Maharashtra",
+                    "slug": "maharashtra",
+                    "code": "MH"
+                },
+                "name": "Nagpur",
+                "slug": "nagpur",
+                "code": "NGP",
+                "sort_order": 1,
+                "status": true,
+                "created_at": "2026-09-16T10:00:00.000000Z",
+                "updated_at": "2026-09-16T10:00:00.000000Z"
+            }
+        ],
+        "pagination": {
+            "current_page": 1,
+            "per_page": 20,
+            "total": 1,
+            "last_page": 1
+        }
+    }
+}
+```
+
+#### 2. District Options (Dropdown)
+- **Method:** `GET`
+- **URI:** `/api/admin/districts/options?state_id=1`
+- **Cache:** `locations:districts:options:state:{stateId}` (TTL 3600s)
+- **Response (200 OK):** Returns array of `{id, state_id, name, slug, code}`.
+
+#### 3. Create District
+- **Method:** `POST`
+- **URI:** `/api/admin/districts`
+- **Payload:**
+```json
+{
+    "state_id": 1,
+    "name": "Nagpur",
+    "code": "NGP",
+    "sort_order": 1,
+    "status": true
+}
+```
+
+#### 4. Update District & Re-parenting
+- **Method:** `PUT`
+- **URI:** `/api/admin/districts/{id}`
+- **Behavior:** If `state_id` changes, automatically checks slug uniqueness within new state, updates records, and invalidates both old and new state cache keys.
+
+#### 5. District Status & Bulk Operations
+- **Single Status Toggle:** `PATCH /api/admin/districts/{id}/status` -> `{"status": false}`
+- **Bulk Status Update:** `PATCH /api/admin/districts/bulk-status` -> `{"ids": [1, 2], "status": true}`
+- **Single Soft Delete:** `DELETE /api/admin/districts/{id}` (409 `DISTRICT_IN_USE` if mandis exist)
+- **Bulk Soft Delete:** `POST /api/admin/districts/bulk-delete` -> `{"ids": [1, 2]}` (Atomic check)
+
+---
+
+### 21.4 Admin Mandi / APMC Market APIs
+
+#### 1. List Mandis (Paginated)
+- **Method:** `GET`
+- **URI:** `/api/admin/mandis`
+- **Query Parameters:** `state_id`, `district_id`, `market_type`, `pincode`, `search` (name/code), `status`, `page`, `per_page`, `sort_by`, `sort_order`
+- **Response (200 OK):**
+```json
+{
+    "status": true,
+    "message": "Mandis fetched successfully.",
+    "data": {
+        "items": [
+            {
+                "id": 1,
+                "district_id": 1,
+                "district": {
+                    "id": 1,
+                    "name": "Nagpur",
+                    "slug": "nagpur"
+                },
+                "state": {
+                    "id": 1,
+                    "name": "Maharashtra",
+                    "slug": "maharashtra",
+                    "code": "MH"
+                },
+                "name": "Nagpur APMC Mandi",
+                "slug": "nagpur-apmc-mandi",
+                "code": "NGP-APMC",
+                "market_type": "apmc",
+                "market_type_label": "APMC Mandi",
+                "address": "Kalamna Market Yard, Nagpur",
+                "pincode": "440035",
+                "sort_order": 1,
+                "status": true,
+                "created_at": "2026-09-16T10:00:00.000000Z",
+                "updated_at": "2026-09-16T10:00:00.000000Z"
+            }
+        ],
+        "pagination": {
+            "current_page": 1,
+            "per_page": 20,
+            "total": 1,
+            "last_page": 1
+        }
+    }
+}
+```
+
+#### 2. Mandi Options (Dropdown)
+- **Method:** `GET`
+- **URI:** `/api/admin/mandis/options?district_id=1` or `/api/admin/mandis/options?state_id=1`
+- **Conflict Handling:** If both `district_id` and `state_id` are passed, validates that District belongs to State; returns HTTP 422 if mismatched.
+- **Cache:** `locations:mandis:options:district:{districtId}` or `locations:mandis:options:state:{stateId}`.
+
+#### 3. Create Mandi
+- **Method:** `POST`
+- **URI:** `/api/admin/mandis`
+- **Payload:**
+```json
+{
+    "district_id": 1,
+    "name": "Nagpur APMC Mandi",
+    "code": "NGP-APMC",
+    "market_type": "apmc",
+    "address": "Kalamna Market Yard, Nagpur",
+    "pincode": "440035",
+    "latitude": 21.1458,
+    "longitude": 79.0882,
+    "contact_phone": "+917122554433",
+    "contact_email": "info@nagpurapmc.org",
+    "website": "https://nagpurapmc.org",
+    "sort_order": 1,
+    "status": true
+}
+```
+
+#### 4. Mandi Detail & Update
+- **Detail:** `GET /api/admin/mandis/{id}`
+- **Update:** `PUT /api/admin/mandis/{id}`
+- **Single Status Toggle:** `PATCH /api/admin/mandis/{id}/status`
+- **Bulk Status Update:** `PATCH /api/admin/mandis/bulk-status`
+- **Single Soft Delete:** `DELETE /api/admin/mandis/{id}`
+- **Bulk Soft Delete:** `POST /api/admin/mandis/bulk-delete`
+
+---
+
+### 21.5 Public Location APIs (Read-Only)
+
+All public location endpoints are unauthenticated and automatically filter to active, non-deleted records whose parent entities are also active.
+
+#### 1. Public Active States
+- **Method:** `GET`
+- **URI:** `/api/locations/states`
+- **Response (200 OK):**
+```json
+{
+    "status": true,
+    "message": "States fetched successfully.",
+    "data": [
+        {
+            "id": 1,
+            "name": "Maharashtra",
+            "slug": "maharashtra",
+            "code": "MH"
+        }
+    ]
+}
+```
+
+#### 2. Public Active Districts
+- **Method:** `GET`
+- **URI:** `/api/locations/districts?state_id=1`
+- **Response (200 OK):** Returns active districts under the active state.
+
+#### 3. Public Active Mandis
+- **Method:** `GET`
+- **URI:** `/api/locations/mandis?district_id=1` (or `?state_id=1`)
+- **Response (200 OK):**
+```json
+{
+    "status": true,
+    "message": "Mandis fetched successfully.",
+    "data": [
+        {
+            "id": 1,
+            "district_id": 1,
+            "name": "Nagpur APMC Mandi",
+            "slug": "nagpur-apmc-mandi",
+            "code": "NGP-APMC",
+            "market_type": "apmc"
+        }
+    ]
+}
+```
+
+
 
 
 

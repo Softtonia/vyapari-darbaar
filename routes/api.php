@@ -12,8 +12,10 @@ use App\Http\Controllers\Api\Admin\CommodityController;
 use App\Http\Controllers\Api\Admin\CommodityGradeController;
 use App\Http\Controllers\Api\Admin\CommoditySubcategoryController;
 use App\Http\Controllers\Api\Admin\CommodityVarietyController;
+use App\Http\Controllers\Api\Admin\DistrictController;
 use App\Http\Controllers\Api\Admin\EmailTemplateController;
 use App\Http\Controllers\Api\Admin\FirebaseSettingController;
+use App\Http\Controllers\Api\Admin\MandiController;
 use App\Http\Controllers\Api\Admin\NotificationBatchController;
 use App\Http\Controllers\Api\Admin\NotificationDashboardController;
 use App\Http\Controllers\Api\Admin\NotificationLogController;
@@ -23,6 +25,8 @@ use App\Http\Controllers\Api\Admin\NotificationTopicController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\SiteSettingController as AdminSiteSettingController;
 use App\Http\Controllers\Api\Admin\SmtpSettingController;
+use App\Http\Controllers\Api\Admin\StateController;
+use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\Api\PublicFirebaseConfigController;
 use App\Http\Controllers\Api\SiteSettingController;
 use App\Http\Controllers\Api\User\InAppNotificationController;
@@ -276,6 +280,72 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.commodity-grades.update-status');
         });
 
+        // State management
+        Route::prefix('states')->group(function () {
+            Route::get('options', [StateController::class, 'options'])
+                ->name('admin.states.options');
+            Route::get('/', [StateController::class, 'index'])
+                ->name('admin.states.index');
+            Route::post('/', [StateController::class, 'store'])
+                ->name('admin.states.store');
+            Route::post('bulk-delete', [StateController::class, 'bulkDestroy'])
+                ->name('admin.states.bulk-delete');
+            Route::patch('bulk-status', [StateController::class, 'bulkStatus'])
+                ->name('admin.states.bulk-status');
+            Route::get('{state}', [StateController::class, 'show'])
+                ->name('admin.states.show');
+            Route::put('{state}', [StateController::class, 'update'])
+                ->name('admin.states.update');
+            Route::delete('{state}', [StateController::class, 'destroy'])
+                ->name('admin.states.destroy');
+            Route::patch('{state}/status', [StateController::class, 'updateStatus'])
+                ->name('admin.states.update-status');
+        });
+
+        // District management
+        Route::prefix('districts')->group(function () {
+            Route::get('options', [DistrictController::class, 'options'])
+                ->name('admin.districts.options');
+            Route::get('/', [DistrictController::class, 'index'])
+                ->name('admin.districts.index');
+            Route::post('/', [DistrictController::class, 'store'])
+                ->name('admin.districts.store');
+            Route::post('bulk-delete', [DistrictController::class, 'bulkDestroy'])
+                ->name('admin.districts.bulk-delete');
+            Route::patch('bulk-status', [DistrictController::class, 'bulkStatus'])
+                ->name('admin.districts.bulk-status');
+            Route::get('{district}', [DistrictController::class, 'show'])
+                ->name('admin.districts.show');
+            Route::put('{district}', [DistrictController::class, 'update'])
+                ->name('admin.districts.update');
+            Route::delete('{district}', [DistrictController::class, 'destroy'])
+                ->name('admin.districts.destroy');
+            Route::patch('{district}/status', [DistrictController::class, 'updateStatus'])
+                ->name('admin.districts.update-status');
+        });
+
+        // Mandi management
+        Route::prefix('mandis')->group(function () {
+            Route::get('options', [MandiController::class, 'options'])
+                ->name('admin.mandis.options');
+            Route::get('/', [MandiController::class, 'index'])
+                ->name('admin.mandis.index');
+            Route::post('/', [MandiController::class, 'store'])
+                ->name('admin.mandis.store');
+            Route::post('bulk-delete', [MandiController::class, 'bulkDestroy'])
+                ->name('admin.mandis.bulk-delete');
+            Route::patch('bulk-status', [MandiController::class, 'bulkStatus'])
+                ->name('admin.mandis.bulk-status');
+            Route::get('{mandi}', [MandiController::class, 'show'])
+                ->name('admin.mandis.show');
+            Route::put('{mandi}', [MandiController::class, 'update'])
+                ->name('admin.mandis.update');
+            Route::delete('{mandi}', [MandiController::class, 'destroy'])
+                ->name('admin.mandis.destroy');
+            Route::patch('{mandi}/status', [MandiController::class, 'updateStatus'])
+                ->name('admin.mandis.update-status');
+        });
+
         // Site Settings management
         Route::prefix('site-settings')->group(function () {
             Route::get('/', [AdminSiteSettingController::class, 'show'])
@@ -425,6 +495,15 @@ Route::get('site-settings', [SiteSettingController::class, 'show'])
 
 Route::get('firebase/config', [PublicFirebaseConfigController::class, 'show'])
     ->name('firebase.config');
+
+Route::prefix('locations')->group(function () {
+    Route::get('states', [LocationController::class, 'states'])
+        ->name('locations.states');
+    Route::get('districts', [LocationController::class, 'districts'])
+        ->name('locations.districts');
+    Route::get('mandis', [LocationController::class, 'mandis'])
+        ->name('locations.mandis');
+});
 
 /*
 |--------------------------------------------------------------------------
