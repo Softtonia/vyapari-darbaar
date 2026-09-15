@@ -6,10 +6,35 @@ use App\Models\Role;
 use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
 
 class RoleService
 {
+    /**
+     * Generate an incrementing unique slug for roles (e.g. role, role-1, role-2).
+     */
+    public function generateUniqueSlug(string $baseSlug, ?int $ignoreId = null): string
+    {
+        $slug = Str::slug($baseSlug);
+        if (blank($slug)) {
+            $slug = 'role';
+        }
+
+        $originalSlug = $slug;
+        $counter = 1;
+
+        while (Role::query()
+            ->where('slug', $slug)
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->exists()) {
+            $slug = "{$originalSlug}-{$counter}";
+            $counter++;
+        }
+
+        return $slug;
+    }
+
     /**
      * Get a paginated list of roles with dynamic filtering and sorting.
      *
@@ -50,10 +75,12 @@ class RoleService
     public function createRole(array $data): Role
     {
         return DB::transaction(function () use ($data) {
+            $slug = $this->generateUniqueSlug($data['slug'] ?? $data['name']);
+
             $role = Role::create([
                 'name' => $data['name'],
                 'guard_name' => $data['guard_name'] ?? 'web',
-                'slug' => $data['slug'],
+                'slug' => $slug,
                 'status' => $data['status'] ?? true,
                 'is_default' => false,
             ]);
@@ -67,7 +94,7 @@ class RoleService
     /**
      * Update an existing role.
      *
-     * @param  array{name: string, slug?: string, guard_name?: string, status?: bool}  $data
+     * @param  array{name: string, guard_name?: string, status?: bool}  $data
      */
     public function updateRole(Role $role, array $data): Role
     {
@@ -78,11 +105,6 @@ class RoleService
 
             if (isset($data['guard_name'])) {
                 $updateData['guard_name'] = $data['guard_name'];
-            }
-
-            // Only update slug if it's not a protected default role
-            if (! $role->is_default && isset($data['slug'])) {
-                $updateData['slug'] = $data['slug'];
             }
 
             if (array_key_exists('status', $data)) {

@@ -153,26 +153,52 @@ class AdminRoleTest extends TestCase
         ]);
     }
 
-    public function test_duplicate_slug_is_rejected_with_validation_error(): void
+    public function test_duplicate_slug_auto_appends_incrementing_suffix(): void
     {
-        Role::create([
+        $role1 = Role::create([
             'name' => 'Finance',
             'slug' => 'finance',
             'status' => true,
             'is_default' => false,
         ]);
 
-        $response = $this->withToken($this->adminToken)->postJson('/api/admin/roles', [
+        $response1 = $this->withToken($this->adminToken)->postJson('/api/admin/roles', [
             'name' => 'Finance Department',
             'slug' => 'finance',
         ]);
 
-        $response->assertStatus(422)
+        $response1->assertStatus(201)
             ->assertJson([
-                'status' => false,
-                'message' => 'Validation error.',
-            ])
-            ->assertJsonValidationErrors(['slug']);
+                'status' => true,
+                'data' => [
+                    'name' => 'Finance Department',
+                    'slug' => 'finance-1',
+                ],
+            ]);
+
+        $this->assertDatabaseHas('roles', [
+            'name' => 'Finance Department',
+            'slug' => 'finance-1',
+        ]);
+
+        $response2 = $this->withToken($this->adminToken)->postJson('/api/admin/roles', [
+            'name' => 'Finance Accounting',
+            'slug' => 'finance',
+        ]);
+
+        $response2->assertStatus(201)
+            ->assertJson([
+                'status' => true,
+                'data' => [
+                    'name' => 'Finance Accounting',
+                    'slug' => 'finance-2',
+                ],
+            ]);
+
+        $this->assertDatabaseHas('roles', [
+            'name' => 'Finance Accounting',
+            'slug' => 'finance-2',
+        ]);
     }
 
     public function test_admin_can_list_roles_with_pagination_and_default_sorting(): void
@@ -253,7 +279,7 @@ class AdminRoleTest extends TestCase
             ]);
     }
 
-    public function test_admin_can_update_custom_role(): void
+    public function test_admin_can_update_custom_role_without_modifying_slug(): void
     {
         $role = Role::create([
             'name' => 'Editor',
@@ -264,7 +290,6 @@ class AdminRoleTest extends TestCase
 
         $response = $this->withToken($this->adminToken)->putJson("/api/admin/roles/{$role->id}", [
             'name' => 'Senior Editor',
-            'slug' => 'senior-editor',
             'status' => false,
         ]);
 
@@ -273,7 +298,7 @@ class AdminRoleTest extends TestCase
                 'status' => true,
                 'data' => [
                     'name' => 'Senior Editor',
-                    'slug' => 'senior-editor',
+                    'slug' => 'editor', // Slug remains immutable
                     'status' => false,
                 ],
             ]);
@@ -281,7 +306,7 @@ class AdminRoleTest extends TestCase
         $this->assertDatabaseHas('roles', [
             'id' => $role->id,
             'name' => 'Senior Editor',
-            'slug' => 'senior-editor',
+            'slug' => 'editor',
             'status' => false,
         ]);
     }

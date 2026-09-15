@@ -26,18 +26,8 @@ class UpdateRoleRequest extends FormRequest
      */
     public function rules(): array
     {
-        /** @var Role|string|int|null $roleParam */
-        $roleParam = $this->route('role');
-        $roleId = $roleParam instanceof Role ? $roleParam->id : $roleParam;
-
         return [
             'name' => ['required', 'string', 'max:100'],
-            'slug' => [
-                'nullable',
-                'string',
-                'max:100',
-                Rule::unique('roles', 'slug')->ignore($roleId),
-            ],
             'status' => ['nullable', 'boolean'],
         ];
     }
@@ -53,9 +43,6 @@ class UpdateRoleRequest extends FormRequest
             'name.required' => 'The role name is required.',
             'name.string' => 'The role name must be a string.',
             'name.max' => 'The role name cannot exceed 100 characters.',
-            'slug.string' => 'The role slug must be a string.',
-            'slug.max' => 'The role slug cannot exceed 100 characters.',
-            'slug.unique' => 'A role with this slug already exists.',
             'status.boolean' => 'The status field must be true or false.',
         ];
     }
@@ -63,25 +50,13 @@ class UpdateRoleRequest extends FormRequest
     /**
      * Get validated data with normalized values.
      *
-     * @param  Role  $currentRole
-     * @return array{name: string, slug: string, status?: bool}
+     * @param  Role|null  $currentRole
+     * @return array{name: string, status?: bool}
      */
-    public function validatedRoleData(Role $currentRole): array
+    public function validatedRoleData(?Role $currentRole = null): array
     {
-        $name = trim((string) $this->input('name'));
-
-        // If default role, preserve original system slug to protect internal invariants
-        if ($currentRole->is_default) {
-            $slug = $currentRole->slug;
-        } elseif ($this->has('slug') && ! blank($this->input('slug'))) {
-            $slug = strtolower(Str::slug((string) $this->input('slug')));
-        } else {
-            $slug = strtolower(Str::slug($name));
-        }
-
         $data = [
-            'name' => $name,
-            'slug' => $slug,
+            'name' => trim((string) $this->input('name')),
         ];
 
         if ($this->has('status')) {

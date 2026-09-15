@@ -26,7 +26,7 @@ class StoreRoleRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:100'],
-            'slug' => ['nullable', 'string', 'max:100', 'unique:roles,slug'],
+            'slug' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', 'boolean'],
         ];
     }
@@ -44,7 +44,6 @@ class StoreRoleRequest extends FormRequest
             'name.max' => 'The role name cannot exceed 100 characters.',
             'slug.string' => 'The role slug must be a string.',
             'slug.max' => 'The role slug cannot exceed 100 characters.',
-            'slug.unique' => 'A role with this slug already exists.',
             'status.boolean' => 'The status field must be true or false.',
         ];
     }
