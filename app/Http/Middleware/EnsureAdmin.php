@@ -27,22 +27,18 @@ class EnsureAdmin
             ], 403);
         }
 
+        $currentToken = $user->currentAccessToken();
+        if ($currentToken && ($currentToken->name === 'user-token' || str_starts_with($currentToken->name, 'user-'))) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthorized access.',
+            ], 403);
+        }
+
         if ($user->status !== 'active') {
             return response()->json([
                 'status' => false,
                 'message' => 'Account is inactive. Please contact the administrator.',
-            ], 403);
-        }
-
-        // Verify administrative role or permission
-        $hasAdminAccess = (bool) $user->is_default
-            || $user->hasAnyRole(['super_admin', 'admin', 'editor'])
-            || $user->getAllPermissions()->isNotEmpty();
-
-        if (! $hasAdminAccess) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Unauthorized access.',
             ], 403);
         }
 

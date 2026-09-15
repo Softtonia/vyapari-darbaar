@@ -28,8 +28,7 @@ return new class extends Migration
         $pivotRole = $columnNames['role_pivot_key'] ?? 'role_id';
         $pivotPermission = $columnNames['permission_pivot_key'] ?? 'permission_id';
 
-        // 1. Drop old custom pivot tables if they exist
-        Schema::dropIfExists('user_has_roles');
+        // 1. Drop old legacy pivot tables if they exist
         Schema::dropIfExists('role_user');
         Schema::dropIfExists('admin_role');
 

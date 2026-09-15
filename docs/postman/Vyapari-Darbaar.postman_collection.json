@@ -379,7 +379,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"first_name\": \"Amit\",\n    \"last_name\": \"Sharma\",\n    \"phone_number\": \"+919876543210\",\n    \"email\": \"amit.sharma@example.com\",\n    \"role\": \"user\"\n}"
+                                    "raw": "{\n    \"first_name\": \"Amit\",\n    \"last_name\": \"Sharma\",\n    \"full_name\": \"Amit Sharma\",\n    \"phone_number\": \"+919876543210\",\n    \"email\": \"amit.sharma@example.com\",\n    \"role\": \"user\",\n    \"is_default\": false\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/users",
@@ -442,7 +442,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"first_name\": \"Amit\",\n    \"last_name\": \"Sharma\",\n    \"phone_number\": \"+919876543210\",\n    \"email\": \"amit.updated@example.com\",\n    \"role\": \"user\"\n}"
+                                    "raw": "{\n    \"first_name\": \"Amit\",\n    \"last_name\": \"Sharma\",\n    \"full_name\": \"Amit Sharma\",\n    \"phone_number\": \"+919876543210\",\n    \"email\": \"amit.updated@example.com\",\n    \"role\": \"user\"\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/users/{{user_id}}",
@@ -478,7 +478,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"status\": \"inactive\"\n}"
+                                    "raw": "{\n    \"status\": \"suspended\",\n    \"suspension_reason\": \"Violation of community guidelines.\"\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/users/{{user_id}}/status",
@@ -520,6 +520,94 @@
                                         "users",
                                         "{{user_id}}",
                                         "resend-credentials"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get User Activities",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/users/{{user_id}}/activities?per_page=20&page=1&event=login",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "users",
+                                        "{{user_id}}",
+                                        "activities"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "per_page",
+                                            "value": "20"
+                                        },
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "event",
+                                            "value": "login"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Global User Activities Feed",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/user-activities?per_page=20&page=1&event=login&search=Amit",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "user-activities"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "per_page",
+                                            "value": "20"
+                                        },
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "event",
+                                            "value": "login"
+                                        },
+                                        {
+                                            "key": "search",
+                                            "value": "Amit"
+                                        }
                                     ]
                                 }
                             }
@@ -673,7 +761,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"name\": \"Content Editor\",\n    \"slug\": \"content-editor\",\n    \"status\": true\n}"
+                                    "raw": "{\n    \"name\": \"Content Editor\",\n    \"slug\": \"content-editor\",\n    \"is_default\": false,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/roles",
@@ -759,7 +847,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"name\": \"Senior Content Editor\",\n    \"slug\": \"senior-content-editor\",\n    \"status\": true\n}"
+                                    "raw": "{\n    \"name\": \"Senior Content Editor\",\n    \"slug\": \"senior-content-editor\",\n    \"is_default\": false,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/roles/4",
