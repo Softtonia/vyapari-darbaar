@@ -39,7 +39,7 @@ class UpdateAdminProfileRequest extends FormRequest
                 'required',
                 'email',
                 'max:255',
-                Rule::unique('admins', 'email')->ignore($adminId),
+                Rule::unique('users', 'email')->ignore($adminId),
             ],
             'otp' => ['nullable', 'string'],
             'current_password' => ['nullable', 'string'],

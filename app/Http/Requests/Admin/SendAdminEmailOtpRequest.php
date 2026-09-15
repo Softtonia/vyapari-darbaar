@@ -34,7 +34,7 @@ class SendAdminEmailOtpRequest extends FormRequest
                 'required',
                 'email',
                 'max:255',
-                Rule::unique('admins', 'email')->ignore($adminId),
+                Rule::unique('users', 'email')->ignore($adminId),
             ],
         ];
     }

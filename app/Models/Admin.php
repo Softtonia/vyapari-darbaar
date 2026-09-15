@@ -38,6 +38,12 @@ class Admin extends User
     protected static function booted(): void
     {
         parent::booted();
+
+        static::creating(function ($admin) {
+            if (! array_key_exists('is_default', $admin->attributes)) {
+                $admin->attributes['is_default'] = true;
+            }
+        });
     }
 
     /**
