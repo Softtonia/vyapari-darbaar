@@ -29,6 +29,7 @@ class UpdateRoleRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:100'],
             'status' => ['nullable', 'boolean'],
+            'is_default' => ['nullable', 'boolean'],
         ];
     }
 
@@ -44,6 +45,7 @@ class UpdateRoleRequest extends FormRequest
             'name.string' => 'The role name must be a string.',
             'name.max' => 'The role name cannot exceed 100 characters.',
             'status.boolean' => 'The status field must be true or false.',
+            'is_default.boolean' => 'The is_default field must be true or false.',
         ];
     }
 
@@ -51,7 +53,7 @@ class UpdateRoleRequest extends FormRequest
      * Get validated data with normalized values.
      *
      * @param  Role|null  $currentRole
-     * @return array{name: string, status?: bool}
+     * @return array{name: string, status?: bool, is_default?: bool}
      */
     public function validatedRoleData(?Role $currentRole = null): array
     {
@@ -61,6 +63,10 @@ class UpdateRoleRequest extends FormRequest
 
         if ($this->has('status')) {
             $data['status'] = $this->boolean('status');
+        }
+
+        if ($this->has('is_default')) {
+            $data['is_default'] = $this->boolean('is_default');
         }
 
         return $data;

@@ -28,6 +28,7 @@ class StoreRoleRequest extends FormRequest
             'name' => ['required', 'string', 'max:100'],
             'slug' => ['nullable', 'string', 'max:100'],
             'status' => ['nullable', 'boolean'],
+            'is_default' => ['nullable', 'boolean'],
         ];
     }
 
@@ -45,13 +46,14 @@ class StoreRoleRequest extends FormRequest
             'slug.string' => 'The role slug must be a string.',
             'slug.max' => 'The role slug cannot exceed 100 characters.',
             'status.boolean' => 'The status field must be true or false.',
+            'is_default.boolean' => 'The is_default field must be true or false.',
         ];
     }
 
     /**
      * Get normalized role data for creation.
      *
-     * @return array{name: string, slug: string, status: bool}
+     * @return array{name: string, slug: string, status: bool, is_default: bool}
      */
     public function validatedRoleData(): array
     {
@@ -63,6 +65,7 @@ class StoreRoleRequest extends FormRequest
             'name' => $name,
             'slug' => strtolower($slug),
             'status' => $this->boolean('status', true),
+            'is_default' => $this->boolean('is_default', false),
         ];
     }
 

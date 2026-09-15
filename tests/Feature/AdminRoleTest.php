@@ -311,6 +311,39 @@ class AdminRoleTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_update_role_is_default_flag(): void
+    {
+        $role = Role::create([
+            'name' => 'Trader',
+            'slug' => 'trader',
+            'status' => true,
+            'is_default' => true,
+        ]);
+
+        $response = $this->withToken($this->adminToken)->putJson("/api/admin/roles/{$role->id}", [
+            'name' => 'Trader',
+            'is_default' => false,
+            'status' => false,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'data' => [
+                    'name' => 'Trader',
+                    'slug' => 'trader',
+                    'status' => false,
+                    'is_default' => false,
+                ],
+            ]);
+
+        $this->assertDatabaseHas('roles', [
+            'id' => $role->id,
+            'is_default' => false,
+            'status' => false,
+        ]);
+    }
+
     public function test_system_role_slug_is_protected_against_accidental_mutation_on_update(): void
     {
         $this->seed(RoleSeeder::class);

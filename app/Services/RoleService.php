@@ -70,7 +70,7 @@ class RoleService
     /**
      * Create a new custom role.
      *
-     * @param  array{name: string, slug: string, guard_name?: string, status?: bool}  $data
+     * @param  array{name: string, slug: string, guard_name?: string, status?: bool, is_default?: bool}  $data
      */
     public function createRole(array $data): Role
     {
@@ -82,7 +82,7 @@ class RoleService
                 'guard_name' => $data['guard_name'] ?? 'web',
                 'slug' => $slug,
                 'status' => $data['status'] ?? true,
-                'is_default' => false,
+                'is_default' => $data['is_default'] ?? false,
             ]);
 
             $this->clearRoleCache();
@@ -94,7 +94,7 @@ class RoleService
     /**
      * Update an existing role.
      *
-     * @param  array{name: string, guard_name?: string, status?: bool}  $data
+     * @param  array{name: string, guard_name?: string, status?: bool, is_default?: bool}  $data
      */
     public function updateRole(Role $role, array $data): Role
     {
@@ -109,6 +109,10 @@ class RoleService
 
             if (array_key_exists('status', $data)) {
                 $updateData['status'] = (bool) $data['status'];
+            }
+
+            if (array_key_exists('is_default', $data)) {
+                $updateData['is_default'] = (bool) $data['is_default'];
             }
 
             $role->update($updateData);
