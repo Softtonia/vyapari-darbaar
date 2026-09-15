@@ -107,10 +107,6 @@ class UserAuthController extends Controller
         /** @var User|null $user */
         $user = $result['user'] ?? null;
         $roleName = $user?->roles?->first()?->name ?? 'user';
-        $roles = $user?->roles?->pluck('name')->values()->all() ?? [$roleName];
-        if (empty($roles)) {
-            $roles = [$roleName];
-        }
 
         return response()->json([
             'status' => true,
@@ -118,7 +114,6 @@ class UserAuthController extends Controller
             'data' => [
                 'token' => $result['token'],
                 'role' => $roleName,
-                'roles' => $roles,
             ],
         ], 201);
     }
@@ -142,10 +137,6 @@ class UserAuthController extends Controller
         $user = $result['user'];
         $user->loadMissing('roles');
         $roleName = $user->roles->first()?->name ?? 'user';
-        $roles = $user->roles->pluck('name')->values()->all();
-        if (empty($roles)) {
-            $roles = [$roleName];
-        }
 
         return response()->json([
             'status' => true,
@@ -153,7 +144,6 @@ class UserAuthController extends Controller
             'data' => [
                 'token' => $result['token'],
                 'role' => $roleName,
-                'roles' => $roles,
             ],
         ], 200);
     }

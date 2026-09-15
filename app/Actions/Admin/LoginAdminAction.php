@@ -67,10 +67,6 @@ class LoginAdminAction
         ]);
 
         $roleName = $user->roles->first()?->name ?? ($user->is_default ? 'super_admin' : 'admin');
-        $roles = $user->roles->pluck('name')->values()->all();
-        if (empty($roles)) {
-            $roles = [$roleName];
-        }
 
         // Check if an unexpired active token exists for this admin
         $activeToken = DB::table('personal_access_tokens')
@@ -90,7 +86,6 @@ class LoginAdminAction
                 'data' => [
                     'token' => $activeToken->plain_token,
                     'role' => $roleName,
-                    'roles' => $roles,
                 ],
             ];
         }
@@ -111,7 +106,6 @@ class LoginAdminAction
             'data' => [
                 'token' => $tokenResult->plainTextToken,
                 'role' => $roleName,
-                'roles' => $roles,
             ],
         ];
     }
