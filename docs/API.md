@@ -529,7 +529,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 - **Query Parameters:**
   - `search`: filters `name` and `slug`
   - `status`: `1` (active) or `0` (inactive)
-  - `is_system`: `1` (system roles) or `0` (custom roles)
+  - `is_default`: `1` (default roles) or `0` (custom roles)
   - `sort_by`: `id`, `name`, `slug`, `status`, `created_at` (default `id`)
   - `sort_order`: `asc` or `desc` (default `desc`)
   - `per_page`: `1` to `100` (default `20`)
@@ -546,7 +546,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
                   "name": "Admin",
                   "slug": "admin",
                   "status": true,
-                  "is_system": true,
+                  "is_default": true,
                   "created_at": "2026-09-07T06:17:15.000000Z",
                   "updated_at": "2026-09-07T06:17:15.000000Z"
               }
@@ -591,7 +591,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
           "name": "Content Editor",
           "slug": "content-editor",
           "status": true,
-          "is_system": false,
+          "is_default": false,
           "created_at": "2026-09-07T06:18:00.000000Z",
           "updated_at": "2026-09-07T06:18:00.000000Z"
       }
@@ -611,7 +611,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
           "name": "Content Editor",
           "slug": "content-editor",
           "status": true,
-          "is_system": false,
+          "is_default": false,
           "created_at": "2026-09-07T06:18:00.000000Z",
           "updated_at": "2026-09-07T06:18:00.000000Z"
       }
@@ -640,7 +640,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
           "name": "Senior Content Editor",
           "slug": "senior-content-editor",
           "status": false,
-          "is_system": false,
+          "is_default": false,
           "created_at": "2026-09-07T06:18:00.000000Z",
           "updated_at": "2026-09-07T06:19:00.000000Z"
       }

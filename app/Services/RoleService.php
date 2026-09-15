@@ -31,13 +31,12 @@ class RoleService
                 'slug',
                 'status',
                 'is_default',
-                'is_system',
                 'created_at',
                 'updated_at',
             ])
             ->search($filters['search'] ?? null)
             ->status($filters['status'] ?? null)
-            ->isDefault($filters['is_default'] ?? $filters['is_system'] ?? null)
+            ->isDefault($filters['is_default'] ?? null)
             ->sort($sortBy, $sortOrder);
 
         return $query->paginate($perPage);
@@ -57,7 +56,6 @@ class RoleService
                 'slug' => $data['slug'],
                 'status' => $data['status'] ?? true,
                 'is_default' => false,
-                'is_system' => false,
             ]);
 
             $this->clearRoleCache();
@@ -82,8 +80,8 @@ class RoleService
                 $updateData['guard_name'] = $data['guard_name'];
             }
 
-            // Only update slug if it's not a protected system role
-            if (! $role->is_system && isset($data['slug'])) {
+            // Only update slug if it's not a protected default role
+            if (! $role->is_default && isset($data['slug'])) {
                 $updateData['slug'] = $data['slug'];
             }
 
@@ -120,7 +118,7 @@ class RoleService
      */
     public function deleteRole(Role $role): void
     {
-        if ($role->is_default || $role->is_system) {
+        if ($role->is_default) {
             throw new DomainException('System role cannot be deleted.');
         }
 
@@ -144,16 +142,13 @@ class RoleService
             return 0;
         }
 
-        // Atomic check: Ensure NO protected default/system roles are within the requested deletion set
-        $hasSystemRoles = Role::query()
+        // Atomic check: Ensure NO protected default roles are within the requested deletion set
+        $hasDefaultRoles = Role::query()
             ->whereIn('id', $ids)
-            ->where(function ($q) {
-                $q->where('is_default', true)
-                    ->orWhere('is_system', true);
-            })
+            ->where('is_default', true)
             ->exists();
 
-        if ($hasSystemRoles) {
+        if ($hasDefaultRoles) {
             throw new DomainException('System roles cannot be deleted.');
         }
 

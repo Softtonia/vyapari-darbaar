@@ -120,7 +120,7 @@ class AdminRoleTest extends TestCase
                     'name' => 'Content Editor',
                     'slug' => 'content-editor',
                     'status' => true,
-                    'is_system' => false,
+                    'is_default' => false,
                 ],
             ]);
 
@@ -159,7 +159,7 @@ class AdminRoleTest extends TestCase
             'name' => 'Finance',
             'slug' => 'finance',
             'status' => true,
-            'is_system' => false,
+            'is_default' => false,
         ]);
 
         $response = $this->withToken($this->adminToken)->postJson('/api/admin/roles', [
@@ -192,7 +192,7 @@ class AdminRoleTest extends TestCase
                 'data' => [
                     'current_page',
                     'data' => [
-                        '*' => ['id', 'name', 'guard_name', 'slug', 'status', 'is_system', 'created_at', 'updated_at'],
+                        '*' => ['id', 'name', 'guard_name', 'slug', 'status', 'is_default', 'created_at', 'updated_at'],
                     ],
                     'per_page',
                     'total',
@@ -219,8 +219,8 @@ class AdminRoleTest extends TestCase
         $this->assertCount(1, $res2->json('data.data'));
         $this->assertEquals('auditor', $res2->json('data.data.0.slug'));
 
-        // Filter by is_system / is_default
-        $res3 = $this->withToken($this->adminToken)->getJson('/api/admin/roles?is_system=1');
+        // Filter by is_default
+        $res3 = $this->withToken($this->adminToken)->getJson('/api/admin/roles?is_default=1');
         $this->assertCount(8, $res3->json('data.data'));
 
         // Sorting by name asc

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Admin;
 use App\Models\User;
 
 return [
@@ -55,7 +56,7 @@ return [
         ],
         'admins' => [
             'driver' => 'eloquent',
-            'model' => User::class,
+            'model' => Admin::class,
         ],
     ],
 
@@ -67,10 +68,10 @@ return [
             'throttle' => 60,
         ],
         'admins' => [
-            'provider' => 'users',
+            'provider' => 'admins',
             'table' => 'password_reset_tokens',
-            'expire' => 60,
-            'throttle' => 60,
+            'expire' => 10,
+            'throttle' => 600,
         ],
     ],
 

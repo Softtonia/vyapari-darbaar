@@ -29,6 +29,18 @@ class ForgotPasswordAdminAction
             ];
         }
 
+        $hasAccess = (bool) $admin->is_default
+            || $admin->hasAnyRole(['super_admin', 'admin', 'editor'])
+            || $admin->getAllPermissions()->isNotEmpty();
+
+        if (! $hasAccess) {
+            return [
+                'status' => false,
+                'message' => 'No administrator account found with this email address.',
+                'code' => 404,
+            ];
+        }
+
         if ($admin->status !== 'active') {
             return [
                 'status' => false,

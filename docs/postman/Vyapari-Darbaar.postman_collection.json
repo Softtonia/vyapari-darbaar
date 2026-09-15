@@ -733,7 +733,7 @@
                                             "disabled": true
                                         },
                                         {
-                                            "key": "is_system",
+                                            "key": "is_default",
                                             "value": "0",
                                             "disabled": true
                                         }

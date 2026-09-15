@@ -70,8 +70,8 @@ class UpdateRoleRequest extends FormRequest
     {
         $name = trim((string) $this->input('name'));
 
-        // If default/system role, preserve original system slug to protect internal invariants
-        if ($currentRole->is_default || $currentRole->is_system) {
+        // If default role, preserve original system slug to protect internal invariants
+        if ($currentRole->is_default) {
             $slug = $currentRole->slug;
         } elseif ($this->has('slug') && ! blank($this->input('slug'))) {
             $slug = strtolower(Str::slug((string) $this->input('slug')));

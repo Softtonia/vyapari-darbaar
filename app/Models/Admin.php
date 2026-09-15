@@ -44,6 +44,15 @@ class Admin extends User
                 $admin->attributes['is_default'] = true;
             }
         });
+
+        static::addGlobalScope('admin', function ($builder) {
+            $builder->where(function ($query) {
+                $query->where('is_default', true)
+                    ->orWhereHas('roles', function ($q) {
+                        $q->whereIn('name', ['super_admin', 'admin', 'editor']);
+                    });
+            });
+        });
     }
 
     /**

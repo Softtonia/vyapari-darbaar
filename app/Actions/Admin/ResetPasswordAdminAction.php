@@ -23,7 +23,20 @@ class ResetPasswordAdminAction
             ->where('email', $normalizedEmail)
             ->first();
 
-        if (! $admin || ! $admin->hasAnyRole(['super_admin', 'admin', 'editor'])) {
+        if (! $admin) {
+            return [
+                'success' => false,
+                'message' => 'No administrator account found with this email address.',
+                'error' => 'No administrator account found with this email address.',
+                'code' => 404,
+            ];
+        }
+
+        $hasAccess = (bool) $admin->is_default
+            || $admin->hasAnyRole(['super_admin', 'admin', 'editor'])
+            || $admin->getAllPermissions()->isNotEmpty();
+
+        if (! $hasAccess) {
             return [
                 'success' => false,
                 'message' => 'No administrator account found with this email address.',
