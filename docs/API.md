@@ -2973,6 +2973,248 @@ Comprehensive enterprise notification management module supporting push notifica
    php artisan schedule:run
    ```
 
+---
+
+## 20. Commodity Master Module
+
+The Commodity Master represents the core agricultural commodities traded on Vyapari Darbaar (e.g. Wheat, Chana, Soybean, Mustard).
+
+### 20.1 Approved Business & Technical Fields
+
+| Field | Type | Rules | Description |
+|---|---|---|---|
+| `id` | Integer | Auto-increment Primary Key | Unique database identifier |
+| `commodity_category_id` | Foreign Key | Required, exists in `commodity_categories` | Parent category reference |
+| `name` | String(150) | Required | Display name of commodity |
+| `slug` | String(180) | Nullable / Auto-generated, Unique | URL-friendly unique slug (checked with soft-deletes) |
+| `code` | String(50) | Required, Unique across commodities | Business identifier (normalized trim & uppercase, e.g. `WHEAT`) |
+| `unit` | String(30) | Required | Standard measurement unit (normalized trim & uppercase, e.g. `QUINTAL`, `KG`, `MT`, `BAG`) |
+| `image` | String(2048) / File | Nullable, Image file (`jpg,jpeg,png,webp`, max 2MB) | Relative storage path (`commodities/...`), public URL returned in API |
+| `description` | Text | Nullable | Commodity description / specifications |
+| `sort_order` | UnsignedSmallInt | Nullable, Default: 0 | Display sequence order |
+| `status` | Boolean | Nullable, Default: true | Active/inactive availability status |
+| `created_by` | Foreign Key | Nullable | Admin creator ID |
+| `updated_by` | Foreign Key | Nullable | Admin last updater ID |
+| `created_at` / `updated_at` | Timestamps | ISO 8601 | Record audit timestamps |
+| `deleted_at` | SoftDeletes | Nullable timestamp | Soft-deletion indicator |
+
+---
+
+### 20.2 List Commodities
+
+- **Method:** `GET`
+- **URI:** `/api/admin/commodities`
+- **Headers:** `Authorization: Bearer <admin_token>`
+- **Query Parameters:**
+  - `search`: Search across `name`, `code`, or `slug`
+  - `commodity_category_id`: Filter by category ID
+  - `status`: `true` or `false`
+  - `sort_by`: `id`, `name`, `slug`, `code`, `unit`, `commodity_category_id`, `sort_order`, `status`, `created_at`, `updated_at` (default: `sort_order`)
+  - `sort_order`: `asc` or `desc` (default: `asc`)
+  - `page`: Page number
+  - `per_page`: Number of records (1 to 100, default: 20)
+
+**Response (200 OK):**
+```json
+{
+    "status": true,
+    "message": "Commodities fetched successfully.",
+    "data": {
+        "items": [
+            {
+                "id": 1,
+                "commodity_category_id": 1,
+                "category": {
+                    "id": 1,
+                    "name": "Grains",
+                    "slug": "grains"
+                },
+                "name": "Wheat",
+                "slug": "wheat",
+                "code": "WHEAT",
+                "unit": "QUINTAL",
+                "image": "http://localhost/storage/commodities/wheat.webp",
+                "sort_order": 1,
+                "status": true,
+                "created_at": "2026-09-08T00:00:00.000000Z",
+                "updated_at": "2026-09-08T00:00:00.000000Z"
+            }
+        ],
+        "pagination": {
+            "current_page": 1,
+            "per_page": 20,
+            "total": 1,
+            "last_page": 1
+        }
+    }
+}
+```
+
+---
+
+### 20.3 Commodity Options (Dropdown)
+
+- **Method:** `GET`
+- **URI:** `/api/admin/commodities/options`
+- **Headers:** `Authorization: Bearer <admin_token>`
+- **Query Parameters:**
+  - `commodity_category_id`: (Optional) Filter options by category
+
+**Response (200 OK):**
+```json
+{
+    "status": true,
+    "message": "Commodity options retrieved successfully.",
+    "data": [
+        {
+            "id": 1,
+            "commodity_category_id": 1,
+            "name": "Wheat",
+            "slug": "wheat",
+            "code": "WHEAT",
+            "unit": "QUINTAL"
+        }
+    ]
+}
+```
+
+---
+
+### 20.4 Create Commodity
+
+- **Method:** `POST`
+- **URI:** `/api/admin/commodities`
+- **Headers:** `Authorization: Bearer <admin_token>`, `Accept: application/json`
+- **Content-Type:** `multipart/form-data` or `application/json`
+- **Payload:**
+  - `commodity_category_id`: `1` (required)
+  - `name`: `Wheat` (required)
+  - `slug`: `wheat` (optional)
+  - `code`: `WHEAT` (required, unique)
+  - `unit`: `QUINTAL` (required)
+  - `image`: `[File: binary image (jpg, jpeg, png, webp, max 2MB)]` (optional)
+  - `description`: `Standard milling wheat.` (optional)
+  - `sort_order`: `1` (optional)
+  - `status`: `1` or `true` (optional)
+
+**Response (201 Created):**
+```json
+{
+    "status": true,
+    "message": "Commodity created successfully.",
+    "data": {
+        "id": 1,
+        "commodity_category_id": 1,
+        "category": {
+            "id": 1,
+            "name": "Grains",
+            "slug": "grains"
+        },
+        "name": "Wheat",
+        "slug": "wheat",
+        "code": "WHEAT",
+        "unit": "QUINTAL",
+        "image": "http://localhost/storage/commodities/abc123xyz.webp",
+        "description": "Standard milling wheat.",
+        "sort_order": 1,
+        "status": true,
+        "created_at": "2026-09-15T12:00:00.000000Z",
+        "updated_at": "2026-09-15T12:00:00.000000Z"
+    }
+}
+```
+
+---
+
+### 20.5 Get Commodity Detail
+
+- **Method:** `GET`
+- **URI:** `/api/admin/commodities/{id}`
+- **Headers:** `Authorization: Bearer <admin_token>`
+
+**Response (200 OK):**
+```json
+{
+    "status": true,
+    "message": "Commodity retrieved successfully.",
+    "data": {
+        "id": 1,
+        "commodity_category_id": 1,
+        "category": {
+            "id": 1,
+            "name": "Grains",
+            "slug": "grains"
+        },
+        "name": "Wheat",
+        "slug": "wheat",
+        "code": "WHEAT",
+        "unit": "QUINTAL",
+        "image": "http://localhost/storage/commodities/abc123xyz.webp",
+        "description": "Standard milling wheat.",
+        "sort_order": 1,
+        "status": true,
+        "created_at": "2026-09-15T12:00:00.000000Z",
+        "updated_at": "2026-09-15T12:00:00.000000Z",
+        "creator": {
+            "id": 1,
+            "name": "Super Admin",
+            "email": "admin@example.com"
+        },
+        "updater": null
+    }
+}
+```
+
+---
+
+### 20.6 Update Commodity
+
+- **Method:** `PUT` / `POST` (with `_method: PUT` for multipart file uploads)
+- **URI:** `/api/admin/commodities/{id}`
+- **Headers:** `Authorization: Bearer <admin_token>`, `Accept: application/json`
+- **Payload:** Any subset of fields (`name`, `code`, `unit`, `image`, `description`, `sort_order`, `status`, `commodity_category_id`).
+
+**Response (200 OK):**
+```json
+{
+    "status": true,
+    "message": "Commodity updated successfully.",
+    "data": {
+        "id": 1,
+        "commodity_category_id": 1,
+        "category": {
+            "id": 1,
+            "name": "Grains",
+            "slug": "grains"
+        },
+        "name": "Wheat (Premium Lokwan)",
+        "slug": "wheat-premium-lokwan",
+        "code": "WHEAT",
+        "unit": "QUINTAL",
+        "image": "http://localhost/storage/commodities/newimage123.webp",
+        "description": "High grade milling wheat.",
+        "sort_order": 1,
+        "status": true,
+        "created_at": "2026-09-15T12:00:00.000000Z",
+        "updated_at": "2026-09-15T12:05:00.000000Z"
+    }
+}
+```
+
+---
+
+### 20.7 Update Commodity Status & Bulk Operations
+
+- **Single Status Toggle:** `PATCH /api/admin/commodities/{id}/status`
+  - Payload: `{"status": false}`
+- **Bulk Status Update:** `PATCH /api/admin/commodities/bulk-status`
+  - Payload: `{"ids": [1, 2, 3], "status": true}`
+- **Single Soft Delete:** `DELETE /api/admin/commodities/{id}`
+  - *Protected:* Cannot delete if subcategories, varieties, or grades are assigned (returns HTTP 409 `COMMODITY_IN_USE`).
+- **Bulk Soft Delete:** `POST /api/admin/commodities/bulk-delete`
+  - Payload: `{"ids": [1, 2, 3]}`
+
+
 
 
 

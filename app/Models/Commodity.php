@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Commodity extends Model
 {
@@ -29,6 +30,9 @@ class Commodity extends Model
         'commodity_category_id',
         'name',
         'slug',
+        'code',
+        'unit',
+        'image',
         'description',
         'sort_order',
         'status',
@@ -45,6 +49,8 @@ class Commodity extends Model
         'id',
         'name',
         'slug',
+        'code',
+        'unit',
         'commodity_category_id',
         'sort_order',
         'status',
@@ -168,7 +174,19 @@ class Commodity extends Model
     }
 
     /**
-     * Scope query to search by name or slug.
+     * Get the fully qualified public URL for commodity image.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (empty($this->image)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->image);
+    }
+
+    /**
+     * Scope query to search by name, code, or slug.
      *
      * @param  Builder<Commodity>  $query
      * @return Builder<Commodity>
@@ -180,6 +198,7 @@ class Commodity extends Model
         if ($term !== '') {
             $query->where(function (Builder $q) use ($term) {
                 $q->where('name', 'LIKE', "%{$term}%")
+                    ->orWhere('code', 'LIKE', "%{$term}%")
                     ->orWhere('slug', 'LIKE', "%{$term}%");
             });
         }

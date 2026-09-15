@@ -16,48 +16,48 @@ class CommoditySeeder extends Seeder
         // Category slug => Array of commodities
         $catalog = [
             'grains' => [
-                ['name' => 'Wheat', 'slug' => 'wheat', 'sort_order' => 1],
-                ['name' => 'Paddy / Rice', 'slug' => 'paddy-rice', 'sort_order' => 2],
-                ['name' => 'Maize', 'slug' => 'maize', 'sort_order' => 3],
-                ['name' => 'Barley', 'slug' => 'barley', 'sort_order' => 4],
+                ['name' => 'Wheat', 'slug' => 'wheat', 'code' => 'WHEAT', 'unit' => 'QUINTAL', 'sort_order' => 1],
+                ['name' => 'Paddy / Rice', 'slug' => 'paddy-rice', 'code' => 'PADDY_RICE', 'unit' => 'QUINTAL', 'sort_order' => 2],
+                ['name' => 'Maize', 'slug' => 'maize', 'code' => 'MAIZE', 'unit' => 'QUINTAL', 'sort_order' => 3],
+                ['name' => 'Barley', 'slug' => 'barley', 'code' => 'BARLEY', 'unit' => 'QUINTAL', 'sort_order' => 4],
             ],
             'pulses' => [
-                ['name' => 'Chana', 'slug' => 'chana', 'sort_order' => 1],
-                ['name' => 'Tur / Arhar', 'slug' => 'tur-arhar', 'sort_order' => 2],
-                ['name' => 'Moong', 'slug' => 'moong', 'sort_order' => 3],
-                ['name' => 'Urad', 'slug' => 'urad', 'sort_order' => 4],
-                ['name' => 'Masoor', 'slug' => 'masoor', 'sort_order' => 5],
+                ['name' => 'Chana', 'slug' => 'chana', 'code' => 'CHANA', 'unit' => 'QUINTAL', 'sort_order' => 1],
+                ['name' => 'Tur / Arhar', 'slug' => 'tur-arhar', 'code' => 'TUR_ARHAR', 'unit' => 'QUINTAL', 'sort_order' => 2],
+                ['name' => 'Moong', 'slug' => 'moong', 'code' => 'MOONG', 'unit' => 'QUINTAL', 'sort_order' => 3],
+                ['name' => 'Urad', 'slug' => 'urad', 'code' => 'URAD', 'unit' => 'QUINTAL', 'sort_order' => 4],
+                ['name' => 'Masoor', 'slug' => 'masoor', 'code' => 'MASOOR', 'unit' => 'QUINTAL', 'sort_order' => 5],
             ],
             'oilseeds' => [
-                ['name' => 'Soybean', 'slug' => 'soybean', 'sort_order' => 1],
-                ['name' => 'Mustard / Rapeseed', 'slug' => 'mustard-rapeseed', 'sort_order' => 2],
-                ['name' => 'Groundnut', 'slug' => 'groundnut', 'sort_order' => 3],
+                ['name' => 'Soybean', 'slug' => 'soybean', 'code' => 'SOYBEAN', 'unit' => 'QUINTAL', 'sort_order' => 1],
+                ['name' => 'Mustard / Rapeseed', 'slug' => 'mustard-rapeseed', 'code' => 'MUSTARD', 'unit' => 'QUINTAL', 'sort_order' => 2],
+                ['name' => 'Groundnut', 'slug' => 'groundnut', 'code' => 'GROUNDNUT', 'unit' => 'QUINTAL', 'sort_order' => 3],
             ],
             'edible-oils' => [
-                ['name' => 'Refined Soy Oil', 'slug' => 'refined-soy-oil', 'sort_order' => 1],
-                ['name' => 'Mustard Oil', 'slug' => 'mustard-oil', 'sort_order' => 2],
-                ['name' => 'Crude Palm Oil (CPO)', 'slug' => 'crude-palm-oil-cpo', 'sort_order' => 3],
+                ['name' => 'Refined Soy Oil', 'slug' => 'refined-soy-oil', 'code' => 'REFINED_SOY_OIL', 'unit' => '10_KG', 'sort_order' => 1],
+                ['name' => 'Mustard Oil', 'slug' => 'mustard-oil', 'code' => 'MUSTARD_OIL', 'unit' => '10_KG', 'sort_order' => 2],
+                ['name' => 'Crude Palm Oil (CPO)', 'slug' => 'crude-palm-oil-cpo', 'code' => 'CPO', 'unit' => '10_KG', 'sort_order' => 3],
             ],
             'spices' => [
-                ['name' => 'Jeera (Cumin)', 'slug' => 'jeera-cumin', 'sort_order' => 1],
-                ['name' => 'Turmeric', 'slug' => 'turmeric', 'sort_order' => 2],
-                ['name' => 'Coriander', 'slug' => 'coriander', 'sort_order' => 3],
+                ['name' => 'Jeera (Cumin)', 'slug' => 'jeera-cumin', 'code' => 'JEERA', 'unit' => 'QUINTAL', 'sort_order' => 1],
+                ['name' => 'Turmeric', 'slug' => 'turmeric', 'code' => 'TURMERIC', 'unit' => 'QUINTAL', 'sort_order' => 2],
+                ['name' => 'Coriander', 'slug' => 'coriander', 'code' => 'CORIANDER', 'unit' => 'QUINTAL', 'sort_order' => 3],
             ],
             'dry-fruits-nuts' => [
-                ['name' => 'Almonds', 'slug' => 'almonds', 'sort_order' => 1],
-                ['name' => 'Cashews', 'slug' => 'cashews', 'sort_order' => 2],
+                ['name' => 'Almonds', 'slug' => 'almonds', 'code' => 'ALMONDS', 'unit' => 'KG', 'sort_order' => 1],
+                ['name' => 'Cashews', 'slug' => 'cashews', 'code' => 'CASHEWS', 'unit' => 'KG', 'sort_order' => 2],
             ],
             'sugar-sweeteners' => [
-                ['name' => 'Sugar', 'slug' => 'sugar', 'sort_order' => 1],
-                ['name' => 'Jaggery (Gur)', 'slug' => 'jaggery-gur', 'sort_order' => 2],
+                ['name' => 'Sugar', 'slug' => 'sugar', 'code' => 'SUGAR', 'unit' => 'QUINTAL', 'sort_order' => 1],
+                ['name' => 'Jaggery (Gur)', 'slug' => 'jaggery-gur', 'code' => 'JAGGERY', 'unit' => 'QUINTAL', 'sort_order' => 2],
             ],
             'feed-by-products' => [
-                ['name' => 'Soy Meal (DOC)', 'slug' => 'soy-meal-doc', 'sort_order' => 1],
-                ['name' => 'Cottonseed Cake', 'slug' => 'cottonseed-cake', 'sort_order' => 2],
+                ['name' => 'Soy Meal (DOC)', 'slug' => 'soy-meal-doc', 'code' => 'SOY_MEAL_DOC', 'unit' => 'MT', 'sort_order' => 1],
+                ['name' => 'Cottonseed Cake', 'slug' => 'cottonseed-cake', 'code' => 'COTTONSEED_CAKE', 'unit' => 'QUINTAL', 'sort_order' => 2],
             ],
             'international-benchmarks' => [
-                ['name' => 'CBOT Soybean', 'slug' => 'cbot-soybean', 'sort_order' => 1],
-                ['name' => 'BMD Crude Palm Oil', 'slug' => 'bmd-crude-palm-oil', 'sort_order' => 2],
+                ['name' => 'CBOT Soybean', 'slug' => 'cbot-soybean', 'code' => 'CBOT_SOYBEAN', 'unit' => 'BUSHEL', 'sort_order' => 1],
+                ['name' => 'BMD Crude Palm Oil', 'slug' => 'bmd-crude-palm-oil', 'code' => 'BMD_CPO', 'unit' => 'MT', 'sort_order' => 2],
             ],
         ];
 
@@ -74,6 +74,8 @@ class CommoditySeeder extends Seeder
                     [
                         'commodity_category_id' => $category->id,
                         'name' => $item['name'],
+                        'code' => $item['code'],
+                        'unit' => $item['unit'],
                         'sort_order' => $item['sort_order'] ?? 0,
                         'status' => true,
                     ]

@@ -74,6 +74,8 @@ class CommodityVarietyManagementTest extends TestCase
             'commodity_category_id' => $this->categoryGrains->id,
             'name' => 'Wheat',
             'slug' => 'wheat',
+            'code' => 'WHEAT',
+            'unit' => 'QUINTAL',
             'status' => true,
         ]);
 
@@ -81,6 +83,8 @@ class CommodityVarietyManagementTest extends TestCase
             'commodity_category_id' => $this->categoryPulses->id,
             'name' => 'Chana',
             'slug' => 'chana',
+            'code' => 'CHANA',
+            'unit' => 'QUINTAL',
             'status' => true,
         ]);
 

@@ -8,12 +8,20 @@ use App\Models\CommoditySubcategory;
 use App\Models\CommodityVariety;
 use DomainException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Throwable;
 
 class CommodityService
 {
+    public const STORAGE_DISK = 'public';
+
+    public const IMAGE_STORAGE_DIR = 'commodities';
+
     /**
      * Cache key prefix for options.
      */
@@ -46,6 +54,9 @@ class CommodityService
                 'commodity_category_id',
                 'name',
                 'slug',
+                'code',
+                'unit',
+                'image',
                 'sort_order',
                 'status',
                 'created_at',
@@ -78,7 +89,7 @@ class CommodityService
                     $query->active();
                 })
                 ->when($categoryId !== null, fn ($q) => $q->where('commodity_category_id', $categoryId))
-                ->select(['id', 'commodity_category_id', 'name', 'slug'])
+                ->select(['id', 'commodity_category_id', 'name', 'slug', 'code', 'unit'])
                 ->orderBy('sort_order', 'asc')
                 ->orderBy('id', 'asc')
                 ->get()
@@ -93,21 +104,47 @@ class CommodityService
      */
     public function createCommodity(array $data, ?int $adminId = null): Commodity
     {
-        $commodity = DB::transaction(function () use ($data, $adminId) {
-            $slug = ! empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['name']);
-            $slug = $this->generateUniqueSlug($slug);
+        $disk = Storage::disk(self::STORAGE_DISK);
+        $storedImagePath = null;
 
-            return Commodity::create([
-                'commodity_category_id' => (int) $data['commodity_category_id'],
-                'name' => $data['name'],
-                'slug' => $slug,
-                'description' => $data['description'] ?? null,
-                'sort_order' => $data['sort_order'] ?? 0,
-                'status' => $data['status'] ?? true,
-                'created_by' => $adminId,
-                'updated_by' => $adminId,
-            ]);
-        });
+        // 1. Guarded file storage
+        if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
+            $storedImagePath = $data['image']->store(self::IMAGE_STORAGE_DIR, self::STORAGE_DISK);
+            if ($storedImagePath === false) {
+                throw new \RuntimeException('Failed to store commodity image.');
+            }
+        }
+
+        // 2. Database transaction
+        try {
+            $commodity = DB::transaction(function () use ($data, $adminId, $storedImagePath) {
+                $slug = ! empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['name']);
+                $slug = $this->generateUniqueSlug($slug);
+
+                $code = strtoupper(trim((string) $data['code']));
+                $unit = strtoupper(trim((string) $data['unit']));
+
+                return Commodity::create([
+                    'commodity_category_id' => (int) $data['commodity_category_id'],
+                    'name' => $data['name'],
+                    'slug' => $slug,
+                    'code' => $code,
+                    'unit' => $unit,
+                    'image' => $storedImagePath,
+                    'description' => $data['description'] ?? null,
+                    'sort_order' => $data['sort_order'] ?? 0,
+                    'status' => $data['status'] ?? true,
+                    'created_by' => $adminId,
+                    'updated_by' => $adminId,
+                ]);
+            });
+        } catch (Throwable $e) {
+            // Clean up newly stored file if DB transaction failed
+            if ($storedImagePath) {
+                $disk->delete($storedImagePath);
+            }
+            throw $e;
+        }
 
         $this->clearCache((int) $commodity->commodity_category_id, [], (int) $commodity->id);
 
@@ -122,43 +159,87 @@ class CommodityService
     public function updateCommodity(Commodity $commodity, array $data, ?int $adminId = null): Commodity
     {
         $oldCategoryId = (int) $commodity->commodity_category_id;
+        $oldImage = $commodity->image;
+        $disk = Storage::disk(self::STORAGE_DISK);
+        $newStoredImagePath = null;
 
-        $updatedCommodity = DB::transaction(function () use ($commodity, $data, $adminId) {
-            $updateData = [];
-
-            if (array_key_exists('commodity_category_id', $data)) {
-                $updateData['commodity_category_id'] = (int) $data['commodity_category_id'];
+        // 1. Guarded file storage
+        if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
+            $newStoredImagePath = $data['image']->store(self::IMAGE_STORAGE_DIR, self::STORAGE_DISK);
+            if ($newStoredImagePath === false) {
+                throw new \RuntimeException('Failed to store commodity image.');
             }
+        }
 
-            if (array_key_exists('name', $data)) {
-                $updateData['name'] = $data['name'];
+        // 2. Database transaction
+        try {
+            $updatedCommodity = DB::transaction(function () use ($commodity, $data, $adminId, $newStoredImagePath) {
+                $updateData = [];
+
+                if (array_key_exists('commodity_category_id', $data)) {
+                    $updateData['commodity_category_id'] = (int) $data['commodity_category_id'];
+                }
+
+                if (array_key_exists('name', $data)) {
+                    $updateData['name'] = $data['name'];
+                }
+
+                // If slug is explicitly supplied, normalize and update; otherwise retain old slug
+                if (array_key_exists('slug', $data) && ! empty($data['slug'])) {
+                    $updateData['slug'] = Str::slug($data['slug']);
+                }
+
+                if (array_key_exists('code', $data)) {
+                    $updateData['code'] = strtoupper(trim((string) $data['code']));
+                }
+
+                if (array_key_exists('unit', $data)) {
+                    $updateData['unit'] = strtoupper(trim((string) $data['unit']));
+                }
+
+                if ($newStoredImagePath !== null) {
+                    $updateData['image'] = $newStoredImagePath;
+                }
+
+                if (array_key_exists('description', $data)) {
+                    $updateData['description'] = $data['description'];
+                }
+
+                if (array_key_exists('sort_order', $data)) {
+                    $updateData['sort_order'] = (int) $data['sort_order'];
+                }
+
+                if (array_key_exists('status', $data)) {
+                    $updateData['status'] = (bool) $data['status'];
+                }
+
+                if ($adminId !== null) {
+                    $updateData['updated_by'] = $adminId;
+                }
+
+                $commodity->update($updateData);
+
+                return $commodity->fresh(['category:id,name,slug', 'creator', 'updater']);
+            });
+        } catch (Throwable $dbException) {
+            if ($newStoredImagePath !== null) {
+                $disk->delete($newStoredImagePath);
             }
+            throw $dbException;
+        }
 
-            // If slug is explicitly supplied, normalize and update; otherwise retain old slug
-            if (array_key_exists('slug', $data) && ! empty($data['slug'])) {
-                $updateData['slug'] = Str::slug($data['slug']);
+        // 3. Post-commit: Superseded old file cleanup (fail-safe)
+        if ($newStoredImagePath !== null && ! empty($oldImage) && $oldImage !== $newStoredImagePath) {
+            try {
+                if ($disk->exists($oldImage)) {
+                    $disk->delete($oldImage);
+                }
+            } catch (Throwable $cleanupException) {
+                Log::warning('Failed to delete superseded old commodity image: '.$oldImage, [
+                    'error' => $cleanupException->getMessage(),
+                ]);
             }
-
-            if (array_key_exists('description', $data)) {
-                $updateData['description'] = $data['description'];
-            }
-
-            if (array_key_exists('sort_order', $data)) {
-                $updateData['sort_order'] = (int) $data['sort_order'];
-            }
-
-            if (array_key_exists('status', $data)) {
-                $updateData['status'] = (bool) $data['status'];
-            }
-
-            if ($adminId !== null) {
-                $updateData['updated_by'] = $adminId;
-            }
-
-            $commodity->update($updateData);
-
-            return $commodity->fresh(['category:id,name,slug', 'creator', 'updater']);
-        });
+        }
 
         $newCategoryId = (int) $updatedCommodity->commodity_category_id;
         $categoryIds = array_unique([$oldCategoryId, $newCategoryId]);

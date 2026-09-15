@@ -68,6 +68,8 @@ class CommoditySubcategoryManagementTest extends TestCase
             'commodity_category_id' => $this->categoryGrains->id,
             'name' => 'Wheat',
             'slug' => 'wheat',
+            'code' => 'WHEAT',
+            'unit' => 'QUINTAL',
             'status' => true,
         ]);
 
@@ -75,6 +77,8 @@ class CommoditySubcategoryManagementTest extends TestCase
             'commodity_category_id' => $this->categoryPulses->id,
             'name' => 'Chana',
             'slug' => 'chana',
+            'code' => 'CHANA',
+            'unit' => 'QUINTAL',
             'status' => true,
         ]);
 
@@ -283,6 +287,8 @@ class CommoditySubcategoryManagementTest extends TestCase
             'commodity_category_id' => $this->categoryGrains->id,
             'name' => 'Barley Inactive',
             'slug' => 'barley-inactive',
+            'code' => 'BARLEY_INACTIVE',
+            'unit' => 'QUINTAL',
             'status' => false,
         ]);
 
@@ -305,6 +311,8 @@ class CommoditySubcategoryManagementTest extends TestCase
             'commodity_category_id' => $inactiveCategory->id,
             'name' => 'Mustard Active',
             'slug' => 'mustard-active',
+            'code' => 'MUSTARD_ACTIVE',
+            'unit' => 'QUINTAL',
             'status' => true,
         ]);
 

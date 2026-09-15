@@ -38,6 +38,16 @@ class UpdateCommodityRequest extends FormRequest
             $sanitized['slug'] = $slug !== '' ? Str::slug($slug) : null;
         }
 
+        if ($this->has('code')) {
+            $code = strtoupper(trim((string) $this->input('code')));
+            $sanitized['code'] = $code !== '' ? $code : null;
+        }
+
+        if ($this->has('unit')) {
+            $unit = strtoupper(trim((string) $this->input('unit')));
+            $sanitized['unit'] = $unit !== '' ? $unit : null;
+        }
+
         if ($this->has('description')) {
             $desc = trim((string) $this->input('description'));
             $sanitized['description'] = $desc !== '' ? $desc : null;
@@ -81,9 +91,29 @@ class UpdateCommodityRequest extends FormRequest
             'commodity_category_id' => $categoryRule,
             'name' => ['sometimes', 'required', 'string', 'max:150'],
             'slug' => ['sometimes', 'nullable', 'string', 'max:180', Rule::unique('commodities', 'slug')->ignore($commodityId)],
+            'code' => ['sometimes', 'required', 'string', 'max:50', Rule::unique('commodities', 'code')->ignore($commodityId)],
+            'unit' => ['sometimes', 'required', 'string', 'max:30'],
+            'image' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
             'status' => ['nullable', 'boolean'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'code.required' => 'Commodity code is required.',
+            'code.unique' => 'A commodity with this code already exists.',
+            'unit.required' => 'Commodity unit is required.',
+            'image.image' => 'The image must be a valid image file.',
+            'image.mimes' => 'The image must be a file of type: jpg, jpeg, png, webp.',
+            'image.max' => 'The image size may not exceed 2MB.',
         ];
     }
 }

@@ -23,6 +23,8 @@ class StoreCommodityRequest extends FormRequest
     {
         $name = $this->has('name') ? trim((string) $this->input('name')) : null;
         $slug = $this->has('slug') && $this->input('slug') !== null ? trim((string) $this->input('slug')) : null;
+        $code = $this->has('code') && $this->input('code') !== null ? strtoupper(trim((string) $this->input('code'))) : null;
+        $unit = $this->has('unit') && $this->input('unit') !== null ? strtoupper(trim((string) $this->input('unit'))) : null;
         $desc = $this->has('description') ? trim((string) $this->input('description')) : null;
 
         $normalizedSlug = null;
@@ -35,6 +37,8 @@ class StoreCommodityRequest extends FormRequest
         $this->merge([
             'name' => $name !== '' ? $name : null,
             'slug' => $normalizedSlug,
+            'code' => $code !== '' ? $code : null,
+            'unit' => $unit !== '' ? $unit : null,
             'description' => $desc !== '' ? $desc : null,
             'status' => $this->has('status') ? filter_var($this->input('status'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true : true,
             'sort_order' => $this->has('sort_order') && $this->input('sort_order') !== null && $this->input('sort_order') !== '' ? (int) $this->input('sort_order') : 0,
@@ -58,9 +62,29 @@ class StoreCommodityRequest extends FormRequest
             ],
             'name' => ['required', 'string', 'max:150'],
             'slug' => ['nullable', 'string', 'max:180', Rule::unique('commodities', 'slug')],
+            'code' => ['required', 'string', 'max:50', Rule::unique('commodities', 'code')],
+            'unit' => ['required', 'string', 'max:30'],
+            'image' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
             'status' => ['nullable', 'boolean'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'code.required' => 'Commodity code is required.',
+            'code.unique' => 'A commodity with this code already exists.',
+            'unit.required' => 'Commodity unit is required.',
+            'image.image' => 'The image must be a valid image file.',
+            'image.mimes' => 'The image must be a file of type: jpg, jpeg, png, webp.',
+            'image.max' => 'The image size may not exceed 2MB.',
         ];
     }
 }

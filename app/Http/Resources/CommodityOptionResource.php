@@ -22,6 +22,8 @@ class CommodityOptionResource extends JsonResource
             'commodity_category_id' => $this->commodity_category_id,
             'name' => $this->name,
             'slug' => $this->slug,
+            'code' => $this->code,
+            'unit' => $this->unit,
         ];
     }
 }
