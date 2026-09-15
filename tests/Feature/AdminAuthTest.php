@@ -41,6 +41,9 @@ class AdminAuthTest extends TestCase
             ]);
 
         $this->assertNotEmpty($response->json('data.token'));
+        $this->assertEquals('super_admin', $response->json('data.role'));
+        $this->assertIsArray($response->json('data.roles'));
+        $this->assertContains('super_admin', $response->json('data.roles'));
         $this->assertNull($response->json('data.admin'));
         $this->assertNull($response->json('data.token_type'));
     }

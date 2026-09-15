@@ -104,11 +104,21 @@ class UserAuthController extends Controller
         $deviceName = (string) $request->input('device_name', $request->header('User-Agent', 'user-device'));
         $result = $action->execute($request->validated(), $deviceName);
 
+        /** @var User|null $user */
+        $user = $result['user'] ?? null;
+        $roleName = $user?->roles?->first()?->name ?? 'user';
+        $roles = $user?->roles?->pluck('name')->values()->all() ?? [$roleName];
+        if (empty($roles)) {
+            $roles = [$roleName];
+        }
+
         return response()->json([
             'status' => true,
             'message' => 'User registered successfully.',
             'data' => [
                 'token' => $result['token'],
+                'role' => $roleName,
+                'roles' => $roles,
             ],
         ], 201);
     }
@@ -128,11 +138,22 @@ class UserAuthController extends Controller
             ], $result['code']);
         }
 
+        /** @var User $user */
+        $user = $result['user'];
+        $user->loadMissing('roles');
+        $roleName = $user->roles->first()?->name ?? 'user';
+        $roles = $user->roles->pluck('name')->values()->all();
+        if (empty($roles)) {
+            $roles = [$roleName];
+        }
+
         return response()->json([
             'status' => true,
             'message' => 'Login successful.',
             'data' => [
                 'token' => $result['token'],
+                'role' => $roleName,
+                'roles' => $roles,
             ],
         ], 200);
     }
