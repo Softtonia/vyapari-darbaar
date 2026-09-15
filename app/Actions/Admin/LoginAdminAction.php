@@ -34,6 +34,13 @@ class LoginAdminAction
         }
 
         if (! Hash::check($password, $user->password)) {
+            \App\Services\UserActivityService::log(
+                $user,
+                'login_failed',
+                "Failed admin login attempt: incorrect password from device '{$tokenName}'",
+                ['device_name' => $tokenName, 'reason' => 'incorrect_password']
+            );
+
             return [
                 'success' => false,
                 'message' => 'Incorrect password.',
@@ -47,6 +54,13 @@ class LoginAdminAction
             || $user->getAllPermissions()->isNotEmpty();
 
         if (! $hasAccess) {
+            \App\Services\UserActivityService::log(
+                $user,
+                'login_failed',
+                "Failed admin login attempt: unauthorized administrative access from device '{$tokenName}'",
+                ['device_name' => $tokenName, 'reason' => 'unauthorized_access']
+            );
+
             return [
                 'success' => false,
                 'message' => 'Unauthorized access.',
@@ -55,6 +69,13 @@ class LoginAdminAction
         }
 
         if ($user->status !== 'active') {
+            \App\Services\UserActivityService::log(
+                $user,
+                'login_failed',
+                "Failed admin login attempt: account inactive from device '{$tokenName}'",
+                ['device_name' => $tokenName, 'reason' => 'account_inactive']
+            );
+
             return [
                 'success' => false,
                 'message' => 'Account is inactive. Please contact the administrator.',
@@ -67,6 +88,13 @@ class LoginAdminAction
         ]);
 
         $roleName = $user->roles->first()?->name ?? ($user->is_default ? 'super_admin' : 'admin');
+
+        \App\Services\UserActivityService::log(
+            $user,
+            'login',
+            "Admin logged in from device '{$tokenName}'",
+            ['device_name' => $tokenName, 'role' => $roleName]
+        );
 
         // Check if an unexpired active token exists for this admin
         $activeToken = DB::table('personal_access_tokens')

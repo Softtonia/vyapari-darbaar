@@ -270,4 +270,110 @@ class AdminUserActivityTrackingTest extends TestCase
             'event' => 'notifications_cleared',
         ]);
     }
+
+    public function test_admin_can_view_own_activities(): void
+    {
+        UserActivityService::log($this->admin, 'login', 'Super Admin logged in');
+        UserActivityService::log($this->admin, 'profile_updated', 'Super Admin updated profile');
+
+        $user = User::factory()->create(['status' => 'active']);
+        UserActivityService::log($user, 'login', 'User logged in');
+
+        $response1 = $this->withToken($this->adminToken)->getJson('/api/admin/my-activities');
+        $response1->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Your activities retrieved successfully.',
+            ])
+            ->assertJsonCount(2, 'data.items');
+
+        $response2 = $this->withToken($this->adminToken)->getJson('/api/admin/activities/own');
+        $response2->assertStatus(200)
+            ->assertJsonCount(2, 'data.items');
+    }
+
+    public function test_admin_can_view_global_login_history_with_status_filter(): void
+    {
+        $userA = User::factory()->create(['status' => 'active', 'first_name' => 'Alice']);
+        $userB = User::factory()->create(['status' => 'active', 'first_name' => 'Bob']);
+
+        UserActivityService::log($userA, 'login', 'Alice logged in');
+        UserActivityService::log($userA, 'login_failed', 'Alice failed login');
+        UserActivityService::log($userB, 'logout', 'Bob logged out');
+        UserActivityService::log($userB, 'profile_update', 'Bob updated profile'); // Not a login event
+
+        $response = $this->withToken($this->adminToken)->getJson('/api/admin/user-logins');
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Login history retrieved successfully.',
+            ])
+            ->assertJsonCount(3, 'data.items'); // Only login, login_failed, logout
+
+        // Filter by status=failed
+        $resFailed = $this->withToken($this->adminToken)->getJson('/api/admin/user-logins?status=failed');
+        $resFailed->assertStatus(200)
+            ->assertJsonCount(1, 'data.items')
+            ->assertJsonPath('data.items.0.event', 'login_failed');
+
+        // Filter by status=success
+        $resSuccess = $this->withToken($this->adminToken)->getJson('/api/admin/user-logins?status=success');
+        $resSuccess->assertStatus(200)
+            ->assertJsonCount(1, 'data.items')
+            ->assertJsonPath('data.items.0.event', 'login');
+    }
+
+    public function test_admin_can_view_own_logins_history(): void
+    {
+        UserActivityService::log($this->admin, 'login', 'Admin logged in');
+        UserActivityService::log($this->admin, 'logout', 'Admin logged out');
+
+        $user = User::factory()->create(['status' => 'active']);
+        UserActivityService::log($user, 'login', 'User logged in');
+
+        $response = $this->withToken($this->adminToken)->getJson('/api/admin/my-logins');
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Your login history retrieved successfully.',
+            ])
+            ->assertJsonCount(2, 'data.items');
+    }
+
+    public function test_admin_can_view_specific_user_login_history(): void
+    {
+        $user = User::factory()->create(['status' => 'active']);
+        UserActivityService::log($user, 'login', 'User logged in');
+        UserActivityService::log($user, 'profile_updated', 'User updated profile');
+
+        $response = $this->withToken($this->adminToken)->getJson("/api/admin/users/{$user->id}/logins");
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'User login history retrieved successfully.',
+                'data' => [
+                    'user' => [
+                        'id' => $user->id,
+                    ],
+                ],
+            ])
+            ->assertJsonCount(1, 'data.items');
+    }
+
+    public function test_user_can_view_own_login_history(): void
+    {
+        $user = User::factory()->create(['status' => 'active']);
+        $userToken = $user->createToken('user-token')->plainTextToken;
+
+        UserActivityService::log($user, 'login', 'User logged in');
+        UserActivityService::log($user, 'logout', 'User logged out');
+
+        $response = $this->withToken($userToken)->getJson('/api/user/logins');
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Login history retrieved successfully.',
+            ])
+            ->assertJsonCount(2, 'data.items');
+    }
 }

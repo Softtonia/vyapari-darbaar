@@ -116,11 +116,36 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.users.resend-credentials');
             Route::get('{user}/activities', [AdminUserActivityController::class, 'userActivities'])
                 ->name('admin.users.activities');
+            Route::get('{user}/logins', [AdminUserActivityController::class, 'userLogins'])
+                ->name('admin.users.logins');
         });
 
-        // User activity feed
+        // Activity & Login Management
+        Route::prefix('activities')->group(function () {
+            Route::get('/', [AdminUserActivityController::class, 'index'])
+                ->name('admin.activities.index');
+            Route::get('own', [AdminUserActivityController::class, 'ownActivities'])
+                ->name('admin.activities.own');
+            Route::get('user/{user}', [AdminUserActivityController::class, 'userActivities'])
+                ->name('admin.activities.user');
+        });
         Route::get('user-activities', [AdminUserActivityController::class, 'index'])
             ->name('admin.user-activities.index');
+        Route::get('my-activities', [AdminUserActivityController::class, 'ownActivities'])
+            ->name('admin.my-activities');
+
+        Route::prefix('logins')->group(function () {
+            Route::get('/', [AdminUserActivityController::class, 'logins'])
+                ->name('admin.logins.index');
+            Route::get('own', [AdminUserActivityController::class, 'ownLogins'])
+                ->name('admin.logins.own');
+            Route::get('user/{user}', [AdminUserActivityController::class, 'userLogins'])
+                ->name('admin.logins.user');
+        });
+        Route::get('user-logins', [AdminUserActivityController::class, 'logins'])
+            ->name('admin.user-logins.index');
+        Route::get('my-logins', [AdminUserActivityController::class, 'ownLogins'])
+            ->name('admin.my-logins');
 
         // Role management
         Route::prefix('roles')->group(function () {
@@ -495,9 +520,11 @@ Route::prefix('user')->group(function () {
         Route::post('logout', [UserAuthController::class, 'logout'])
             ->name('user.logout');
 
-        // User activities
+        // User activities & login history
         Route::get('activities', [UserActivityController::class, 'index'])
             ->name('user.activities.index');
+        Route::get('logins', [UserActivityController::class, 'logins'])
+            ->name('user.logins.index');
 
         // In-app notifications
         Route::prefix('notifications')->group(function () {

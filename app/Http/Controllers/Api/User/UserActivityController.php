@@ -44,4 +44,46 @@ class UserActivityController extends Controller
             ],
         ], 200);
     }
+
+    /**
+     * Display login and logout history for the authenticated user.
+     */
+    public function logins(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $query = UserActivity::query()
+            ->where('user_id', $user->id)
+            ->whereIn('event', ['login', 'login_failed', 'logout'])
+            ->latest('id');
+
+        if ($request->filled('status')) {
+            $status = strtolower((string) $request->input('status'));
+            if ($status === 'success') {
+                $query->where('event', 'login');
+            } elseif ($status === 'failed') {
+                $query->where('event', 'login_failed');
+            } elseif ($status === 'logout') {
+                $query->where('event', 'logout');
+            }
+        }
+
+        $perPage = min(100, max(1, (int) $request->input('per_page', 20)));
+        $activities = $query->paginate($perPage);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Login history retrieved successfully.',
+            'data' => [
+                'items' => UserActivityResource::collection($activities->items()),
+                'pagination' => [
+                    'current_page' => $activities->currentPage(),
+                    'per_page' => $activities->perPage(),
+                    'total' => $activities->total(),
+                    'last_page' => $activities->lastPage(),
+                ],
+            ],
+        ], 200);
+    }
 }
