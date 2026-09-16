@@ -30,10 +30,11 @@ class ValidateUsernameTest extends TestCase
                 'message' => "The username 'ramesh.kumar99' is available.",
                 'data' => [
                     'username' => 'ramesh.kumar99',
-                    'available' => true,
                     'is_available' => true,
                 ],
             ]);
+
+        $this->assertArrayNotHasKey('available', $response->json('data'));
     }
 
     public function test_existing_username_returns_validation_error(): void

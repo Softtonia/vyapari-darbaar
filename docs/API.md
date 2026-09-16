@@ -2178,7 +2178,6 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
       "message": "The username 'ramesh.kumar' is available.",
       "data": {
           "username": "ramesh.kumar",
-          "available": true,
           "is_available": true
       }
   }

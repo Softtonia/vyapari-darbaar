@@ -281,7 +281,6 @@ class UserAuthController extends Controller
             'message' => "The username '{$username}' is available.",
             'data' => [
                 'username' => $username,
-                'available' => true,
                 'is_available' => true,
             ],
         ], 200);
