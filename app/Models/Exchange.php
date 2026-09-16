@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Enums\ExchangeType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 
-class Commodity extends Model
+class Exchange extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -19,7 +19,7 @@ class Commodity extends Model
      *
      * @var string
      */
-    protected $table = 'commodities';
+    protected $table = 'exchanges';
 
     /**
      * The attributes that are mass assignable.
@@ -27,13 +27,13 @@ class Commodity extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'commodity_category_id',
         'name',
         'slug',
         'code',
-        'unit',
-        'image',
-        'description',
+        'exchange_type',
+        'timezone',
+        'website',
+        'default_data_delay_minutes',
         'sort_order',
         'status',
         'created_by',
@@ -50,8 +50,8 @@ class Commodity extends Model
         'name',
         'slug',
         'code',
-        'unit',
-        'commodity_category_id',
+        'exchange_type',
+        'default_data_delay_minutes',
         'sort_order',
         'status',
         'created_at',
@@ -66,64 +66,45 @@ class Commodity extends Model
     protected function casts(): array
     {
         return [
-            'commodity_category_id' => 'integer',
-            'status' => 'boolean',
+            'exchange_type' => ExchangeType::class,
+            'default_data_delay_minutes' => 'integer',
             'sort_order' => 'integer',
+            'status' => 'boolean',
         ];
     }
 
     /**
-     * Get the parent commodity category.
-     *
-     * @return BelongsTo<CommodityCategory, $this>
-     */
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(CommodityCategory::class, 'commodity_category_id');
-    }
-
-    /**
-     * Get the subcategories belonging to this commodity.
-     *
-     * @return HasMany<CommoditySubcategory, $this>
-     */
-    public function subcategories(): HasMany
-    {
-        return $this->hasMany(CommoditySubcategory::class, 'commodity_id');
-    }
-
-    /**
-     * Get the varieties belonging to this commodity.
-     *
-     * @return HasMany<CommodityVariety, $this>
-     */
-    public function varieties(): HasMany
-    {
-        return $this->hasMany(CommodityVariety::class, 'commodity_id');
-    }
-
-    /**
-     * Get the grades belonging to this commodity.
-     *
-     * @return HasMany<CommodityGrade, $this>
-     */
-    public function grades(): HasMany
-    {
-        return $this->hasMany(CommodityGrade::class, 'commodity_id');
-    }
-
-    /**
-     * Get the exchange commodity mappings configured for this canonical commodity.
+     * Get the commodity mappings configured for this exchange.
      *
      * @return HasMany<ExchangeCommodityMapping, $this>
      */
-    public function exchangeMappings(): HasMany
+    public function mappings(): HasMany
     {
-        return $this->hasMany(ExchangeCommodityMapping::class, 'commodity_id');
+        return $this->hasMany(ExchangeCommodityMapping::class, 'exchange_id');
     }
 
     /**
-     * Get the administrator who created the commodity.
+     * Get all instruments belonging to this exchange.
+     *
+     * @return HasMany<ExchangeInstrument, $this>
+     */
+    public function instruments(): HasMany
+    {
+        return $this->hasMany(ExchangeInstrument::class, 'exchange_id');
+    }
+
+    /**
+     * Get all ingestion runs for this exchange.
+     *
+     * @return HasMany<MarketIngestionRun, $this>
+     */
+    public function ingestionRuns(): HasMany
+    {
+        return $this->hasMany(MarketIngestionRun::class, 'exchange_id');
+    }
+
+    /**
+     * Get the administrator who created the exchange.
      *
      * @return BelongsTo<Admin, $this>
      */
@@ -133,7 +114,7 @@ class Commodity extends Model
     }
 
     /**
-     * Get the administrator who last updated the commodity.
+     * Get the administrator who last updated the exchange.
      *
      * @return BelongsTo<Admin, $this>
      */
@@ -143,10 +124,10 @@ class Commodity extends Model
     }
 
     /**
-     * Scope query to only include active commodities.
+     * Scope query to only include active exchanges.
      *
-     * @param  Builder<Commodity>  $query
-     * @return Builder<Commodity>
+     * @param  Builder<Exchange>  $query
+     * @return Builder<Exchange>
      */
     public function scopeActive(Builder $query): Builder
     {
@@ -156,8 +137,8 @@ class Commodity extends Model
     /**
      * Scope query to filter by status if supplied.
      *
-     * @param  Builder<Commodity>  $query
-     * @return Builder<Commodity>
+     * @param  Builder<Exchange>  $query
+     * @return Builder<Exchange>
      */
     public function scopeStatus(Builder $query, mixed $status): Builder
     {
@@ -169,37 +150,10 @@ class Commodity extends Model
     }
 
     /**
-     * Scope query to filter by commodity category if supplied.
+     * Scope query to search by name or code.
      *
-     * @param  Builder<Commodity>  $query
-     * @return Builder<Commodity>
-     */
-    public function scopeCategory(Builder $query, mixed $categoryId): Builder
-    {
-        if ($categoryId !== null && $categoryId !== '') {
-            $query->where('commodity_category_id', (int) $categoryId);
-        }
-
-        return $query;
-    }
-
-    /**
-     * Get the fully qualified public URL for commodity image.
-     */
-    public function getImageUrlAttribute(): ?string
-    {
-        if (empty($this->image)) {
-            return null;
-        }
-
-        return Storage::disk('public')->url($this->image);
-    }
-
-    /**
-     * Scope query to search by name, code, or slug.
-     *
-     * @param  Builder<Commodity>  $query
-     * @return Builder<Commodity>
+     * @param  Builder<Exchange>  $query
+     * @return Builder<Exchange>
      */
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
@@ -219,8 +173,8 @@ class Commodity extends Model
     /**
      * Scope query to sort by a whitelisted column and order.
      *
-     * @param  Builder<Commodity>  $query
-     * @return Builder<Commodity>
+     * @param  Builder<Exchange>  $query
+     * @return Builder<Exchange>
      */
     public function scopeSorted(Builder $query, ?string $sortBy = 'sort_order', ?string $sortOrder = 'asc'): Builder
     {
@@ -237,7 +191,6 @@ class Commodity extends Model
 
         $query->orderBy($sortBy, $sortOrder);
 
-        // Secondary stable sort
         if ($sortBy !== 'id') {
             $query->orderBy('id', 'desc');
         }

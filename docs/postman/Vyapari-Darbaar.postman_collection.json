@@ -47,12 +47,13 @@
                                     "raw": "{\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"{{admin_password}}\",\n    \"device_name\": \"Postman Admin\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/admin/login",
+                                    "raw": "{{live}}/api/auth/admin/login",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "admin",
                                         "login"
                                     ]
@@ -78,12 +79,13 @@
                                     "raw": "{\n    \"email\": \"{{admin_email}}\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/admin/forgot-password",
+                                    "raw": "{{live}}/api/auth/admin/forgot-password",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "admin",
                                         "forgot-password"
                                     ]
@@ -109,12 +111,13 @@
                                     "raw": "{\n    \"token\": \"sample_token_here\",\n    \"email\": \"{{admin_email}}\",\n    \"password\": \"NewAdminPassword#2026\",\n    \"password_confirmation\": \"NewAdminPassword#2026\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/admin/reset-password",
+                                    "raw": "{{live}}/api/auth/admin/reset-password",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "admin",
                                         "reset-password"
                                     ]
@@ -136,12 +139,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{live}}/api/admin/logout",
+                                    "raw": "{{live}}/api/auth/admin/logout",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "admin",
                                         "logout"
                                     ]
@@ -163,12 +167,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{live}}/api/admin/logout-all",
+                                    "raw": "{{live}}/api/auth/admin/logout-all",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "admin",
                                         "logout-all"
                                     ]
@@ -5316,12 +5321,13 @@
                                     "raw": "{\n    \"email\": \"ramesh.kumar@example.com\",\n    \"purpose\": \"registration\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/user/send-otp",
+                                    "raw": "{{live}}/api/auth/user/send-otp",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "user",
                                         "send-otp"
                                     ]
@@ -5347,12 +5353,13 @@
                                     "raw": "{\n    \"email\": \"ramesh.kumar@example.com\",\n    \"otp\": \"123456\",\n    \"purpose\": \"registration\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/user/verify-otp",
+                                    "raw": "{{live}}/api/auth/user/verify-otp",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "user",
                                         "verify-otp"
                                     ]
@@ -5378,12 +5385,13 @@
                                     "raw": "{\n    \"username\": \"ajay.kumar\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/user/validate-username",
+                                    "raw": "{{live}}/api/auth/user/validate-username",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "user",
                                         "validate-username"
                                     ]
@@ -5424,12 +5432,13 @@
                                     "raw": "{\n    \"first_name\": \"Vijay\",\n    \"last_name\": \"Kumar\",\n    \"email\": \"vijay@example.com\",\n    \"phone_number\": \"+919876543210\",\n    \"username\": \"vijaykumar\",\n    \"password\": \"Password#2026\",\n    \"password_confirmation\": \"Password#2026\",\n    \"otp\": \"123456\",\n    \"role\": \"trader\",\n    \"device_name\": \"Postman Device\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/user/register",
+                                    "raw": "{{live}}/api/auth/user/register",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "user",
                                         "register"
                                     ]
@@ -5437,7 +5446,7 @@
                             }
                         },
                         {
-                            "name": "User Login (Password Method)",
+                            "name": "User Login - Username & Password",
                             "event": [
                                 {
                                     "listen": "test",
@@ -5470,12 +5479,13 @@
                                     "raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"{{user_password}}\",\n    \"device_name\": \"Mobile Android App\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/user/login",
+                                    "raw": "{{live}}/api/auth/user/login",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "user",
                                         "login"
                                     ]
@@ -5483,7 +5493,7 @@
                             }
                         },
                         {
-                            "name": "User Login (OTP Method)",
+                            "name": "User Login - Mobile Number & OTP",
                             "event": [
                                 {
                                     "listen": "test",
@@ -5513,61 +5523,16 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"username\": \"{{username}}\",\n    \"otp\": \"123456\",\n    \"device_name\": \"Mobile Android App\"\n}"
+                                    "raw": "{\n    \"phone_number\": \"+919876543210\",\n    \"otp\": \"123456\",\n    \"device_name\": \"Mobile Android App\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/user/login",
+                                    "raw": "{{live}}/api/auth/user/login",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
-                                        "user",
-                                        "login"
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            "name": "User Login (Email / Number OTP)",
-                            "event": [
-                                {
-                                    "listen": "test",
-                                    "script": {
-                                        "exec": [
-                                            "var jsonData = pm.response.json();",
-                                            "if (jsonData.status === true && jsonData.data && jsonData.data.token) {",
-                                            "    pm.environment.set('user_token', jsonData.data.token);",
-                                            "    console.log('User token saved to environment.');",
-                                            "}"
-                                        ],
-                                        "type": "text/javascript"
-                                    }
-                                }
-                            ],
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"username\": \"{{username}}\",\n    \"email_otp\": \"123456\",\n    \"device_name\": \"Mobile Android App\"\n}"
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/user/login",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
+                                        "auth",
                                         "user",
                                         "login"
                                     ]
@@ -5593,12 +5558,13 @@
                                     "raw": "{\n    \"email\": \"user@example.com\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/user/forgot-password",
+                                    "raw": "{{live}}/api/auth/user/forgot-password",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "user",
                                         "forgot-password"
                                     ]
@@ -5624,12 +5590,13 @@
                                     "raw": "{\n    \"token\": \"sample_user_token_here\",\n    \"email\": \"user@example.com\",\n    \"password\": \"NewUserPassword#2026\",\n    \"password_confirmation\": \"NewUserPassword#2026\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/user/reset-password",
+                                    "raw": "{{live}}/api/auth/user/reset-password",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "user",
                                         "reset-password"
                                     ]
@@ -5659,12 +5626,13 @@
                                     "raw": "{\n    \"current_password\": \"{{user_password}}\",\n    \"password\": \"NewUserPassword#2026\",\n    \"password_confirmation\": \"NewUserPassword#2026\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/user/change-password",
+                                    "raw": "{{live}}/api/auth/user/change-password",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "user",
                                         "change-password"
                                     ]
@@ -5701,12 +5669,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{live}}/api/user/refresh-token",
+                                    "raw": "{{live}}/api/auth/user/refresh-token",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "user",
                                         "refresh-token"
                                     ]
@@ -5732,12 +5701,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{live}}/api/user/logout",
+                                    "raw": "{{live}}/api/auth/user/logout",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
                                         "api",
+                                        "auth",
                                         "user",
                                         "logout"
                                     ]
@@ -6353,6 +6323,938 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "Exchange & Instrument Masters",
+            "description": "Exchange Master, Commodity Exchange Mapping, and Exchange Instrument Reference APIs.",
+            "item": [
+                {
+                    "name": "Exchanges",
+                    "item": [
+                        {
+                            "name": "List Exchanges",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchanges?page=1&per_page=20",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchanges"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "per_page",
+                                            "value": "20"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Exchange Options",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchanges/options",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchanges",
+                                        "options"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Create Exchange",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"name\": \"Multi Commodity Exchange of India Limited\",\n    \"code\": \"MCX\",\n    \"exchange_type\": \"commodity_derivatives\",\n    \"timezone\": \"Asia/Kolkata\",\n    \"website\": \"https://www.mcxindia.com\",\n    \"default_data_delay_minutes\": null,\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchanges",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchanges"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Exchange Detail",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchanges/{{exchangeId}}",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchanges",
+                                        "{{exchangeId}}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Update Exchange",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"name\": \"Multi Commodity Exchange of India Limited\",\n    \"code\": \"MCX\",\n    \"exchange_type\": \"commodity_derivatives\",\n    \"timezone\": \"Asia/Kolkata\",\n    \"website\": \"https://www.mcxindia.com\",\n    \"default_data_delay_minutes\": 0,\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchanges/{{exchangeId}}",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchanges",
+                                        "{{exchangeId}}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Toggle Exchange Status",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"status\": false\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchanges/{{exchangeId}}/status",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchanges",
+                                        "{{exchangeId}}",
+                                        "status"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Bulk Update Exchange Status",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"ids\": [\n        1,\n        2\n    ],\n    \"status\": true\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchanges/bulk-status",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchanges",
+                                        "bulk-status"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Delete Exchange",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchanges/{{exchangeId}}",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchanges",
+                                        "{{exchangeId}}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Bulk Delete Exchanges",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"ids\": [\n        1,\n        2\n    ]\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchanges/bulk-delete",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchanges",
+                                        "bulk-delete"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Commodity Exchange Mappings",
+                    "item": [
+                        {
+                            "name": "List Commodity Mappings",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchange-commodity-mappings?exchange_id=1&page=1&per_page=20",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchange-commodity-mappings"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "exchange_id",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "per_page",
+                                            "value": "20"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Commodity Mapping Options",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchange-commodity-mappings/options?exchange_id=1",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchange-commodity-mappings",
+                                        "options"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "exchange_id",
+                                            "value": "1"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Create Commodity Mapping",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"exchange_id\": 1,\n    \"commodity_id\": 12,\n    \"external_symbol\": \"GOLD\",\n    \"external_code\": \"GOLD_STD\",\n    \"external_name\": \"Gold 1 KG\",\n    \"status\": true\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchange-commodity-mappings",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchange-commodity-mappings"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Commodity Mapping Detail",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchange-commodity-mappings/{{mappingId}}",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchange-commodity-mappings",
+                                        "{{mappingId}}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Update Commodity Mapping",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"external_symbol\": \"GOLD\",\n    \"external_code\": \"GOLD_STD\",\n    \"external_name\": \"Gold Standard 1kg Contract\",\n    \"status\": true\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchange-commodity-mappings/{{mappingId}}",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchange-commodity-mappings",
+                                        "{{mappingId}}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Toggle Commodity Mapping Status",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"status\": false\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchange-commodity-mappings/{{mappingId}}/status",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchange-commodity-mappings",
+                                        "{{mappingId}}",
+                                        "status"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Delete Commodity Mapping",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchange-commodity-mappings/{{mappingId}}",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchange-commodity-mappings",
+                                        "{{mappingId}}"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Exchange Instruments",
+                    "item": [
+                        {
+                            "name": "List Exchange Instruments",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchange-instruments?exchange_id=1&instrument_type=future&page=1&per_page=20",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchange-instruments"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "exchange_id",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "instrument_type",
+                                            "value": "future"
+                                        },
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "per_page",
+                                            "value": "20"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Exchange Instrument Options",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchange-instruments/options?exchange_commodity_mapping_id={{mappingId}}",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchange-instruments",
+                                        "options"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "exchange_commodity_mapping_id",
+                                            "value": "{{mappingId}}"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Exchange Instrument Detail",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchange-instruments/{{instrumentId}}",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchange-instruments",
+                                        "{{instrumentId}}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Toggle Instrument Enabled Status",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"is_enabled\": false\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/exchange-instruments/{{instrumentId}}/enabled",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "exchange-instruments",
+                                        "{{instrumentId}}",
+                                        "enabled"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Public Exchanges & Instruments",
+                    "item": [
+                        {
+                            "name": "Get Public Exchanges",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/exchanges",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "exchanges"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Public Exchange Commodities",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/exchanges/{{exchangeId}}/commodities",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "exchanges",
+                                        "{{exchangeId}}",
+                                        "commodities"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Public Exchange Instruments",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/exchanges/{{exchangeId}}/instruments?commodity_id=1&instrument_type=future",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "exchanges",
+                                        "{{exchangeId}}",
+                                        "instruments"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "commodity_id",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "instrument_type",
+                                            "value": "future"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Public Instrument Detail",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/exchange-instruments/{{instrumentId}}",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "exchange-instruments",
+                                        "{{instrumentId}}"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Market Data",
+            "item": [
+                {
+                    "name": "Instrument History",
+                    "item": [
+                        {
+                            "name": "Get Instrument EOD History",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/markets/instruments/{{instrumentId}}/history?interval=1D&from=2026-08-15&to=2026-09-15",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "markets",
+                                        "instruments",
+                                        "{{instrumentId}}",
+                                        "history"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "interval",
+                                            "value": "1D"
+                                        },
+                                        {
+                                            "key": "from",
+                                            "value": "2026-08-15"
+                                        },
+                                        {
+                                            "key": "to",
+                                            "value": "2026-09-15"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Ingestion Runs",
+                    "item": [
+                        {
+                            "name": "List Market Ingestion Runs (Admin)",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/market-ingestion-runs?exchange_id={{exchangeId}}&source_type=bhavcopy",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "market-ingestion-runs"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "exchange_id",
+                                            "value": "{{exchangeId}}"
+                                        },
+                                        {
+                                            "key": "source_type",
+                                            "value": "bhavcopy"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Market Ingestion Run Detail (Admin)",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/market-ingestion-runs/{{runId}}",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "market-ingestion-runs",
+                                        "{{runId}}"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "variable": [
@@ -6368,6 +7270,26 @@
         },
         {
             "key": "mandiId",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "exchangeId",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "mappingId",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "instrumentId",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "runId",
             "value": "1",
             "type": "string"
         }

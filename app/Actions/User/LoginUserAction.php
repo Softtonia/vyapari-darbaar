@@ -45,9 +45,16 @@ class LoginUserAction
             ->first();
 
         if (! $user) {
+            $notFoundMsg = 'No account found with this username.';
+            if (str_contains($identifier, '@')) {
+                $notFoundMsg = 'No account found with this email address.';
+            } elseif (preg_match('/^\+?[0-9]{7,15}$/', $identifier)) {
+                $notFoundMsg = 'No account found with this phone number.';
+            }
+
             return [
                 'success' => false,
-                'message' => 'No account found with this username.',
+                'message' => $notFoundMsg,
                 'code' => 401,
             ];
         }

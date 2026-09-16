@@ -305,5 +305,27 @@ class AppServiceProvider extends ServiceProvider
                     ], 429, $headers);
                 });
         });
+
+        RateLimiter::for('public-api', function (Request $request) {
+            return Limit::perMinute(60)
+                ->by('public:'.$request->ip())
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Too many requests. Please slow down.',
+                    ], 429, $headers);
+                });
+        });
+
+        RateLimiter::for('location-api', function (Request $request) {
+            return Limit::perMinute(100)
+                ->by('location:'.$request->ip())
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Too many location requests. Please slow down.',
+                    ], 429, $headers);
+                });
+        });
     }
 }

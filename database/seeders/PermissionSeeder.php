@@ -122,6 +122,17 @@ class PermissionSeeder extends Seeder
             'companies.create',
             'companies.update',
             'companies.delete',
+            'exchanges.view',
+            'exchanges.create',
+            'exchanges.update',
+            'exchanges.delete',
+            'exchange-commodity-mappings.view',
+            'exchange-commodity-mappings.create',
+            'exchange-commodity-mappings.update',
+            'exchange-commodity-mappings.delete',
+            'exchange-instruments.view',
+            'exchange-instruments.update',
+            'market-ingestion-runs.view',
         ];
 
         foreach ($adminPermissions as $permissionName) {

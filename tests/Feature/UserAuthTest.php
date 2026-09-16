@@ -100,6 +100,73 @@ class UserAuthTest extends TestCase
         $res2->assertStatus(200);
     }
 
+    public function test_user_can_login_directly_with_email_and_otp(): void
+    {
+        $otpService = app(\App\Services\OtpService::class);
+        $otpData = $otpService->getOrCreateOtp($this->user->email, 'login');
+
+        $response = $this->postJson('/api/auth/user/login', [
+            'email' => $this->user->email,
+            'otp' => $otpData['otp'],
+            'device_name' => 'Web Browser',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Login successful.',
+            ]);
+
+        $this->assertNotEmpty($response->json('data.token'));
+    }
+
+    public function test_user_can_login_directly_with_phone_number_and_otp(): void
+    {
+        $this->user->update(['phone_number' => '+919988776655']);
+        $otpService = app(\App\Services\OtpService::class);
+        $otpData = $otpService->getOrCreateOtp('+919988776655', 'login');
+
+        $response = $this->postJson('/api/auth/user/login', [
+            'phone_number' => '+919988776655',
+            'otp' => $otpData['otp'],
+            'device_name' => 'Android App',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Login successful.',
+            ]);
+
+        $this->assertNotEmpty($response->json('data.token'));
+    }
+
+    public function test_unified_auth_prefix_endpoints_work_identically(): void
+    {
+        $response = $this->postJson('/api/auth/user/login', [
+            'username' => 'ajay.kumar',
+            'password' => $this->plainPassword,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Login successful.',
+            ]);
+
+        $token = $response->json('data.token');
+
+        // Refresh token via /api/auth/user/refresh-token
+        $refreshRes = $this->withToken($token)->postJson('/api/auth/user/refresh-token');
+        $refreshRes->assertStatus(200)->assertJson(['status' => true]);
+
+        $newToken = $refreshRes->json('data.token');
+
+        // Logout via /api/auth/user/logout
+        $logoutRes = $this->withToken($newToken)->postJson('/api/auth/user/logout');
+        $logoutRes->assertStatus(200)->assertJson(['status' => true]);
+    }
+
     public function test_invalid_otp_returns_error(): void
     {
         $response = $this->postJson('/api/user/login', [

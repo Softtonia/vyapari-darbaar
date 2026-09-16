@@ -24,7 +24,10 @@ class LoginUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => ['required', 'string'],
+            'username' => ['required_without_all:email,phone_number,number', 'nullable', 'string'],
+            'email' => ['required_without_all:username,phone_number,number', 'nullable', 'string'],
+            'phone_number' => ['required_without_all:username,email,number', 'nullable', 'string'],
+            'number' => ['required_without_all:username,email,phone_number', 'nullable', 'string'],
             'password' => ['required_without_all:otp,email_otp,number_otp', 'nullable', 'string'],
             'otp' => ['required_without_all:password,email_otp,number_otp', 'nullable', 'string', 'size:6'],
             'email_otp' => ['nullable', 'string', 'size:6'],
@@ -41,7 +44,10 @@ class LoginUserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'username.required' => 'Please enter your username, email, or phone number.',
+            'username.required_without_all' => 'Please enter your username, email, or phone number.',
+            'email.required_without_all' => 'Please enter your username, email, or phone number.',
+            'phone_number.required_without_all' => 'Please enter your username, email, or phone number.',
+            'number.required_without_all' => 'Please enter your username, email, or phone number.',
             'password.required_without_all' => 'Please provide either a password or OTP to log in.',
             'otp.required_without_all' => 'Please provide either a password or OTP to log in.',
             'otp.size' => 'The OTP must be 6 digits.',
@@ -53,14 +59,21 @@ class LoginUserRequest extends FormRequest
     /**
      * Get validated login credentials.
      *
-     * @return array{username: string, password?: string|null, otp?: string|null, email_otp?: string|null, number_otp?: string|null}
+     * @return array{username: string, email?: string|null, phone_number?: string|null, password?: string|null, otp?: string|null, email_otp?: string|null, number_otp?: string|null}
      */
     public function credentials(): array
     {
+        $identifier = $this->input('username')
+            ?? $this->input('email')
+            ?? $this->input('phone_number')
+            ?? $this->input('number');
+
         $otp = $this->input('otp') ?? $this->input('email_otp') ?? $this->input('number_otp');
 
         return [
-            'username' => trim((string) $this->input('username')),
+            'username' => trim((string) $identifier),
+            'email' => $this->input('email') !== null ? strtolower(trim((string) $this->input('email'))) : null,
+            'phone_number' => ($this->input('phone_number') ?? $this->input('number')) !== null ? trim((string) ($this->input('phone_number') ?? $this->input('number'))) : null,
             'password' => $this->input('password') !== null ? (string) $this->input('password') : null,
             'otp' => $otp !== null ? (string) $otp : null,
             'email_otp' => $this->input('email_otp') !== null ? (string) $this->input('email_otp') : null,

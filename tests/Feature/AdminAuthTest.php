@@ -475,4 +475,32 @@ class AdminAuthTest extends TestCase
         auth()->forgetGuards();
         $this->withToken($token)->getJson('/api/admin/profile')->assertStatus(401);
     }
+
+    public function test_unified_auth_prefix_endpoints_for_admin(): void
+    {
+        $admin = Admin::create([
+            'name' => 'Unified Admin',
+            'email' => 'unified.admin@example.com',
+            'password' => Hash::make('AdminSecret#123'),
+            'status' => 'active',
+        ]);
+
+        $response = $this->postJson('/api/auth/admin/login', [
+            'email' => 'unified.admin@example.com',
+            'password' => 'AdminSecret#123',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Login successful.',
+            ]);
+
+        $token = $response->json('data.token');
+
+        // Logout via /api/auth/admin/logout
+        $this->withToken($token)->postJson('/api/auth/admin/logout')
+            ->assertStatus(200)
+            ->assertJson(['status' => true, 'message' => 'Logged out successfully.']);
+    }
 }

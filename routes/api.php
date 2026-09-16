@@ -14,8 +14,12 @@ use App\Http\Controllers\Api\Admin\CommoditySubcategoryController;
 use App\Http\Controllers\Api\Admin\CommodityVarietyController;
 use App\Http\Controllers\Api\Admin\DistrictController;
 use App\Http\Controllers\Api\Admin\EmailTemplateController;
+use App\Http\Controllers\Api\Admin\ExchangeCommodityMappingController;
+use App\Http\Controllers\Api\Admin\ExchangeController;
+use App\Http\Controllers\Api\Admin\ExchangeInstrumentController;
 use App\Http\Controllers\Api\Admin\FirebaseSettingController;
 use App\Http\Controllers\Api\Admin\MandiController;
+use App\Http\Controllers\Api\Admin\MarketIngestionRunController;
 use App\Http\Controllers\Api\Admin\NotificationBatchController;
 use App\Http\Controllers\Api\Admin\NotificationDashboardController;
 use App\Http\Controllers\Api\Admin\NotificationLogController;
@@ -27,7 +31,9 @@ use App\Http\Controllers\Api\Admin\SiteSettingController as AdminSiteSettingCont
 use App\Http\Controllers\Api\Admin\SmtpSettingController;
 use App\Http\Controllers\Api\Admin\StateController;
 use App\Http\Controllers\Api\LocationController;
+use App\Http\Controllers\Api\PublicExchangeController;
 use App\Http\Controllers\Api\PublicFirebaseConfigController;
+use App\Http\Controllers\Api\Public\MarketHistoryController;
 use App\Http\Controllers\Api\SiteSettingController;
 use App\Http\Controllers\Api\User\InAppNotificationController;
 use App\Http\Controllers\Api\User\NotificationDeviceController;
@@ -36,6 +42,84 @@ use App\Http\Controllers\Api\User\UserAuthController;
 use App\Http\Controllers\Api\User\UserCompanyController;
 use App\Http\Controllers\Api\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Unified Auth API Routes (/api/auth/admin/* and /api/auth/user/*)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('auth')->group(function () {
+    // Admin Auth
+    Route::prefix('admin')->group(function () {
+        Route::post('login', [AdminAuthController::class, 'login'])
+            ->middleware('throttle:admin-login')
+            ->name('auth.admin.login');
+
+        Route::post('forgot-password', [AdminAuthController::class, 'forgotPassword'])
+            ->middleware('throttle:admin-password-reset')
+            ->name('auth.admin.forgot-password');
+
+        Route::post('reset-password', [AdminAuthController::class, 'resetPassword'])
+            ->middleware('throttle:admin-password-reset')
+            ->name('auth.admin.reset-password');
+
+        Route::middleware(['auth:sanctum', 'admin', 'throttle:admin-api'])->group(function () {
+            Route::post('logout', [AdminAuthController::class, 'logout'])
+                ->name('auth.admin.logout');
+            Route::post('logout-all', [AdminAuthController::class, 'logoutAll'])
+                ->name('auth.admin.logout-all');
+        });
+    });
+
+    // User Auth
+    Route::prefix('user')->group(function () {
+        Route::post('send-otp', [UserAuthController::class, 'sendOtp'])
+            ->middleware('throttle:user-send-otp')
+            ->name('auth.user.send-otp');
+        Route::post('otp/send', [UserAuthController::class, 'sendOtp'])
+            ->middleware('throttle:user-send-otp');
+
+        Route::post('verify-otp', [UserAuthController::class, 'verifyOtp'])
+            ->middleware('throttle:user-verify-otp')
+            ->name('auth.user.verify-otp');
+        Route::post('otp/verify', [UserAuthController::class, 'verifyOtp'])
+            ->middleware('throttle:user-verify-otp');
+
+        Route::post('validate-username', [UserAuthController::class, 'validateUsername'])
+            ->middleware('throttle:user-api')
+            ->name('auth.user.validate-username');
+
+        Route::post('register', [UserAuthController::class, 'register'])
+            ->middleware('throttle:user-register')
+            ->name('auth.user.register');
+
+        Route::post('login', [UserAuthController::class, 'login'])
+            ->middleware('throttle:user-login')
+            ->name('auth.user.login');
+
+        Route::post('forgot-password', [UserAuthController::class, 'forgotPassword'])
+            ->middleware('throttle:user-password-reset')
+            ->name('auth.user.forgot-password');
+
+        Route::post('reset-password', [UserAuthController::class, 'resetPassword'])
+            ->middleware('throttle:user-password-reset')
+            ->name('auth.user.reset-password');
+
+        Route::middleware(['auth:sanctum', 'user'])->group(function () {
+            Route::post('refresh-token', [UserAuthController::class, 'refreshToken'])
+                ->middleware('throttle:user-api')
+                ->name('auth.user.refresh-token');
+
+            Route::post('change-password', [UserAuthController::class, 'changePassword'])
+                ->middleware('throttle:user-change-password')
+                ->name('auth.user.change-password');
+
+            Route::post('logout', [UserAuthController::class, 'logout'])
+                ->middleware('throttle:user-api')
+                ->name('auth.user.logout');
+        });
+    });
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -482,6 +566,67 @@ Route::prefix('admin')->group(function () {
             Route::delete('{id}', [AdminCompanyController::class, 'destroy'])
                 ->name('admin.companies.destroy');
         });
+
+        // Exchange Management
+        Route::prefix('exchanges')->group(function () {
+            Route::get('options', [ExchangeController::class, 'options'])
+                ->name('admin.exchanges.options');
+            Route::get('/', [ExchangeController::class, 'index'])
+                ->name('admin.exchanges.index');
+            Route::post('/', [ExchangeController::class, 'store'])
+                ->name('admin.exchanges.store');
+            Route::post('bulk-delete', [ExchangeController::class, 'bulkDestroy'])
+                ->name('admin.exchanges.bulk-delete');
+            Route::delete('bulk-delete', [ExchangeController::class, 'bulkDestroy']);
+            Route::patch('bulk-status', [ExchangeController::class, 'bulkStatus'])
+                ->name('admin.exchanges.bulk-status');
+            Route::get('{exchange}', [ExchangeController::class, 'show'])
+                ->name('admin.exchanges.show');
+            Route::put('{exchange}', [ExchangeController::class, 'update'])
+                ->name('admin.exchanges.update');
+            Route::delete('{exchange}', [ExchangeController::class, 'destroy'])
+                ->name('admin.exchanges.destroy');
+            Route::patch('{exchange}/status', [ExchangeController::class, 'updateStatus'])
+                ->name('admin.exchanges.update-status');
+        });
+
+        // Exchange Commodity Mapping Management
+        Route::prefix('exchange-commodity-mappings')->group(function () {
+            Route::get('options', [ExchangeCommodityMappingController::class, 'options'])
+                ->name('admin.exchange-commodity-mappings.options');
+            Route::get('/', [ExchangeCommodityMappingController::class, 'index'])
+                ->name('admin.exchange-commodity-mappings.index');
+            Route::post('/', [ExchangeCommodityMappingController::class, 'store'])
+                ->name('admin.exchange-commodity-mappings.store');
+            Route::get('{mapping}', [ExchangeCommodityMappingController::class, 'show'])
+                ->name('admin.exchange-commodity-mappings.show');
+            Route::put('{mapping}', [ExchangeCommodityMappingController::class, 'update'])
+                ->name('admin.exchange-commodity-mappings.update');
+            Route::delete('{mapping}', [ExchangeCommodityMappingController::class, 'destroy'])
+                ->name('admin.exchange-commodity-mappings.destroy');
+            Route::patch('{mapping}/status', [ExchangeCommodityMappingController::class, 'updateStatus'])
+                ->name('admin.exchange-commodity-mappings.update-status');
+        });
+
+        // Exchange Instrument Management (Reference master / read & local visibility toggle only)
+        Route::prefix('exchange-instruments')->group(function () {
+            Route::get('options', [ExchangeInstrumentController::class, 'options'])
+                ->name('admin.exchange-instruments.options');
+            Route::get('/', [ExchangeInstrumentController::class, 'index'])
+                ->name('admin.exchange-instruments.index');
+            Route::get('{instrument}', [ExchangeInstrumentController::class, 'show'])
+                ->name('admin.exchange-instruments.show');
+            Route::patch('{instrument}/enabled', [ExchangeInstrumentController::class, 'updateEnabled'])
+                ->name('admin.exchange-instruments.update-enabled');
+        });
+
+        // Market Ingestion Runs (Operational logs & audit)
+        Route::prefix('market-ingestion-runs')->group(function () {
+            Route::get('/', [MarketIngestionRunController::class, 'index'])
+                ->name('admin.market-ingestion-runs.index');
+            Route::get('{run}', [MarketIngestionRunController::class, 'show'])
+                ->name('admin.market-ingestion-runs.show');
+        });
     });
 });
 
@@ -491,18 +636,38 @@ Route::prefix('admin')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::get('site-settings', [SiteSettingController::class, 'show'])
+    ->middleware('throttle:public-api')
     ->name('site-settings.show');
 
 Route::get('firebase/config', [PublicFirebaseConfigController::class, 'show'])
+    ->middleware('throttle:public-api')
     ->name('firebase.config');
 
-Route::prefix('locations')->group(function () {
+Route::prefix('locations')->middleware('throttle:location-api')->group(function () {
     Route::get('states', [LocationController::class, 'states'])
         ->name('locations.states');
     Route::get('districts', [LocationController::class, 'districts'])
         ->name('locations.districts');
     Route::get('mandis', [LocationController::class, 'mandis'])
         ->name('locations.mandis');
+});
+
+Route::prefix('exchanges')->middleware('throttle:public-api')->group(function () {
+    Route::get('/', [PublicExchangeController::class, 'index'])
+        ->name('public.exchanges.index');
+    Route::get('{exchange}/commodities', [PublicExchangeController::class, 'commodities'])
+        ->name('public.exchanges.commodities');
+    Route::get('{exchange}/instruments', [PublicExchangeController::class, 'instruments'])
+        ->name('public.exchanges.instruments');
+});
+
+Route::get('exchange-instruments/{instrument}', [PublicExchangeController::class, 'showInstrument'])
+    ->middleware('throttle:public-api')
+    ->name('public.exchange-instruments.show');
+
+Route::prefix('markets')->middleware('throttle:public-api')->group(function () {
+    Route::get('instruments/{instrument}/history', [MarketHistoryController::class, 'instrumentHistory'])
+        ->name('public.markets.instruments.history');
 });
 
 /*

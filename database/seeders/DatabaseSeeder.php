@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             DistrictSeeder::class,
             MandiSeeder::class,
             SiteSettingSeeder::class,
+            ExchangeSeeder::class,
         ]);
     }
 }
