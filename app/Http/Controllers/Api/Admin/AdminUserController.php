@@ -31,6 +31,7 @@ class AdminUserController extends Controller
         'created_at',
         'first_name',
         'last_name',
+        'full_name',
         'name',
         'username',
         'email',
@@ -52,21 +53,22 @@ class AdminUserController extends Controller
                 'id',
                 'first_name',
                 'last_name',
+                'full_name',
                 'phone_number',
-                'name',
                 'username',
                 'email',
                 'status',
+                'suspension_reason',
                 'must_change_password',
                 'created_at',
                 'updated_at',
             ]);
 
-        // Search: name, first_name, last_name, username prefix, email prefix, phone_number
+        // Search: full_name, first_name, last_name, username prefix, email prefix, phone_number
         if ($request->filled('search')) {
             $search = (string) $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
+                $q->where('full_name', 'like', "%{$search}%")
                     ->orWhere('first_name', 'like', "%{$search}%")
                     ->orWhere('last_name', 'like', "%{$search}%")
                     ->orWhere('phone_number', 'like', "%{$search}%")
@@ -103,9 +105,10 @@ class AdminUserController extends Controller
             $sortBy = 'created_at';
         }
 
+        $sortColumn = ($sortBy === 'name') ? 'full_name' : $sortBy;
         $sortDir = strtolower((string) $request->input('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
 
-        $paginator = $query->orderBy($sortBy, $sortDir)
+        $paginator = $query->orderBy($sortColumn, $sortDir)
             ->orderBy('id', $sortDir)
             ->paginate($perPage);
 

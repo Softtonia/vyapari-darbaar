@@ -251,7 +251,7 @@ class AdminUserActivityController extends Controller
                     ->orWhereHas('user', function ($userQuery) use ($search) {
                         $userQuery->where('first_name', 'like', "%{$search}%")
                             ->orWhere('last_name', 'like', "%{$search}%")
-                            ->orWhere('name', 'like', "%{$search}%")
+                            ->orWhere('full_name', 'like', "%{$search}%")
                             ->orWhere('username', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%");
                     });
@@ -313,7 +313,7 @@ class AdminUserActivityController extends Controller
                     ->orWhereHas('user', function ($userQuery) use ($search) {
                         $userQuery->where('first_name', 'like', "%{$search}%")
                             ->orWhere('last_name', 'like', "%{$search}%")
-                            ->orWhere('name', 'like', "%{$search}%")
+                            ->orWhere('full_name', 'like', "%{$search}%")
                             ->orWhere('username', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%");
                     });

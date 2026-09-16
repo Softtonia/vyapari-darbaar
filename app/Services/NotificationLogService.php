@@ -59,7 +59,9 @@ class NotificationLogService
                     ->orWhere('provider_message_id', 'like', "%{$search}%")
                     ->orWhere('error_code', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($uq) use ($search) {
-                        $uq->where('name', 'like', "%{$search}%")
+                        $uq->where('full_name', 'like', "%{$search}%")
+                            ->orWhere('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%");
                     });
             });
