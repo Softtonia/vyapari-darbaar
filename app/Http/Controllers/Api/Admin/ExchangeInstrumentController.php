@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ExchangeInstrument\ListExchangeInstrumentRequest;
+use App\Http\Requests\Admin\ExchangeInstrument\StoreExchangeInstrumentRequest;
 use App\Http\Requests\Admin\ExchangeInstrument\UpdateExchangeInstrumentEnabledRequest;
+use App\Http\Requests\Admin\ExchangeInstrument\UpdateExchangeInstrumentRequest;
 use App\Http\Resources\ExchangeInstrumentListResource;
 use App\Http\Resources\ExchangeInstrumentOptionResource;
 use App\Http\Resources\ExchangeInstrumentResource;
@@ -60,6 +62,24 @@ class ExchangeInstrumentController extends Controller
     }
 
     /**
+     * Store a newly created exchange instrument.
+     */
+    public function store(
+        StoreExchangeInstrumentRequest $request,
+        ExchangeInstrumentService $service
+    ): JsonResponse {
+        $this->authorizeAdmin($request, 'exchange-instruments.create');
+
+        $instrument = $service->createInstrument($request->validated());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Exchange instrument created successfully.',
+            'data' => new ExchangeInstrumentResource($instrument),
+        ], 201);
+    }
+
+    /**
      * Display the specified exchange instrument detail.
      */
     public function show(Request $request, ExchangeInstrument $instrument): JsonResponse
@@ -76,6 +96,25 @@ class ExchangeInstrumentController extends Controller
             'status' => true,
             'message' => 'Exchange instrument retrieved successfully.',
             'data' => new ExchangeInstrumentResource($instrument),
+        ], 200);
+    }
+
+    /**
+     * Update the specified exchange instrument.
+     */
+    public function update(
+        UpdateExchangeInstrumentRequest $request,
+        ExchangeInstrument $instrument,
+        ExchangeInstrumentService $service
+    ): JsonResponse {
+        $this->authorizeAdmin($request, 'exchange-instruments.update');
+
+        $updatedInstrument = $service->updateInstrument($instrument, $request->validated());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Exchange instrument updated successfully.',
+            'data' => new ExchangeInstrumentResource($updatedInstrument),
         ], 200);
     }
 
@@ -98,6 +137,31 @@ class ExchangeInstrumentController extends Controller
             'status' => true,
             'message' => 'Exchange instrument enabled status updated successfully.',
             'data' => new ExchangeInstrumentResource($updatedInstrument),
+        ], 200);
+    }
+
+    /**
+     * Remove the specified exchange instrument.
+     */
+    public function destroy(
+        Request $request,
+        ExchangeInstrument $instrument,
+        ExchangeInstrumentService $service
+    ): JsonResponse {
+        $this->authorizeAdmin($request, 'exchange-instruments.delete');
+
+        try {
+            $service->deleteInstrument($instrument);
+        } catch (\DomainException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Exchange instrument deleted successfully.',
         ], 200);
     }
 

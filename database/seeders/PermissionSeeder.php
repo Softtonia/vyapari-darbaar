@@ -131,7 +131,9 @@ class PermissionSeeder extends Seeder
             'exchange-commodity-mappings.update',
             'exchange-commodity-mappings.delete',
             'exchange-instruments.view',
+            'exchange-instruments.create',
             'exchange-instruments.update',
+            'exchange-instruments.delete',
             'market-ingestion-runs.view',
         ];
 

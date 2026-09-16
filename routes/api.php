@@ -608,14 +608,20 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.exchange-commodity-mappings.update-status');
         });
 
-        // Exchange Instrument Management (Reference master / read & local visibility toggle only)
+        // Exchange Instrument Management (Manual CRUD, read & local visibility toggle)
         Route::prefix('exchange-instruments')->group(function () {
             Route::get('options', [ExchangeInstrumentController::class, 'options'])
                 ->name('admin.exchange-instruments.options');
             Route::get('/', [ExchangeInstrumentController::class, 'index'])
                 ->name('admin.exchange-instruments.index');
+            Route::post('/', [ExchangeInstrumentController::class, 'store'])
+                ->name('admin.exchange-instruments.store');
             Route::get('{instrument}', [ExchangeInstrumentController::class, 'show'])
                 ->name('admin.exchange-instruments.show');
+            Route::put('{instrument}', [ExchangeInstrumentController::class, 'update'])
+                ->name('admin.exchange-instruments.update');
+            Route::delete('{instrument}', [ExchangeInstrumentController::class, 'destroy'])
+                ->name('admin.exchange-instruments.destroy');
             Route::patch('{instrument}/enabled', [ExchangeInstrumentController::class, 'updateEnabled'])
                 ->name('admin.exchange-instruments.update-enabled');
         });

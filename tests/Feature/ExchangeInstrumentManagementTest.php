@@ -183,29 +183,214 @@ class ExchangeInstrumentManagementTest extends TestCase
         $this->assertNotNull($ncdexInst->id);
     }
 
-    public function test_admin_cannot_manually_http_post_or_delete_instruments(): void
+    public function test_admin_can_manually_create_future_instrument(): void
     {
-        // No HTTP Store route
-        $postRes = $this->withHeader('Authorization', 'Bearer '.$this->adminToken)
-            ->postJson('/api/admin/exchange-instruments', [
-                'symbol' => 'FAKE_INSTRUMENT',
-            ]);
-        $this->assertTrue(in_array($postRes->status(), [404, 405]));
+        $payload = [
+            'exchange_id' => $this->mcx->id,
+            'exchange_commodity_mapping_id' => $this->mcxGoldMapping->id,
+            'external_instrument_id' => 'MCX_GOLD_202610_FUT_MANUAL',
+            'symbol' => 'GOLD26OCTFUT',
+            'instrument_name' => 'MCX Gold Futures Oct 2026',
+            'instrument_type' => 'future',
+            'original_expiry_date' => '2026-10-05',
+            'actual_expiry_date' => '2026-10-05',
+            'lot_size' => 1.0,
+            'tick_size' => 1.0,
+            'quote_unit' => '10 GM',
+            'contract_unit' => '1 KG',
+            'lifecycle_status' => 'active',
+            'is_enabled' => true,
+        ];
 
-        // Create an instrument via service
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->adminToken)
+            ->postJson('/api/admin/exchange-instruments', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('status', true)
+            ->assertJsonPath('message', 'Exchange instrument created successfully.')
+            ->assertJsonPath('data.symbol', 'GOLD26OCTFUT')
+            ->assertJsonPath('data.instrument_type', 'future')
+            ->assertJsonPath('data.exchange.code', 'MCX');
+
+        $this->assertDatabaseHas('exchange_instruments', [
+            'external_instrument_id' => 'MCX_GOLD_202610_FUT_MANUAL',
+            'symbol' => 'GOLD26OCTFUT',
+            'is_enabled' => 1,
+        ]);
+    }
+
+    public function test_admin_can_manually_create_option_instrument(): void
+    {
+        $payload = [
+            'exchange_id' => $this->mcx->id,
+            'exchange_commodity_mapping_id' => $this->mcxGoldMapping->id,
+            'external_instrument_id' => 'MCX_GOLD_202610_75000_CE',
+            'symbol' => 'GOLD26OCT75000CE',
+            'instrument_name' => 'MCX Gold Options Oct 2026 Call 75000',
+            'instrument_type' => 'option',
+            'option_type' => 'call',
+            'strike_price' => 75000.00,
+            'actual_expiry_date' => '2026-10-05',
+            'lot_size' => 1.0,
+            'tick_size' => 0.5,
+            'quote_unit' => '10 GM',
+            'contract_unit' => '1 KG',
+        ];
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->adminToken)
+            ->postJson('/api/admin/exchange-instruments', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('status', true)
+            ->assertJsonPath('data.instrument_type', 'option')
+            ->assertJsonPath('data.option_type', 'call')
+            ->assertJsonPath('data.strike_price', '75000.00000000');
+    }
+
+    public function test_admin_cannot_create_instrument_with_mismatched_exchange_mapping(): void
+    {
+        $payload = [
+            'exchange_id' => $this->mcx->id,
+            'exchange_commodity_mapping_id' => $this->ncdexGoldMapping->id, // Mismatch!
+            'external_instrument_id' => 'MCX_MISMATCH_INST',
+            'symbol' => 'MISMATCHFUT',
+            'instrument_name' => 'Mismatch Test',
+            'instrument_type' => 'future',
+            'actual_expiry_date' => '2026-10-05',
+            'lot_size' => 1.0,
+            'tick_size' => 1.0,
+        ];
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->adminToken)
+            ->postJson('/api/admin/exchange-instruments', $payload);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['exchange_commodity_mapping_id']);
+    }
+
+    public function test_admin_can_manually_update_instrument(): void
+    {
         $instrument = ExchangeInstrument::create([
             'exchange_id' => $this->mcx->id,
             'exchange_commodity_mapping_id' => $this->mcxGoldMapping->id,
-            'external_instrument_id' => 'MCX_GOLD_DEL_TEST',
+            'external_instrument_id' => 'MCX_GOLD_EDIT_TEST',
             'symbol' => 'GOLD26OCTFUT',
+            'instrument_name' => 'Initial Name',
             'instrument_type' => InstrumentType::FUTURE->value,
             'actual_expiry_date' => '2026-10-05',
+            'lot_size' => '1.000000',
+            'tick_size' => '1.00000000',
         ]);
 
-        // No HTTP Delete route
-        $delRes = $this->withHeader('Authorization', 'Bearer '.$this->adminToken)
+        $updatePayload = [
+            'instrument_name' => 'Updated Name via Admin',
+            'lot_size' => 2.0,
+            'tick_size' => 0.5,
+            'lifecycle_status' => 'expired',
+        ];
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->adminToken)
+            ->putJson("/api/admin/exchange-instruments/{$instrument->id}", $updatePayload);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('status', true)
+            ->assertJsonPath('data.instrument_name', 'Updated Name via Admin')
+            ->assertJsonPath('data.lot_size', '2.000000')
+            ->assertJsonPath('data.lifecycle_status', 'expired');
+
+        $this->assertDatabaseHas('exchange_instruments', [
+            'id' => $instrument->id,
+            'instrument_name' => 'Updated Name via Admin',
+            'lifecycle_status' => 'expired',
+        ]);
+    }
+
+    public function test_admin_can_delete_instrument_when_no_bhavcopies_exist(): void
+    {
+        $instrument = ExchangeInstrument::create([
+            'exchange_id' => $this->mcx->id,
+            'exchange_commodity_mapping_id' => $this->mcxGoldMapping->id,
+            'external_instrument_id' => 'MCX_GOLD_DELETE_OK',
+            'symbol' => 'GOLD26OCTFUT',
+            'instrument_name' => 'Delete Me',
+            'instrument_type' => InstrumentType::FUTURE->value,
+            'actual_expiry_date' => '2026-10-05',
+            'lot_size' => '1.000000',
+            'tick_size' => '1.00000000',
+        ]);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->adminToken)
             ->deleteJson("/api/admin/exchange-instruments/{$instrument->id}");
-        $this->assertTrue(in_array($delRes->status(), [404, 405]));
+
+        $response->assertStatus(200)
+            ->assertJsonPath('status', true)
+            ->assertJsonPath('message', 'Exchange instrument deleted successfully.');
+
+        $this->assertDatabaseMissing('exchange_instruments', [
+            'id' => $instrument->id,
+        ]);
+    }
+
+    public function test_admin_cannot_delete_instrument_when_bhavcopies_exist(): void
+    {
+        $instrument = ExchangeInstrument::create([
+            'exchange_id' => $this->mcx->id,
+            'exchange_commodity_mapping_id' => $this->mcxGoldMapping->id,
+            'external_instrument_id' => 'MCX_GOLD_WITH_BHAVCOPY',
+            'symbol' => 'GOLD26OCTFUT',
+            'instrument_name' => 'Has History',
+            'instrument_type' => InstrumentType::FUTURE->value,
+            'actual_expiry_date' => '2026-10-05',
+            'lot_size' => '1.000000',
+            'tick_size' => '1.00000000',
+        ]);
+
+        \App\Models\MarketBhavcopy::create([
+            'exchange_instrument_id' => $instrument->id,
+            'trade_date' => '2026-09-15',
+            'settlement_price' => 75200.0,
+            'received_at' => now(),
+        ]);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->adminToken)
+            ->deleteJson("/api/admin/exchange-instruments/{$instrument->id}");
+
+        $response->assertStatus(422)
+            ->assertJsonPath('status', false)
+            ->assertJsonPath('message', 'Cannot delete instrument because historical market data (bhavcopies) exists. You can set lifecycle_status to delisted or is_enabled to false instead.');
+
+        $this->assertDatabaseHas('exchange_instruments', [
+            'id' => $instrument->id,
+        ]);
+    }
+
+    public function test_unauthorized_admin_without_permissions_is_rejected(): void
+    {
+        $limitedAdmin = Admin::create([
+            'first_name' => 'Limited',
+            'last_name' => 'Admin',
+            'name' => 'Limited Admin',
+            'email' => 'limited.admin@example.com',
+            'password' => Hash::make('AdminPass@12345'),
+            'status' => 'active',
+        ]);
+        // Do not assign role or permissions
+        $token = $limitedAdmin->createToken('limited-token')->plainTextToken;
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/admin/exchange-instruments', [
+                'exchange_id' => $this->mcx->id,
+                'exchange_commodity_mapping_id' => $this->mcxGoldMapping->id,
+                'external_instrument_id' => 'FORBIDDEN_TEST',
+                'symbol' => 'FORBIDDEN',
+                'instrument_name' => 'Forbidden',
+                'instrument_type' => 'future',
+                'actual_expiry_date' => '2026-10-05',
+                'lot_size' => 1.0,
+                'tick_size' => 1.0,
+            ]);
+
+        $response->assertStatus(403);
     }
 
     public function test_admin_can_toggle_is_enabled_only(): void

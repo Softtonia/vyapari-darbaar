@@ -114,6 +114,212 @@ class ExchangeInstrumentService
     }
 
     /**
+     * Manually create a new exchange instrument.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function createInstrument(array $data): ExchangeInstrument
+    {
+        $mappingId = (int) $data['exchange_commodity_mapping_id'];
+        $mapping = ExchangeCommodityMapping::findOrFail($mappingId);
+
+        $exchangeId = (int) ($data['exchange_id'] ?? $mapping->exchange_id);
+        if ($exchangeId !== (int) $mapping->exchange_id) {
+            throw new InvalidArgumentException("Exchange mismatch: mapping {$mappingId} belongs to exchange {$mapping->exchange_id}, not {$exchangeId}.");
+        }
+
+        $instrumentType = $data['instrument_type'] instanceof InstrumentType
+            ? $data['instrument_type']->value
+            : (string) $data['instrument_type'];
+
+        $optionType = null;
+        if (! empty($data['option_type'])) {
+            $optionType = $data['option_type'] instanceof OptionType
+                ? $data['option_type']->value
+                : (string) $data['option_type'];
+        }
+
+        $lifecycleStatus = ! empty($data['lifecycle_status'])
+            ? ($data['lifecycle_status'] instanceof InstrumentLifecycleStatus ? $data['lifecycle_status']->value : (string) $data['lifecycle_status'])
+            : InstrumentLifecycleStatus::ACTIVE->value;
+
+        $externalInstrumentId = isset($data['external_instrument_id']) && trim((string) $data['external_instrument_id']) !== ''
+            ? trim((string) $data['external_instrument_id'])
+            : null;
+
+        $instrument = DB::transaction(function () use (
+            $exchangeId,
+            $mappingId,
+            $externalInstrumentId,
+            $data,
+            $instrumentType,
+            $optionType,
+            $lifecycleStatus
+        ) {
+            return ExchangeInstrument::create([
+                'exchange_id' => $exchangeId,
+                'exchange_commodity_mapping_id' => $mappingId,
+                'external_instrument_id' => $externalInstrumentId,
+                'symbol' => trim((string) $data['symbol']),
+                'instrument_name' => isset($data['instrument_name']) ? trim((string) $data['instrument_name']) : null,
+                'instrument_type' => $instrumentType,
+                'original_expiry_date' => $data['original_expiry_date'] ?? null,
+                'actual_expiry_date' => $data['actual_expiry_date'],
+                'strike_price' => array_key_exists('strike_price', $data) ? $data['strike_price'] : null,
+                'option_type' => $optionType,
+                'lot_size' => $data['lot_size'],
+                'tick_size' => $data['tick_size'],
+                'quote_unit' => $data['quote_unit'] ?? null,
+                'contract_unit' => $data['contract_unit'] ?? null,
+                'lifecycle_status' => $lifecycleStatus,
+                'is_enabled' => array_key_exists('is_enabled', $data) ? (bool) $data['is_enabled'] : true,
+                'listed_at' => $data['listed_at'] ?? null,
+                'delisted_at' => $data['delisted_at'] ?? null,
+            ]);
+        });
+
+        $this->clearCache($mappingId);
+
+        return $instrument->fresh([
+            'exchange:id,name,code',
+            'mapping:id,exchange_id,commodity_id,external_symbol,external_name',
+            'mapping.commodity:id,name,code,unit',
+        ]);
+    }
+
+    /**
+     * Manually update an existing exchange instrument.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function updateInstrument(ExchangeInstrument $instrument, array $data): ExchangeInstrument
+    {
+        $oldMappingId = (int) $instrument->exchange_commodity_mapping_id;
+        $newMappingId = array_key_exists('exchange_commodity_mapping_id', $data) && $data['exchange_commodity_mapping_id'] !== null
+            ? (int) $data['exchange_commodity_mapping_id']
+            : $oldMappingId;
+
+        if ($newMappingId !== $oldMappingId) {
+            $mapping = ExchangeCommodityMapping::findOrFail($newMappingId);
+            if ((int) $mapping->exchange_id !== (int) $instrument->exchange_id) {
+                throw new InvalidArgumentException("Exchange mismatch: mapping {$newMappingId} belongs to exchange {$mapping->exchange_id}, not {$instrument->exchange_id}.");
+            }
+        }
+
+        $updateData = [];
+
+        if (array_key_exists('exchange_commodity_mapping_id', $data) && $data['exchange_commodity_mapping_id'] !== null) {
+            $updateData['exchange_commodity_mapping_id'] = (int) $data['exchange_commodity_mapping_id'];
+        }
+
+        if (array_key_exists('external_instrument_id', $data)) {
+            $updateData['external_instrument_id'] = $data['external_instrument_id'] !== null && trim((string) $data['external_instrument_id']) !== ''
+                ? trim((string) $data['external_instrument_id'])
+                : null;
+        }
+
+        if (array_key_exists('symbol', $data)) {
+            $updateData['symbol'] = trim((string) $data['symbol']);
+        }
+
+        if (array_key_exists('instrument_name', $data)) {
+            $updateData['instrument_name'] = $data['instrument_name'] !== null ? trim((string) $data['instrument_name']) : null;
+        }
+
+        if (array_key_exists('instrument_type', $data)) {
+            $updateData['instrument_type'] = $data['instrument_type'] instanceof InstrumentType
+                ? $data['instrument_type']->value
+                : (string) $data['instrument_type'];
+        }
+
+        if (array_key_exists('original_expiry_date', $data)) {
+            $updateData['original_expiry_date'] = $data['original_expiry_date'];
+        }
+
+        if (array_key_exists('actual_expiry_date', $data)) {
+            $updateData['actual_expiry_date'] = $data['actual_expiry_date'];
+        }
+
+        if (array_key_exists('strike_price', $data)) {
+            $updateData['strike_price'] = $data['strike_price'];
+        }
+
+        if (array_key_exists('option_type', $data)) {
+            $updateData['option_type'] = ! empty($data['option_type'])
+                ? ($data['option_type'] instanceof OptionType ? $data['option_type']->value : (string) $data['option_type'])
+                : null;
+        }
+
+        if (array_key_exists('lot_size', $data)) {
+            $updateData['lot_size'] = $data['lot_size'];
+        }
+
+        if (array_key_exists('tick_size', $data)) {
+            $updateData['tick_size'] = $data['tick_size'];
+        }
+
+        if (array_key_exists('quote_unit', $data)) {
+            $updateData['quote_unit'] = $data['quote_unit'];
+        }
+
+        if (array_key_exists('contract_unit', $data)) {
+            $updateData['contract_unit'] = $data['contract_unit'];
+        }
+
+        if (array_key_exists('lifecycle_status', $data)) {
+            $updateData['lifecycle_status'] = $data['lifecycle_status'] instanceof InstrumentLifecycleStatus
+                ? $data['lifecycle_status']->value
+                : (string) $data['lifecycle_status'];
+        }
+
+        if (array_key_exists('is_enabled', $data)) {
+            $updateData['is_enabled'] = (bool) $data['is_enabled'];
+        }
+
+        if (array_key_exists('listed_at', $data)) {
+            $updateData['listed_at'] = $data['listed_at'];
+        }
+
+        if (array_key_exists('delisted_at', $data)) {
+            $updateData['delisted_at'] = $data['delisted_at'];
+        }
+
+        $instrument = DB::transaction(function () use ($instrument, $updateData) {
+            $instrument->update($updateData);
+
+            return $instrument->fresh([
+                'exchange:id,name,code',
+                'mapping:id,exchange_id,commodity_id,external_symbol,external_name',
+                'mapping.commodity:id,name,code,unit',
+            ]);
+        });
+
+        $this->clearCache($oldMappingId, [$newMappingId]);
+
+        return $instrument;
+    }
+
+    /**
+     * Delete an exchange instrument if no historical market bhavcopies exist.
+     */
+    public function deleteInstrument(ExchangeInstrument $instrument): bool
+    {
+        if ($instrument->bhavcopies()->exists()) {
+            throw new \DomainException('Cannot delete instrument because historical market data (bhavcopies) exists. You can set lifecycle_status to delisted or is_enabled to false instead.');
+        }
+
+        $mappingId = (int) $instrument->exchange_commodity_mapping_id;
+
+        DB::transaction(function () use ($instrument) {
+            $instrument->delete();
+        });
+
+        $this->clearCache($mappingId);
+
+        return true;
+    }
+
+    /**
      * Set local is_enabled flag for an instrument.
      */
     public function setEnabled(ExchangeInstrument $instrument, bool $isEnabled): ExchangeInstrument
