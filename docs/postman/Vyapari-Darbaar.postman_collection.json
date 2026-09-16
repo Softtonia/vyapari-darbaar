@@ -1298,6 +1298,41 @@
                     "name": "Email Templates",
                     "item": [
                         {
+                            "name": "Get Email Template Placeholders",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/email-templates/placeholders?key=USER_ACCOUNT_CREATED",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "email-templates",
+                                        "placeholders"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "key",
+                                            "value": "USER_ACCOUNT_CREATED",
+                                            "description": "Optional template key filter"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
                             "name": "Get Supported Placeholders",
                             "request": {
                                 "method": "GET",
@@ -1374,7 +1409,7 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{live}}/api/admin/email-templates?page=1&per_page=20",
+                                    "raw": "{{live}}/api/admin/email-templates?page=1&per_page=20&type=html&is_active=1&search=",
                                     "host": [
                                         "{{live}}"
                                     ],
@@ -1391,6 +1426,19 @@
                                         {
                                             "key": "per_page",
                                             "value": "20"
+                                        },
+                                        {
+                                            "key": "type",
+                                            "value": "html",
+                                            "description": "Filter by template type: plain or html"
+                                        },
+                                        {
+                                            "key": "is_active",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "search",
+                                            "value": ""
                                         }
                                     ]
                                 }
@@ -1416,7 +1464,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"name\": \"Welcome Notice\",\n    \"key\": \"WELCOME_NOTICE\",\n    \"subject\": \"Welcome to {{CompanyName}}\",\n    \"body\": \"Hello, welcome to {{CompanyName}}. Contact {{SupportEmail}} for help.\",\n    \"is_active\": true\n}"
+                                    "raw": "{\n    \"key\": \"CUSTOM_NOTIFICATION\",\n    \"name\": \"Custom Notification Email\",\n    \"subject\": \"Important update from {{CompanyName}}\",\n    \"body\": \"Hello {{UserName}},\\n\\nPlease check your account for recent updates.\\n\\nRegards,\\n{{CompanyName}}\",\n    \"type\": \"html\",\n    \"is_active\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/email-templates",
@@ -1544,7 +1592,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"name\": \"Updated Account Credentials\",\n    \"subject\": \"Your Credentials for {{CompanyName}}\",\n    \"body\": \"Hello {{UserName}}, username is {{Username}} and temporary password is {{TemporaryPassword}}.\",\n    \"is_active\": true\n}"
+                                    "raw": "{\n    \"name\": \"Updated Account Credentials\",\n    \"subject\": \"Your Credentials for {{CompanyName}}\",\n    \"body\": \"Hello {{UserName}}, username is {{Username}} and temporary password is {{TemporaryPassword}}.\",\n    \"type\": \"plain\",\n    \"is_active\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/email-templates/{{email_template_id}}",
@@ -5312,6 +5360,37 @@
                             }
                         },
                         {
+                            "name": "Validate Username (Availability Check)",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"username\": \"ajay.kumar\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/user/validate-username",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "user",
+                                        "validate-username"
+                                    ]
+                                }
+                            }
+                        },
+                        {
                             "name": "User Register",
                             "event": [
                                 {
@@ -5358,7 +5437,7 @@
                             }
                         },
                         {
-                            "name": "User Login",
+                            "name": "User Login (Password Method)",
                             "event": [
                                 {
                                     "listen": "test",
@@ -5388,7 +5467,99 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"{{user_password}}\",\n    \"device_name\": \"Postman User\"\n}"
+                                    "raw": "{\n    \"username\": \"{{username}}\",\n    \"password\": \"{{user_password}}\",\n    \"device_name\": \"Mobile Android App\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/user/login",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "user",
+                                        "login"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "User Login (OTP Method)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.status === true && jsonData.data && jsonData.data.token) {",
+                                            "    pm.environment.set('user_token', jsonData.data.token);",
+                                            "    console.log('User token saved to environment.');",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"username\": \"{{username}}\",\n    \"otp\": \"123456\",\n    \"device_name\": \"Mobile Android App\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/user/login",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "user",
+                                        "login"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "User Login (Email / Number OTP)",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.status === true && jsonData.data && jsonData.data.token) {",
+                                            "    pm.environment.set('user_token', jsonData.data.token);",
+                                            "    console.log('User token saved to environment.');",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"username\": \"{{username}}\",\n    \"email_otp\": \"123456\",\n    \"device_name\": \"Mobile Android App\"\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/user/login",
@@ -5554,6 +5725,10 @@
                                     {
                                         "key": "Authorization",
                                         "value": "Bearer {{user_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
                                     }
                                 ],
                                 "url": {
@@ -5566,6 +5741,10 @@
                                         "user",
                                         "logout"
                                     ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"fcm_token\": \"optional_fcm_token_to_deactivate\"\n}"
                                 }
                             }
                         }
