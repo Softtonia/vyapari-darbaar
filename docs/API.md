@@ -3901,7 +3901,78 @@ Decoupled 3-tier architecture separating internal physical commodities from exch
 }
 ```
 
-#### 2. Toggle Local Enabled Visibility
+#### 2. Exchange Instrument Options (Dropdown)
+- **Method:** `GET`
+- **URI:** `/api/admin/exchange-instruments/options?exchange_commodity_mapping_id=30`
+- **Permission:** `exchange-instruments.view`
+- **Cache:** `exchange-instruments:options:mapping:{mapping_id}` (TTL: 3600s)
+
+#### 3. Create Exchange Instrument
+- **Method:** `POST`
+- **URI:** `/api/admin/exchange-instruments`
+- **Permission:** `exchange-instruments.create`
+- **Request Body:**
+```json
+{
+    "exchange_id": 1,
+    "exchange_commodity_mapping_id": 30,
+    "external_instrument_id": "MCX_GOLD_202610_FUT",
+    "symbol": "GOLD26OCTFUT",
+    "instrument_name": "MCX Gold Futures Oct 2026",
+    "instrument_type": "future",
+    "original_expiry_date": "2026-10-05",
+    "actual_expiry_date": "2026-10-05",
+    "strike_price": null,
+    "option_type": null,
+    "lot_size": 1.0,
+    "tick_size": 1.0,
+    "quote_unit": "10 GM",
+    "contract_unit": "1 KG",
+    "lifecycle_status": "active",
+    "is_enabled": true
+}
+```
+- **Option Contract Body:**
+```json
+{
+    "exchange_id": 1,
+    "exchange_commodity_mapping_id": 30,
+    "external_instrument_id": "MCX_GOLD_202610_75000_CE",
+    "symbol": "GOLD26OCT75000CE",
+    "instrument_name": "MCX Gold Options Oct 2026 Call 75000",
+    "instrument_type": "option",
+    "option_type": "call",
+    "strike_price": 75000.00,
+    "actual_expiry_date": "2026-10-05",
+    "lot_size": 1.0,
+    "tick_size": 0.5,
+    "quote_unit": "10 GM",
+    "contract_unit": "1 KG"
+}
+```
+
+#### 4. Get Exchange Instrument Detail
+- **Method:** `GET`
+- **URI:** `/api/admin/exchange-instruments/{id}`
+- **Permission:** `exchange-instruments.view`
+- **Response (200 OK):** Returns full `ExchangeInstrumentResource`.
+
+#### 5. Update Exchange Instrument
+- **Method:** `PUT`
+- **URI:** `/api/admin/exchange-instruments/{id}`
+- **Permission:** `exchange-instruments.update`
+- **Request Body:**
+```json
+{
+    "instrument_name": "MCX Gold Futures Oct 2026 (Updated)",
+    "lot_size": 1.0,
+    "tick_size": 1.0,
+    "lifecycle_status": "active",
+    "is_enabled": true
+}
+```
+
+#### 6. Toggle Local Enabled Visibility
 - **Method:** `PATCH`
 - **URI:** `/api/admin/exchange-instruments/{id}/enabled`
 - **Permission:** `exchange-instruments.update`
@@ -3909,6 +3980,19 @@ Decoupled 3-tier architecture separating internal physical commodities from exch
 ```json
 {
     "is_enabled": false
+}
+```
+
+#### 7. Delete Exchange Instrument
+- **Method:** `DELETE`
+- **URI:** `/api/admin/exchange-instruments/{id}`
+- **Permission:** `exchange-instruments.delete`
+- **Safeguard:** Deletion is blocked with `422 Unprocessable Content` if historical bhavcopy data exists. When blocked, administrators should soft-delist or toggle `is_enabled: false`.
+- **Response (200 OK):**
+```json
+{
+    "status": true,
+    "message": "Exchange instrument deleted successfully."
 }
 ```
 

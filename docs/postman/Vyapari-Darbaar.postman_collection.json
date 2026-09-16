@@ -5929,6 +5929,43 @@
                                     }
                                 },
                                 {
+                                    "name": "Create Exchange Instrument",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"exchange_id\": 1,\n    \"exchange_commodity_mapping_id\": 1,\n    \"external_instrument_id\": \"MCX_GOLD_202610_FUT\",\n    \"symbol\": \"GOLD26OCTFUT\",\n    \"instrument_name\": \"Gold Futures Oct 2026\",\n    \"instrument_type\": \"future\",\n    \"original_expiry_date\": \"2026-10-05\",\n    \"actual_expiry_date\": \"2026-10-05\",\n    \"lot_size\": 1,\n    \"tick_size\": 1,\n    \"quote_unit\": \"10 GM\",\n    \"contract_unit\": \"1 KG\",\n    \"lifecycle_status\": \"active\",\n    \"is_enabled\": true\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/exchange-instruments",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "exchange-instruments"
+                                            ]
+                                        },
+                                        "description": "Manually create an exchange instrument under an authorized exchange mapping."
+                                    },
+                                    "response": []
+                                },
+                                {
                                     "name": "Get Exchange Instrument Detail",
                                     "request": {
                                         "method": "GET",
@@ -5955,6 +5992,74 @@
                                             ]
                                         }
                                     }
+                                },
+                                {
+                                    "name": "Update Exchange Instrument",
+                                    "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"instrument_name\": \"Gold Futures Oct 2026 (Updated)\",\n    \"lot_size\": 1,\n    \"tick_size\": 1,\n    \"lifecycle_status\": \"active\",\n    \"is_enabled\": true\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/exchange-instruments/{{instrument_id}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "exchange-instruments",
+                                                "{{instrument_id}}"
+                                            ]
+                                        },
+                                        "description": "Update instrument details, lifecycle status, units, and contract specifications."
+                                    },
+                                    "response": []
+                                },
+                                {
+                                    "name": "Delete Exchange Instrument",
+                                    "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/exchange-instruments/{{instrument_id}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "exchange-instruments",
+                                                "{{instrument_id}}"
+                                            ]
+                                        },
+                                        "description": "Delete an exchange instrument (only allowed if no bhavcopy market history exists)."
+                                    },
+                                    "response": []
                                 },
                                 {
                                     "name": "Toggle Instrument Enabled Status",
