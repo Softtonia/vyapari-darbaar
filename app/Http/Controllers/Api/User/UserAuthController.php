@@ -16,6 +16,7 @@ use App\Http\Requests\User\LoginUserRequest;
 use App\Http\Requests\User\RegisterUserRequest;
 use App\Http\Requests\User\ResetPasswordUserRequest;
 use App\Http\Requests\User\SendOtpRequest;
+use App\Http\Requests\User\ValidateUsernameRequest;
 use App\Http\Requests\User\VerifyOtpRequest;
 use App\Http\Resources\UserProfileResource;
 use App\Models\User;
@@ -32,8 +33,28 @@ class UserAuthController extends Controller
      */
     public function sendOtp(SendOtpRequest $request, OtpService $otpService): JsonResponse
     {
-        $email = strtolower(trim((string) $request->input('email')));
         $purpose = (string) $request->input('purpose', 'registration');
+        $inputEmail = $request->input('email');
+        $inputUsername = $request->input('username');
+        $inputPhone = $request->input('phone_number');
+
+        $targetUser = null;
+        if (! empty($inputUsername) || ! empty($inputPhone) || in_array($purpose, ['login', 'password_reset'], true)) {
+            $identifier = trim((string) ($inputUsername ?? $inputEmail ?? $inputPhone));
+            $targetUser = User::where('username', $identifier)
+                ->orWhere('email', strtolower($identifier))
+                ->orWhere('phone_number', $identifier)
+                ->first();
+
+            if (! $targetUser && in_array($purpose, ['login', 'password_reset'], true)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'No account found with this identifier.',
+                ], 404);
+            }
+        }
+
+        $email = $targetUser ? $targetUser->email : strtolower(trim((string) $inputEmail));
 
         // Check 60-second cooldown
         $cooldown = $otpService->checkResendCooldown($email, $purpose);
@@ -50,6 +71,16 @@ class UserAuthController extends Controller
         // Generate / retrieve active OTP
         $otpData = $otpService->getOrCreateOtp($email, $purpose);
         $otpService->setResendCooldown($email, $purpose);
+
+        // If target user exists, also associate active OTP with username & phone for quick login matching
+        if ($targetUser) {
+            if ($targetUser->username && $targetUser->username !== $email) {
+                $otpService->getOrCreateOtp($targetUser->username, $purpose);
+            }
+            if ($targetUser->phone_number && $targetUser->phone_number !== $email) {
+                $otpService->getOrCreateOtp($targetUser->phone_number, $purpose);
+            }
+        }
 
         // Dispatch queued email notification
         Notification::route('mail', $email)
@@ -235,6 +266,24 @@ class UserAuthController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Logged out successfully.',
+        ], 200);
+    }
+
+    /**
+     * Validate username availability and format in real-time.
+     */
+    public function validateUsername(ValidateUsernameRequest $request): JsonResponse
+    {
+        $username = trim((string) $request->input('username'));
+
+        return response()->json([
+            'status' => true,
+            'message' => "The username '{$username}' is available.",
+            'data' => [
+                'username' => $username,
+                'available' => true,
+                'is_available' => true,
+            ],
         ], 200);
     }
 }

@@ -559,6 +559,11 @@ Route::prefix('user')->group(function () {
         ->middleware('throttle:user-verify-otp')
         ->name('user.otp.verify');
 
+    // Real-time username validation & availability
+    Route::post('validate-username', [UserAuthController::class, 'validateUsername'])
+        ->middleware('throttle:user-api')
+        ->name('user.validate-username');
+
     // Registration
     Route::post('register', [UserAuthController::class, 'register'])
         ->middleware('throttle:user-register')
@@ -634,6 +639,8 @@ Route::prefix('user')->group(function () {
         Route::prefix('company')->group(function () {
             Route::get('/', [UserCompanyController::class, 'show'])
                 ->name('user.company.show');
+            Route::post('/', [UserCompanyController::class, 'store'])
+                ->name('user.company.store');
             Route::put('/', [UserCompanyController::class, 'update'])
                 ->name('user.company.update');
             Route::patch('/', [UserCompanyController::class, 'update']);

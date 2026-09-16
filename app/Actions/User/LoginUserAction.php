@@ -3,20 +3,28 @@
 namespace App\Actions\User;
 
 use App\Models\User;
+use App\Services\OtpService;
+use App\Services\UserActivityService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class LoginUserAction
 {
+    public function __construct(
+        protected OtpService $otpService
+    ) {}
+
     /**
-     * Authenticate a user by username and issue a Sanctum token.
+     * Authenticate a user by username + password OR username + OTP and issue a Sanctum token.
      *
-     * @param  array{username: string, password: string}  $credentials
+     * @param  array{username: string, password?: string|null, otp?: string|null, email_otp?: string|null, number_otp?: string|null}  $credentials
      * @param  string  $deviceName
      * @return array{success: true, token: string, user: User}|array{success: false, message: string, code: int}
      */
     public function execute(array $credentials, string $deviceName = 'user-device'): array
     {
+        $identifier = trim((string) $credentials['username']);
+
         $user = User::query()
             ->select([
                 'id',
@@ -31,7 +39,9 @@ class LoginUserAction
                 'suspension_reason',
                 'must_change_password',
             ])
-            ->where('username', $credentials['username'])
+            ->where('username', $identifier)
+            ->orWhere('email', strtolower($identifier))
+            ->orWhere('phone_number', $identifier)
             ->first();
 
         if (! $user) {
@@ -42,18 +52,67 @@ class LoginUserAction
             ];
         }
 
-        if (! Hash::check($credentials['password'], $user->password)) {
-            \App\Services\UserActivityService::log(
-                $user,
-                'login_failed',
-                "Failed login attempt: incorrect password from device '{$deviceName}'",
-                ['device_name' => $deviceName, 'reason' => 'incorrect_password']
-            );
+        $otp = $credentials['otp'] ?? $credentials['email_otp'] ?? $credentials['number_otp'] ?? null;
+        $password = $credentials['password'] ?? null;
 
+        if (! empty($otp)) {
+            // Verify OTP method
+            $otpString = trim((string) $otp);
+            $isValid = false;
+
+            $candidateIdentifiers = array_unique(array_filter([
+                $user->email,
+                $user->phone_number,
+                $user->username,
+                $identifier,
+            ]));
+
+            $purposes = ['login', 'default', 'verification'];
+
+            foreach ($candidateIdentifiers as $id) {
+                foreach ($purposes as $purpose) {
+                    if ($this->otpService->verify($id, $otpString, $purpose, consumeOnSuccess: true)) {
+                        $isValid = true;
+                        break 2;
+                    }
+                }
+            }
+
+            if (! $isValid) {
+                UserActivityService::log(
+                    $user,
+                    'login_failed',
+                    "Failed login attempt: invalid or expired OTP from device '{$deviceName}'",
+                    ['device_name' => $deviceName, 'reason' => 'invalid_otp']
+                );
+
+                return [
+                    'success' => false,
+                    'message' => 'The provided OTP is invalid or has expired.',
+                    'code' => 401,
+                ];
+            }
+        } elseif (! empty($password)) {
+            // Verify Password method
+            if (! Hash::check((string) $password, $user->password)) {
+                UserActivityService::log(
+                    $user,
+                    'login_failed',
+                    "Failed login attempt: incorrect password from device '{$deviceName}'",
+                    ['device_name' => $deviceName, 'reason' => 'incorrect_password']
+                );
+
+                return [
+                    'success' => false,
+                    'message' => 'Incorrect password.',
+                    'code' => 401,
+                ];
+            }
+        } else {
             return [
                 'success' => false,
-                'message' => 'Incorrect password.',
-                'code' => 401,
+                'message' => 'Please provide either password or OTP to log in.',
+                'code' => 422,
             ];
         }
 
@@ -62,7 +121,7 @@ class LoginUserAction
                 ? "Account is suspended. Reason: {$user->suspension_reason}"
                 : 'Account is suspended. Please contact administrator.';
 
-            \App\Services\UserActivityService::log(
+            UserActivityService::log(
                 $user,
                 'login_failed',
                 'Failed login attempt: account is suspended',
@@ -77,7 +136,7 @@ class LoginUserAction
         }
 
         if ($user->status !== 'active') {
-            \App\Services\UserActivityService::log(
+            UserActivityService::log(
                 $user,
                 'login_failed',
                 'Failed login attempt: account is inactive',
@@ -91,21 +150,13 @@ class LoginUserAction
             ];
         }
 
-        // Check if an unexpired active token exists for this user and device
-        $activeToken = DB::table('personal_access_tokens')
-            ->where('tokenable_type', $user->getMorphClass())
-            ->where('tokenable_id', $user->getKey())
-            ->where('name', $deviceName)
-            ->where('expires_at', '>', now())
-            ->whereNotNull('plain_token')
-            ->latest('id')
-            ->first();
+        $loginMethod = ! empty($otp) ? 'otp' : 'password';
 
-        \App\Services\UserActivityService::log(
+        UserActivityService::log(
             $user,
             'login',
-            "User logged in from device '{$deviceName}'",
-            ['device_name' => $deviceName]
+            "User logged in via {$loginMethod} from device '{$deviceName}'",
+            ['device_name' => $deviceName, 'method' => $loginMethod]
         );
 
         // Security Alert: New Login Notification
@@ -116,13 +167,8 @@ class LoginUserAction
             \App\Enums\NotificationType::PUSH_AND_IN_APP
         );
 
-        if ($activeToken && ! empty($activeToken->plain_token)) {
-            return [
-                'success' => true,
-                'token' => $activeToken->plain_token,
-                'user' => $user,
-            ];
-        }
+        // Revoke any previous tokens for this specific device to restart a fresh 24h session
+        $user->tokens()->where('name', $deviceName)->delete();
 
         $expiresMinutes = (int) (config('sanctum.expiration') ?? 1440);
         $tokenResult = $user->createToken($deviceName, ['*'], now()->addMinutes($expiresMinutes));

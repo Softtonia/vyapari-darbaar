@@ -156,27 +156,63 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 - **Method:** `POST`
 - **URI:** `/api/user/login`
 - **Throttle:** `user-login` (5 attempts / minute by SHA1(username + IP))
-- **Identifier:** Username only (`ajay.kumar`). Email is rejected.
+- **Supported Login Methods:**
+  1. **Username + Password**
+  2. **Username + OTP** (email OTP or phone number OTP)
+
+#### Method A: Username & Password
 - **Request Body:**
   ```json
   {
       "username": "ajay.kumar",
-      "password": "TemporaryPassword123!",
-      "device_name": "Mobile App"
+      "password": "Password#2026",
+      "device_name": "Mobile Android App"
   }
   ```
+
+#### Method B: Username & OTP (Email / Number OTP)
+- **Request Body (using `otp`):**
+  ```json
+  {
+      "username": "ajay.kumar",
+      "otp": "123456",
+      "device_name": "Mobile Android App"
+  }
+  ```
+- **Alternative fields accepted:** `email_otp` or `number_otp`
+  ```json
+  {
+      "username": "ajay.kumar",
+      "email_otp": "123456",
+      "device_name": "Mobile Android App"
+  }
+  ```
+
+- **Device Management & Session Lifecycle:**
+  - **24-Hour Independent Sessions:** Every successful login issues a Sanctum token valid for exactly **24 hours** (`expires_at = now() + 24 hours`).
+  - **Multi-Device Support:** When logging in from another device (`device_name`), an independent 24-hour session is initiated without terminating sessions on other devices.
+  - **Re-login & Token Refresh:** Logging in again on the same device revokes the previous token for that device and starts a brand-new 24-hour session timer.
+  - **Logout Isolation:** Calling `/api/user/logout` revokes only the token of the current device, leaving other active device sessions intact.
+
+- **Validation:**
+  - `username`: `required|string` (Accepts username, email, or phone number)
+  - `password`: `required_without_all:otp,email_otp,number_otp|string`
+  - `otp` / `email_otp` / `number_otp`: `required_without_all:password|string|size:6`
+  - `device_name`: `nullable|string|max:100` (Defaults to `User-Agent` or `'user-device'`)
+
 - **Success (200 OK):**
   ```json
   {
       "status": true,
       "message": "Login successful.",
       "data": {
-          "token": "2|user_sanctum_token..."
+          "token": "2|user_sanctum_token...",
+          "role": "trader"
       }
   }
   ```
 - **Specific Error Responses:**
-  - Username not found (401 Unauthorized):
+  - Username / identifier not found (401 Unauthorized):
     ```json
     {
         "status": false,
@@ -188,6 +224,20 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
     {
         "status": false,
         "message": "Incorrect password."
+    }
+    ```
+  - Invalid / expired OTP (401 Unauthorized):
+    ```json
+    {
+        "status": false,
+        "message": "The provided OTP is invalid or has expired."
+    }
+    ```
+  - Account inactive / suspended (403 Forbidden):
+    ```json
+    {
+        "status": false,
+        "message": "Account is inactive. Please contact administrator."
     }
     ```
 
@@ -379,7 +429,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 ### 3.3 List Email Templates
 - **Method:** `GET`
 - **URI:** `/api/admin/email-templates`
-- **Query Parameters:** `page`, `per_page` (default 20, max 100), `search`, `is_active`
+- **Query Parameters:** `page`, `per_page` (default 20, max 100), `search`, `type` (`plain` or `html`), `is_active`
 - **Performance:** Omits `LONGTEXT` `body` column.
 
 ### 3.4 Create Email Template
@@ -389,7 +439,9 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   - `key`: required, regex `/^[A-Z0-9_]+$/`, unique
   - `name`: required, string, max:150
   - `subject`: required, string, max:255 (forbidden to contain `{{TemporaryPassword}}`)
-  - `body`: required, string (Supports full HTML structure)
+  - `body`: required, string (Supports full HTML structure or Plain text)
+  - `type`: optional, string, `plain` or `html` (default `html`)
+  - `is_active`: optional, boolean (default `true`)
 
 ### 3.5 Preview Email Template
 - **Method:** `POST`
@@ -404,12 +456,22 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 ### 3.7 Get Template Detail
 - **Method:** `GET`
 - **URI:** `/api/admin/email-templates/{id}`
-- **Note:** Returns template details along with `supported_placeholders` array.
+- **Note:** Returns template details (including `type`) along with `supported_placeholders` array.
 
 ### 3.8 Update Email Template
 - **Method:** `PUT`
 - **URI:** `/api/admin/email-templates/{id}`
-- **Rule:** `key` is immutable.
+- **Request Body:**
+  ```json
+  {
+      "name": "Updated Template Name",
+      "subject": "Updated Subject",
+      "body": "Updated Body Content",
+      "type": "plain",
+      "is_active": true
+  }
+  ```
+- **Rule:** `key` is immutable. `type` can be updated to `plain` or `html`.
 
 ### 3.9 Update Template Status
 - **Method:** `PATCH`
@@ -2091,10 +2153,55 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
 
 ---
 
-### 14.3 User Registration
+### 14.3 Validate Username (Real-Time Availability Check)
+- **Method:** `POST`
+- **URI:** `/api/user/validate-username`
+- **Route Name:** `user.validate-username`
+- **Throttle:** `user-api` (60 requests / minute / IP)
+- **Request Body:**
+  ```json
+  {
+      "username": "ramesh.kumar"
+  }
+  ```
+- **Validation Rules:**
+  - `username`: `required|string|min:3|max:50`
+  - Allowed characters: Letters, numbers, dots (`.`), underscores (`_`), and hyphens (`-`).
+  - Boundary: Must begin and end with an alphanumeric character (cannot start/end with `.`, `_`, `-`).
+  - Consecutive symbols: Cannot contain consecutive special symbols (e.g. `..`, `__`, `--`).
+  - Reserved list: Disallows system reserved keywords (`admin`, `superadmin`, `root`, `system`, `support`, `api`, `null`, `guest`, etc.).
+  - Uniqueness: Must be unique in `users` table.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "The username 'ramesh.kumar' is available.",
+      "data": {
+          "username": "ramesh.kumar",
+          "available": true,
+          "is_available": true
+      }
+  }
+  ```
+- **Validation Error (422 Unprocessable Content):**
+  ```json
+  {
+      "message": "This username is already taken. Please try another one.",
+      "errors": {
+          "username": [
+              "This username is already taken. Please try another one."
+          ]
+      }
+  }
+  ```
+
+---
+
+### 14.4 User Registration
 - **Method:** `POST`
 - **URI:** `/api/user/register`
 - **Throttle:** `user-register` (10 requests / minute)
+- **Behavior:** Registers the user account for any role (`user`, `trader`, `subscriber`, `advertiser`, `guest`) with OTP verification. For `trader` accounts, company details are filled post-login via `/api/user/company` rather than during registration.
 - **Request Body:**
   ```json
   {
@@ -2115,7 +2222,7 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
   - `last_name`: `nullable|string|max:100`
   - `email`: `required|email|max:255|unique:users,email`
   - `phone_number`: `nullable|string|max:20|unique:users,phone_number`
-  - `username`: `nullable|string|max:50|alpha_dash|unique:users,username`
+  - `username`: `nullable|string|min:3|max:50|unique:users,username`
   - `password`: `required|string|min:8|confirmed`
   - `otp`: `required|string|size:6` (must match active OTP and is consumed upon registration)
   - `role`: `required|in:user,trader,subscriber,advertiser,guest`
@@ -2133,11 +2240,11 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
 
 ---
 
-### 14.4 Refresh Token
+### 14.5 Refresh Token
 - **Method:** `POST`
 - **URI:** `/api/user/refresh-token`
 - **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
-- **Behavior:** Revokes the current token and issues a fresh token for the device.
+- **Behavior:** Revokes the current token and issues a fresh 24-hour token for the device.
 - **Success (200 OK):**
   ```json
   {
@@ -2147,6 +2254,27 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
           "token": "2|fedcba654321...",
           "token_type": "Bearer"
       }
+  }
+  ```
+
+---
+
+### 14.6 User Logout
+- **Method:** `POST`
+- **URI:** `/api/user/logout`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Behavior:** Revokes only the token corresponding to the calling device session, allowing other devices to remain securely logged in. Optionally deactivates the provided `fcm_token`.
+- **Request Body (optional):**
+  ```json
+  {
+      "fcm_token": "optional_fcm_token_to_deactivate"
+  }
+  ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Logged out successfully."
   }
   ```
 
@@ -2393,7 +2521,46 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
   }
   ```
 
-### 17.2 Update Trader Company Profile (User Side)
+### 17.2 Register / Fill Company Profile After Login (User Side)
+- **Method:** `POST`
+- **URI:** `/api/user/company`
+- **Authentication:** Bearer token (`auth:sanctum`, `user` guard)
+- **Behavior:** Creates the company profile and associates it with the authenticated user (`is_primary = true`).
+- **Request Body:**
+  ```json
+  {
+      "company_name": "Singhania Agro Traders Pvt Ltd",
+      "contact_person": "Vikram Singhania",
+      "business_type": "Wholesaler",
+      "gstin": "27ABCDE1234F1Z5",
+      "country": "India",
+      "state": "Maharashtra",
+      "city": "Nagpur",
+      "address": "Shop 12, APMC Market Yard",
+      "commodities_handled": ["Wheat", "Soybean", "Cotton"],
+      "trade_preference": "both"
+  }
+  ```
+- **Success (201 Created):**
+  ```json
+  {
+      "status": true,
+      "message": "Company profile created successfully.",
+      "data": {
+          "id": 1,
+          "name": "Singhania Agro Traders Pvt Ltd",
+          "contact_person": "Vikram Singhania",
+          "business_type": "Wholesaler",
+          "gstin": "27ABCDE1234F1Z5",
+          "city": "Nagpur",
+          "state": "Maharashtra",
+          "trade_preference": "both",
+          "verification_status": "pending"
+      }
+  }
+  ```
+
+### 17.3 Update Trader Company Profile (User Side)
 - **Method:** `PUT` / `PATCH`
 - **URI:** `/api/user/company`
 - **Authentication:** Bearer token (`auth:sanctum`, `user` guard)

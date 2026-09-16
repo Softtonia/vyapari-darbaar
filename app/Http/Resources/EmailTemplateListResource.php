@@ -22,6 +22,7 @@ class EmailTemplateListResource extends JsonResource
             'name' => $this->name,
             'key' => $this->key,
             'subject' => $this->subject,
+            'type' => $this->type?->value ?? (string) $this->type ?: 'html',
             'is_active' => (bool) $this->is_active,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),

@@ -9,7 +9,7 @@ class CreateEmailTemplateAction
     /**
      * Create a new email template.
      *
-     * @param  array{name: string, key: string, subject: string, body: string, is_active?: bool}  $data
+     * @param  array{name: string, key: string, subject: string, body: string, type?: string, is_active?: bool}  $data
      * @return EmailTemplate
      */
     public function execute(array $data): EmailTemplate
@@ -19,6 +19,7 @@ class CreateEmailTemplateAction
             'key' => strtoupper(trim($data['key'])),
             'subject' => $data['subject'],
             'body' => $data['body'],
+            'type' => isset($data['type']) ? strtolower(trim((string) $data['type'])) : 'html',
             'is_active' => $data['is_active'] ?? true,
         ]);
     }

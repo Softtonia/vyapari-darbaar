@@ -25,21 +25,46 @@ class LoginUserRequest extends FormRequest
     {
         return [
             'username' => ['required', 'string'],
-            'password' => ['required', 'string'],
+            'password' => ['required_without_all:otp,email_otp,number_otp', 'nullable', 'string'],
+            'otp' => ['required_without_all:password,email_otp,number_otp', 'nullable', 'string', 'size:6'],
+            'email_otp' => ['nullable', 'string', 'size:6'],
+            'number_otp' => ['nullable', 'string', 'size:6'],
             'device_name' => ['nullable', 'string', 'max:100'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'username.required' => 'Please enter your username, email, or phone number.',
+            'password.required_without_all' => 'Please provide either a password or OTP to log in.',
+            'otp.required_without_all' => 'Please provide either a password or OTP to log in.',
+            'otp.size' => 'The OTP must be 6 digits.',
+            'email_otp.size' => 'The email OTP must be 6 digits.',
+            'number_otp.size' => 'The phone number OTP must be 6 digits.',
         ];
     }
 
     /**
      * Get validated login credentials.
      *
-     * @return array{username: string, password: string}
+     * @return array{username: string, password?: string|null, otp?: string|null, email_otp?: string|null, number_otp?: string|null}
      */
     public function credentials(): array
     {
+        $otp = $this->input('otp') ?? $this->input('email_otp') ?? $this->input('number_otp');
+
         return [
-            'username' => (string) $this->input('username'),
-            'password' => (string) $this->input('password'),
+            'username' => trim((string) $this->input('username')),
+            'password' => $this->input('password') !== null ? (string) $this->input('password') : null,
+            'otp' => $otp !== null ? (string) $otp : null,
+            'email_otp' => $this->input('email_otp') !== null ? (string) $this->input('email_otp') : null,
+            'number_otp' => $this->input('number_otp') !== null ? (string) $this->input('number_otp') : null,
         ];
     }
 

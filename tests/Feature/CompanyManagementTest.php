@@ -27,7 +27,7 @@ class CompanyManagementTest extends TestCase
         $this->seed(\Database\Seeders\EmailTemplateSeeder::class);
     }
 
-    public function test_trader_registration_creates_company_and_pivot_association(): void
+    public function test_trader_registration_succeeds_without_company_details(): void
     {
         $otpService = app(OtpService::class);
         $otpData = $otpService->getOrCreateOtp('trader@example.com', 'registration');
@@ -42,16 +42,6 @@ class CompanyManagementTest extends TestCase
             'password_confirmation' => 'Password#2026',
             'otp' => $otpData['otp'],
             'role' => 'trader',
-            'company_name' => 'Singhania Agro Traders Pvt Ltd',
-            'contact_person' => 'Vikram Singhania',
-            'business_type' => 'Wholesaler',
-            'gstin' => '27ABCDE1234F1Z5',
-            'country' => 'India',
-            'state' => 'Maharashtra',
-            'city' => 'Nagpur',
-            'address' => 'Shop 12, APMC Market Yard',
-            'commodities_handled' => ['Wheat', 'Soybean', 'Cotton'],
-            'buy_sell_preference' => 'both',
         ]);
 
         $response->assertStatus(201)
@@ -67,21 +57,57 @@ class CompanyManagementTest extends TestCase
         $user = User::where('email', 'trader@example.com')->firstOrFail();
         $this->assertTrue($user->hasRole('trader'));
 
-        // Database assertions for Company
-        $this->assertDatabaseHas('companies', [
-            'name' => 'Singhania Agro Traders Pvt Ltd',
+        // No company created during registration
+        $this->assertEquals(0, Company::count());
+        $this->assertNull($user->company);
+    }
+
+    public function test_trader_can_fill_company_details_after_login(): void
+    {
+        $user = User::factory()->create(['status' => 'active']);
+        $user->assignRole('trader');
+
+        Sanctum::actingAs($user, ['*']);
+
+        // Fill company details post-login
+        $response = $this->postJson('/api/user/company', [
+            'company_name' => 'Singhania Agro Traders Pvt Ltd',
             'contact_person' => 'Vikram Singhania',
             'business_type' => 'Wholesaler',
             'gstin' => '27ABCDE1234F1Z5',
-            'city' => 'Nagpur',
+            'country' => 'India',
             'state' => 'Maharashtra',
-            'trade_preference' => 'both',
-            'verification_status' => 'pending',
+            'city' => 'Nagpur',
+            'address' => 'Shop 12, APMC Market Yard',
+            'commodities_handled' => ['Wheat', 'Soybean', 'Cotton'],
+            'buy_sell_preference' => 'both',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Company profile created successfully.',
+                'data' => [
+                    'name' => 'Singhania Agro Traders Pvt Ltd',
+                    'contact_person' => 'Vikram Singhania',
+                    'business_type' => 'Wholesaler',
+                    'gstin' => '27ABCDE1234F1Z5',
+                    'city' => 'Nagpur',
+                    'state' => 'Maharashtra',
+                    'trade_preference' => 'both',
+                    'verification_status' => 'pending',
+                ],
+            ]);
+
+        // Database assertions
+        $this->assertDatabaseHas('companies', [
+            'name' => 'Singhania Agro Traders Pvt Ltd',
+            'contact_person' => 'Vikram Singhania',
+            'city' => 'Nagpur',
         ]);
 
         $company = Company::where('name', 'Singhania Agro Traders Pvt Ltd')->firstOrFail();
 
-        // Database assertions for user_has_companies
         $this->assertDatabaseHas('user_has_companies', [
             'user_id' => $user->id,
             'company_id' => $company->id,
@@ -89,28 +115,7 @@ class CompanyManagementTest extends TestCase
             'is_primary' => true,
         ]);
 
-        $this->assertEquals($company->id, $user->company?->id);
-    }
-
-    public function test_trader_registration_fails_without_company_name(): void
-    {
-        $otpService = app(OtpService::class);
-        $otpData = $otpService->getOrCreateOtp('trader_noname@example.com', 'registration');
-
-        $response = $this->postJson('/api/user/register', [
-            'first_name' => 'Vikram',
-            'last_name' => 'Singhania',
-            'email' => 'trader_noname@example.com',
-            'password' => 'Password#2026',
-            'password_confirmation' => 'Password#2026',
-            'otp' => $otpData['otp'],
-            'role' => 'trader',
-            // company_name omitted
-        ]);
-
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['company_name'])
-            ->assertJsonPath('errors.company_name.0', 'The company name field is required for trader accounts.');
+        $this->assertEquals($company->id, $user->fresh()->company?->id);
     }
 
     public function test_non_trader_registration_does_not_create_company(): void

@@ -625,4 +625,109 @@ class EmailTemplateManagementTest extends TestCase
         $resKey->assertStatus(200);
         $this->assertCount(5, $resKey->json('data'));
     }
+
+    public function test_admin_can_create_and_update_plain_and_html_email_templates(): void
+    {
+        // 1. Create plain text template
+        $plainResponse = $this->withToken($this->adminToken)
+            ->postJson('/api/admin/email-templates', [
+                'name' => 'Plain Text Alert',
+                'key' => 'PLAIN_ALERT_TEST',
+                'subject' => 'Important Alert for {{UserName}}',
+                'body' => 'Hello {{UserName}}, this is a plain text notification from {{CompanyName}}.',
+                'type' => 'plain',
+                'is_active' => true,
+            ]);
+
+        $plainResponse->assertStatus(201)
+            ->assertJson([
+                'status' => true,
+                'data' => [
+                    'key' => 'PLAIN_ALERT_TEST',
+                    'type' => 'plain',
+                ],
+            ]);
+
+        $this->assertDatabaseHas('email_templates', [
+            'key' => 'PLAIN_ALERT_TEST',
+            'type' => 'plain',
+        ]);
+
+        $templateId = $plainResponse->json('data.id');
+
+        // 2. Update type to html
+        $updateResponse = $this->withToken($this->adminToken)
+            ->putJson("/api/admin/email-templates/{$templateId}", [
+                'name' => 'HTML Alert',
+                'subject' => 'HTML Alert for {{UserName}}',
+                'body' => '<h1>Hello {{UserName}}</h1><p>Welcome to {{CompanyName}}</p>',
+                'type' => 'html',
+            ]);
+
+        $updateResponse->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'data' => [
+                    'type' => 'html',
+                ],
+            ]);
+
+        $this->assertDatabaseHas('email_templates', [
+            'id' => $templateId,
+            'type' => 'html',
+        ]);
+    }
+
+    public function test_admin_can_filter_templates_by_type(): void
+    {
+        EmailTemplate::create([
+            'name' => 'Plain 1',
+            'key' => 'FILTER_PLAIN_1',
+            'subject' => 'Sub 1',
+            'body' => 'Body 1',
+            'type' => 'plain',
+            'is_active' => true,
+        ]);
+
+        EmailTemplate::create([
+            'name' => 'HTML 1',
+            'key' => 'FILTER_HTML_1',
+            'subject' => 'Sub 2',
+            'body' => '<h1>Body 2</h1>',
+            'type' => 'html',
+            'is_active' => true,
+        ]);
+
+        $plainList = $this->withToken($this->adminToken)
+            ->getJson('/api/admin/email-templates?type=plain');
+
+        $plainList->assertStatus(200);
+        foreach ($plainList->json('data.data') as $item) {
+            $this->assertEquals('plain', $item['type']);
+        }
+
+        $htmlList = $this->withToken($this->adminToken)
+            ->getJson('/api/admin/email-templates?type=html');
+
+        $htmlList->assertStatus(200);
+        foreach ($htmlList->json('data.data') as $item) {
+            $this->assertEquals('html', $item['type']);
+        }
+    }
+
+    public function test_invalid_template_type_fails_validation(): void
+    {
+        $response = $this->withToken($this->adminToken)
+            ->postJson('/api/admin/email-templates', [
+                'name' => 'Invalid Type Test',
+                'key' => 'INVALID_TYPE_TEST',
+                'subject' => 'Subject',
+                'body' => 'Body',
+                'type' => 'invalid_format',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['type'])
+            ->assertJsonPath('errors.type.0', 'The template type must be either "plain" or "html".');
+    }
 }

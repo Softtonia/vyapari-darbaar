@@ -32,7 +32,7 @@ class EmailTemplateController extends Controller
         $perPage = max(1, min(100, $perPage));
 
         $query = EmailTemplate::query()
-            ->select(['id', 'name', 'key', 'subject', 'is_active', 'created_at', 'updated_at']);
+            ->select(['id', 'name', 'key', 'subject', 'type', 'is_active', 'created_at', 'updated_at']);
 
         // Search filter
         if ($request->filled('search')) {
@@ -42,6 +42,11 @@ class EmailTemplateController extends Controller
                     ->orWhere('key', 'like', "%{$search}%")
                     ->orWhere('subject', 'like', "%{$search}%");
             });
+        }
+
+        // Type filter (plain, html)
+        if ($request->filled('type')) {
+            $query->where('type', strtolower((string) $request->input('type')));
         }
 
         // Status filter

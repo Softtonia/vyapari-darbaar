@@ -74,6 +74,7 @@ HTML;
                 'name' => 'New User Account Created',
                 'subject' => 'Your Account Credentials',
                 'body' => $htmlBody,
+                'type' => 'html',
                 'is_active' => true,
             ]
         );

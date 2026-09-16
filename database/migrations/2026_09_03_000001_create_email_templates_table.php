@@ -18,6 +18,7 @@ return new class extends Migration
                 $table->string('key', 100)->unique();
                 $table->string('subject', 255);
                 $table->longText('body');
+                $table->string('type', 20)->default('html');
                 $table->boolean('is_active')->default(true);
                 $table->timestamps();
             });

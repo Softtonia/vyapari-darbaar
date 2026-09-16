@@ -5,8 +5,35 @@ namespace App\Http\Requests\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class RegisterUserRequest extends FormRequest
+class ValidateUsernameRequest extends FormRequest
 {
+    /**
+     * Reserved system usernames that cannot be claimed.
+     *
+     * @var list<string>
+     */
+    public const RESERVED_USERNAMES = [
+        'admin',
+        'administrator',
+        'superadmin',
+        'super.admin',
+        'root',
+        'system',
+        'support',
+        'help',
+        'api',
+        'null',
+        'undefined',
+        'anonymous',
+        'guest',
+        'dashboard',
+        'auth',
+        'login',
+        'register',
+        'vyaparidarbaar',
+        'vyapari',
+    ];
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -22,25 +49,19 @@ class RegisterUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userId = $this->user()?->id ?? $this->input('ignore_user_id');
+
         return [
-            'first_name' => ['required', 'string', 'max:100'],
-            'last_name' => ['nullable', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'phone_number' => ['nullable', 'string', 'max:20', 'unique:users,phone_number'],
             'username' => [
-                'nullable',
+                'required',
                 'string',
                 'min:3',
                 'max:50',
                 'regex:/^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$/',
                 'not_regex:/\.{2,}|_{2,}|-{2,}/',
-                Rule::notIn(ValidateUsernameRequest::RESERVED_USERNAMES),
-                'unique:users,username',
+                Rule::notIn(self::RESERVED_USERNAMES),
+                Rule::unique('users', 'username')->ignore($userId),
             ],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'otp' => ['required', 'string', 'size:6'],
-            'role' => ['required', 'string', 'in:user,trader,subscriber,advertiser,guest,USER,TRADER,SUBSCRIBER,ADVERTISER,GUEST'],
-            'device_name' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -52,10 +73,8 @@ class RegisterUserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'role.required' => 'Please select a role (user, trader, subscriber, advertiser, guest).',
-            'role.in' => 'The selected role is invalid. Allowed roles are: user, trader, subscriber, advertiser, guest.',
-            'email.unique' => 'An account with this email address already exists.',
-            'phone_number.unique' => 'An account with this phone number already exists.',
+            'username.required' => 'Please enter a username.',
+            'username.string' => 'Username must be a valid text string.',
             'username.min' => 'Username must be at least :min characters long.',
             'username.max' => 'Username cannot be longer than :max characters.',
             'username.regex' => 'Username can only contain letters, numbers, dots, underscores, and hyphens (and cannot start or end with a special character).',

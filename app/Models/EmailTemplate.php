@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EmailTemplateType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -26,6 +27,7 @@ class EmailTemplate extends Model
         'key',
         'subject',
         'body',
+        'type',
         'is_active',
     ];
 
@@ -37,6 +39,7 @@ class EmailTemplate extends Model
     protected function casts(): array
     {
         return [
+            'type' => EmailTemplateType::class,
             'is_active' => 'boolean',
         ];
     }

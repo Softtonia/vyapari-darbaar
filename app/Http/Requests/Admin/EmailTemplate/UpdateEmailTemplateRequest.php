@@ -28,7 +28,20 @@ class UpdateEmailTemplateRequest extends FormRequest
             'name' => ['required', 'string', 'max:150'],
             'subject' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string'],
+            'type' => ['sometimes', 'required', 'string', 'in:html,plain,HTML,PLAIN'],
             'is_active' => ['sometimes', 'boolean'],
+        ];
+    }
+
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'type.in' => 'The template type must be either "plain" or "html".',
         ];
     }
 

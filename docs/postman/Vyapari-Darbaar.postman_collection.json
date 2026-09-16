@@ -4159,7 +4159,7 @@
                                     }
                                 },
                                 {
-                                    "name": "State Options (Cached)",
+                                    "name": "State Options",
                                     "request": {
                                         "method": "GET",
                                         "header": [
@@ -4489,7 +4489,7 @@
                                     }
                                 },
                                 {
-                                    "name": "District Options (Cached by State)",
+                                    "name": "District Options",
                                     "request": {
                                         "method": "GET",
                                         "header": [
@@ -4601,7 +4601,7 @@
                                     }
                                 },
                                 {
-                                    "name": "Update District (with State Reassignment)",
+                                    "name": "Update District",
                                     "request": {
                                         "method": "PUT",
                                         "header": [

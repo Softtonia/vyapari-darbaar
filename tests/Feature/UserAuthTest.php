@@ -58,17 +58,59 @@ class UserAuthTest extends TestCase
         $this->assertNull($response->json('data.token_type'));
     }
 
-    public function test_email_cannot_be_used_as_login_identifier(): void
+    public function test_active_user_can_login_with_username_and_otp(): void
+    {
+        $otpService = app(\App\Services\OtpService::class);
+        $otpData = $otpService->getOrCreateOtp($this->user->email, 'login');
+
+        $response = $this->postJson('/api/user/login', [
+            'username' => 'ajay.kumar',
+            'otp' => $otpData['otp'],
+            'device_name' => 'otp-device',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Login successful.',
+            ]);
+
+        $this->assertNotEmpty($response->json('data.token'));
+    }
+
+    public function test_user_can_login_with_email_otp_or_number_otp_fields(): void
+    {
+        $otpService = app(\App\Services\OtpService::class);
+        
+        // 1. Using email_otp field
+        $otp1 = $otpService->getOrCreateOtp($this->user->email, 'login');
+        $res1 = $this->postJson('/api/user/login', [
+            'username' => 'ajay.kumar',
+            'email_otp' => $otp1['otp'],
+        ]);
+        $res1->assertStatus(200);
+
+        // 2. Using number_otp field
+        $this->user->update(['phone_number' => '+919876543210']);
+        $otp2 = $otpService->getOrCreateOtp('+919876543210', 'login');
+        $res2 = $this->postJson('/api/user/login', [
+            'username' => 'ajay.kumar',
+            'number_otp' => $otp2['otp'],
+        ]);
+        $res2->assertStatus(200);
+    }
+
+    public function test_invalid_otp_returns_error(): void
     {
         $response = $this->postJson('/api/user/login', [
-            'username' => 'ajay.kumar@example.com',
-            'password' => $this->plainPassword,
+            'username' => 'ajay.kumar',
+            'otp' => '999999',
         ]);
 
         $response->assertStatus(401)
             ->assertJson([
                 'status' => false,
-                'message' => 'No account found with this username.',
+                'message' => 'The provided OTP is invalid or has expired.',
             ]);
     }
 
@@ -363,26 +405,111 @@ class UserAuthTest extends TestCase
         ])->assertStatus(429);
     }
 
-    public function test_user_login_when_already_authenticated_reuses_same_token(): void
+    public function test_user_relogin_on_same_device_starts_fresh_24_hour_session(): void
     {
         $response1 = $this->postJson('/api/user/login', [
             'username' => 'ajay.kumar',
             'password' => $this->plainPassword,
+            'device_name' => 'Device A',
         ]);
 
         $response1->assertStatus(200);
         $token1 = $response1->json('data.token');
 
-        // Second login within 24 hours returns the EXACT SAME token
+        // Fast forward 12 hours
+        $this->travel(12)->hours();
+
+        // Device A logs in again -> previous token replaced with fresh 24-hour token
         $response2 = $this->postJson('/api/user/login', [
             'username' => 'ajay.kumar',
             'password' => $this->plainPassword,
+            'device_name' => 'Device A',
         ]);
 
         $response2->assertStatus(200);
         $token2 = $response2->json('data.token');
 
-        $this->assertEquals($token1, $token2);
+        $this->assertNotEquals($token1, $token2);
+
+        // Old token1 is revoked
+        auth()->forgetGuards();
+        $this->withToken($token1)->getJson('/api/user/profile')->assertStatus(401);
+
+        // New token2 is valid now
+        auth()->forgetGuards();
+        $this->withToken($token2)->getJson('/api/user/profile')->assertStatus(200);
+
+        // Fast forward another 23 hours (total 35 hours from initial login, but 23 hours from 2nd login)
+        $this->travel(23)->hours();
+        auth()->forgetGuards();
+        $this->withToken($token2)->getJson('/api/user/profile')->assertStatus(200);
+
+        // Fast forward 2 more hours (25 hours from 2nd login) -> expired
+        $this->travel(2)->hours();
+        auth()->forgetGuards();
+        $this->withToken($token2)->getJson('/api/user/profile')->assertStatus(401);
+    }
+
+    public function test_multi_device_login_and_logout_lifecycle_with_independent_24h_sessions(): void
+    {
+        // 1. Login on Device 1
+        $res1 = $this->postJson('/api/user/login', [
+            'username' => 'ajay.kumar',
+            'password' => $this->plainPassword,
+            'device_name' => 'Device 1',
+        ]);
+        $tokenDevice1 = $res1->json('data.token');
+
+        // Travel 10 hours
+        $this->travel(10)->hours();
+
+        // 2. Login on Device 2 ("another device") -> gets fresh 24h session
+        $res2 = $this->postJson('/api/user/login', [
+            'username' => 'ajay.kumar',
+            'password' => $this->plainPassword,
+            'device_name' => 'Device 2',
+        ]);
+        $tokenDevice2 = $res2->json('data.token');
+
+        $this->assertNotEquals($tokenDevice1, $tokenDevice2);
+
+        // Both devices are active
+        auth()->forgetGuards();
+        $this->withToken($tokenDevice1)->getJson('/api/user/profile')->assertStatus(200);
+        auth()->forgetGuards();
+        $this->withToken($tokenDevice2)->getJson('/api/user/profile')->assertStatus(200);
+
+        // 3. Logout from Device 1
+        auth()->forgetGuards();
+        $this->withToken($tokenDevice1)->postJson('/api/user/logout')->assertStatus(200);
+
+        // Device 1 token is revoked, Device 2 remains valid
+        auth()->forgetGuards();
+        $this->withToken($tokenDevice1)->getJson('/api/user/profile')->assertStatus(401);
+        auth()->forgetGuards();
+        $this->withToken($tokenDevice2)->getJson('/api/user/profile')->assertStatus(200);
+
+        // 4. Re-login on Device 1 -> starts fresh 24h clock again
+        $res3 = $this->postJson('/api/user/login', [
+            'username' => 'ajay.kumar',
+            'password' => $this->plainPassword,
+            'device_name' => 'Device 1',
+        ]);
+        $tokenDevice1New = $res3->json('data.token');
+
+        // Travel 15 hours from Device 2's login (total 25h from initial, 15h for Dev2, 15h after Dev1 re-login)
+        $this->travel(15)->hours();
+        auth()->forgetGuards();
+        $this->withToken($tokenDevice1New)->getJson('/api/user/profile')->assertStatus(200);
+        auth()->forgetGuards();
+        $this->withToken($tokenDevice2)->getJson('/api/user/profile')->assertStatus(200);
+
+        // Travel 10 more hours (Dev 2 has reached 25h -> expired; Dev 1 new token is at 25h -> expired)
+        $this->travel(10)->hours();
+        auth()->forgetGuards();
+        $this->withToken($tokenDevice1New)->getJson('/api/user/profile')->assertStatus(401);
+        auth()->forgetGuards();
+        $this->withToken($tokenDevice2)->getJson('/api/user/profile')->assertStatus(401);
     }
 
     public function test_user_token_expires_after_24_hours(): void

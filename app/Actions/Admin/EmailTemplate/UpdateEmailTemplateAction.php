@@ -10,7 +10,7 @@ class UpdateEmailTemplateAction
      * Update the given email template (excluding key).
      *
      * @param  EmailTemplate  $template
-     * @param  array{name: string, subject: string, body: string, is_active?: bool}  $data
+     * @param  array{name: string, subject: string, body: string, type?: string, is_active?: bool}  $data
      * @return EmailTemplate
      */
     public function execute(EmailTemplate $template, array $data): EmailTemplate
@@ -20,6 +20,10 @@ class UpdateEmailTemplateAction
             'subject' => $data['subject'],
             'body' => $data['body'],
         ];
+
+        if (array_key_exists('type', $data)) {
+            $updateData['type'] = strtolower(trim((string) $data['type']));
+        }
 
         if (array_key_exists('is_active', $data)) {
             $updateData['is_active'] = (bool) $data['is_active'];

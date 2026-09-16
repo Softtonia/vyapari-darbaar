@@ -34,6 +34,7 @@ class StoreEmailTemplateRequest extends FormRequest
             ],
             'subject' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string'],
+            'type' => ['sometimes', 'required', 'string', 'in:html,plain,HTML,PLAIN'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }
@@ -82,6 +83,7 @@ class StoreEmailTemplateRequest extends FormRequest
     {
         return [
             'key.regex' => 'The template key must only contain uppercase letters, numbers, and underscores (e.g. USER_ACCOUNT_CREATED).',
+            'type.in' => 'The template type must be either "plain" or "html".',
         ];
     }
 

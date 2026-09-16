@@ -26,6 +26,7 @@ class EmailTemplateResource extends JsonResource
             'key' => $this->key,
             'subject' => $this->subject,
             'body' => $this->body,
+            'type' => $this->type?->value ?? (string) $this->type ?: 'html',
             'is_active' => (bool) $this->is_active,
             'supported_placeholders' => $renderer->getPlaceholdersWithMetadata($this->key),
             'created_at' => $this->created_at?->toISOString(),
