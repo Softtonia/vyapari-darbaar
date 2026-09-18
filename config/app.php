@@ -54,7 +54,15 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'frontend_admin_url' => env('FRONTEND_ADMIN_URL', 'http://localhost:3000'),
+    'frontend_admin_url' => env(
+        'FRONTEND_ADMIN_URL',
+        'http://localhost:3000'
+    ),
+
+    'frontend_user_url' => env(
+        'FRONTEND_USER_URL',
+        'http://localhost:3000'
+    ),
 
     'support_email' => env('SUPPORT_EMAIL', 'support@vyaparidarbar.com'),
 
