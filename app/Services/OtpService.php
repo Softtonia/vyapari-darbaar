@@ -28,7 +28,7 @@ class OtpService
         int $length = self::DEFAULT_OTP_LENGTH
     ): array {
         $cacheKey = $this->buildCacheKey($identifier, $purpose);
-        $cachedData = Cache::get($cacheKey);
+        $cachedData = $this->safeGet($cacheKey);
 
         $now = Carbon::now();
 
@@ -59,7 +59,7 @@ class OtpService
         ];
 
         // Store in cache for the full expiry duration
-        Cache::put($cacheKey, $dataToStore, $expiresAt);
+        $this->safePut($cacheKey, $dataToStore, $expiresAt);
 
         return [
             'otp' => $otp,
@@ -88,7 +88,7 @@ class OtpService
             'expires_at' => $expiresAt->toIso8601String(),
         ];
 
-        Cache::put($cacheKey, $dataToStore, $expiresAt);
+        $this->safePut($cacheKey, $dataToStore, $expiresAt);
     }
 
     /**
@@ -105,7 +105,7 @@ class OtpService
         int $cooldownSeconds = self::DEFAULT_RESEND_COOLDOWN_SECONDS
     ): array {
         $cooldownKey = $this->buildCooldownKey($identifier, $purpose);
-        $cooldownUntil = Cache::get($cooldownKey);
+        $cooldownUntil = $this->safeGet($cooldownKey);
 
         if ($cooldownUntil) {
             $cooldownTime = Carbon::parse($cooldownUntil);
@@ -136,7 +136,7 @@ class OtpService
         $cooldownKey = $this->buildCooldownKey($identifier, $purpose);
         $cooldownUntil = Carbon::now()->addSeconds($cooldownSeconds);
 
-        Cache::put($cooldownKey, $cooldownUntil->toIso8601String(), $cooldownUntil);
+        $this->safePut($cooldownKey, $cooldownUntil->toIso8601String(), $cooldownUntil);
     }
 
     /**
@@ -155,7 +155,7 @@ class OtpService
         bool $consumeOnSuccess = true
     ): bool {
         $cacheKey = $this->buildCacheKey($identifier, $purpose);
-        $cachedData = Cache::get($cacheKey);
+        $cachedData = $this->safeGet($cacheKey);
 
         if (!is_array($cachedData) || !isset($cachedData['otp'], $cachedData['expires_at'])) {
             return false;
@@ -185,8 +185,8 @@ class OtpService
      */
     public function invalidate(string $identifier, string $purpose = 'default'): void
     {
-        Cache::forget($this->buildCacheKey($identifier, $purpose));
-        Cache::forget($this->buildCooldownKey($identifier, $purpose));
+        $this->safeForget($this->buildCacheKey($identifier, $purpose));
+        $this->safeForget($this->buildCooldownKey($identifier, $purpose));
     }
 
     /**
@@ -195,7 +195,7 @@ class OtpService
     public function getRemainingSeconds(string $identifier, string $purpose = 'default'): int
     {
         $cacheKey = $this->buildCacheKey($identifier, $purpose);
-        $cachedData = Cache::get($cacheKey);
+        $cachedData = $this->safeGet($cacheKey);
 
         if (is_array($cachedData) && isset($cachedData['expires_at'])) {
             $expiresAt = Carbon::parse($cachedData['expires_at']);
@@ -236,5 +236,53 @@ class OtpService
         $max = (int) str_repeat('9', $length);
 
         return (string) random_int($min, $max);
+    }
+
+    /**
+     * Safe Cache Get with fallback to file store if default (e.g., Redis) is unavailable.
+     */
+    protected function safeGet(string $key): mixed
+    {
+        try {
+            return Cache::get($key);
+        } catch (\Throwable) {
+            try {
+                return Cache::store('file')->get($key);
+            } catch (\Throwable) {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Safe Cache Put with fallback to file store if default is unavailable.
+     */
+    protected function safePut(string $key, mixed $value, $ttl): void
+    {
+        try {
+            Cache::put($key, $value, $ttl);
+        } catch (\Throwable) {
+            try {
+                Cache::store('file')->put($key, $value, $ttl);
+            } catch (\Throwable) {
+                // Ignore
+            }
+        }
+    }
+
+    /**
+     * Safe Cache Forget with fallback to file store if default is unavailable.
+     */
+    protected function safeForget(string $key): void
+    {
+        try {
+            Cache::forget($key);
+        } catch (\Throwable) {
+            try {
+                Cache::store('file')->forget($key);
+            } catch (\Throwable) {
+                // Ignore
+            }
+        }
     }
 }

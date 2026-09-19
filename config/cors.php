@@ -21,12 +21,15 @@ return [
             'trim',
             explode(',', (string) env(
                 'CORS_ALLOWED_ORIGINS',
-                'https://admin.vyaparidarbar.com,https://vyaparidarbar.com'
+                'http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000,https://admin.vyaparidarbar.com,https://vyaparidarbar.com'
             ))
         )
     )),
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#^https?://localhost(:\d+)?$#',
+        '#^https?://127\.0\.0\.1(:\d+)?$#',
+    ],
 
     'allowed_headers' => [
         'Accept',
@@ -35,6 +38,7 @@ return [
         'X-Requested-With',
         'Origin',
         'User-Agent',
+        'X-XSRF-TOKEN',
     ],
 
     'exposed_headers' => [],

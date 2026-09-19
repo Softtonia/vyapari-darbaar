@@ -41,8 +41,11 @@ class UserOtpNotification extends Notification implements ShouldBeEncrypted, Sho
         $this->otp = $otp;
         $this->purpose = $purpose;
         $this->userName = $userName;
-        $this->onConnection('redis');
-        $this->onQueue('emails');
+        $queueConnection = (string) config('queue.default', 'redis');
+        $this->onConnection($queueConnection);
+        if ($queueConnection === 'redis') {
+            $this->onQueue('emails');
+        }
         $this->tries = 3;
         $this->timeout = 60;
         $this->backoff = [10, 30, 60];
