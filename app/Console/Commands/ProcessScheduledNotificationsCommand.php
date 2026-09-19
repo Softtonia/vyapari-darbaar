@@ -65,7 +65,7 @@ class ProcessScheduledNotificationsCommand extends Command
                             'updated_at' => now(),
                         ]);
 
-                    Log::error("Failed to dispatch scheduled batch #{$batch->id}: " . $e->getMessage());
+                    Log::error("Failed to dispatch scheduled batch #{$batch->id}: ".$e->getMessage());
                     $this->error("Failed to dispatch batch #{$batch->id}: {$e->getMessage()}");
                 }
             }
@@ -84,7 +84,7 @@ class ProcessScheduledNotificationsCommand extends Command
                 $stuckBatch->touch();
                 $this->warn("Re-dispatched stuck queued batch #{$stuckBatch->id}.");
             } catch (Throwable $e) {
-                Log::warning("Could not re-dispatch stuck queued batch #{$stuckBatch->id}: " . $e->getMessage());
+                Log::warning("Could not re-dispatch stuck queued batch #{$stuckBatch->id}: ".$e->getMessage());
             }
         }
 

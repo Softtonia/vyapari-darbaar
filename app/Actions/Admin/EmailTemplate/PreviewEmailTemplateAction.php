@@ -13,9 +13,6 @@ class PreviewEmailTemplateAction
     /**
      * Preview rendered subject and body with demo placeholder values.
      *
-     * @param  string  $key
-     * @param  string  $subject
-     * @param  string  $body
      * @return array{subject: string, body: string}
      */
     public function execute(string $key, string $subject, string $body): array

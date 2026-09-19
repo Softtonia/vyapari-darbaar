@@ -8,7 +8,6 @@ use App\Http\Requests\Admin\ExchangeInstrument\StoreExchangeInstrumentRequest;
 use App\Http\Requests\Admin\ExchangeInstrument\UpdateExchangeInstrumentEnabledRequest;
 use App\Http\Requests\Admin\ExchangeInstrument\UpdateExchangeInstrumentRequest;
 use App\Http\Resources\ExchangeInstrumentListResource;
-use App\Http\Resources\ExchangeInstrumentOptionResource;
 use App\Http\Resources\ExchangeInstrumentResource;
 use App\Models\Admin;
 use App\Models\ExchangeInstrument;

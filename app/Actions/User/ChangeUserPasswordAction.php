@@ -2,7 +2,10 @@
 
 namespace App\Actions\User;
 
+use App\Enums\NotificationType;
+use App\Jobs\SendUserNotificationJob;
 use App\Models\User;
+use App\Services\UserActivityService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Hash;
 
@@ -11,10 +14,6 @@ class ChangeUserPasswordAction
     /**
      * Change user password, clear must_change_password flag, and revoke all other device tokens.
      *
-     * @param  User  $user
-     * @param  string  $currentPassword
-     * @param  string  $newPassword
-     * @return void
      *
      * @throws HttpResponseException
      */
@@ -52,18 +51,18 @@ class ChangeUserPasswordAction
             'must_change_password' => false,
         ]);
 
-        \App\Services\UserActivityService::log(
+        UserActivityService::log(
             $user,
             'password_change',
             'User changed account password'
         );
 
         // Security Alert: Password Changed Notification
-        \App\Jobs\SendUserNotificationJob::dispatch(
+        SendUserNotificationJob::dispatch(
             $user->id,
             'Security Alert: Password Changed',
             'Hello {{user_first_name}}, your account password was changed successfully. If you did not make this change, please contact support immediately.',
-            \App\Enums\NotificationType::PUSH_AND_IN_APP
+            NotificationType::PUSH_AND_IN_APP
         );
 
         // Security: Revoke all other device tokens except the currently authenticated session

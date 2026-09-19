@@ -7,6 +7,7 @@ use App\Models\EmailTemplate;
 use App\Models\User;
 use App\Services\EmailTemplateRenderer;
 use App\Services\TemporaryPasswordGenerator;
+use App\Services\UserActivityService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -21,8 +22,6 @@ class ResendUserCredentialsAction
     /**
      * Resend user credentials with a new secure temporary password, preserving username.
      *
-     * @param  User  $user
-     * @return void
      *
      * @throws HttpResponseException
      */
@@ -76,7 +75,7 @@ class ResendUserCredentialsAction
 
             $user->tokens()->delete();
 
-            \App\Services\UserActivityService::log(
+            UserActivityService::log(
                 $user,
                 'credentials_resent',
                 'Temporary credentials resent by administrator',

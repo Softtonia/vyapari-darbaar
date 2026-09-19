@@ -48,7 +48,7 @@ class UserResetPasswordNotification extends Notification implements ShouldBeEncr
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $frontendUrl = rtrim((string) config('app.frontend_url', 'http://localhost:3000'), '/');
+        $frontendUrl = rtrim((string) (config('app.frontend_user_url') ?: config('app.frontend_url', 'http://localhost:3000')), '/');
         $email = $notifiable->getEmailForPasswordReset();
         $resetUrl = $frontendUrl.'/reset-password?token='.urlencode($this->token).'&email='.urlencode($email);
 

@@ -12,11 +12,6 @@ class UpdateUserStatusAction
 {
     /**
      * Update user status, store suspension reason if applicable, and revoke all tokens if inactive or suspended.
-     *
-     * @param  User  $user
-     * @param  string  $status
-     * @param  string|null  $reason
-     * @return User
      */
     public function execute(User $user, string $status, ?string $reason = null): User
     {

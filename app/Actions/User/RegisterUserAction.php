@@ -2,9 +2,12 @@
 
 namespace App\Actions\User;
 
+use App\Enums\NotificationType;
+use App\Jobs\SendUserNotificationJob;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\OtpService;
+use App\Services\UserActivityService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -20,7 +23,6 @@ class RegisterUserAction
      * Register a new user after verifying OTP.
      *
      * @param  array<string, mixed>  $data
-     * @param  string  $deviceName
      * @return array{token: string, user: User}
      *
      * @throws ValidationException
@@ -88,7 +90,7 @@ class RegisterUserAction
                     'plain_token' => $tokenResult->plainTextToken,
                 ]);
 
-            \App\Services\UserActivityService::log(
+            UserActivityService::log(
                 $user,
                 'register',
                 'User registered new account',
@@ -96,11 +98,11 @@ class RegisterUserAction
             );
 
             // Automated Welcome Notification
-            \App\Jobs\SendUserNotificationJob::dispatch(
+            SendUserNotificationJob::dispatch(
                 $user->id,
                 'Welcome to {{app_name}}!',
                 'Hello {{user_first_name}}, your account has been successfully created. Welcome to Vyapari Darbaar!',
-                \App\Enums\NotificationType::PUSH_AND_IN_APP
+                NotificationType::PUSH_AND_IN_APP
             );
 
             return [

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\DiagnosticTestMail;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -101,7 +102,7 @@ class TestMailDeliveryCommand extends Command
 </html>
 HTML;
 
-        $mailable = new \App\Mail\DiagnosticTestMail($htmlBody, $subject, $fromAddress, $fromName);
+        $mailable = new DiagnosticTestMail($htmlBody, $subject, $fromAddress, $fromName);
 
         if ($this->option('queue')) {
             $this->line('Dispatching test email to Redis queue (emails)...');

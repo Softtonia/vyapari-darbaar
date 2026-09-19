@@ -9,9 +9,7 @@ class UpdateEmailTemplateAction
     /**
      * Update the given email template (excluding key).
      *
-     * @param  EmailTemplate  $template
      * @param  array{name: string, subject: string, body: string, type?: string, is_active?: bool}  $data
-     * @return EmailTemplate
      */
     public function execute(EmailTemplate $template, array $data): EmailTemplate
     {

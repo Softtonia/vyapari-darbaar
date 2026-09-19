@@ -5,22 +5,22 @@ namespace App\DTOs\Market;
 readonly class NormalizedBhavcopyRowDTO
 {
     /**
-     * @param string|null $externalInstrumentId External source identifier/token
-     * @param int|null $instrumentId Pre-resolved internal exchange_instrument_id
-     * @param string $tradeDate Format: YYYY-MM-DD
-     * @param string|null $openPrice Decimal string or null
-     * @param string|null $highPrice Decimal string or null
-     * @param string|null $lowPrice Decimal string or null
-     * @param string|null $closePrice Decimal string or null
-     * @param string|null $lastPrice Decimal string or null
-     * @param string|null $previousClosePrice Decimal string or null
-     * @param string|null $settlementPrice Decimal string or null
-     * @param string|null $volume Decimal string or null
-     * @param string|null $tradedValue Decimal string or null
-     * @param int|null $numberOfTrades Integer count or null
-     * @param string|null $openInterest Decimal string or null
-     * @param string|null $changeInOpenInterest Decimal string or null
-     * @param string|null $sourceTimestamp Source datetime string or null
+     * @param  string|null  $externalInstrumentId  External source identifier/token
+     * @param  int|null  $instrumentId  Pre-resolved internal exchange_instrument_id
+     * @param  string  $tradeDate  Format: YYYY-MM-DD
+     * @param  string|null  $openPrice  Decimal string or null
+     * @param  string|null  $highPrice  Decimal string or null
+     * @param  string|null  $lowPrice  Decimal string or null
+     * @param  string|null  $closePrice  Decimal string or null
+     * @param  string|null  $lastPrice  Decimal string or null
+     * @param  string|null  $previousClosePrice  Decimal string or null
+     * @param  string|null  $settlementPrice  Decimal string or null
+     * @param  string|null  $volume  Decimal string or null
+     * @param  string|null  $tradedValue  Decimal string or null
+     * @param  int|null  $numberOfTrades  Integer count or null
+     * @param  string|null  $openInterest  Decimal string or null
+     * @param  string|null  $changeInOpenInterest  Decimal string or null
+     * @param  string|null  $sourceTimestamp  Source datetime string or null
      */
     public function __construct(
         public ?string $externalInstrumentId,
@@ -44,7 +44,7 @@ readonly class NormalizedBhavcopyRowDTO
     /**
      * Create a DTO instance from an associative array.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     public static function fromArray(array $data): self
     {
@@ -71,8 +71,6 @@ readonly class NormalizedBhavcopyRowDTO
     /**
      * Convert DTO to array for database upsert.
      *
-     * @param int $resolvedInstrumentId
-     * @param string $receivedAt
      * @return array<string, mixed>
      */
     public function toDatabaseRow(int $resolvedInstrumentId, string $receivedAt): array

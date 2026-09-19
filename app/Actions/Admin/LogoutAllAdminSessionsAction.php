@@ -9,7 +9,6 @@ class LogoutAllAdminSessionsAction
     /**
      * Delete all personal access tokens for the authenticated admin.
      *
-     * @param  User  $admin
      * @return array{status: bool, message: string, data: array<string, mixed>}
      */
     public function execute(User $admin): array

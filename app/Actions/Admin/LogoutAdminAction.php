@@ -9,7 +9,6 @@ class LogoutAdminAction
     /**
      * Delete the current access token for the authenticated admin.
      *
-     * @param  User  $admin
      * @return array{status: bool, message: string, data: array<string, mixed>}
      */
     public function execute(User $admin): array

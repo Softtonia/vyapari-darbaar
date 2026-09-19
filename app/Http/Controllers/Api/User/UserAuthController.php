@@ -9,6 +9,7 @@ use App\Actions\User\LogoutUserAction;
 use App\Actions\User\RefreshTokenAction;
 use App\Actions\User\RegisterUserAction;
 use App\Actions\User\ResetPasswordUserAction;
+use App\Actions\User\VerifyResetTokenUserAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\ChangeUserPasswordRequest;
 use App\Http\Requests\User\ForgotPasswordUserRequest;
@@ -18,7 +19,7 @@ use App\Http\Requests\User\ResetPasswordUserRequest;
 use App\Http\Requests\User\SendOtpRequest;
 use App\Http\Requests\User\ValidateUsernameRequest;
 use App\Http\Requests\User\VerifyOtpRequest;
-use App\Http\Resources\UserProfileResource;
+use App\Http\Requests\User\VerifyResetTokenUserRequest;
 use App\Models\User;
 use App\Notifications\UserOtpNotification;
 use App\Services\OtpService;
@@ -223,6 +224,24 @@ class UserAuthController extends Controller
         ResetPasswordUserAction $action
     ): JsonResponse {
         $result = $action->execute($request->credentials());
+
+        return response()->json([
+            'status' => $result['success'],
+            'message' => $result['message'],
+        ], $result['code']);
+    }
+
+    /**
+     * Verify user password reset token validity.
+     */
+    public function verifyResetToken(
+        VerifyResetTokenUserRequest $request,
+        VerifyResetTokenUserAction $action
+    ): JsonResponse {
+        $result = $action->execute(
+            (string) $request->input('email'),
+            (string) $request->input('token')
+        );
 
         return response()->json([
             'status' => $result['success'],

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Admin\User;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -10,9 +11,7 @@ class UpdateUserAction
     /**
      * Update the user's information and sync Spatie role if provided.
      *
-     * @param  User  $user
      * @param  array{first_name: string, last_name: string, name: string, email: string, phone_number?: string|null, role?: string|null}  $data
-     * @return User
      */
     public function execute(User $user, array $data): User
     {
@@ -30,7 +29,7 @@ class UpdateUserAction
             $user->update($updateData);
 
             if (! empty($data['role'])) {
-                $role = \App\Models\Role::where('name', $data['role'])->orWhere('slug', $data['role'])->first();
+                $role = Role::where('name', $data['role'])->orWhere('slug', $data['role'])->first();
                 $targetRole = $role ? $role->name : $data['role'];
 
                 // syncRoles replaces existing roles with the new role in pivot table without duplicates

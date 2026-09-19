@@ -10,6 +10,7 @@ use App\Http\Resources\UserProfileResource;
 use App\Models\User;
 use App\Notifications\UserEmailUpdateOtpNotification;
 use App\Services\OtpService;
+use App\Services\UserActivityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
@@ -61,7 +62,7 @@ class UserProfileController extends Controller
             new UserEmailUpdateOtpNotification($otpData['otp'])
         );
 
-        \App\Services\UserActivityService::log(
+        UserActivityService::log(
             $request->user(),
             'email_otp_requested',
             "User requested email update OTP for '{$targetEmail}'",

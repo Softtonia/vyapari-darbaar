@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Enums\NotificationType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CompanyResource;
+use App\Jobs\SendUserNotificationJob;
 use App\Models\Admin;
 use App\Models\Company;
 use Illuminate\Http\JsonResponse;
@@ -187,11 +189,11 @@ class AdminCompanyController extends Controller
 
         // Notify associated company users
         foreach ($company->users as $companyUser) {
-            \App\Jobs\SendUserNotificationJob::dispatch(
+            SendUserNotificationJob::dispatch(
                 $companyUser->id,
                 'Company Status Updated',
                 "Hello {{user_first_name}}, your company {$company->name} status has been updated to '{$status}'.",
-                \App\Enums\NotificationType::PUSH_AND_IN_APP
+                NotificationType::PUSH_AND_IN_APP
             );
         }
 

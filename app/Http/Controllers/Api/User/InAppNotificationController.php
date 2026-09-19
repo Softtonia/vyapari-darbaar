@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\InAppNotificationResource;
 use App\Models\User;
 use App\Services\InAppNotificationService;
+use App\Services\UserActivityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -72,7 +73,7 @@ class InAppNotificationController extends Controller
             ], 404);
         }
 
-        \App\Services\UserActivityService::log(
+        UserActivityService::log(
             $user,
             'notification_read',
             "Notification marked as read: '{$notification->title}'",
@@ -96,7 +97,7 @@ class InAppNotificationController extends Controller
 
         $service->markAllAsReadForUser($user);
 
-        \App\Services\UserActivityService::log(
+        UserActivityService::log(
             $user,
             'notifications_mark_all_read',
             'All notifications marked as read',
@@ -130,7 +131,7 @@ class InAppNotificationController extends Controller
             ], 404);
         }
 
-        \App\Services\UserActivityService::log(
+        UserActivityService::log(
             $user,
             'notification_deleted',
             "Notification #{$id} dismissed",
@@ -153,7 +154,7 @@ class InAppNotificationController extends Controller
 
         $deletedCount = $service->clearReadForUser($user);
 
-        \App\Services\UserActivityService::log(
+        UserActivityService::log(
             $user,
             'notifications_cleared',
             "Cleared {$deletedCount} read notifications",

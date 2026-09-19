@@ -276,6 +276,62 @@ class AdminPasswordResetTest extends TestCase
             ]);
     }
 
+    public function test_verify_admin_reset_token_endpoint_succeeds_for_valid_token_and_fails_after_reset(): void
+    {
+        $admin = Admin::create([
+            'name' => 'Verify Admin',
+            'email' => 'verify.admin@example.com',
+            'password' => Hash::make('OldPassword@123'),
+            'status' => 'active',
+        ]);
+
+        $rawToken = Password::broker('admins')->createToken($admin);
+
+        // POST verify valid token
+        $this->postJson('/api/admin/verify-reset-token', [
+            'email' => 'verify.admin@example.com',
+            'token' => $rawToken,
+        ])->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Password reset token is valid.',
+            ]);
+
+        // GET verify valid token
+        $this->getJson('/api/auth/admin/verify-reset-token?email=verify.admin@example.com&token=' . urlencode($rawToken))
+            ->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Password reset token is valid.',
+            ]);
+
+        // Reset the password
+        $this->postJson('/api/admin/reset-password', [
+            'email' => 'verify.admin@example.com',
+            'token' => $rawToken,
+            'password' => 'NewSecurePassword#2026',
+            'password_confirmation' => 'NewSecurePassword#2026',
+        ])->assertStatus(200);
+
+        // POST verify after reset MUST fail
+        $this->postJson('/api/admin/verify-reset-token', [
+            'email' => 'verify.admin@example.com',
+            'token' => $rawToken,
+        ])->assertStatus(400)
+            ->assertJson([
+                'status' => false,
+                'message' => 'This password reset link is invalid or has expired.',
+            ]);
+
+        // GET verify after reset MUST fail
+        $this->getJson('/api/auth/admin/verify-reset-token?email=verify.admin@example.com&token=' . urlencode($rawToken))
+            ->assertStatus(400)
+            ->assertJson([
+                'status' => false,
+                'message' => 'This password reset link is invalid or has expired.',
+            ]);
+    }
+
     public function test_weak_password_is_rejected(): void
     {
         $admin = Admin::create([

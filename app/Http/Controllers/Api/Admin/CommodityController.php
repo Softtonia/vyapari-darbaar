@@ -10,7 +10,6 @@ use App\Http\Requests\Admin\Commodity\StoreCommodityRequest;
 use App\Http\Requests\Admin\Commodity\UpdateCommodityRequest;
 use App\Http\Requests\Admin\Commodity\UpdateCommodityStatusRequest;
 use App\Http\Resources\CommodityListResource;
-use App\Http\Resources\CommodityOptionResource;
 use App\Http\Resources\CommodityResource;
 use App\Models\Commodity;
 use App\Services\CommodityService;

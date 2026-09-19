@@ -2,6 +2,8 @@
 
 namespace App\Actions\User;
 
+use App\Enums\NotificationType;
+use App\Jobs\SendUserNotificationJob;
 use App\Models\User;
 use App\Services\OtpService;
 use App\Services\UserActivityService;
@@ -18,7 +20,6 @@ class LoginUserAction
      * Authenticate a user by username + password OR username + OTP and issue a Sanctum token.
      *
      * @param  array{username: string, password?: string|null, otp?: string|null, email_otp?: string|null, number_otp?: string|null}  $credentials
-     * @param  string  $deviceName
      * @return array{success: true, token: string, user: User}|array{success: false, message: string, code: int}
      */
     public function execute(array $credentials, string $deviceName = 'user-device'): array
@@ -167,11 +168,11 @@ class LoginUserAction
         );
 
         // Security Alert: New Login Notification
-        \App\Jobs\SendUserNotificationJob::dispatch(
+        SendUserNotificationJob::dispatch(
             $user->id,
             'Security Alert: New Login Detected',
             "Hello {{user_first_name}}, a new login was detected from device '{$deviceName}'.",
-            \App\Enums\NotificationType::PUSH_AND_IN_APP
+            NotificationType::PUSH_AND_IN_APP
         );
 
         // Revoke any previous tokens for this specific device to restart a fresh 24h session

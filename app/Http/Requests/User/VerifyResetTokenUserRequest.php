@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Admin\EmailTemplate;
+namespace App\Http\Requests\User;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class PreviewEmailTemplateRequest extends FormRequest
+class VerifyResetTokenUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -18,6 +18,19 @@ class PreviewEmailTemplateRequest extends FormRequest
     }
 
     /**
+     * Prepare inputs for validation (allows query parameters if GET request).
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->isMethod('get')) {
+            $this->merge([
+                'email' => $this->query('email'),
+                'token' => $this->query('token'),
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
@@ -25,9 +38,8 @@ class PreviewEmailTemplateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'key' => ['required', 'string', 'max:100'],
-            'subject' => ['required', 'string', 'max:255'],
-            'body' => ['required', 'string'],
+            'email' => ['required', 'email', 'max:255'],
+            'token' => ['required', 'string'],
         ];
     }
 

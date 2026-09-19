@@ -14,10 +14,6 @@ class LogoutUserAction
 
     /**
      * Revoke the current access token and optionally deactivate current device token.
-     *
-     * @param  User  $user
-     * @param  string|null  $fcmToken
-     * @return void
      */
     public function execute(User $user, ?string $fcmToken = null): void
     {
@@ -34,4 +30,3 @@ class LogoutUserAction
         $user->currentAccessToken()?->delete();
     }
 }
-

@@ -15,7 +15,6 @@ interface ExchangeBhavcopyProviderInterface
     /**
      * Parse raw source payload or file into a collection of normalized Bhavcopy row DTOs.
      *
-     * @param string $sourcePathOrPayload
      * @return Collection<int, NormalizedBhavcopyRowDTO>
      */
     public function parseBhavcopy(string $sourcePathOrPayload): Collection;

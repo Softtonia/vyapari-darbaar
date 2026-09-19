@@ -205,6 +205,86 @@ class UserPasswordResetTest extends TestCase
             'password' => 'BrandNewPassword#2026',
         ])->assertStatus(200);
 
-        $this->assertTrue($loginResponse->json('status'));
+        // Token is deleted from password_reset_tokens
+        $this->assertDatabaseMissing('password_reset_tokens', [
+            'email' => 'success.reset@example.com',
+        ]);
+
+        $this->assertFalse(Password::broker('users')->tokenExists($user, $token));
+
+        // Second reset with same token fails
+        $secondResponse = $this->postJson('/api/user/reset-password', [
+            'token' => $token,
+            'email' => 'success.reset@example.com',
+            'password' => 'AnotherNewPassword#2026',
+            'password_confirmation' => 'AnotherNewPassword#2026',
+        ]);
+
+        $secondResponse->assertStatus(400)
+            ->assertJson([
+                'status' => false,
+                'message' => 'This password reset token is invalid or has expired.',
+            ]);
+    }
+
+    public function test_verify_reset_token_endpoint_succeeds_for_valid_token_and_fails_after_reset(): void
+    {
+        $user = User::create([
+            'first_name' => 'Verify',
+            'last_name' => 'Token',
+            'name' => 'Verify Token',
+            'phone_number' => '+919876543219',
+            'username' => 'verify.token',
+            'email' => 'verify.token@example.com',
+            'password' => Hash::make('OldPass#123'),
+            'status' => 'active',
+        ]);
+
+        $token = Password::broker('users')->createToken($user);
+
+        // Valid token verification via POST
+        $postResponse = $this->postJson('/api/user/verify-reset-token', [
+            'email' => 'verify.token@example.com',
+            'token' => $token,
+        ]);
+        $postResponse->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Password reset token is valid.',
+            ]);
+
+        // Valid token verification via GET
+        $getResponse = $this->getJson('/api/auth/user/verify-reset-token?email=verify.token@example.com&token=' . urlencode($token));
+        $getResponse->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Password reset token is valid.',
+            ]);
+
+        // Now reset the password
+        $this->postJson('/api/user/reset-password', [
+            'token' => $token,
+            'email' => 'verify.token@example.com',
+            'password' => 'NewPassWord#2026',
+            'password_confirmation' => 'NewPassWord#2026',
+        ])->assertStatus(200);
+
+        // Verification immediately after reset MUST fail (token expired / used)
+        $postAfterReset = $this->postJson('/api/user/verify-reset-token', [
+            'email' => 'verify.token@example.com',
+            'token' => $token,
+        ]);
+        $postAfterReset->assertStatus(400)
+            ->assertJson([
+                'status' => false,
+                'message' => 'This password reset link is invalid or has expired.',
+            ]);
+
+        $getAfterReset = $this->getJson('/api/auth/user/verify-reset-token?email=verify.token@example.com&token=' . urlencode($token));
+        $getAfterReset->assertStatus(400)
+            ->assertJson([
+                'status' => false,
+                'message' => 'This password reset link is invalid or has expired.',
+            ]);
     }
 }

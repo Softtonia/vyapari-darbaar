@@ -2,7 +2,10 @@
 
 namespace App\Actions\User\Profile;
 
+use App\Enums\NotificationType;
+use App\Jobs\SendUserNotificationJob;
 use App\Models\User;
+use App\Services\UserActivityService;
 use Illuminate\Support\Facades\DB;
 
 class UpdateUserProfileAction
@@ -10,9 +13,7 @@ class UpdateUserProfileAction
     /**
      * Update user profile (name, phone_number, email), revoke other sessions if email changes.
      *
-     * @param  User  $user
      * @param  array{first_name?: string, last_name?: string, name?: string, phone_number?: string|null, email?: string}  $data
-     * @return User
      */
     public function execute(User $user, array $data): User
     {
@@ -50,7 +51,7 @@ class UpdateUserProfileAction
 
             $user->save();
 
-            \App\Services\UserActivityService::log(
+            UserActivityService::log(
                 $user,
                 'profile_update',
                 'User updated profile information',
@@ -58,11 +59,11 @@ class UpdateUserProfileAction
             );
 
             // In-App Notification: Profile Updated
-            \App\Jobs\SendUserNotificationJob::dispatch(
+            SendUserNotificationJob::dispatch(
                 $user->id,
                 'Profile Updated',
                 'Hello {{user_first_name}}, your profile details have been updated successfully.',
-                \App\Enums\NotificationType::IN_APP
+                NotificationType::IN_APP
             );
 
             return $user->fresh(['roles']);

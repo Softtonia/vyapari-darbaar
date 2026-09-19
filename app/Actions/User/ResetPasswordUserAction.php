@@ -2,7 +2,10 @@
 
 namespace App\Actions\User;
 
+use App\Enums\NotificationType;
+use App\Jobs\SendUserNotificationJob;
 use App\Models\User;
+use App\Services\UserActivityService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -60,18 +63,18 @@ class ResetPasswordUserAction
             // Security: Ensure all active login tokens across all devices are deleted
             $user->tokens()->delete();
 
-            \App\Services\UserActivityService::log(
+            UserActivityService::log(
                 $user,
                 'password_reset',
                 'User reset account password via password broker'
             );
 
             // Security Alert: Password Reset Successful Notification
-            \App\Jobs\SendUserNotificationJob::dispatch(
+            SendUserNotificationJob::dispatch(
                 $user->id,
                 'Security Alert: Password Reset Successful',
                 'Hello {{user_first_name}}, your account password has been reset successfully.',
-                \App\Enums\NotificationType::PUSH_AND_IN_APP
+                NotificationType::PUSH_AND_IN_APP
             );
 
             return [

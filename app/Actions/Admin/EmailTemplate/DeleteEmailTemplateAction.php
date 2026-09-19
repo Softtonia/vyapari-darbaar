@@ -10,8 +10,6 @@ class DeleteEmailTemplateAction
     /**
      * Delete the specified email template, protecting system-critical templates.
      *
-     * @param  EmailTemplate  $emailTemplate
-     * @return void
      *
      * @throws HttpResponseException
      */

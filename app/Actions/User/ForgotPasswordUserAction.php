@@ -3,6 +3,7 @@
 namespace App\Actions\User;
 
 use App\Models\User;
+use App\Services\UserActivityService;
 use Illuminate\Support\Facades\Password;
 
 class ForgotPasswordUserAction
@@ -10,7 +11,6 @@ class ForgotPasswordUserAction
     /**
      * Send a password reset link to the given user email if active and eligible.
      *
-     * @param  string  $email
      * @return array{status: bool, message: string, code: int}
      */
     public function execute(string $email): array
@@ -48,7 +48,7 @@ class ForgotPasswordUserAction
         }
 
         if ($status === Password::RESET_LINK_SENT) {
-            \App\Services\UserActivityService::log(
+            UserActivityService::log(
                 $user,
                 'password_reset_requested',
                 "User requested password reset link for '{$normalizedEmail}'",

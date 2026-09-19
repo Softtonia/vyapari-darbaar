@@ -10,7 +10,6 @@ class ForgotPasswordAdminAction
     /**
      * Send a password reset link to the given administrator email if active and eligible.
      *
-     * @param  string  $email
      * @return array{status: bool, message: string, data: array<string, mixed>}
      */
     public function execute(string $email): array

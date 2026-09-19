@@ -3,8 +3,9 @@
 namespace App\Actions\Admin\User;
 
 use App\Jobs\SendUserCredentialsEmailJob;
-use App\Models\Admin;
+use App\Models\Company;
 use App\Models\EmailTemplate;
+use App\Models\Role;
 use App\Models\User;
 use App\Services\EmailTemplateRenderer;
 use App\Services\TemporaryPasswordGenerator;
@@ -24,9 +25,7 @@ class CreateUserAction
     /**
      * Provision a new user account, assign Spatie role, render credential email snapshot and queue after commit.
      *
-     * @param  User  $admin
      * @param  array{first_name: string, last_name: string, name?: string, full_name?: string, phone_number: string, email: string, role?: string}  $data
-     * @return User
      *
      * @throws HttpResponseException
      */
@@ -81,9 +80,9 @@ class CreateUserAction
             ]);
 
             $roleName = ! empty($data['role']) ? $data['role'] : 'user';
-            
+
             // Find role by name or slug, default to 'user'
-            $role = \App\Models\Role::where('name', $roleName)->orWhere('slug', $roleName)->first();
+            $role = Role::where('name', $roleName)->orWhere('slug', $roleName)->first();
             $targetRole = $role ? $role->name : 'user';
 
             // syncRoles handles pivot creation cleanly and prevents duplicate role assignments
@@ -97,7 +96,7 @@ class CreateUserAction
                     $commodities = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode(',', $commodities)));
                 }
 
-                $company = \App\Models\Company::create([
+                $company = Company::create([
                     'name' => trim((string) $data['company_name']),
                     'contact_person' => trim((string) ($data['contact_person'] ?? $data['name'])),
                     'business_type' => isset($data['business_type']) ? trim((string) $data['business_type']) : null,

@@ -3,6 +3,7 @@
 namespace App\Actions\User;
 
 use App\Models\User;
+use App\Services\UserActivityService;
 use Illuminate\Support\Facades\DB;
 
 class RefreshTokenAction
@@ -10,8 +11,6 @@ class RefreshTokenAction
     /**
      * Revoke the current access token and issue a fresh Sanctum token.
      *
-     * @param  User  $user
-     * @param  string  $deviceName
      * @return array{token: string, token_type: string}
      */
     public function execute(User $user, string $deviceName = 'user-device'): array
@@ -31,7 +30,7 @@ class RefreshTokenAction
                 'plain_token' => $tokenResult->plainTextToken,
             ]);
 
-        \App\Services\UserActivityService::log(
+        UserActivityService::log(
             $user,
             'token_refreshed',
             "User refreshed access token from device '{$deviceName}'",

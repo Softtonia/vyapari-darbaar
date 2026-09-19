@@ -5,14 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DistrictOptionResource;
 use App\Http\Resources\MandiOptionResource;
-use App\Http\Resources\StateOptionResource;
 use App\Models\District;
 use App\Models\Mandi;
 use App\Models\State;
 use App\Services\DistrictService;
 use App\Services\MandiService;
 use App\Services\StateService;
-use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

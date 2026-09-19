@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\User;
 
+use App\Enums\NotificationType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CompanyResource;
+use App\Jobs\SendUserNotificationJob;
 use App\Models\Company;
 use App\Models\User;
 use App\Services\UserActivityService;
@@ -102,11 +104,11 @@ class UserCompanyController extends Controller
         );
 
         // In-App Notification: Company Profile Created
-        \App\Jobs\SendUserNotificationJob::dispatch(
+        SendUserNotificationJob::dispatch(
             $user->id,
             'Company Profile Created',
             'Hello {{user_first_name}}, your company profile has been created successfully.',
-            \App\Enums\NotificationType::IN_APP
+            NotificationType::IN_APP
         );
 
         return response()->json([
@@ -189,11 +191,11 @@ class UserCompanyController extends Controller
         );
 
         // In-App Notification: Company Profile Updated
-        \App\Jobs\SendUserNotificationJob::dispatch(
+        SendUserNotificationJob::dispatch(
             $user->id,
             'Company Profile Updated',
             'Hello {{user_first_name}}, your company details have been updated successfully.',
-            \App\Enums\NotificationType::IN_APP
+            NotificationType::IN_APP
         );
 
         return response()->json([

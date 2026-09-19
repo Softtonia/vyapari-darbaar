@@ -9,9 +9,6 @@ class DeleteUserAction
 {
     /**
      * Revoke tokens and hard-delete the user record.
-     *
-     * @param  User  $user
-     * @return void
      */
     public function execute(User $user): void
     {

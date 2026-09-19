@@ -9,13 +9,11 @@ use App\Http\Requests\Admin\CommodityCategory\ListCommodityCategoryRequest;
 use App\Http\Requests\Admin\CommodityCategory\StoreCommodityCategoryRequest;
 use App\Http\Requests\Admin\CommodityCategory\UpdateCommodityCategoryRequest;
 use App\Http\Requests\Admin\CommodityCategory\UpdateCommodityCategoryStatusRequest;
-use App\Http\Resources\CommodityCategoryOptionResource;
 use App\Http\Resources\CommodityCategoryResource;
 use App\Models\CommodityCategory;
 use App\Services\CommodityCategoryService;
 use DomainException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class CommodityCategoryController extends Controller
 {

@@ -63,6 +63,10 @@ Route::prefix('auth')->group(function () {
             ->middleware('throttle:admin-password-reset')
             ->name('auth.admin.reset-password');
 
+        Route::match(['get', 'post'], 'verify-reset-token', [AdminAuthController::class, 'verifyResetToken'])
+            ->middleware('throttle:admin-password-reset')
+            ->name('auth.admin.verify-reset-token');
+
         Route::middleware(['auth:sanctum', 'admin', 'throttle:admin-api'])->group(function () {
             Route::post('logout', [AdminAuthController::class, 'logout'])
                 ->name('auth.admin.logout');
@@ -105,6 +109,10 @@ Route::prefix('auth')->group(function () {
             ->middleware('throttle:user-password-reset')
             ->name('auth.user.reset-password');
 
+        Route::match(['get', 'post'], 'verify-reset-token', [UserAuthController::class, 'verifyResetToken'])
+            ->middleware('throttle:user-password-reset')
+            ->name('auth.user.verify-reset-token');
+
         Route::middleware(['auth:sanctum', 'user'])->group(function () {
             Route::post('refresh-token', [UserAuthController::class, 'refreshToken'])
                 ->middleware('throttle:user-api')
@@ -139,6 +147,10 @@ Route::prefix('admin')->group(function () {
     Route::post('reset-password', [AdminAuthController::class, 'resetPassword'])
         ->middleware('throttle:admin-password-reset')
         ->name('admin.reset-password');
+
+    Route::match(['get', 'post'], 'verify-reset-token', [AdminAuthController::class, 'verifyResetToken'])
+        ->middleware('throttle:admin-password-reset')
+        ->name('admin.verify-reset-token');
 
     // Protected admin endpoints
     Route::middleware(['auth:sanctum', 'admin', 'throttle:admin-api'])->group(function () {
@@ -752,6 +764,10 @@ Route::prefix('user')->group(function () {
     Route::post('reset-password', [UserAuthController::class, 'resetPassword'])
         ->middleware('throttle:user-password-reset')
         ->name('user.reset-password');
+
+    Route::match(['get', 'post'], 'verify-reset-token', [UserAuthController::class, 'verifyResetToken'])
+        ->middleware('throttle:user-password-reset')
+        ->name('user.verify-reset-token');
 
     // Protected user endpoints
     Route::middleware(['auth:sanctum', 'user'])->group(function () {

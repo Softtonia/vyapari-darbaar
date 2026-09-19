@@ -8,6 +8,7 @@ use App\Http\Requests\User\NotificationDevice\StoreNotificationDeviceRequest;
 use App\Http\Resources\NotificationDeviceResource;
 use App\Models\User;
 use App\Services\Firebase\NotificationDeviceService;
+use App\Services\UserActivityService;
 use Illuminate\Http\JsonResponse;
 
 class NotificationDeviceController extends Controller
@@ -24,7 +25,7 @@ class NotificationDeviceController extends Controller
 
         $device = $service->registerDevice($user, $request->validated(), $request->ip());
 
-        \App\Services\UserActivityService::log(
+        UserActivityService::log(
             $user,
             'device_registered',
             "Notification device registered ({$device->device_type})",
@@ -65,7 +66,7 @@ class NotificationDeviceController extends Controller
             ], 404);
         }
 
-        \App\Services\UserActivityService::log(
+        UserActivityService::log(
             $user,
             'device_unregistered',
             'Notification device deactivated',

@@ -10,9 +10,7 @@ class UpdateAdminProfileAction
     /**
      * Update admin profile name/first_name/last_name/email, clean stale password reset tokens, and revoke other sessions if email changes.
      *
-     * @param  User  $admin
      * @param  array{first_name?: string, last_name?: string, name?: string, email?: string}  $data
-     * @return User
      */
     public function execute(User $admin, array $data): User
     {

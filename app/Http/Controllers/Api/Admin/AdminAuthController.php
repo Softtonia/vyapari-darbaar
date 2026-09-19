@@ -7,10 +7,12 @@ use App\Actions\Admin\LoginAdminAction;
 use App\Actions\Admin\LogoutAdminAction;
 use App\Actions\Admin\LogoutAllAdminSessionsAction;
 use App\Actions\Admin\ResetPasswordAdminAction;
+use App\Actions\Admin\VerifyResetTokenAdminAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ForgotPasswordAdminRequest;
 use App\Http\Requests\Admin\LoginAdminRequest;
 use App\Http\Requests\Admin\ResetPasswordAdminRequest;
+use App\Http\Requests\Admin\VerifyResetTokenAdminRequest;
 use App\Models\Admin;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -83,6 +85,31 @@ class AdminAuthController extends Controller
         }
 
         return response()->json($response, 200);
+    }
+
+    /**
+     * Verify administrator password reset token validity.
+     */
+    public function verifyResetToken(
+        VerifyResetTokenAdminRequest $request,
+        VerifyResetTokenAdminAction $action
+    ): JsonResponse {
+        $result = $action->execute(
+            (string) $request->input('email'),
+            (string) $request->input('token')
+        );
+
+        if (! $result['success']) {
+            return response()->json([
+                'status' => false,
+                'message' => $result['message'],
+            ], $result['code']);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => $result['message'],
+        ], 200);
     }
 
     /**

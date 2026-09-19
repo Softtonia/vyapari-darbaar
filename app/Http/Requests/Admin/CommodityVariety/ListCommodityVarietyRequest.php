@@ -5,8 +5,10 @@ namespace App\Http\Requests\Admin\CommodityVariety;
 use App\Models\Commodity;
 use App\Models\CommoditySubcategory;
 use App\Models\CommodityVariety;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class ListCommodityVarietyRequest extends FormRequest
 {
@@ -63,7 +65,7 @@ class ListCommodityVarietyRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -95,7 +97,7 @@ class ListCommodityVarietyRequest extends FormRequest
     /**
      * Configure the validator instance.
      *
-     * @param  \Illuminate\Validation\Validator  $validator
+     * @param  Validator  $validator
      */
     public function withValidator($validator): void
     {

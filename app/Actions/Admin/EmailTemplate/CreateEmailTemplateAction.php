@@ -10,7 +10,6 @@ class CreateEmailTemplateAction
      * Create a new email template.
      *
      * @param  array{name: string, key: string, subject: string, body: string, type?: string, is_active?: bool}  $data
-     * @return EmailTemplate
      */
     public function execute(array $data): EmailTemplate
     {

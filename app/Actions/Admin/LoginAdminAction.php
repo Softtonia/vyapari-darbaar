@@ -3,6 +3,7 @@
 namespace App\Actions\Admin;
 
 use App\Models\User;
+use App\Services\UserActivityService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -12,7 +13,6 @@ class LoginAdminAction
      * Execute the admin login action.
      *
      * @param  array{email: string, password: string}  $credentials
-     * @param  string  $tokenName
      * @return array{success: bool, message: string, data?: array<string, mixed>, code: int}
      */
     public function execute(array $credentials, string $tokenName = 'admin-token'): array
@@ -34,7 +34,7 @@ class LoginAdminAction
         }
 
         if (! Hash::check($password, $user->password)) {
-            \App\Services\UserActivityService::log(
+            UserActivityService::log(
                 $user,
                 'login_failed',
                 "Failed admin login attempt: incorrect password from device '{$tokenName}'",
@@ -54,7 +54,7 @@ class LoginAdminAction
             || $user->getAllPermissions()->isNotEmpty();
 
         if (! $hasAccess) {
-            \App\Services\UserActivityService::log(
+            UserActivityService::log(
                 $user,
                 'login_failed',
                 "Failed admin login attempt: unauthorized administrative access from device '{$tokenName}'",
@@ -69,7 +69,7 @@ class LoginAdminAction
         }
 
         if ($user->status !== 'active') {
-            \App\Services\UserActivityService::log(
+            UserActivityService::log(
                 $user,
                 'login_failed',
                 "Failed admin login attempt: account inactive from device '{$tokenName}'",
@@ -89,7 +89,7 @@ class LoginAdminAction
 
         $roleName = $user->roles->first()?->name ?? ($user->is_default ? 'super_admin' : 'admin');
 
-        \App\Services\UserActivityService::log(
+        UserActivityService::log(
             $user,
             'login',
             "Admin logged in from device '{$tokenName}'",

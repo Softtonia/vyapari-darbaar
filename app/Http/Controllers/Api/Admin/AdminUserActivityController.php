@@ -328,4 +328,3 @@ class AdminUserActivityController extends Controller
         $query->orderBy($sortBy, $sortOrder);
     }
 }
-

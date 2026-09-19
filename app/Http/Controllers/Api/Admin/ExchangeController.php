@@ -10,7 +10,6 @@ use App\Http\Requests\Admin\Exchange\StoreExchangeRequest;
 use App\Http\Requests\Admin\Exchange\UpdateExchangeRequest;
 use App\Http\Requests\Admin\Exchange\UpdateExchangeStatusRequest;
 use App\Http\Resources\ExchangeListResource;
-use App\Http\Resources\ExchangeOptionResource;
 use App\Http\Resources\ExchangeResource;
 use App\Models\Admin;
 use App\Models\Exchange;

@@ -10,7 +10,6 @@ use App\Http\Requests\Admin\State\StoreStateRequest;
 use App\Http\Requests\Admin\State\UpdateStateRequest;
 use App\Http\Requests\Admin\State\UpdateStateStatusRequest;
 use App\Http\Resources\StateListResource;
-use App\Http\Resources\StateOptionResource;
 use App\Http\Resources\StateResource;
 use App\Models\State;
 use App\Services\StateService;
