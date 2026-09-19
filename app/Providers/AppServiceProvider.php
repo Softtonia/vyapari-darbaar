@@ -65,8 +65,13 @@ class AppServiceProvider extends ServiceProvider
     protected function configureRateLimiting(): void
     {
         RateLimiter::for('admin-login', function (Request $request) {
-            $email = strtolower(trim((string) $request->input('email', '')));
-            $identifier = sha1($email.'|'.$request->ip());
+            $rawIdentifier = $request->input('email')
+                ?? $request->input('mobile')
+                ?? $request->input('phone')
+                ?? $request->input('phone_number')
+                ?? $request->input('username')
+                ?? $request->input('identifier', '');
+            $identifier = sha1(strtolower(trim((string) $rawIdentifier)).'|'.$request->ip());
 
             return Limit::perMinute(5)
                 ->by($identifier)
@@ -74,6 +79,25 @@ class AppServiceProvider extends ServiceProvider
                     return response()->json([
                         'status' => false,
                         'message' => 'Too many login attempts. Please try again later.',
+                    ], 429, $headers);
+                });
+        });
+
+        RateLimiter::for('admin-send-otp', function (Request $request) {
+            $rawIdentifier = $request->input('email')
+                ?? $request->input('mobile')
+                ?? $request->input('phone')
+                ?? $request->input('phone_number')
+                ?? $request->input('username')
+                ?? $request->input('identifier', '');
+            $identifier = sha1(strtolower(trim((string) $rawIdentifier)).'|'.$request->ip());
+
+            return Limit::perMinute(5)
+                ->by('admin-send-otp:'.$identifier)
+                ->response(function (Request $request, array $headers) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Too many OTP requests. Please try again later.',
                     ], 429, $headers);
                 });
         });

@@ -61,6 +61,164 @@
                             }
                         },
                         {
+                            "name": "Admin Send Login OTP - Email",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"email\": \"{{admin_email}}\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/auth/admin/send-login-otp",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "admin",
+                                        "send-login-otp"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Admin Send Login OTP - Mobile",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"mobile\": \"9876543210\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/auth/admin/send-login-otp",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "admin",
+                                        "send-login-otp"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Admin Login - Email & OTP",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.status === true && jsonData.data && jsonData.data.token) {",
+                                            "    pm.environment.set('admin_token', jsonData.data.token);",
+                                            "    console.log('Admin token saved to environment.');",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"email\": \"{{admin_email}}\",\n    \"otp\": \"123456\",\n    \"device_name\": \"Postman Admin\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/auth/admin/login-with-otp",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "admin",
+                                        "login-with-otp"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Admin Login - Mobile & OTP",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.status === true && jsonData.data && jsonData.data.token) {",
+                                            "    pm.environment.set('admin_token', jsonData.data.token);",
+                                            "    console.log('Admin token saved to environment.');",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"mobile\": \"9876543210\",\n    \"otp\": \"123456\",\n    \"device_name\": \"Postman Admin\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/auth/admin/login-with-otp",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "admin",
+                                        "login-with-otp"
+                                    ]
+                                }
+                            }
+                        },
+                        {
                             "name": "Admin Forgot Password",
                             "request": {
                                 "method": "POST",
@@ -6372,6 +6530,117 @@
                             }
                         },
                         {
+                            "name": "User Send Login OTP - Email",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"email\": \"user@example.com\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/auth/user/send-login-otp",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "user",
+                                        "send-login-otp"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "User Send Login OTP - Mobile",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"mobile\": \"9876543210\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/auth/user/send-login-otp",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "user",
+                                        "send-login-otp"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "User Login - Email & OTP",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.status === true && jsonData.data && jsonData.data.token) {",
+                                            "    pm.environment.set('user_token', jsonData.data.token);",
+                                            "    console.log('User token saved to environment.');",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"email\": \"user@example.com\",\n    \"otp\": \"123456\",\n    \"device_name\": \"Mobile Android App\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/auth/user/login-with-otp",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "auth",
+                                        "user",
+                                        "login-with-otp"
+                                    ]
+                                }
+                            }
+                        },
+                        {
                             "name": "User Login - Mobile Number & OTP",
                             "event": [
                                 {
@@ -6402,10 +6671,10 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"phone_number\": \"+919876543210\",\n    \"otp\": \"123456\",\n    \"device_name\": \"Mobile Android App\"\n}"
+                                    "raw": "{\n    \"mobile\": \"9876543210\",\n    \"otp\": \"123456\",\n    \"device_name\": \"Mobile Android App\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/auth/user/login",
+                                    "raw": "{{live}}/api/auth/user/login-with-otp",
                                     "host": [
                                         "{{live}}"
                                     ],
@@ -6413,7 +6682,7 @@
                                         "api",
                                         "auth",
                                         "user",
-                                        "login"
+                                        "login-with-otp"
                                     ]
                                 }
                             }

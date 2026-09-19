@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Actions\User\LoginUserAction;
+use App\Models\Admin;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class LoginAdminRequest extends FormRequest
+class SendAdminOtpRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -43,15 +45,6 @@ class LoginAdminRequest extends FormRequest
             }
             $this->merge(['identifier' => $trimmed]);
         }
-
-        $otp = $this->input('otp')
-            ?? $this->input('code')
-            ?? $this->input('admin_otp')
-            ?? $this->input('mobile_otp');
-
-        if ($otp !== null) {
-            $this->merge(['otp' => trim((string) $otp)]);
-        }
     }
 
     /**
@@ -69,12 +62,6 @@ class LoginAdminRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:25'],
             'number' => ['nullable', 'string', 'max:25'],
             'identifier' => ['nullable', 'string', 'max:255'],
-            'password' => ['required_without_all:otp,code,admin_otp,mobile_otp', 'nullable', 'string'],
-            'otp' => ['required_without:password', 'nullable', 'string', 'max:10'],
-            'code' => ['nullable', 'string', 'max:10'],
-            'admin_otp' => ['nullable', 'string', 'max:10'],
-            'mobile_otp' => ['nullable', 'string', 'max:10'],
-            'device_name' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -86,38 +73,39 @@ class LoginAdminRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required_without_all' => 'Please provide an administrator email, username, or mobile number.',
-            'username.required_without_all' => 'Please provide an administrator email, username, or mobile number.',
-            'phone_number.required_without_all' => 'Please provide an administrator email, username, or mobile number.',
-            'password.required_without_all' => 'Please provide either password or OTP to sign in.',
-            'otp.required_without' => 'Please provide either password or OTP to sign in.',
+            'email.required_without_all' => 'Please provide an administrator email, username, or mobile number to receive an OTP.',
+            'username.required_without_all' => 'Please provide an administrator email, username, or mobile number to receive an OTP.',
+            'phone_number.required_without_all' => 'Please provide an administrator email, username, or mobile number to receive an OTP.',
         ];
     }
 
     /**
-     * Get normalized credentials.
-     *
-     * @return array<string, mixed>
+     * Resolve the targeted Administrator model.
      */
-    public function credentials(): array
+    public function targetAdmin(): ?Admin
     {
-        $rawIdentifier = $this->input('identifier')
+        $identifier = trim((string) (
+            $this->input('identifier')
             ?? $this->input('email')
             ?? $this->input('username')
             ?? $this->input('phone_number')
             ?? $this->input('mobile')
             ?? $this->input('phone')
-            ?? $this->input('number');
+        ));
 
-        return [
-            'identifier' => trim((string) $rawIdentifier),
-            'email' => $this->input('email') ? strtolower(trim((string) $this->input('email'))) : null,
-            'username' => $this->input('username') ? trim((string) $this->input('username')) : null,
-            'phone_number' => $this->input('phone_number') ?? $this->input('mobile') ?? $this->input('phone'),
-            'password' => $this->input('password'),
-            'otp' => $this->input('otp') ?? $this->input('code') ?? $this->input('admin_otp') ?? $this->input('mobile_otp'),
-            'device_name' => (string) $this->input('device_name', $this->header('User-Agent', 'admin-token')),
-        ];
+        if (empty($identifier)) {
+            return null;
+        }
+
+        $phoneVariations = LoginUserAction::getPhoneVariations($identifier);
+
+        return Admin::query()
+            ->where(function ($query) use ($identifier, $phoneVariations) {
+                $query->where('email', strtolower($identifier))
+                    ->orWhere('username', $identifier)
+                    ->orWhereIn('phone_number', $phoneVariations);
+            })
+            ->first();
     }
 
     /**

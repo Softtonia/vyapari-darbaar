@@ -66,6 +66,17 @@ Route::prefix('auth')->group(function () {
         Route::post('login', [AdminAuthController::class, 'login'])
             ->middleware('throttle:admin-login')
             ->name('auth.admin.login');
+        Route::post('login-with-otp', [AdminAuthController::class, 'loginWithOtp'])
+            ->middleware('throttle:admin-login')
+            ->name('auth.admin.login-with-otp');
+        Route::post('send-otp', [AdminAuthController::class, 'sendOtp'])
+            ->middleware('throttle:admin-send-otp')
+            ->name('auth.admin.send-otp');
+        Route::post('send-login-otp', [AdminAuthController::class, 'sendLoginOtp'])
+            ->middleware('throttle:admin-send-otp')
+            ->name('auth.admin.send-login-otp');
+        Route::post('otp/send', [AdminAuthController::class, 'sendOtp'])
+            ->middleware('throttle:admin-send-otp');
 
         Route::post('forgot-password', [AdminAuthController::class, 'forgotPassword'])
             ->middleware('throttle:admin-password-reset')
@@ -158,6 +169,17 @@ Route::prefix('admin')->group(function () {
     Route::post('login', [AdminAuthController::class, 'login'])
         ->middleware('throttle:admin-login')
         ->name('admin.login');
+    Route::post('login-with-otp', [AdminAuthController::class, 'loginWithOtp'])
+        ->middleware('throttle:admin-login')
+        ->name('admin.login-with-otp');
+    Route::post('send-otp', [AdminAuthController::class, 'sendOtp'])
+        ->middleware('throttle:admin-send-otp')
+        ->name('admin.send-otp');
+    Route::post('send-login-otp', [AdminAuthController::class, 'sendLoginOtp'])
+        ->middleware('throttle:admin-send-otp')
+        ->name('admin.send-login-otp');
+    Route::post('otp/send', [AdminAuthController::class, 'sendOtp'])
+        ->middleware('throttle:admin-send-otp');
 
     Route::post('forgot-password', [AdminAuthController::class, 'forgotPassword'])
         ->middleware('throttle:admin-password-reset')

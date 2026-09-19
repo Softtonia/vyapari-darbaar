@@ -139,5 +139,67 @@ HTML;
                 'is_active' => true,
             ]
         );
+
+        $adminLoginOtpHtml = <<<'HTML'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login OTP</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0f172a; color: #334155;">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 30px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);">
+        <!-- Header -->
+        <tr>
+            <td style="background-color: #0f172a; padding: 28px 32px; text-align: center; border-bottom: 3px solid #3b82f6;">
+                <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 700; letter-spacing: -0.5px;">{{CompanyName}} Administration</h1>
+            </td>
+        </tr>
+        <!-- Content Body -->
+        <tr>
+            <td style="padding: 36px 32px;">
+                <h2 style="margin: 0 0 16px 0; color: #0f172a; font-size: 20px; font-weight: 600;">Hello {{AdminName}},</h2>
+                <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 1.6; color: #475569;">
+                    You have requested to sign in to the administrative control panel of <strong>{{CompanyName}}</strong>.
+                </p>
+                
+                <!-- OTP Box -->
+                <div style="background-color: #eff6ff; border: 2px dashed #93c5fd; border-radius: 8px; padding: 24px; text-align: center; margin: 24px 0;">
+                    <span style="font-size: 13px; color: #1d4ed8; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; display: block; margin-bottom: 8px;">Admin Security Verification Code</span>
+                    <span style="font-size: 38px; font-weight: 800; color: #1e3a8a; letter-spacing: 6px; font-family: monospace;">{{Otp}}</span>
+                </div>
+                
+                <p style="margin: 0 0 14px 0; font-size: 14px; line-height: 1.5; color: #64748b;">
+                    <strong>Security Notice:</strong> This code is valid for <strong>{{ExpiryMinutes}} minutes</strong>. Never share this administrative code with anyone.
+                </p>
+                <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #dc2626;">
+                    If you did not initiate this administrator login request, please change your credentials immediately and contact the security team at <a href="mailto:{{SupportEmail}}" style="color: #dc2626; text-decoration: underline;">{{SupportEmail}}</a>.
+                </p>
+            </td>
+        </tr>
+        <!-- Footer -->
+        <tr>
+            <td style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 32px; text-align: center; font-size: 13px; color: #94a3b8;">
+                <p style="margin: 0 0 4px 0;">Regards,</p>
+                <p style="margin: 0; font-weight: 600; color: #64748b;">Security Operations &bull; {{CompanyName}}</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+HTML;
+
+        EmailTemplate::updateOrCreate(
+            ['key' => 'ADMIN_LOGIN_OTP'],
+            [
+                'name' => 'Admin Login OTP Verification',
+                'subject' => 'Admin Security Code - {{CompanyName}}',
+                'body' => $adminLoginOtpHtml,
+                'type' => 'html',
+                'is_active' => true,
+            ]
+        );
     }
 }
+

@@ -3,9 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Admin;
+use App\Models\EmailTemplate;
 use App\Models\User;
+use App\Notifications\AdminOtpNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
 
@@ -17,6 +20,7 @@ class AdminAuthTest extends TestCase
     {
         parent::setUp();
         RateLimiter::clear('admin-login');
+        RateLimiter::clear('admin-send-otp');
         RateLimiter::clear('admin-api');
     }
 
@@ -503,4 +507,168 @@ class AdminAuthTest extends TestCase
             ->assertStatus(200)
             ->assertJson(['status' => true, 'message' => 'Logged out successfully.']);
     }
+
+    public function test_admin_can_request_otp_via_email_and_login_with_otp(): void
+    {
+        Notification::fake();
+
+        $admin = Admin::create([
+            'name' => 'OTP Admin',
+            'email' => 'otp.admin@example.com',
+            'password' => Hash::make('secret123'),
+            'status' => 'active',
+        ]);
+
+        // 1. Send OTP to admin email
+        $sendResponse = $this->postJson('/api/admin/send-login-otp', [
+            'email' => 'otp.admin@example.com',
+        ]);
+
+        $sendResponse->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'OTP has been sent to the administrator email address. Valid for 10 minutes.',
+            ]);
+
+        $capturedOtp = null;
+        Notification::assertSentOnDemand(
+            AdminOtpNotification::class,
+            function (AdminOtpNotification $notification) use (&$capturedOtp) {
+                $this->assertNotEmpty($notification->otp);
+                $capturedOtp = $notification->otp;
+                return true;
+            }
+        );
+
+        $this->assertNotNull($capturedOtp);
+
+        // 2. Login using login-with-otp
+        $loginResponse = $this->postJson('/api/admin/login-with-otp', [
+            'email' => 'otp.admin@example.com',
+            'otp' => $capturedOtp,
+        ]);
+
+        $loginResponse->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Login successful.',
+            ]);
+
+        $this->assertNotEmpty($loginResponse->json('data.token'));
+        $this->assertEquals('super_admin', $loginResponse->json('data.role'));
+    }
+
+    public function test_admin_can_request_otp_via_mobile_number_and_login_with_otp(): void
+    {
+        Notification::fake();
+
+        $admin = Admin::create([
+            'name' => 'Mobile Admin',
+            'email' => 'mobile.admin@example.com',
+            'phone_number' => '+919988776655',
+            'password' => Hash::make('secret123'),
+            'status' => 'active',
+        ]);
+
+        // 1. Send OTP via 10-digit mobile number
+        $sendResponse = $this->postJson('/api/auth/admin/send-otp', [
+            'mobile' => '9988776655',
+        ]);
+
+        $sendResponse->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'OTP has been sent to the administrator mobile number. Valid for 10 minutes.',
+            ]);
+
+        $otp = $sendResponse->json('data.otp');
+        $this->assertNotEmpty($otp);
+
+        // 2. Login using phone and OTP
+        $loginResponse = $this->postJson('/api/auth/admin/login', [
+            'phone' => '9988776655',
+            'otp' => $otp,
+        ]);
+
+        $loginResponse->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Login successful.',
+            ]);
+
+        $this->assertNotEmpty($loginResponse->json('data.token'));
+    }
+
+    public function test_admin_login_with_invalid_otp_is_rejected(): void
+    {
+        Admin::create([
+            'name' => 'Invalid OTP Admin',
+            'email' => 'invalid.otp@example.com',
+            'password' => Hash::make('secret123'),
+            'status' => 'active',
+        ]);
+
+        $response = $this->postJson('/api/admin/login-with-otp', [
+            'email' => 'invalid.otp@example.com',
+            'otp' => '999999',
+        ]);
+
+        $response->assertStatus(401)
+            ->assertJson([
+                'status' => false,
+                'message' => 'The provided OTP is invalid or has expired.',
+            ]);
+    }
+
+    public function test_non_admin_cannot_request_admin_otp_or_login(): void
+    {
+        // Regular user without admin roles or is_default
+        User::create([
+            'name' => 'Regular User',
+            'email' => 'regular.user@example.com',
+            'username' => 'regular.user',
+            'password' => Hash::make('password123'),
+            'status' => 'active',
+            'is_default' => false,
+        ]);
+
+        $sendResponse = $this->postJson('/api/admin/send-login-otp', [
+            'email' => 'regular.user@example.com',
+        ]);
+
+        $sendResponse->assertStatus(404)
+            ->assertJson([
+                'status' => false,
+                'message' => 'No administrative account found with the provided credentials.',
+            ]);
+    }
+
+    public function test_admin_otp_notification_renders_admin_login_otp_email_template(): void
+    {
+        EmailTemplate::create([
+            'name' => 'Admin Security Template',
+            'key' => 'ADMIN_LOGIN_OTP',
+            'subject' => 'Admin Security Key - {{CompanyName}}',
+            'body' => '<h1>Hello {{AdminName}}</h1><p>Your OTP is {{Otp}}. Expires in {{ExpiryMinutes}} mins.</p>',
+            'type' => 'html',
+            'is_active' => true,
+        ]);
+
+        $admin = Admin::create([
+            'name' => 'Security Officer',
+            'email' => 'sec@example.com',
+            'password' => Hash::make('secret123'),
+            'status' => 'active',
+        ]);
+
+        $notification = new AdminOtpNotification('876543', 'login', 'Security Officer');
+        $mail = $notification->toMail($admin);
+
+        $this->assertStringContainsString('Admin Security Key', $mail->subject);
+        $this->assertNotNull($mail->view);
+        $this->assertStringContainsString('876543', (string) $mail->view['html']);
+        $this->assertStringContainsString('Security Officer', (string) $mail->view['html']);
+        $this->assertStringContainsString('10 mins', (string) $mail->view['html']);
+    }
 }
+

@@ -51,11 +51,11 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 ## 1. Authentication Endpoints (`/api/auth/*`)
 *Unified authentication routes are prefixed under `/api/auth/*`. Legacy `/api/admin/*` and `/api/user/*` auth routes remain supported as backward-compatible aliases.*
 
-### 1.1 Admin Login
+### 1.1 Admin Login (Password or OTP)
 - **Method:** `POST`
 - **URI:** `/api/auth/admin/login` (Alias: `/api/admin/login`)
-- **Throttle:** `admin-login` (5 attempts / minute by SHA1(email + IP))
-- **Request Body:**
+- **Throttle:** `admin-login` (5 attempts / minute by SHA1(identifier + IP))
+- **Request Body (Password):**
   ```json
   {
       "email": "admin@vyaparidarbaar.com",
@@ -63,10 +63,19 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
       "device_name": "Admin Dashboard"
   }
   ```
+- **Request Body (OTP - Email or Mobile):**
+  ```json
+  {
+      "email": "admin@vyaparidarbaar.com",
+      "otp": "123456",
+      "device_name": "Admin Dashboard"
+  }
+  ```
+  *(Or with mobile: `{"mobile": "9876543210", "otp": "123456"}`)*
 - **Validation:**
-  - `email`: required, email, max:255
-  - `password`: required, string
-  - `device_name`: optional, string, max:255
+  - Identifier: `email` / `username` / `phone_number` / `mobile` / `phone` (at least one required)
+  - Credential: `password` OR `otp` (`code`, `admin_otp`, `mobile_otp`)
+  - `device_name`: optional string, max:255
 - **Success (200 OK):**
   ```json
   {
@@ -79,7 +88,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
   }
   ```
 - **Specific Error Responses:**
-  - Email not found (401 Unauthorized):
+  - Account not found (401 Unauthorized):
     ```json
     {
         "status": false,
@@ -93,6 +102,13 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
         "message": "Incorrect password."
     }
     ```
+  - Invalid / Expired OTP (401 Unauthorized):
+    ```json
+    {
+        "status": false,
+        "message": "The provided OTP is invalid or has expired."
+    }
+    ```
   - Inactive account (403 Forbidden):
     ```json
     {
@@ -103,7 +119,73 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 
 ---
 
-### 1.2 Admin Forgot Password
+### 1.2 Admin Send Login OTP
+- **Method:** `POST`
+- **URI:** `/api/auth/admin/send-login-otp` (Aliases: `/api/auth/admin/send-otp`, `/api/admin/send-login-otp`, `/api/admin/send-otp`)
+- **Throttle:** `admin-send-otp` (5 requests / minute)
+- **Request Body (Email):**
+  ```json
+  {
+      "email": "admin@vyaparidarbaar.com"
+  }
+  ```
+- **Request Body (Mobile Number):**
+  ```json
+  {
+      "mobile": "9876543210"
+  }
+  ```
+  *(Accepts 10-digit number `9876543210` or country code `+919876543210`)*
+- **Email Template:** Renders dynamic `ADMIN_LOGIN_OTP` HTML email template from the database.
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "OTP has been sent to the administrator email address. Valid for 10 minutes.",
+      "data": {
+          "identifier": "admin@vyaparidarbaar.com",
+          "expires_in_seconds": 600,
+          "cooldown_seconds": 60
+      }
+  }
+  ```
+  *(For mobile requests or in non-production environments, `data.otp` is included for development and testing)*
+
+---
+
+### 1.3 Admin Login with OTP
+- **Method:** `POST`
+- **URI:** `/api/auth/admin/login-with-otp` (Alias: `/api/admin/login-with-otp`)
+- **Throttle:** `admin-login` (5 attempts / minute)
+- **Request Body (Email):**
+  ```json
+  {
+      "email": "admin@vyaparidarbaar.com",
+      "otp": "123456"
+  }
+  ```
+- **Request Body (Mobile):**
+  ```json
+  {
+      "mobile": "9876543210",
+      "otp": "123456"
+  }
+  ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Login successful.",
+      "data": {
+          "token": "1|sanctum_token_string...",
+          "role": "super_admin"
+      }
+  }
+  ```
+
+---
+
+### 1.4 Admin Forgot Password
 - **Method:** `POST`
 - **URI:** `/api/auth/admin/forgot-password` (Alias: `/api/admin/forgot-password`)
 - **Throttle:** `admin-password-reset` (5 attempts / minute by SHA1(email + IP))
@@ -130,7 +212,7 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 
 ---
 
-### 1.3 Admin Reset Password
+### 1.5 Admin Reset Password
 - **Method:** `POST`
 - **URI:** `/api/auth/admin/reset-password` (Alias: `/api/admin/reset-password`)
 - **Throttle:** `admin-password-reset` (5 attempts / minute)
@@ -154,9 +236,9 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
 
 ---
 
-### 1.4 User Login (Multi-Channel Login)
+### 1.6 User Login (Multi-Channel Login)
 - **Method:** `POST`
-- **URI:** `/api/auth/user/login` (Alias: `/api/user/login`)
+- **URI:** `/api/auth/user/login` (Aliases: `/api/user/login`, `/api/login`)
 - **Throttle:** `user-login` (5 attempts / minute by SHA1(identifier + IP))
 - **Supported Login Channels:**
 
@@ -244,6 +326,72 @@ Comprehensive reference for all REST API endpoints across the Vyapari Darbaar sy
         "message": "Account is inactive. Please contact administrator."
     }
     ```
+
+---
+
+### 1.7 User Send Login OTP
+- **Method:** `POST`
+- **URI:** `/api/auth/user/send-login-otp` (Aliases: `/api/user/send-login-otp`, `/api/send-login-otp`, `/api/send-otp`, `/api/user/send-otp`)
+- **Throttle:** `user-send-otp` (5 requests / minute)
+- **Request Body (Email):**
+  ```json
+  {
+      "email": "user@example.com"
+  }
+  ```
+- **Request Body (Mobile Number):**
+  ```json
+  {
+      "mobile": "9876543210"
+  }
+  ```
+  *(Accepts `mobile`, `phone`, `phone_number`, or `identifier` in 10-digit format `9876543210` or country code `+919876543210`)*
+- **Email Template:** Renders dynamic `USER_LOGIN_OTP` HTML email template from the database (`{{Otp}}`, `{{ExpiryMinutes}}`, `{{UserName}}`, `{{CompanyName}}`, `{{SupportEmail}}`).
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "OTP has been sent to the email address. Valid for 10 minutes.",
+      "data": {
+          "identifier": "user@example.com",
+          "expires_in_seconds": 600,
+          "cooldown_seconds": 60
+      }
+  }
+  ```
+  *(For mobile requests or in non-production environments, `data.otp` is included for testing and dev tools)*
+
+---
+
+### 1.8 User Login with OTP
+- **Method:** `POST`
+- **URI:** `/api/auth/user/login-with-otp` (Aliases: `/api/user/login-with-otp`, `/api/login-with-otp`, `/api/user/login`)
+- **Throttle:** `user-login` (5 attempts / minute)
+- **Request Body (Email & OTP):**
+  ```json
+  {
+      "email": "user@example.com",
+      "otp": "123456"
+  }
+  ```
+- **Request Body (Mobile & OTP):**
+  ```json
+  {
+      "mobile": "9876543210",
+      "otp": "123456"
+  }
+  ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Login successful.",
+      "data": {
+          "token": "2|user_sanctum_token...",
+          "role": "user"
+      }
+  }
+  ```
 
 ---
 

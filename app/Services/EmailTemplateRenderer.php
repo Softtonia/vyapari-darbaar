@@ -66,6 +66,13 @@ class EmailTemplateRenderer
             'description' => 'The purpose of the OTP (e.g., Account Login, Registration).',
             'example' => 'Account Login',
         ],
+        'AdminName' => [
+            'variable' => 'AdminName',
+            'tag' => '{{AdminName}}',
+            'label' => 'Administrator Name',
+            'description' => 'The full name of the administrator.',
+            'example' => 'Super Admin',
+        ],
     ];
 
     /**
@@ -82,6 +89,14 @@ class EmailTemplateRenderer
             'SupportEmail',
         ],
         'USER_LOGIN_OTP' => [
+            'UserName',
+            'Otp',
+            'ExpiryMinutes',
+            'CompanyName',
+            'SupportEmail',
+        ],
+        'ADMIN_LOGIN_OTP' => [
+            'AdminName',
             'UserName',
             'Otp',
             'ExpiryMinutes',
@@ -221,6 +236,13 @@ class EmailTemplateRenderer
 
         if ($templateKey === 'USER_LOGIN_OTP') {
             $data['UserName'] = 'Demo User';
+            $data['Otp'] = '123456';
+            $data['ExpiryMinutes'] = '10';
+        }
+
+        if ($templateKey === 'ADMIN_LOGIN_OTP') {
+            $data['AdminName'] = 'Demo Administrator';
+            $data['UserName'] = 'Demo Administrator';
             $data['Otp'] = '123456';
             $data['ExpiryMinutes'] = '10';
         }
