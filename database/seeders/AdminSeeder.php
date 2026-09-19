@@ -17,28 +17,6 @@ class AdminSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        $email = env('SEED_ADMIN_EMAIL', 'vijay.kumar@softtonia.com');
-        $password = env('SEED_ADMIN_PASSWORD', 'Soft@12345');
-        $firstName = env('SEED_ADMIN_FIRST_NAME', 'Super');
-        $lastName = env('SEED_ADMIN_LAST_NAME', 'Admin');
-        $fullName = env('SEED_ADMIN_NAME', "{$firstName} {$lastName}");
-        $username = env('SEED_ADMIN_USERNAME', 'super.admin');
-
-        $superAdmin = User::updateOrCreate(
-            ['email' => $email],
-            [
-                'first_name' => $firstName,
-                'last_name' => $lastName,
-                'full_name' => $fullName,
-                'name' => $fullName,
-                'username' => $username,
-                'password' => Hash::make($password),
-                'status' => 'active',
-                'is_default' => true,
-                'must_change_password' => false,
-            ]
-        );
-
         $superAdminRole = Role::firstOrCreate(
             ['name' => 'super_admin', 'guard_name' => 'web'],
             ['slug' => 'super_admin', 'status' => true, 'is_default' => true]
@@ -49,6 +27,45 @@ class AdminSeeder extends Seeder
             ['slug' => 'admin', 'status' => true, 'is_default' => true]
         );
 
-        $superAdmin->assignRole([$superAdminRole, $adminRole]);
+        $admins = [
+            [
+                'email' => 'sales@softtonia.com',
+                'password' => 'Soft@12345',
+                'first_name' => 'Sales',
+                'last_name' => 'Admin',
+                'full_name' => 'Sales Admin',
+                'name' => 'Sales Admin',
+                'username' => 'sales.softtonia',
+            ],
+            [
+                'email' => env('SEED_ADMIN_EMAIL', 'vijay.kumar@softtonia.com'),
+                'password' => env('SEED_ADMIN_PASSWORD', 'Soft@12345'),
+                'first_name' => env('SEED_ADMIN_FIRST_NAME', 'Super'),
+                'last_name' => env('SEED_ADMIN_LAST_NAME', 'Admin'),
+                'full_name' => env('SEED_ADMIN_NAME', 'Super Admin'),
+                'name' => env('SEED_ADMIN_NAME', 'Super Admin'),
+                'username' => env('SEED_ADMIN_USERNAME', 'super.admin'),
+            ],
+        ];
+
+        foreach ($admins as $adminData) {
+            $adminUser = User::updateOrCreate(
+                ['email' => $adminData['email']],
+                [
+                    'first_name' => $adminData['first_name'],
+                    'last_name' => $adminData['last_name'],
+                    'full_name' => $adminData['full_name'],
+                    'name' => $adminData['name'],
+                    'username' => $adminData['username'],
+                    'password' => Hash::make($adminData['password']),
+                    'status' => 'active',
+                    'is_default' => true,
+                    'must_change_password' => false,
+                    'email_verified_at' => now(),
+                ]
+            );
+
+            $adminUser->syncRoles([$superAdminRole, $adminRole]);
+        }
     }
 }
