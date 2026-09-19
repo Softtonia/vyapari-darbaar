@@ -2,10 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Enums\EmailTemplateType;
 use App\Models\Admin;
+use App\Models\EmailTemplate;
 use App\Models\User;
+use App\Notifications\UserOtpNotification;
+use App\Services\OtpService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
@@ -30,6 +35,7 @@ class UserAuthTest extends TestCase
             'name' => 'Ajay Kumar',
             'username' => 'ajay.kumar',
             'email' => 'ajay.kumar@example.com',
+            'phone_number' => '+919876543210',
             'password' => Hash::make($this->plainPassword),
             'status' => 'active',
             'must_change_password' => true,
@@ -60,7 +66,7 @@ class UserAuthTest extends TestCase
 
     public function test_active_user_can_login_with_username_and_otp(): void
     {
-        $otpService = app(\App\Services\OtpService::class);
+        $otpService = app(OtpService::class);
         $otpData = $otpService->getOrCreateOtp($this->user->email, 'login');
 
         $response = $this->postJson('/api/user/login', [
@@ -80,8 +86,8 @@ class UserAuthTest extends TestCase
 
     public function test_user_can_login_with_email_otp_or_number_otp_fields(): void
     {
-        $otpService = app(\App\Services\OtpService::class);
-        
+        $otpService = app(OtpService::class);
+
         // 1. Using email_otp field
         $otp1 = $otpService->getOrCreateOtp($this->user->email, 'login');
         $res1 = $this->postJson('/api/user/login', [
@@ -102,7 +108,7 @@ class UserAuthTest extends TestCase
 
     public function test_user_can_login_directly_with_email_and_otp(): void
     {
-        $otpService = app(\App\Services\OtpService::class);
+        $otpService = app(OtpService::class);
         $otpData = $otpService->getOrCreateOtp($this->user->email, 'login');
 
         $response = $this->postJson('/api/auth/user/login', [
@@ -123,7 +129,7 @@ class UserAuthTest extends TestCase
     public function test_user_can_login_directly_with_phone_number_and_otp(): void
     {
         $this->user->update(['phone_number' => '+919988776655']);
-        $otpService = app(\App\Services\OtpService::class);
+        $otpService = app(OtpService::class);
         $otpData = $otpService->getOrCreateOtp('+919988776655', 'login');
 
         $response = $this->postJson('/api/auth/user/login', [
@@ -598,4 +604,149 @@ class UserAuthTest extends TestCase
         auth()->forgetGuards();
         $this->withToken($token)->getJson('/api/user/profile')->assertStatus(401);
     }
+
+    public function test_send_login_otp_and_login_with_otp_endpoints_flow(): void
+    {
+        Notification::fake();
+
+        // 1. Request Login OTP via send-login-otp
+        $sendResponse = $this->postJson('/api/user/send-login-otp', [
+            'email' => $this->user->email,
+        ]);
+
+        $sendResponse->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'OTP has been sent to the email address. Valid for 10 minutes.',
+            ]);
+
+        $capturedOtp = null;
+        Notification::assertSentOnDemand(
+            UserOtpNotification::class,
+            function (UserOtpNotification $notification) use (&$capturedOtp) {
+                $this->assertEquals('login', $notification->purpose);
+                $this->assertNotEmpty($notification->otp);
+                $capturedOtp = $notification->otp;
+
+                return true;
+            }
+        );
+
+        $this->assertNotNull($capturedOtp);
+
+        // 2. Log in using login-with-otp
+        $loginResponse = $this->postJson('/api/user/login-with-otp', [
+            'email' => $this->user->email,
+            'otp' => $capturedOtp,
+        ]);
+
+        $loginResponse->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Login successful.',
+            ]);
+
+        $this->assertNotEmpty($loginResponse->json('data.token'));
+    }
+
+    public function test_mobile_send_login_otp_and_login_with_otp(): void
+    {
+        Notification::fake();
+
+        // 1. Send Login OTP to 10-digit mobile number (without +91 country code)
+        $sendResponse = $this->postJson('/api/user/send-login-otp', [
+            'mobile' => '9876543210',
+        ]);
+
+        $sendResponse->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'OTP has been sent to the mobile number. Valid for 10 minutes.',
+            ]);
+
+        $otp = $sendResponse->json('data.otp');
+        $this->assertNotEmpty($otp);
+
+        // 2. Login using the 10-digit mobile and OTP
+        $loginResponse = $this->postJson('/api/user/login-with-otp', [
+            'mobile' => '9876543210',
+            'otp' => $otp,
+        ]);
+
+        $loginResponse->assertStatus(200)
+            ->assertJson([
+                'status' => true,
+                'message' => 'Login successful.',
+            ]);
+
+        $this->assertNotEmpty($loginResponse->json('data.token'));
+    }
+
+    public function test_root_alias_routes_for_otp_login_with_both_mobile_and_email(): void
+    {
+        Notification::fake();
+
+        // 1. Email OTP via root alias /api/send-otp
+        $sendEmailRes = $this->postJson('/api/send-otp', [
+            'email' => $this->user->email,
+        ]);
+        $sendEmailRes->assertStatus(200)->assertJson(['status' => true]);
+
+        $capturedEmailOtp = null;
+        Notification::assertSentOnDemand(
+            UserOtpNotification::class,
+            function (UserOtpNotification $notification) use (&$capturedEmailOtp) {
+                $capturedEmailOtp = $notification->otp;
+                return true;
+            }
+        );
+        $this->assertNotNull($capturedEmailOtp);
+
+        // Login via root alias /api/login-with-otp
+        $loginEmailRes = $this->postJson('/api/login-with-otp', [
+            'email' => $this->user->email,
+            'otp' => $capturedEmailOtp,
+        ]);
+        $loginEmailRes->assertStatus(200)->assertJson(['status' => true]);
+        $this->assertNotEmpty($loginEmailRes->json('data.token'));
+
+        // 2. Mobile OTP via root alias /api/send-login-otp
+        $sendMobileRes = $this->postJson('/api/send-login-otp', [
+            'phone' => '9876543210',
+        ]);
+        $sendMobileRes->assertStatus(200)->assertJson(['status' => true]);
+        $mobileOtp = $sendMobileRes->json('data.otp');
+        $this->assertNotEmpty($mobileOtp);
+
+        // Login via root alias /api/login-with-otp using phone
+        $loginMobileRes = $this->postJson('/api/login-with-otp', [
+            'phone' => '9876543210',
+            'otp' => $mobileOtp,
+        ]);
+        $loginMobileRes->assertStatus(200)->assertJson(['status' => true]);
+        $this->assertNotEmpty($loginMobileRes->json('data.token'));
+    }
+
+    public function test_user_otp_notification_renders_user_login_otp_email_template(): void
+    {
+        EmailTemplate::create([
+            'name' => 'Custom Login OTP Template',
+            'key' => 'USER_LOGIN_OTP',
+            'subject' => 'Your Security Code - {{CompanyName}}',
+            'body' => '<h1>Hello {{UserName}}</h1><p>Your OTP is {{Otp}}. Expires in {{ExpiryMinutes}} mins.</p>',
+            'type' => EmailTemplateType::HTML,
+            'is_active' => true,
+        ]);
+
+        $notification = new UserOtpNotification('654321', 'login', 'Ajay Kumar');
+        $mail = $notification->toMail($this->user);
+
+        $this->assertStringContainsString('Your Security Code', $mail->subject);
+        $this->assertNotNull($mail->view);
+        $this->assertStringContainsString('654321', (string) $mail->view['html']);
+        $this->assertStringContainsString('Ajay Kumar', (string) $mail->view['html']);
+        $this->assertStringContainsString('10 mins', (string) $mail->view['html']);
+    }
 }
+
+

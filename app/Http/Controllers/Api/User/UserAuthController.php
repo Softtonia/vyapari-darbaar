@@ -37,14 +37,19 @@ class UserAuthController extends Controller
         $purpose = (string) $request->input('purpose', 'registration');
         $inputEmail = $request->input('email');
         $inputUsername = $request->input('username');
-        $inputPhone = $request->input('phone_number');
+        $inputPhone = $request->input('phone_number') ?? $request->input('mobile') ?? $request->input('phone') ?? $request->input('number');
+        $rawIdentifier = $request->input('identifier') ?? $inputUsername ?? $inputEmail ?? $inputPhone;
 
         $targetUser = null;
-        if (! empty($inputUsername) || ! empty($inputPhone) || in_array($purpose, ['login', 'password_reset'], true)) {
-            $identifier = trim((string) ($inputUsername ?? $inputEmail ?? $inputPhone));
+        $identifier = null;
+
+        if (! empty($rawIdentifier) || in_array($purpose, ['login', 'password_reset'], true)) {
+            $identifier = trim((string) $rawIdentifier);
+            $phoneVariations = LoginUserAction::getPhoneVariations($identifier);
+
             $targetUser = User::where('username', $identifier)
                 ->orWhere('email', strtolower($identifier))
-                ->orWhere('phone_number', $identifier)
+                ->orWhereIn('phone_number', $phoneVariations)
                 ->first();
 
             if (! $targetUser && in_array($purpose, ['login', 'password_reset'], true)) {
@@ -55,10 +60,20 @@ class UserAuthController extends Controller
             }
         }
 
-        $email = $targetUser ? $targetUser->email : strtolower(trim((string) $inputEmail));
+        $email = $targetUser ? $targetUser->email : ($inputEmail ? strtolower(trim((string) $inputEmail)) : null);
+        $phone = $targetUser ? $targetUser->phone_number : $inputPhone;
+        $isMobileRequest = ! empty($inputPhone) && (empty($inputEmail) || $rawIdentifier === $inputPhone);
+        $primaryTarget = $email ?? $phone ?? $identifier;
 
-        // Check 60-second cooldown
-        $cooldown = $otpService->checkResendCooldown($email, $purpose);
+        if (empty($primaryTarget)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No email address or mobile number found to deliver OTP.',
+            ], 422);
+        }
+
+        // Check 60-second cooldown on primary target
+        $cooldown = $otpService->checkResendCooldown($primaryTarget, $purpose);
         if (! $cooldown['can_resend']) {
             return response()->json([
                 'status' => false,
@@ -70,31 +85,81 @@ class UserAuthController extends Controller
         }
 
         // Generate / retrieve active OTP
-        $otpData = $otpService->getOrCreateOtp($email, $purpose);
-        $otpService->setResendCooldown($email, $purpose);
+        $otpData = $otpService->getOrCreateOtp($primaryTarget, $purpose);
+        $otpService->setResendCooldown($primaryTarget, $purpose);
 
-        // If target user exists, also associate active OTP with username & phone for quick login matching
+        // Store the identical OTP across all associated identifiers (email, username, phone variations)
         if ($targetUser) {
-            if ($targetUser->username && $targetUser->username !== $email) {
-                $otpService->getOrCreateOtp($targetUser->username, $purpose);
+            if ($targetUser->email && $targetUser->email !== $primaryTarget) {
+                $otpService->storeOtpDirectly($targetUser->email, $otpData['otp'], $purpose, 10);
             }
-            if ($targetUser->phone_number && $targetUser->phone_number !== $email) {
-                $otpService->getOrCreateOtp($targetUser->phone_number, $purpose);
+            if ($targetUser->username && $targetUser->username !== $primaryTarget) {
+                $otpService->storeOtpDirectly($targetUser->username, $otpData['otp'], $purpose, 10);
+            }
+            if ($targetUser->phone_number) {
+                foreach (LoginUserAction::getPhoneVariations($targetUser->phone_number) as $phoneVar) {
+                    $otpService->storeOtpDirectly($phoneVar, $otpData['otp'], $purpose, 10);
+                }
             }
         }
 
-        // Dispatch queued email notification
-        Notification::route('mail', $email)
-            ->notify(new UserOtpNotification($otpData['otp'], $purpose));
+        if ($identifier && $identifier !== $primaryTarget) {
+            $otpService->storeOtpDirectly($identifier, $otpData['otp'], $purpose, 10);
+        }
+
+        if ($inputPhone) {
+            foreach (LoginUserAction::getPhoneVariations($inputPhone) as $phoneVar) {
+                $otpService->storeOtpDirectly($phoneVar, $otpData['otp'], $purpose, 10);
+            }
+        }
+
+        // Dispatch queued email notification if email is present
+        if (! empty($email)) {
+            $recipientName = $targetUser ? ($targetUser->full_name ?? $targetUser->name) : 'User';
+            try {
+                Notification::route('mail', $email)
+                    ->notify(new UserOtpNotification($otpData['otp'], $purpose, $recipientName));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Could not dispatch OTP email: ' . $e->getMessage());
+            }
+        }
+
+        $responseData = [
+            'identifier' => $identifier ?? $email ?? $phone,
+            'expires_in_seconds' => $otpData['remaining_seconds'],
+            'cooldown_seconds' => OtpService::DEFAULT_RESEND_COOLDOWN_SECONDS,
+        ];
+
+        // Return OTP in response for mobile or non-production environment
+        if ($isMobileRequest || config('app.env') !== 'production') {
+            $responseData['otp'] = $otpData['otp'];
+        }
+
+        $channelMsg = $isMobileRequest ? 'mobile number' : 'email address';
 
         return response()->json([
             'status' => true,
-            'message' => 'OTP has been sent to the email address. Valid for 10 minutes.',
-            'data' => [
-                'expires_in_seconds' => $otpData['remaining_seconds'],
-                'cooldown_seconds' => OtpService::DEFAULT_RESEND_COOLDOWN_SECONDS,
-            ],
+            'message' => "OTP has been sent to the {$channelMsg}. Valid for 10 minutes.",
+            'data' => $responseData,
         ], 200);
+    }
+
+    /**
+     * Send an OTP specifically for user login.
+     */
+    public function sendLoginOtp(SendOtpRequest $request, OtpService $otpService): JsonResponse
+    {
+        $request->merge(['purpose' => 'login']);
+
+        return $this->sendOtp($request, $otpService);
+    }
+
+    /**
+     * Authenticate a user via OTP (alias for login with OTP).
+     */
+    public function loginWithOtp(LoginUserRequest $request, LoginUserAction $action): JsonResponse
+    {
+        return $this->login($request, $action);
     }
 
     /**

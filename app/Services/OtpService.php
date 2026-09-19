@@ -70,6 +70,28 @@ class OtpService
     }
 
     /**
+     * Store a specific OTP directly against an identifier.
+     */
+    public function storeOtpDirectly(
+        string $identifier,
+        string $otp,
+        string $purpose = 'default',
+        int $expiryMinutes = self::DEFAULT_EXPIRY_MINUTES
+    ): void {
+        $cacheKey = $this->buildCacheKey($identifier, $purpose);
+        $now = Carbon::now();
+        $expiresAt = $now->copy()->addMinutes($expiryMinutes);
+
+        $dataToStore = [
+            'otp' => $otp,
+            'created_at' => $now->toIso8601String(),
+            'expires_at' => $expiresAt->toIso8601String(),
+        ];
+
+        Cache::put($cacheKey, $dataToStore, $expiresAt);
+    }
+
+    /**
      * Check if a resend cooldown is currently active.
      *
      * @param  string  $identifier

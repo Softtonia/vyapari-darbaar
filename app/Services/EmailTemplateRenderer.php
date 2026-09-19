@@ -45,6 +45,27 @@ class EmailTemplateRenderer
             'description' => 'The official support contact email address.',
             'example' => 'support@vyaparidarbar.com',
         ],
+        'Otp' => [
+            'variable' => 'Otp',
+            'tag' => '{{Otp}}',
+            'label' => 'One-Time Password (OTP)',
+            'description' => 'The 6-digit security verification code.',
+            'example' => '123456',
+        ],
+        'ExpiryMinutes' => [
+            'variable' => 'ExpiryMinutes',
+            'tag' => '{{ExpiryMinutes}}',
+            'label' => 'Expiry Time (Minutes)',
+            'description' => 'Validity period of the OTP in minutes.',
+            'example' => '10',
+        ],
+        'Purpose' => [
+            'variable' => 'Purpose',
+            'tag' => '{{Purpose}}',
+            'label' => 'Verification Purpose',
+            'description' => 'The purpose of the OTP (e.g., Account Login, Registration).',
+            'example' => 'Account Login',
+        ],
     ];
 
     /**
@@ -57,6 +78,21 @@ class EmailTemplateRenderer
             'UserName',
             'Username',
             'TemporaryPassword',
+            'CompanyName',
+            'SupportEmail',
+        ],
+        'USER_LOGIN_OTP' => [
+            'UserName',
+            'Otp',
+            'ExpiryMinutes',
+            'CompanyName',
+            'SupportEmail',
+        ],
+        'USER_OTP' => [
+            'UserName',
+            'Otp',
+            'Purpose',
+            'ExpiryMinutes',
             'CompanyName',
             'SupportEmail',
         ],
@@ -75,10 +111,7 @@ class EmailTemplateRenderer
     /**
      * Render the given text by safely replacing allowed placeholders.
      *
-     * @param  string  $text
      * @param  array<string, string>  $replacements
-     * @param  string|null  $templateKey
-     * @return string
      */
     public function render(string $text, array $replacements, ?string $templateKey = null): string
     {
@@ -100,9 +133,6 @@ class EmailTemplateRenderer
     /**
      * Get preview render using safe demo values.
      *
-     * @param  string  $templateKey
-     * @param  string  $subject
-     * @param  string  $body
      * @return array{subject: string, body: string}
      */
     public function preview(string $templateKey, string $subject, string $body): array
@@ -118,7 +148,6 @@ class EmailTemplateRenderer
     /**
      * Get allowed placeholders for a specific template key (or all known placeholders if null).
      *
-     * @param  string|null  $templateKey
      * @return list<string>
      */
     public function getAllowedPlaceholders(?string $templateKey = null): array
@@ -138,7 +167,6 @@ class EmailTemplateRenderer
     /**
      * Get allowed placeholders with full descriptions, tags, and usage examples.
      *
-     * @param  string|null  $templateKey
      * @return list<array{variable: string, tag: string, label: string, description: string, example: string}>
      */
     public function getPlaceholdersWithMetadata(?string $templateKey = null): array
@@ -179,7 +207,6 @@ class EmailTemplateRenderer
     /**
      * Get safe demo replacement values for previewing.
      *
-     * @param  string  $templateKey
      * @return array<string, string>
      */
     protected function getPreviewDemoData(string $templateKey): array
@@ -190,6 +217,19 @@ class EmailTemplateRenderer
             $data['UserName'] = 'Demo User';
             $data['Username'] = 'demo.user';
             $data['TemporaryPassword'] = 'TempExample123!';
+        }
+
+        if ($templateKey === 'USER_LOGIN_OTP') {
+            $data['UserName'] = 'Demo User';
+            $data['Otp'] = '123456';
+            $data['ExpiryMinutes'] = '10';
+        }
+
+        if ($templateKey === 'USER_OTP') {
+            $data['UserName'] = 'Demo User';
+            $data['Otp'] = '123456';
+            $data['Purpose'] = 'Account Login';
+            $data['ExpiryMinutes'] = '10';
         }
 
         return $data;

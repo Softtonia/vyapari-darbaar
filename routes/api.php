@@ -43,12 +43,24 @@ use App\Http\Controllers\Api\User\UserCompanyController;
 use App\Http\Controllers\Api\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
 
+// Universal Direct Aliases for Mobile/Email OTP Login
+Route::post('send-otp', [UserAuthController::class, 'sendOtp'])->middleware('throttle:user-send-otp');
+Route::post('send-login-otp', [UserAuthController::class, 'sendLoginOtp'])->middleware('throttle:user-send-otp');
+Route::post('verify-otp', [UserAuthController::class, 'verifyOtp'])->middleware('throttle:user-verify-otp');
+Route::post('login-with-otp', [UserAuthController::class, 'loginWithOtp'])->middleware('throttle:user-login');
+
 /*
 |--------------------------------------------------------------------------
 | Unified Auth API Routes (/api/auth/admin/* and /api/auth/user/*)
 |--------------------------------------------------------------------------
 */
 Route::prefix('auth')->group(function () {
+    // Direct Auth Aliases (/api/auth/send-otp, /api/auth/login-with-otp, etc.)
+    Route::post('send-otp', [UserAuthController::class, 'sendOtp'])->middleware('throttle:user-send-otp');
+    Route::post('send-login-otp', [UserAuthController::class, 'sendLoginOtp'])->middleware('throttle:user-send-otp');
+    Route::post('verify-otp', [UserAuthController::class, 'verifyOtp'])->middleware('throttle:user-verify-otp');
+    Route::post('login-with-otp', [UserAuthController::class, 'loginWithOtp'])->middleware('throttle:user-login');
+
     // Admin Auth
     Route::prefix('admin')->group(function () {
         Route::post('login', [AdminAuthController::class, 'login'])
@@ -80,6 +92,9 @@ Route::prefix('auth')->group(function () {
         Route::post('send-otp', [UserAuthController::class, 'sendOtp'])
             ->middleware('throttle:user-send-otp')
             ->name('auth.user.send-otp');
+        Route::post('send-login-otp', [UserAuthController::class, 'sendLoginOtp'])
+            ->middleware('throttle:user-send-otp')
+            ->name('auth.user.send-login-otp');
         Route::post('otp/send', [UserAuthController::class, 'sendOtp'])
             ->middleware('throttle:user-send-otp');
 
@@ -100,6 +115,10 @@ Route::prefix('auth')->group(function () {
         Route::post('login', [UserAuthController::class, 'login'])
             ->middleware('throttle:user-login')
             ->name('auth.user.login');
+
+        Route::post('login-with-otp', [UserAuthController::class, 'loginWithOtp'])
+            ->middleware('throttle:user-login')
+            ->name('auth.user.login-with-otp');
 
         Route::post('forgot-password', [UserAuthController::class, 'forgotPassword'])
             ->middleware('throttle:user-password-reset')
@@ -731,6 +750,9 @@ Route::prefix('user')->group(function () {
     Route::post('send-otp', [UserAuthController::class, 'sendOtp'])
         ->middleware('throttle:user-send-otp')
         ->name('user.send-otp');
+    Route::post('send-login-otp', [UserAuthController::class, 'sendLoginOtp'])
+        ->middleware('throttle:user-send-otp')
+        ->name('user.send-login-otp');
     Route::post('otp/send', [UserAuthController::class, 'sendOtp'])
         ->middleware('throttle:user-send-otp')
         ->name('user.otp.send');
@@ -756,6 +778,10 @@ Route::prefix('user')->group(function () {
     Route::post('login', [UserAuthController::class, 'login'])
         ->middleware('throttle:user-login')
         ->name('user.login');
+
+    Route::post('login-with-otp', [UserAuthController::class, 'loginWithOtp'])
+        ->middleware('throttle:user-login')
+        ->name('user.login-with-otp');
 
     Route::post('forgot-password', [UserAuthController::class, 'forgotPassword'])
         ->middleware('throttle:user-password-reset')

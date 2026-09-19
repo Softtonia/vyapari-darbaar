@@ -25,6 +25,7 @@ class LoginUserAction
     public function execute(array $credentials, string $deviceName = 'user-device'): array
     {
         $identifier = trim((string) $credentials['username']);
+        $phoneVariations = self::getPhoneVariations($identifier);
 
         $user = User::query()
             ->select([
@@ -42,7 +43,7 @@ class LoginUserAction
             ])
             ->where('username', $identifier)
             ->orWhere('email', strtolower($identifier))
-            ->orWhere('phone_number', $identifier)
+            ->orWhereIn('phone_number', $phoneVariations)
             ->first();
 
         if (! $user) {
@@ -50,7 +51,7 @@ class LoginUserAction
             if (str_contains($identifier, '@')) {
                 $notFoundMsg = 'No account found with this email address.';
             } elseif (preg_match('/^\+?[0-9]{7,15}$/', $identifier)) {
-                $notFoundMsg = 'No account found with this phone number.';
+                $notFoundMsg = 'No account found with this mobile number.';
             }
 
             return [
@@ -68,12 +69,18 @@ class LoginUserAction
             $otpString = trim((string) $otp);
             $isValid = false;
 
-            $candidateIdentifiers = array_unique(array_filter([
+            $candidateIdentifiers = [
                 $user->email,
                 $user->phone_number,
                 $user->username,
                 $identifier,
-            ]));
+            ];
+
+            if ($user->phone_number) {
+                $candidateIdentifiers = array_merge($candidateIdentifiers, self::getPhoneVariations($user->phone_number));
+            }
+            $candidateIdentifiers = array_merge($candidateIdentifiers, $phoneVariations);
+            $candidateIdentifiers = array_values(array_unique(array_filter($candidateIdentifiers)));
 
             $purposes = ['login', 'default', 'verification'];
 
@@ -192,5 +199,42 @@ class LoginUserAction
             'token' => $tokenResult->plainTextToken,
             'user' => $user,
         ];
+    }
+
+    /**
+     * Generate common phone number variations for robust matching (e.g. +91, 91, 0, or 10-digit).
+     *
+     * @return list<string>
+     */
+    public static function getPhoneVariations(string $phone): array
+    {
+        $trimmed = trim($phone);
+        if ($trimmed === '') {
+            return [];
+        }
+
+        $variations = [$trimmed];
+        $digitsOnly = preg_replace('/\D/', '', $trimmed);
+
+        if (strlen($digitsOnly) === 10) {
+            $variations[] = '+91' . $digitsOnly;
+            $variations[] = '91' . $digitsOnly;
+            $variations[] = '0' . $digitsOnly;
+            $variations[] = $digitsOnly;
+        } elseif (strlen($digitsOnly) === 12 && str_starts_with($digitsOnly, '91')) {
+            $tenDigit = substr($digitsOnly, 2);
+            $variations[] = '+91' . $tenDigit;
+            $variations[] = '91' . $tenDigit;
+            $variations[] = '0' . $tenDigit;
+            $variations[] = $tenDigit;
+        } elseif (strlen($digitsOnly) === 11 && str_starts_with($digitsOnly, '0')) {
+            $tenDigit = substr($digitsOnly, 1);
+            $variations[] = '+91' . $tenDigit;
+            $variations[] = '91' . $tenDigit;
+            $variations[] = '0' . $tenDigit;
+            $variations[] = $tenDigit;
+        }
+
+        return array_values(array_unique(array_filter($variations)));
     }
 }
