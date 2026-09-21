@@ -25,6 +25,8 @@ class DatabaseSeeder extends Seeder
             MandiSeeder::class,
             SiteSettingSeeder::class,
             ExchangeSeeder::class,
+            NewsSourceSeeder::class,
+            NewsCategorySeeder::class,
         ]);
     }
 }

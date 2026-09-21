@@ -11,3 +11,8 @@ Artisan::command('inspire', function () {
 Schedule::command('notification:process-scheduled')
     ->everyMinute()
     ->withoutOverlapping();
+
+Schedule::command('news:publish-scheduled')
+    ->everyMinute()
+    ->withoutOverlapping();
+

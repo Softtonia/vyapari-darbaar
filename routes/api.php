@@ -26,11 +26,16 @@ use App\Http\Controllers\Api\Admin\NotificationLogController;
 use App\Http\Controllers\Api\Admin\NotificationSendController;
 use App\Http\Controllers\Api\Admin\NotificationTemplateController;
 use App\Http\Controllers\Api\Admin\NotificationTopicController;
+use App\Http\Controllers\Api\Admin\NewsArticleController as AdminNewsArticleController;
+use App\Http\Controllers\Api\Admin\NewsCategoryController as AdminNewsCategoryController;
+use App\Http\Controllers\Api\Admin\NewsMediaController as AdminNewsMediaController;
+use App\Http\Controllers\Api\Admin\NewsSourceController as AdminNewsSourceController;
 use App\Http\Controllers\Api\Admin\RoleController;
 use App\Http\Controllers\Api\Admin\SiteSettingController as AdminSiteSettingController;
 use App\Http\Controllers\Api\Admin\SmtpSettingController;
 use App\Http\Controllers\Api\Admin\StateController;
 use App\Http\Controllers\Api\LocationController;
+use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\PublicExchangeController;
 use App\Http\Controllers\Api\PublicFirebaseConfigController;
 use App\Http\Controllers\Api\Public\MarketHistoryController;
@@ -686,6 +691,72 @@ Route::prefix('admin')->group(function () {
             Route::get('{run}', [MarketIngestionRunController::class, 'show'])
                 ->name('admin.market-ingestion-runs.show');
         });
+
+        // News Sources management
+        Route::prefix('news-sources')->group(function () {
+            Route::get('options', [AdminNewsSourceController::class, 'options'])
+                ->name('admin.news-sources.options');
+            Route::get('/', [AdminNewsSourceController::class, 'index'])
+                ->name('admin.news-sources.index');
+            Route::post('/', [AdminNewsSourceController::class, 'store'])
+                ->name('admin.news-sources.store');
+            Route::get('{newsSource}', [AdminNewsSourceController::class, 'show'])
+                ->name('admin.news-sources.show');
+            Route::patch('{newsSource}', [AdminNewsSourceController::class, 'update'])
+                ->name('admin.news-sources.update');
+            Route::put('{newsSource}', [AdminNewsSourceController::class, 'update']);
+            Route::delete('{newsSource}', [AdminNewsSourceController::class, 'destroy'])
+                ->name('admin.news-sources.destroy');
+            Route::patch('{newsSource}/status', [AdminNewsSourceController::class, 'updateStatus'])
+                ->name('admin.news-sources.update-status');
+        });
+
+        // News Categories management
+        Route::prefix('news-categories')->group(function () {
+            Route::get('options', [AdminNewsCategoryController::class, 'options'])
+                ->name('admin.news-categories.options');
+            Route::get('/', [AdminNewsCategoryController::class, 'index'])
+                ->name('admin.news-categories.index');
+            Route::post('/', [AdminNewsCategoryController::class, 'store'])
+                ->name('admin.news-categories.store');
+            Route::get('{newsCategory}', [AdminNewsCategoryController::class, 'show'])
+                ->name('admin.news-categories.show');
+            Route::patch('{newsCategory}', [AdminNewsCategoryController::class, 'update'])
+                ->name('admin.news-categories.update');
+            Route::put('{newsCategory}', [AdminNewsCategoryController::class, 'update']);
+            Route::delete('{newsCategory}', [AdminNewsCategoryController::class, 'destroy'])
+                ->name('admin.news-categories.destroy');
+            Route::patch('{newsCategory}/status', [AdminNewsCategoryController::class, 'updateStatus'])
+                ->name('admin.news-categories.update-status');
+        });
+
+        // News Articles & Media management
+        Route::prefix('news')->group(function () {
+            Route::get('/', [AdminNewsArticleController::class, 'index'])
+                ->name('admin.news.index');
+            Route::post('/', [AdminNewsArticleController::class, 'store'])
+                ->name('admin.news.store');
+            Route::get('{newsArticle}', [AdminNewsArticleController::class, 'show'])
+                ->name('admin.news.show');
+            Route::patch('{newsArticle}', [AdminNewsArticleController::class, 'update'])
+                ->name('admin.news.update');
+            Route::put('{newsArticle}', [AdminNewsArticleController::class, 'update']);
+            Route::delete('{newsArticle}', [AdminNewsArticleController::class, 'destroy'])
+                ->name('admin.news.destroy');
+
+            Route::patch('{newsArticle}/status', [AdminNewsArticleController::class, 'updateStatus'])
+                ->name('admin.news.update-status');
+            Route::patch('{newsArticle}/featured', [AdminNewsArticleController::class, 'updateFeatured'])
+                ->name('admin.news.update-featured');
+            Route::patch('{newsArticle}/breaking', [AdminNewsArticleController::class, 'updateBreaking'])
+                ->name('admin.news.update-breaking');
+
+            // Article Media
+            Route::post('{article}/media', [AdminNewsMediaController::class, 'store'])
+                ->name('admin.news.media.store');
+            Route::delete('{article}/media/{media}', [AdminNewsMediaController::class, 'destroy'])
+                ->name('admin.news.media.destroy');
+        });
     });
 });
 
@@ -694,6 +765,20 @@ Route::prefix('admin')->group(function () {
 | Public Routes
 |--------------------------------------------------------------------------
 */
+// News Public APIs
+Route::prefix('news')->middleware('throttle:public-api')->group(function () {
+    Route::get('/', [NewsController::class, 'index'])->name('public.news.index');
+    Route::get('{slug}', [NewsController::class, 'show'])->name('public.news.show');
+});
+
+Route::get('news-categories', [NewsController::class, 'categories'])
+    ->middleware('throttle:public-api')
+    ->name('public.news-categories.index');
+
+Route::get('news-sources', [NewsController::class, 'sources'])
+    ->middleware('throttle:public-api')
+    ->name('public.news-sources.index');
+
 Route::get('site-settings', [SiteSettingController::class, 'show'])
     ->middleware('throttle:public-api')
     ->name('site-settings.show');

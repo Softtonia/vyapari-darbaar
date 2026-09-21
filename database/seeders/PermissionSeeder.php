@@ -135,6 +135,19 @@ class PermissionSeeder extends Seeder
             'exchange-instruments.update',
             'exchange-instruments.delete',
             'market-ingestion-runs.view',
+            'news.view',
+            'news.create',
+            'news.update',
+            'news.delete',
+            'news.publish',
+            'news-categories.view',
+            'news-categories.create',
+            'news-categories.update',
+            'news-categories.delete',
+            'news-sources.view',
+            'news-sources.create',
+            'news-sources.update',
+            'news-sources.delete',
         ];
 
         foreach ($adminPermissions as $permissionName) {

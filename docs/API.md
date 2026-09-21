@@ -4390,16 +4390,289 @@ Decoupled 3-tier architecture separating internal physical commodities from exch
 | **Open Interest** | `market_bhavcopies` | `open_interest` | `Open_Interest` | `Open_Interest` | *NOT CONFIRMED (Spec Required)* |
 | **Change in Open Interest** | `market_bhavcopies` | `change_in_open_interest` | `Change_in_OI` | `OI_Change` | *NOT CONFIRMED (Spec Required)* |
 
+---
 
+## 26. News & Editorial CMS Module
 
+### Overview & Architecture
+The News CMS module is an editorial management system supporting manual authoring and publication of agricultural commodity news, press releases, market updates, expert insights, announcements, and media coverage.
 
+**Core Rules & Architectural Guarantees:**
+- **Strictly Editorial:** No automated web scrapers, live exchange tickers, auto-translators, or AI content generation.
+- **URL Versioning:** Strictly `/api/...` for public endpoints and `/api/admin/...` for administrative endpoints. Never `/api/v1`.
+- **Query Performance:** Listing APIs use `select([...])` explicitly omitting the `LONGTEXT content` column. Paginator default is 15 items (capped at 100).
+- **Relational Integrity:** Foreign keys on `news_sources` and `news_categories` use `restrictOnDelete()`. Deleting an active/in-use category or source returns `409 Conflict`.
+- **Safety & Sanitization:** All rich HTML content is sanitized using PHP's native `DOMDocument` parser (`HtmlSanitizerService`), completely stripping `<script>`, `<iframe>`, `onclick/onerror` inline handlers, and `javascript:` URIs.
+- **Scheduled Publishing:** Command `news:publish-scheduled` executes every minute via the Laravel scheduler (`routes/console.php`) using Redis cache mutex `withoutOverlapping()`.
+- **Redis Caching:** Public category/source options (3600s TTL) and article details (1800s TTL) are cached in Redis and invalidated on any create, update, or delete action.
 
+---
 
+### 26.1 Public News Endpoints
 
+#### 26.1.1 List Public News Articles
+- **Method:** `GET`
+- **URI:** `/api/news`
+- **Query Parameters:**
+  - `search`: string (searches `title`, `short_description`, `slug`, `author_name`)
+  - `category_id`: integer (filter by category)
+  - `source_id`: integer (filter by source)
+  - `content_type`: enum (`news`, `press_release`, `announcement`, `market_update`, `expert_insight`, `publication`, `media_coverage`, `event`, `interview`, `video`, `other`)
+  - `featured`: boolean (`1`/`0`, `true`/`false`)
+  - `breaking`: boolean (`1`/`0`, `true`/`false`)
+  - `from_date`: date (`YYYY-MM-DD`, filters `published_at`)
+  - `to_date`: date (`YYYY-MM-DD`, filters `published_at`)
+  - `sort_by`: `published_at` (default), `view_count`, `id`
+  - `sort_order`: `desc` (default), `asc`
+  - `per_page`: integer, 1-100 (default: 15)
+  - `page`: integer (default: 1)
+- **Visibility:** Only returns articles where `status = published`, `published_at <= NOW()`, and both parent source and category are active (`status = true`). Draft, scheduled, and archived items are strictly omitted.
+- **Success (200 OK):**
+```json
+{
+    "status": true,
+    "message": "News articles fetched successfully.",
+    "data": {
+        "items": [
+            {
+                "id": 1,
+                "content_type": "news",
+                "title": "Chana Futures Rally 2 Percent on Festive Demand",
+                "slug": "chana-futures-rally-2-percent",
+                "short_description": "Chana prices rose substantially across mandis today.",
+                "featured_image_url": "http://localhost:8000/storage/news/featured/abc.jpg",
+                "author_name": "Editorial Desk",
+                "source_url": "https://ncdex.com/market-updates/chana-festive",
+                "published_on": "2026-09-21",
+                "published_at": "2026-09-21T10:00:00.000000Z",
+                "is_featured": true,
+                "is_breaking": false,
+                "view_count": 142,
+                "source": {
+                    "id": 1,
+                    "name": "NCDEX",
+                    "slug": "ncdex",
+                    "logo_url": "http://localhost:8000/storage/news-sources/logos/ncdex.png"
+                },
+                "category": {
+                    "id": 1,
+                    "name": "Market Updates",
+                    "slug": "market-updates"
+                }
+            }
+        ],
+        "pagination": {
+            "current_page": 1,
+            "per_page": 15,
+            "total": 1,
+            "last_page": 1
+        }
+    }
+}
+```
 
+#### 26.1.2 Get Public News Article Detail
+- **Method:** `GET`
+- **URI:** `/api/news/{slug}`
+- **Behavior:** Cached in Redis (1800s TTL). Safely and atomically increments `view_count` on every hit. Returns full sanitized HTML content, media attachments, source, and category.
+- **Success (200 OK):**
+```json
+{
+    "status": true,
+    "message": "News article retrieved successfully.",
+    "data": {
+        "id": 1,
+        "content_type": "news",
+        "title": "Chana Futures Rally 2 Percent on Festive Demand",
+        "slug": "chana-futures-rally-2-percent",
+        "short_description": "Chana prices rose substantially across mandis today.",
+        "content": "<p>Chana futures witnessed robust buying across major trading centers today ahead of festive demand.</p>",
+        "featured_image_url": "http://localhost:8000/storage/news/featured/abc.jpg",
+        "author_name": "Editorial Desk",
+        "source_url": "https://ncdex.com/market-updates/chana-festive",
+        "published_on": "2026-09-21",
+        "published_at": "2026-09-21T10:00:00.000000Z",
+        "is_featured": true,
+        "is_breaking": false,
+        "meta_title": "Chana Futures Surge 2% - Vyapari Darbaar",
+        "meta_description": "In-depth analysis of Chana futures trading on NCDEX.",
+        "meta_keywords": ["chana", "ncdex", "agri commodities"],
+        "view_count": 143,
+        "source": {
+            "id": 1,
+            "name": "NCDEX",
+            "slug": "ncdex",
+            "website_url": "https://ncdex.com",
+            "logo_url": "http://localhost:8000/storage/news-sources/logos/ncdex.png",
+            "description": "National Commodity & Derivatives Exchange"
+        },
+        "category": {
+            "id": 1,
+            "name": "Market Updates",
+            "slug": "market-updates",
+            "description": "Daily commodity market developments"
+        },
+        "media": [
+            {
+                "id": 1,
+                "media_type": "external_link",
+                "title": "Official NCDEX Circular",
+                "url": "https://ncdex.com/circulars/2026-09.pdf",
+                "caption": "Download Circular PDF",
+                "sort_order": 1
+            }
+        ]
+    }
+}
+```
 
+#### 26.1.3 Get Public News Categories
+- **Method:** `GET`
+- **URI:** `/api/news-categories`
+- **Response (200 OK):** Array of active news categories cached in Redis (3600s TTL).
 
+#### 26.1.4 Get Public News Sources
+- **Method:** `GET`
+- **URI:** `/api/news-sources`
+- **Response (200 OK):** Array of active editorial news sources cached in Redis (3600s TTL).
 
+---
 
+### 26.2 Admin News Articles Management
 
+#### 26.2.1 List Admin News Articles
+- **Method:** `GET`
+- **URI:** `/api/admin/news`
+- **Permission:** `news.view`
+- **Query Parameters:** `search`, `status` (`draft`, `published`, `scheduled`, `archived`), `news_source_id`, `news_category_id`, `content_type`, `is_featured`, `is_breaking`, `per_page`, `page`.
+- **Response (200 OK):** Paginated listing using `NewsArticleListResource` (excludes `content`).
 
+#### 26.2.2 Create News Article
+- **Method:** `POST`
+- **URI:** `/api/admin/news`
+- **Permission:** `news.create` (and `news.publish` if status is `published` or `scheduled`)
+- **Request Body (multipart/form-data or application/json):**
+```json
+{
+    "news_source_id": 1,
+    "news_category_id": 1,
+    "content_type": "news",
+    "title": "Chana Futures Rally 2 Percent",
+    "slug": "chana-futures-rally-2-percent",
+    "short_description": "Summary excerpt",
+    "content": "<p>Rich sanitized HTML</p>",
+    "author_name": "Editorial Desk",
+    "source_url": "https://ncdex.com/updates/123",
+    "status": "draft",
+    "is_featured": false,
+    "is_breaking": false,
+    "meta_title": "SEO Title",
+    "meta_description": "SEO Description",
+    "meta_keywords": ["chana", "ncdex"]
+}
+```
+- **Validation Rules:**
+  - If `status = published`: parent `news_source_id` and `news_category_id` must be active (`status = true`). Must provide either non-empty `content`, `source_url`, or `featured_image`.
+  - If `status = scheduled`: `scheduled_at` is required and must be a future timestamp.
+
+#### 26.2.3 Get Admin News Article Detail
+- **Method:** `GET`
+- **URI:** `/api/admin/news/{id}`
+- **Permission:** `news.view`
+- **Response (200 OK):** Full article detail including creator/updater audit info, sanitized `content`, and media list.
+
+#### 26.2.4 Update News Article
+- **Method:** `PATCH`
+- **URI:** `/api/admin/news/{id}`
+- **Permission:** `news.update` (and `news.publish` if changing status to `published` or `scheduled`)
+- **Response (200 OK):** Updated article resource. Automatically invalidates Redis caches.
+
+#### 26.2.5 Update Article Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/news/{id}/status`
+- **Permission:** `news.update` (and `news.publish` if publishing)
+- **Request Body:** `{"status": "archived"}`
+- **Behavior:** Changing status to `archived` automatically resets `is_featured = false` and `is_breaking = false`.
+
+#### 26.2.6 Toggle Featured Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/news/{id}/featured`
+- **Permission:** `news.update`
+- **Request Body:** `{"is_featured": true}`
+
+#### 26.2.7 Toggle Breaking Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/news/{id}/breaking`
+- **Permission:** `news.update`
+- **Request Body:** `{"is_breaking": true}`
+
+#### 26.2.8 Soft Delete News Article
+- **Method:** `DELETE`
+- **URI:** `/api/admin/news/{id}`
+- **Permission:** `news.delete`
+- **Response (200 OK):** Soft deletes article and purges cache keys.
+
+---
+
+### 26.3 Admin News Sources Management
+
+- **Permissions:** `news-sources.view`, `news-sources.create`, `news-sources.update`, `news-sources.delete`.
+- **Endpoints:**
+  - `GET /api/admin/news-sources`: Paginated listing with search and status filters.
+  - `GET /api/admin/news-sources/options`: Cached active source dropdown list.
+  - `POST /api/admin/news-sources`: Create source (supports logo image upload).
+  - `GET /api/admin/news-sources/{id}`: Single source detail.
+  - `PATCH /api/admin/news-sources/{id}`: Update source details.
+  - `PATCH /api/admin/news-sources/{id}/status`: Toggle active/inactive status.
+  - `DELETE /api/admin/news-sources/{id}`: Soft delete source. Returns `409 Conflict` (`SOURCE_IN_USE`) if any articles reference this source.
+
+---
+
+### 26.4 Admin News Categories Management
+
+- **Permissions:** `news-categories.view`, `news-categories.create`, `news-categories.update`, `news-categories.delete`.
+- **Endpoints:**
+  - `GET /api/admin/news-categories`: Paginated listing with search and status filters.
+  - `GET /api/admin/news-categories/options`: Cached active category dropdown list.
+  - `POST /api/admin/news-categories`: Create category.
+  - `GET /api/admin/news-categories/{id}`: Single category detail.
+  - `PATCH /api/admin/news-categories/{id}`: Update category details.
+  - `PATCH /api/admin/news-categories/{id}/status`: Toggle active/inactive status.
+  - `DELETE /api/admin/news-categories/{id}`: Soft delete category. Returns `409 Conflict` (`CATEGORY_IN_USE`) if any articles reference this category.
+
+---
+
+### 26.5 Admin News Media Management
+
+- **Permissions:** `news.update`.
+- **Endpoints:**
+  - `POST /api/admin/news/{articleId}/media`: Attach media (supports file uploads for `image` / `pdf`, and URLs for `external_link` / `video`). Max file size 10MB.
+  - `DELETE /api/admin/news/{articleId}/media/{mediaId}`: Delete media attachment. Validates that `mediaId` belongs to `articleId` (returns 422 if mismatched). Safely unlinks physical file from storage disk.
+
+---
+
+### 26.6 Scheduled Publishing Command
+
+- **Artisan Command:** `php artisan news:publish-scheduled`
+- **Schedule:** Runs every minute (`everyMinute()->withoutOverlapping()`) in `routes/console.php`.
+- **Logic:** Queries articles where `status = scheduled` and `scheduled_at <= NOW()`. In a database transaction, updates them to `status = published`, sets `published_at = scheduled_at` and `published_on = DATE(scheduled_at)`, and flushes the news Redis cache.
+
+---
+
+### 26.7 Spatie Permissions Matrix
+
+| Permission Name | Category | Super Admin | Admin | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `news.view` | News | Yes | Yes | View news articles in admin panel |
+| `news.create` | News | Yes | Yes | Create draft news articles |
+| `news.update` | News | Yes | Yes | Edit news articles, toggle featured/breaking |
+| `news.delete` | News | Yes | Yes | Soft delete news articles |
+| `news.publish` | News | Yes | Yes | Directly publish or schedule articles |
+| `news-sources.view` | News Sources | Yes | Yes | View news sources list and options |
+| `news-sources.create` | News Sources | Yes | Yes | Create news sources |
+| `news-sources.update` | News Sources | Yes | Yes | Edit news sources and toggle status |
+| `news-sources.delete` | News Sources | Yes | Yes | Delete unreferenced news sources |
+| `news-categories.view` | News Categories | Yes | Yes | View news categories list and options |
+| `news-categories.create` | News Categories | Yes | Yes | Create news categories |
+| `news-categories.update` | News Categories | Yes | Yes | Edit news categories and toggle status |
+| `news-categories.delete` | News Categories | Yes | Yes | Delete unreferenced news categories |
