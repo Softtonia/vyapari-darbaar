@@ -19,6 +19,7 @@ class SiteSetting extends Model
         'site_description',
         'web_logo',
         'mobile_logo',
+        'favicon',
         'created_by',
         'updated_by',
     ];
@@ -60,5 +61,17 @@ class SiteSetting extends Model
         }
 
         return Storage::disk('public')->url($this->mobile_logo);
+    }
+
+    /**
+     * Get the fully qualified public URL for favicon.
+     */
+    public function getFaviconUrlAttribute(): ?string
+    {
+        if (empty($this->favicon)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->favicon);
     }
 }

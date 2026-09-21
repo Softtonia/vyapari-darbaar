@@ -23,6 +23,7 @@ class PublicSiteSettingResource extends JsonResource
             'site_description' => $this->site_description,
             'web_logo' => $this->web_logo_url,
             'mobile_logo' => $this->mobile_logo_url,
+            'favicon' => $this->favicon_url,
         ];
     }
 }

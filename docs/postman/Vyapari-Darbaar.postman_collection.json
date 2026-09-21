@@ -3805,6 +3805,11 @@
                                             "key": "mobile_logo",
                                             "type": "file",
                                             "src": []
+                                        },
+                                        {
+                                            "key": "favicon",
+                                            "type": "file",
+                                            "src": []
                                         }
                                     ]
                                 },

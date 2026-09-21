@@ -54,6 +54,7 @@ class UpdateSiteSettingRequest extends FormRequest
             'site_description' => ['sometimes', 'nullable', 'string', 'max:5000'],
             'web_logo' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'mobile_logo' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'favicon' => ['sometimes', 'file', 'mimes:ico,png,jpg,jpeg,webp,svg', 'max:2048'],
         ];
     }
 }

@@ -2031,7 +2031,8 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
           "site_title": "India Premier Mandi Platform",
           "site_description": "Connecting mandi traders across India.",
           "web_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-web.png",
-          "mobile_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-mobile.png"
+          "mobile_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-mobile.png",
+          "favicon": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-favicon.ico"
       }
   }
   ```
@@ -2056,6 +2057,7 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
           "site_description": "Connecting mandi traders across India.",
           "web_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-web.png",
           "mobile_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-mobile.png",
+          "favicon": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-favicon.ico",
           "created_at": "2026-09-09T08:00:00.000000Z",
           "updated_at": "2026-09-09T08:00:00.000000Z"
       }
@@ -2069,9 +2071,9 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
 - **URI:** `/api/admin/site-settings`
 - **Authentication:** Bearer token (`auth:sanctum`, `admin` middleware)
 - **Permission:** `site-setting.update`
-- **Multipart Form-Data Method Spoofing (For Logo Uploads):**
+- **Multipart Form-Data Method Spoofing (For Logo / Favicon Uploads):**
   - Standard PHP engines do not populate `$_FILES` on raw `PUT`/`PATCH` multipart requests.
-  - Clients sending files (`web_logo`, `mobile_logo`) should submit a `POST /api/admin/site-settings` multipart/form-data request with `_method = PATCH`.
+  - Clients sending files (`web_logo`, `mobile_logo`, `favicon`) should submit a `POST /api/admin/site-settings` multipart/form-data request with `_method = PATCH`.
   - For text-only updates, clients may send standard JSON with `PATCH /api/admin/site-settings`.
 - **Validation Rules:**
   - `site_name`: `sometimes|required|string|max:150`
@@ -2079,6 +2081,7 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
   - `site_description`: `sometimes|nullable|string|max:5000`
   - `web_logo`: `sometimes|file|image|mimes:jpg,jpeg,png,webp|max:2048` (SVG rejected; not nullable)
   - `mobile_logo`: `sometimes|file|image|mimes:jpg,jpeg,png,webp|max:2048` (SVG rejected; not nullable)
+  - `favicon`: `sometimes|file|mimes:ico,png,jpg,jpeg,webp,svg|max:2048` (nullable if not uploading)
 - **File & Concurrency Safety:**
   - Database row locked via `lockForUpdate()` during transaction.
   - Newly uploaded files are stored safely in `site-settings/logos` on the `public` storage disk.
@@ -2102,6 +2105,7 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
   site_name=Vyapari Darbaar Global
   web_logo=[FILE: logo_web.png]
   mobile_logo=[FILE: logo_mobile.webp]
+  favicon=[FILE: favicon.ico]
   ```
 - **Success (200 OK):**
   ```json
@@ -2115,6 +2119,7 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
           "site_description": "Connecting mandi traders across India.",
           "web_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/abc123web.png",
           "mobile_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/def456mobile.webp",
+          "favicon": "https://api.vyaparidarbaar.com/storage/site-settings/logos/ghi789favicon.ico",
           "created_at": "2026-09-09T08:00:00.000000Z",
           "updated_at": "2026-09-09T08:05:00.000000Z"
       }

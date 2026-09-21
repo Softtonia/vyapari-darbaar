@@ -89,6 +89,14 @@ class SiteSettingService
                 }
                 $newStoredFiles['mobile_logo'] = $path;
             }
+
+            if (isset($data['favicon']) && $data['favicon'] instanceof UploadedFile) {
+                $path = $data['favicon']->store(self::LOGO_STORAGE_DIR, self::STORAGE_DISK);
+                if ($path === false) {
+                    throw new \RuntimeException('Failed to store favicon.');
+                }
+                $newStoredFiles['favicon'] = $path;
+            }
         } catch (Throwable $e) {
             // Clean up any newly stored files in this request if an upload failed
             foreach ($newStoredFiles as $filePath) {
@@ -99,10 +107,11 @@ class SiteSettingService
 
         $oldWebLogo = null;
         $oldMobileLogo = null;
+        $oldFavicon = null;
 
         // 2. Database transaction with row lock
         try {
-            $setting = DB::transaction(function () use ($data, $adminId, $newStoredFiles, &$oldWebLogo, &$oldMobileLogo) {
+            $setting = DB::transaction(function () use ($data, $adminId, $newStoredFiles, &$oldWebLogo, &$oldMobileLogo, &$oldFavicon) {
                 /** @var SiteSetting|null $setting */
                 $setting = SiteSetting::query()
                     ->whereKey(1)
@@ -120,6 +129,7 @@ class SiteSettingService
 
                 $oldWebLogo = $setting->web_logo;
                 $oldMobileLogo = $setting->mobile_logo;
+                $oldFavicon = $setting->favicon;
 
                 $updatePayload = [];
 
@@ -141,6 +151,10 @@ class SiteSettingService
 
                 if (isset($newStoredFiles['mobile_logo'])) {
                     $updatePayload['mobile_logo'] = $newStoredFiles['mobile_logo'];
+                }
+
+                if (isset($newStoredFiles['favicon'])) {
+                    $updatePayload['favicon'] = $newStoredFiles['favicon'];
                 }
 
                 $updatePayload['updated_by'] = $adminId;
@@ -180,6 +194,18 @@ class SiteSettingService
                 }
             } catch (Throwable $cleanupException) {
                 Log::warning('Failed to delete superseded old mobile logo: ' . $oldMobileLogo, [
+                    'error' => $cleanupException->getMessage(),
+                ]);
+            }
+        }
+
+        if (isset($newStoredFiles['favicon']) && ! empty($oldFavicon) && $oldFavicon !== $newStoredFiles['favicon']) {
+            try {
+                if ($disk->exists($oldFavicon)) {
+                    $disk->delete($oldFavicon);
+                }
+            } catch (Throwable $cleanupException) {
+                Log::warning('Failed to delete superseded old favicon: ' . $oldFavicon, [
                     'error' => $cleanupException->getMessage(),
                 ]);
             }
