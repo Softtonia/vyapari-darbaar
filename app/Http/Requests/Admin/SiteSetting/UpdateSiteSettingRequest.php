@@ -36,9 +36,10 @@ class UpdateSiteSettingRequest extends FormRequest
             $sanitized['site_description'] = $desc !== '' ? $desc : null;
         }
 
-        if ($this->has('admin_email') && is_string($this->input('admin_email'))) {
-            $email = trim($this->input('admin_email'));
-            $sanitized['admin_email'] = $email !== '' ? strtolower($email) : null;
+        $rawEmail = $this->has('email') ? $this->input('email') : ($this->has('admin_email') ? $this->input('admin_email') : null);
+        if ($rawEmail !== null && is_string($rawEmail)) {
+            $email = trim($rawEmail);
+            $sanitized['email'] = $email !== '' ? strtolower($email) : null;
         }
 
         if ($this->has('timezone') && is_string($this->input('timezone'))) {
@@ -72,6 +73,7 @@ class UpdateSiteSettingRequest extends FormRequest
             'site_name' => ['sometimes', 'required', 'string', 'max:150'],
             'site_title' => ['sometimes', 'nullable', 'string', 'max:255'],
             'site_description' => ['sometimes', 'nullable', 'string', 'max:5000'],
+            'email' => ['sometimes', 'nullable', 'string', 'email', 'max:150'],
             'admin_email' => ['sometimes', 'nullable', 'string', 'email', 'max:150'],
             'timezone' => ['sometimes', 'nullable', 'string', 'max:100', 'timezone:all'],
             'default_language' => ['sometimes', 'nullable', 'string', 'max:20'],

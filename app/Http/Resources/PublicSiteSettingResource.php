@@ -21,7 +21,7 @@ class PublicSiteSettingResource extends JsonResource
             'site_name' => $this->site_name,
             'site_title' => $this->site_title,
             'site_description' => $this->site_description,
-            'admin_email' => $this->admin_email,
+            'email' => $this->email,
             'timezone' => $this->timezone,
             'default_language' => $this->default_language,
             'currency' => $this->currency,

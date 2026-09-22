@@ -3744,7 +3744,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"site_name\": \"Vyapari Darbar\",\n    \"site_title\": \"India Premier Mandi Platform\",\n    \"site_description\": \"Connecting mandi traders across India.\",\n    \"admin_email\": \"admin@vyaparidarbaar.com\",\n    \"timezone\": \"Asia/Kolkata\",\n    \"default_language\": \"en\",\n    \"currency\": \"INR\"\n}"
+                                    "raw": "{\n    \"site_name\": \"Vyapari Darbar\",\n    \"site_title\": \"India Premier Mandi Platform\",\n    \"site_description\": \"Connecting mandi traders across India.\",\n    \"email\": \"admin@vyaparidarbaar.com\",\n    \"timezone\": \"Asia/Kolkata\",\n    \"default_language\": \"en\",\n    \"currency\": \"INR\"\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/site-settings",
@@ -3797,7 +3797,7 @@
                                             "type": "text"
                                         },
                                         {
-                                            "key": "admin_email",
+                                            "key": "email",
                                             "value": "admin@vyaparidarbaar.com",
                                             "type": "text"
                                         },
