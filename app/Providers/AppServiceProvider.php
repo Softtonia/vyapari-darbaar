@@ -39,6 +39,19 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureRateLimiting();
         $this->configureMailSynchronization();
+        $this->registerActivityObservers();
+    }
+
+    /**
+     * Register real-time activity log observers across all primary models.
+     */
+    protected function registerActivityObservers(): void
+    {
+        foreach (array_keys(\App\Observers\ActivityLogObserver::MODULE_MAP) as $modelClass) {
+            if (class_exists($modelClass)) {
+                $modelClass::observe(\App\Observers\ActivityLogObserver::class);
+            }
+        }
     }
 
     /**
