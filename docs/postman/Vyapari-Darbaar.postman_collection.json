@@ -3849,6 +3849,162 @@
                     ]
                 },
                 {
+                    "name": "System Activity Logs",
+                    "item": [
+                        {
+                            "name": "List Activity Logs",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/activity-logs?page=1&per_page=20",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "activity-logs"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "per_page",
+                                            "value": "20"
+                                        },
+                                        {
+                                            "key": "search",
+                                            "value": "",
+                                            "disabled": true
+                                        },
+                                        {
+                                            "key": "module",
+                                            "value": "Website",
+                                            "disabled": true
+                                        },
+                                        {
+                                            "key": "action",
+                                            "value": "Updated",
+                                            "disabled": true
+                                        },
+                                        {
+                                            "key": "status",
+                                            "value": "Success",
+                                            "disabled": true
+                                        },
+                                        {
+                                            "key": "date_from",
+                                            "value": "2026-09-01",
+                                            "disabled": true
+                                        },
+                                        {
+                                            "key": "date_to",
+                                            "value": "2026-09-30",
+                                            "disabled": true
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Activity Log Details",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/activity-logs/1",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "activity-logs",
+                                        "1"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Modules Filter Options",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/activity-logs/modules",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "activity-logs",
+                                        "modules"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Actions Filter Options",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/activity-logs/actions",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "activity-logs",
+                                        "actions"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
                     "name": "SMTP Settings",
                     "item": [
                         {
