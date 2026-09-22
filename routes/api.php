@@ -275,10 +275,6 @@ Route::prefix('admin')->group(function () {
             Route::get('user/{user}', [AdminUserActivityController::class, 'userActivities'])
                 ->name('admin.activities.user');
         });
-        Route::get('user-activities', [AdminUserActivityController::class, 'index'])
-            ->name('admin.user-activities.index');
-        Route::get('my-activities', [AdminUserActivityController::class, 'ownActivities'])
-            ->name('admin.my-activities');
 
         Route::prefix('logins')->group(function () {
             Route::get('/', [AdminUserActivityController::class, 'logins'])
@@ -288,10 +284,6 @@ Route::prefix('admin')->group(function () {
             Route::get('user/{user}', [AdminUserActivityController::class, 'userLogins'])
                 ->name('admin.logins.user');
         });
-        Route::get('user-logins', [AdminUserActivityController::class, 'logins'])
-            ->name('admin.user-logins.index');
-        Route::get('my-logins', [AdminUserActivityController::class, 'ownLogins'])
-            ->name('admin.my-logins');
 
         // Role management
         Route::prefix('roles')->group(function () {
@@ -504,8 +496,13 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.activity-logs.modules');
             Route::get('actions', [\App\Http\Controllers\Api\Admin\AdminSystemActivityController::class, 'actions'])
                 ->name('admin.activity-logs.actions');
+            Route::post('bulk-delete', [\App\Http\Controllers\Api\Admin\AdminSystemActivityController::class, 'bulkDestroy'])
+                ->name('admin.activity-logs.bulk-delete');
+            Route::delete('bulk-delete', [\App\Http\Controllers\Api\Admin\AdminSystemActivityController::class, 'bulkDestroy']);
             Route::get('{id}', [\App\Http\Controllers\Api\Admin\AdminSystemActivityController::class, 'show'])
                 ->name('admin.activity-logs.show');
+            Route::delete('{id}', [\App\Http\Controllers\Api\Admin\AdminSystemActivityController::class, 'destroy'])
+                ->name('admin.activity-logs.destroy');
         });
 
         // SMTP Settings management

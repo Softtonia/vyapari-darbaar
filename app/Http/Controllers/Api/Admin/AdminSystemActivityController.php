@@ -162,4 +162,71 @@ class AdminSystemActivityController extends Controller
             'data' => $actions,
         ], 200);
     }
+
+    /**
+     * Delete a single activity log entry.
+     */
+    public function destroy(int $id): JsonResponse
+    {
+        $log = UserActivity::query()->find($id);
+
+        if (!$log) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Activity log entry not found.',
+            ], 404);
+        }
+
+        $log->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Activity log entry deleted successfully.',
+        ], 200);
+    }
+
+    /**
+     * Bulk delete activity log entries.
+     *
+     * Request body: { "ids": [1, 2, 3] }
+     * Or delete all: { "delete_all": true }
+     */
+    public function bulkDestroy(Request $request): JsonResponse
+    {
+        if ($request->boolean('delete_all')) {
+            $count = UserActivity::query()->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => "All {$count} activity log entries deleted successfully.",
+                'data' => ['deleted_count' => $count],
+            ], 200);
+        }
+
+        $ids = $request->input('ids', []);
+
+        if (!is_array($ids) || empty($ids)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Please provide an array of IDs to delete, or set delete_all=true to clear all logs.',
+            ], 422);
+        }
+
+        $ids = array_filter(array_map('intval', $ids));
+
+        if (empty($ids)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No valid IDs provided.',
+            ], 422);
+        }
+
+        $count = UserActivity::query()->whereIn('id', $ids)->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => "{$count} activity log " . ($count === 1 ? 'entry' : 'entries') . ' deleted successfully.',
+            'data' => ['deleted_count' => $count],
+        ], 200);
+    }
 }
