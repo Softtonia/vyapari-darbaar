@@ -115,6 +115,27 @@ class ActivityLogObserver
                 $action = 'Status Changed';
                 $newStatus = $dirty['status'] ?? $dirty['is_active'];
                 $description = "Changed status of {$label} to {$newStatus}: {$identifier}";
+            } elseif ($model instanceof \App\Models\SiteSetting) {
+                $fieldNames = [
+                    'site_name' => 'Site Name',
+                    'site_title' => 'Site Title',
+                    'site_description' => 'Site Description',
+                    'email' => 'Contact Email',
+                    'phone_number' => 'Phone Number',
+                    'social_links' => 'Social Links',
+                    'timezone' => 'Timezone',
+                    'default_language' => 'Default Language',
+                    'currency' => 'Currency',
+                    'web_logo' => 'Web Logo',
+                    'mobile_logo' => 'Mobile Logo',
+                    'favicon' => 'Favicon',
+                ];
+                $changed = [];
+                foreach (array_keys($dirty) as $field) {
+                    $changed[] = $fieldNames[$field] ?? ucwords(str_replace('_', ' ', $field));
+                }
+                $changedStr = !empty($changed) ? implode(', ', $changed) : 'General Settings';
+                $description = "Updated site settings ({$changedStr}): {$identifier}";
             } else {
                 $description = "Updated {$label}: {$identifier}";
             }
@@ -178,6 +199,10 @@ class ActivityLogObserver
      */
     protected function resolveLabel(Model $model): string
     {
+        if ($model instanceof \App\Models\SiteSetting) {
+            return 'site settings';
+        }
+
         $base = class_basename($model);
 
         return strtolower(preg_replace('/(?<!^)[A-Z]/', ' $0', $base));
@@ -188,6 +213,26 @@ class ActivityLogObserver
      */
     protected function resolveIdentifier(Model $model): string
     {
+        if ($model instanceof \App\Models\SiteSetting) {
+            return !empty($model->site_name) ? (string) $model->site_name : 'General Settings';
+        }
+
+        if ($model instanceof \App\Models\SmtpSetting) {
+            return !empty($model->host) ? (string) $model->host : 'SMTP Configuration';
+        }
+
+        if ($model instanceof \App\Models\FirebaseSetting) {
+            return !empty($model->project_id) ? (string) $model->project_id : 'Firebase Configuration';
+        }
+
+        if (!empty($model->site_name)) {
+            return (string) $model->site_name;
+        }
+
+        if (!empty($model->site_title)) {
+            return (string) $model->site_title;
+        }
+
         if (!empty($model->title)) {
             return (string) $model->title;
         }
