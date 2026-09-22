@@ -62,6 +62,8 @@ class SiteSettingService
                     'instagram' => 'https://instagram.com/vyaparidarbar',
                     'linkedin' => 'https://linkedin.com/company/vyaparidarbar',
                     'youtube' => 'https://youtube.com/@vyaparidarbar',
+                    'whatsapp' => 'https://wa.me/919876543210',
+                    'telegram' => 'https://t.me/vyaparidarbar',
                 ],
                 'timezone' => 'Asia/Kolkata',
                 'default_language' => 'en',
@@ -234,6 +236,52 @@ class SiteSettingService
                 ]);
             }
         }
+
+        return $setting;
+    }
+
+    /**
+     * Update only social links on site settings singleton.
+     *
+     * @param  array<string, string|null>  $socialLinks
+     * @param  int|null  $adminId
+     * @return SiteSetting
+     */
+    public function updateSocialLinks(array $socialLinks, ?int $adminId = null): SiteSetting
+    {
+        $setting = DB::transaction(function () use ($socialLinks, $adminId) {
+            /** @var SiteSetting|null $setting */
+            $setting = SiteSetting::query()
+                ->whereKey(1)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $setting) {
+                $setting = SiteSetting::create([
+                    'id' => 1,
+                    'site_name' => 'Vyapari Darbar',
+                    'email' => 'admin@vyaparidarbaar.com',
+                    'phone_number' => '+919876543210',
+                    'social_links' => $socialLinks,
+                    'timezone' => 'Asia/Kolkata',
+                    'default_language' => 'en',
+                    'currency' => 'INR',
+                    'created_by' => $adminId,
+                    'updated_by' => $adminId,
+                ]);
+            } else {
+                $existing = is_array($setting->social_links) ? $setting->social_links : [];
+                $merged = array_merge($existing, $socialLinks);
+                $setting->update([
+                    'social_links' => $merged,
+                    'updated_by' => $adminId,
+                ]);
+            }
+
+            return $setting->fresh();
+        });
+
+        Cache::forget(self::PUBLIC_CACHE_KEY);
 
         return $setting;
     }

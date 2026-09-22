@@ -22,4 +22,18 @@ class SiteSettingController extends Controller
             'data' => $setting ? new PublicSiteSettingResource($setting) : null,
         ], 200);
     }
+
+    /**
+     * Display public social links.
+     */
+    public function socialLinks(SiteSettingService $service): JsonResponse
+    {
+        $setting = $service->getPublicSettings();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Social links fetched successfully.',
+            'data' => $setting && ! empty($setting->social_links) ? $setting->social_links : (object) [],
+        ], 200);
+    }
 }

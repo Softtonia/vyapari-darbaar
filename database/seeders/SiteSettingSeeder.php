@@ -24,6 +24,8 @@ class SiteSettingSeeder extends Seeder
                     'instagram' => 'https://instagram.com/vyaparidarbar',
                     'linkedin' => 'https://linkedin.com/company/vyaparidarbar',
                     'youtube' => 'https://youtube.com/@vyaparidarbar',
+                    'whatsapp' => 'https://wa.me/919876543210',
+                    'telegram' => 'https://t.me/vyaparidarbar',
                 ],
                 'timezone' => 'Asia/Kolkata',
                 'default_language' => 'en',

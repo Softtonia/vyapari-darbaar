@@ -3855,6 +3855,77 @@
                                     ]
                                 }
                             }
+                        },
+                        {
+                            "name": "Get Social Links",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/site-settings/social-links",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "site-settings",
+                                        "social-links"
+                                    ]
+                                },
+                                "description": "Retrieve social media links configuration for admin."
+                            }
+                        },
+                        {
+                            "name": "Update Social Links",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"social_links\": {\n        \"facebook\": \"https://facebook.com/vyaparidarbar\",\n        \"twitter\": \"https://x.com/vyaparidarbar\",\n        \"instagram\": \"https://instagram.com/vyaparidarbar\",\n        \"linkedin\": \"https://linkedin.com/company/vyaparidarbar\",\n        \"youtube\": \"https://youtube.com/@vyaparidarbar\",\n        \"whatsapp\": \"https://wa.me/919876543210\",\n        \"telegram\": \"https://t.me/vyaparidarbar\"\n    }\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/site-settings/social-links",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "site-settings",
+                                        "social-links"
+                                    ]
+                                },
+                                "description": "Update social media links configuration."
+                            }
                         }
                     ]
                 },

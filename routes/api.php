@@ -486,6 +486,10 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.site-settings.show');
             Route::patch('/', [AdminSiteSettingController::class, 'update'])
                 ->name('admin.site-settings.update');
+            Route::get('social-links', [AdminSiteSettingController::class, 'socialLinks'])
+                ->name('admin.site-settings.social-links');
+            Route::match(['put', 'patch'], 'social-links', [AdminSiteSettingController::class, 'updateSocialLinks'])
+                ->name('admin.site-settings.update-social-links');
         });
 
         // System Activity Logs (Audit Trail)
@@ -791,6 +795,10 @@ Route::get('news-sources', [NewsController::class, 'sources'])
 Route::get('site-settings', [SiteSettingController::class, 'show'])
     ->middleware('throttle:public-api')
     ->name('site-settings.show');
+
+Route::get('site-settings/social-links', [SiteSettingController::class, 'socialLinks'])
+    ->middleware('throttle:public-api')
+    ->name('site-settings.social-links');
 
 Route::get('firebase/config', [PublicFirebaseConfigController::class, 'show'])
     ->middleware('throttle:public-api')

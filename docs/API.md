@@ -2173,7 +2173,9 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
               "twitter": "https://x.com/vyaparidarbar",
               "instagram": "https://instagram.com/vyaparidarbar",
               "linkedin": "https://linkedin.com/company/vyaparidarbar",
-              "youtube": "https://youtube.com/@vyaparidarbar"
+              "youtube": "https://youtube.com/@vyaparidarbar",
+              "whatsapp": "https://wa.me/919876543210",
+              "telegram": "https://t.me/vyaparidarbar"
           },
           "timezone": "Asia/Kolkata",
           "default_language": "en",
@@ -2186,6 +2188,94 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
       }
   }
   ```
+
+---
+
+### 12.4 Get Admin Social Links
+- **Method:** `GET`
+- **URI:** `/api/admin/site-settings/social-links`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` middleware)
+- **Permission:** `site-setting.view`
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Social links fetched successfully.",
+      "data": {
+          "facebook": "https://facebook.com/vyaparidarbar",
+          "twitter": "https://x.com/vyaparidarbar",
+          "instagram": "https://instagram.com/vyaparidarbar",
+          "linkedin": "https://linkedin.com/company/vyaparidarbar",
+          "youtube": "https://youtube.com/@vyaparidarbar",
+          "whatsapp": "https://wa.me/919876543210",
+          "telegram": "https://t.me/vyaparidarbar"
+      }
+  }
+  ```
+
+---
+
+### 12.5 Update Admin Social Links
+- **Method:** `PUT` / `PATCH`
+- **URI:** `/api/admin/site-settings/social-links`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` middleware)
+- **Permission:** `site-setting.update`
+- **Request Body (JSON):**
+  ```json
+  {
+      "social_links": {
+          "facebook": "https://facebook.com/vyaparidarbar",
+          "twitter": "https://x.com/vyaparidarbar",
+          "instagram": "https://instagram.com/vyaparidarbar",
+          "linkedin": "https://linkedin.com/company/vyaparidarbar",
+          "youtube": "https://youtube.com/@vyaparidarbar",
+          "whatsapp": "https://wa.me/919876543210",
+          "telegram": "https://t.me/vyaparidarbar"
+      }
+  }
+  ```
+  *(Clients may also send the key-value dictionary directly at root).*
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Social links updated successfully.",
+      "data": {
+          "facebook": "https://facebook.com/vyaparidarbar",
+          "twitter": "https://x.com/vyaparidarbar",
+          "instagram": "https://instagram.com/vyaparidarbar",
+          "linkedin": "https://linkedin.com/company/vyaparidarbar",
+          "youtube": "https://youtube.com/@vyaparidarbar",
+          "whatsapp": "https://wa.me/919876543210",
+          "telegram": "https://t.me/vyaparidarbar"
+      }
+  }
+  ```
+
+---
+
+### 12.6 Get Public Social Links
+- **Method:** `GET`
+- **URI:** `/api/site-settings/social-links`
+- **Authentication:** Public (No authentication required)
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Public social links fetched successfully.",
+      "data": {
+          "facebook": "https://facebook.com/vyaparidarbar",
+          "twitter": "https://x.com/vyaparidarbar",
+          "instagram": "https://instagram.com/vyaparidarbar",
+          "linkedin": "https://linkedin.com/company/vyaparidarbar",
+          "youtube": "https://youtube.com/@vyaparidarbar",
+          "whatsapp": "https://wa.me/919876543210",
+          "telegram": "https://t.me/vyaparidarbar"
+      }
+  }
+  ```
+
+---
 
 ---
 
