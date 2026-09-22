@@ -36,6 +36,26 @@ class UpdateSiteSettingRequest extends FormRequest
             $sanitized['site_description'] = $desc !== '' ? $desc : null;
         }
 
+        if ($this->has('admin_email') && is_string($this->input('admin_email'))) {
+            $email = trim($this->input('admin_email'));
+            $sanitized['admin_email'] = $email !== '' ? strtolower($email) : null;
+        }
+
+        if ($this->has('timezone') && is_string($this->input('timezone'))) {
+            $tz = trim($this->input('timezone'));
+            $sanitized['timezone'] = $tz !== '' ? $tz : null;
+        }
+
+        if ($this->has('default_language') && is_string($this->input('default_language'))) {
+            $lang = trim($this->input('default_language'));
+            $sanitized['default_language'] = $lang !== '' ? strtolower($lang) : null;
+        }
+
+        if ($this->has('currency') && is_string($this->input('currency'))) {
+            $curr = trim($this->input('currency'));
+            $sanitized['currency'] = $curr !== '' ? strtoupper($curr) : null;
+        }
+
         if (! empty($sanitized)) {
             $this->merge($sanitized);
         }
@@ -52,6 +72,10 @@ class UpdateSiteSettingRequest extends FormRequest
             'site_name' => ['sometimes', 'required', 'string', 'max:150'],
             'site_title' => ['sometimes', 'nullable', 'string', 'max:255'],
             'site_description' => ['sometimes', 'nullable', 'string', 'max:5000'],
+            'admin_email' => ['sometimes', 'nullable', 'string', 'email', 'max:150'],
+            'timezone' => ['sometimes', 'nullable', 'string', 'max:100', 'timezone:all'],
+            'default_language' => ['sometimes', 'nullable', 'string', 'max:20'],
+            'currency' => ['sometimes', 'nullable', 'string', 'max:20'],
             'web_logo' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'mobile_logo' => ['sometimes', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'favicon' => ['sometimes', 'file', 'mimes:ico,png,jpg,jpeg,webp,svg', 'max:2048'],

@@ -2030,6 +2030,10 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
           "site_name": "Vyapari Darbar",
           "site_title": "India Premier Mandi Platform",
           "site_description": "Connecting mandi traders across India.",
+          "admin_email": "admin@vyaparidarbaar.com",
+          "timezone": "Asia/Kolkata",
+          "default_language": "en",
+          "currency": "INR",
           "web_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-web.png",
           "mobile_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-mobile.png",
           "favicon": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-favicon.ico"
@@ -2055,6 +2059,10 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
           "site_name": "Vyapari Darbar",
           "site_title": "India Premier Mandi Platform",
           "site_description": "Connecting mandi traders across India.",
+          "admin_email": "admin@vyaparidarbaar.com",
+          "timezone": "Asia/Kolkata",
+          "default_language": "en",
+          "currency": "INR",
           "web_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-web.png",
           "mobile_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-mobile.png",
           "favicon": "https://api.vyaparidarbaar.com/storage/site-settings/logos/sample-favicon.ico",
@@ -2079,6 +2087,10 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
   - `site_name`: `sometimes|required|string|max:150`
   - `site_title`: `sometimes|nullable|string|max:255`
   - `site_description`: `sometimes|nullable|string|max:5000`
+  - `admin_email`: `sometimes|nullable|string|email|max:150`
+  - `timezone`: `sometimes|nullable|string|max:100|timezone:all`
+  - `default_language`: `sometimes|nullable|string|max:20`
+  - `currency`: `sometimes|nullable|string|max:20`
   - `web_logo`: `sometimes|file|image|mimes:jpg,jpeg,png,webp|max:2048` (SVG rejected; not nullable)
   - `mobile_logo`: `sometimes|file|image|mimes:jpg,jpeg,png,webp|max:2048` (SVG rejected; not nullable)
   - `favicon`: `sometimes|file|mimes:ico,png,jpg,jpeg,webp,svg|max:2048` (nullable if not uploading)
@@ -2093,7 +2105,11 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
   {
       "site_name": "Vyapari Darbaar Global",
       "site_title": "India Premier Mandi Platform",
-      "site_description": "Connecting mandi traders across India."
+      "site_description": "Connecting mandi traders across India.",
+      "admin_email": "admin@vyaparidarbaar.com",
+      "timezone": "Asia/Kolkata",
+      "default_language": "en",
+      "currency": "INR"
   }
   ```
 - **Request Body Example (Multipart / Form Data with Spoofing):**
@@ -2103,6 +2119,10 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
 
   _method=PATCH
   site_name=Vyapari Darbaar Global
+  admin_email=admin@vyaparidarbaar.com
+  timezone=Asia/Kolkata
+  default_language=en
+  currency=INR
   web_logo=[FILE: logo_web.png]
   mobile_logo=[FILE: logo_mobile.webp]
   favicon=[FILE: favicon.ico]
@@ -2117,6 +2137,10 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
           "site_name": "Vyapari Darbaar Global",
           "site_title": "India Premier Mandi Platform",
           "site_description": "Connecting mandi traders across India.",
+          "admin_email": "admin@vyaparidarbaar.com",
+          "timezone": "Asia/Kolkata",
+          "default_language": "en",
+          "currency": "INR",
           "web_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/abc123web.png",
           "mobile_logo": "https://api.vyaparidarbaar.com/storage/site-settings/logos/def456mobile.webp",
           "favicon": "https://api.vyaparidarbaar.com/storage/site-settings/logos/ghi789favicon.ico",

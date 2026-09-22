@@ -3744,7 +3744,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"site_name\": \"Vyapari Darbar\",\n    \"site_title\": \"India Premier Mandi Platform\",\n    \"site_description\": \"Connecting mandi traders across India.\",\n}"
+                                    "raw": "{\n    \"site_name\": \"Vyapari Darbar\",\n    \"site_title\": \"India Premier Mandi Platform\",\n    \"site_description\": \"Connecting mandi traders across India.\",\n    \"admin_email\": \"admin@vyaparidarbaar.com\",\n    \"timezone\": \"Asia/Kolkata\",\n    \"default_language\": \"en\",\n    \"currency\": \"INR\"\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/site-settings",
@@ -3794,6 +3794,26 @@
                                         {
                                             "key": "site_description",
                                             "value": "Connecting mandi traders across India.",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "admin_email",
+                                            "value": "admin@vyaparidarbaar.com",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "timezone",
+                                            "value": "Asia/Kolkata",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "default_language",
+                                            "value": "en",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "currency",
+                                            "value": "INR",
                                             "type": "text"
                                         },
                                         {
