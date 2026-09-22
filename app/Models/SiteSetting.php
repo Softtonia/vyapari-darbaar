@@ -18,6 +18,7 @@ class SiteSetting extends Model
         'site_title',
         'site_description',
         'email',
+        'phone_number',
         'timezone',
         'default_language',
         'currency',

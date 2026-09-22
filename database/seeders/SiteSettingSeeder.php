@@ -17,6 +17,7 @@ class SiteSettingSeeder extends Seeder
             [
                 'site_name' => 'Vyapari Darbar',
                 'email' => 'admin@vyaparidarbaar.com',
+                'phone_number' => '+919876543210',
                 'timezone' => 'Asia/Kolkata',
                 'default_language' => 'en',
                 'currency' => 'INR',

@@ -2031,6 +2031,7 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
           "site_title": "India Premier Mandi Platform",
           "site_description": "Connecting mandi traders across India.",
           "email": "admin@vyaparidarbaar.com",
+          "phone_number": "+919876543210",
           "timezone": "Asia/Kolkata",
           "default_language": "en",
           "currency": "INR",
@@ -2060,6 +2061,7 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
           "site_title": "India Premier Mandi Platform",
           "site_description": "Connecting mandi traders across India.",
           "email": "admin@vyaparidarbaar.com",
+          "phone_number": "+919876543210",
           "timezone": "Asia/Kolkata",
           "default_language": "en",
           "currency": "INR",
@@ -2088,6 +2090,7 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
   - `site_title`: `sometimes|nullable|string|max:255`
   - `site_description`: `sometimes|nullable|string|max:5000`
   - `email`: `sometimes|nullable|string|email|max:150`
+  - `phone_number`: `sometimes|nullable|string|max:50`
   - `timezone`: `sometimes|nullable|string|max:100|timezone:all`
   - `default_language`: `sometimes|nullable|string|max:20`
   - `currency`: `sometimes|nullable|string|max:20`
@@ -2107,6 +2110,7 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
       "site_title": "India Premier Mandi Platform",
       "site_description": "Connecting mandi traders across India.",
       "email": "admin@vyaparidarbaar.com",
+      "phone_number": "+919876543210",
       "timezone": "Asia/Kolkata",
       "default_language": "en",
       "currency": "INR"
@@ -2120,6 +2124,7 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
   _method=PATCH
   site_name=Vyapari Darbaar Global
   email=admin@vyaparidarbaar.com
+  phone_number=+919876543210
   timezone=Asia/Kolkata
   default_language=en
   currency=INR
@@ -2138,6 +2143,7 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
           "site_title": "India Premier Mandi Platform",
           "site_description": "Connecting mandi traders across India.",
           "email": "admin@vyaparidarbaar.com",
+          "phone_number": "+919876543210",
           "timezone": "Asia/Kolkata",
           "default_language": "en",
           "currency": "INR",

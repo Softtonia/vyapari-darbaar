@@ -55,6 +55,7 @@ class SiteSettingService
             [
                 'site_name' => 'Vyapari Darbar',
                 'email' => 'admin@vyaparidarbaar.com',
+                'phone_number' => '+919876543210',
                 'timezone' => 'Asia/Kolkata',
                 'default_language' => 'en',
                 'currency' => 'INR',
@@ -127,6 +128,7 @@ class SiteSettingService
                         'id' => 1,
                         'site_name' => 'Vyapari Darbar',
                         'email' => 'admin@vyaparidarbaar.com',
+                        'phone_number' => $data['phone_number'] ?? '+919876543210',
                         'timezone' => 'Asia/Kolkata',
                         'default_language' => 'en',
                         'currency' => 'INR',
@@ -146,6 +148,7 @@ class SiteSettingService
                     'site_title',
                     'site_description',
                     'email',
+                    'phone_number',
                     'timezone',
                     'default_language',
                     'currency',

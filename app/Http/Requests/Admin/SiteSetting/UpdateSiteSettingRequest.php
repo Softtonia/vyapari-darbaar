@@ -42,6 +42,12 @@ class UpdateSiteSettingRequest extends FormRequest
             $sanitized['email'] = $email !== '' ? strtolower($email) : null;
         }
 
+        $rawPhone = $this->has('phone_number') ? $this->input('phone_number') : ($this->has('phone') ? $this->input('phone') : null);
+        if ($rawPhone !== null && is_string($rawPhone)) {
+            $phone = trim($rawPhone);
+            $sanitized['phone_number'] = $phone !== '' ? $phone : null;
+        }
+
         if ($this->has('timezone') && is_string($this->input('timezone'))) {
             $tz = trim($this->input('timezone'));
             $sanitized['timezone'] = $tz !== '' ? $tz : null;
@@ -75,6 +81,8 @@ class UpdateSiteSettingRequest extends FormRequest
             'site_description' => ['sometimes', 'nullable', 'string', 'max:5000'],
             'email' => ['sometimes', 'nullable', 'string', 'email', 'max:150'],
             'admin_email' => ['sometimes', 'nullable', 'string', 'email', 'max:150'],
+            'phone_number' => ['sometimes', 'nullable', 'string', 'max:50'],
+            'phone' => ['sometimes', 'nullable', 'string', 'max:50'],
             'timezone' => ['sometimes', 'nullable', 'string', 'max:100', 'timezone:all'],
             'default_language' => ['sometimes', 'nullable', 'string', 'max:20'],
             'currency' => ['sometimes', 'nullable', 'string', 'max:20'],

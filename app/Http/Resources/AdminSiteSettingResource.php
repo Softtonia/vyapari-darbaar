@@ -20,6 +20,7 @@ class AdminSiteSettingResource extends JsonResource
             'site_title' => $this->site_title,
             'site_description' => $this->site_description,
             'email' => $this->email,
+            'phone_number' => $this->phone_number,
             'timezone' => $this->timezone,
             'default_language' => $this->default_language,
             'currency' => $this->currency,
