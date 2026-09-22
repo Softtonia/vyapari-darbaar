@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             ExchangeSeeder::class,
             NewsSourceSeeder::class,
             NewsCategorySeeder::class,
+            SystemActivitySeeder::class,
         ]);
     }
 }

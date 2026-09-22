@@ -59,6 +59,15 @@ class NewsArticleController extends Controller
         try {
             $article = $service->createArticle($request->validated(), $request->user()?->id);
 
+            \App\Services\SystemActivityService::log(
+                module: 'News',
+                action: 'Created',
+                description: "Published new article: {$article->title}",
+                user: $request->user(),
+                properties: ['article_id' => $article->id, 'slug' => $article->slug],
+                request: $request
+            );
+
             return response()->json([
                 'status' => true,
                 'message' => 'News article created successfully.',
@@ -105,6 +114,15 @@ class NewsArticleController extends Controller
         try {
             $article = $service->updateArticle($newsArticle, $request->validated(), $request->user()?->id);
 
+            \App\Services\SystemActivityService::log(
+                module: 'News',
+                action: 'Updated',
+                description: "Updated article: {$article->title}",
+                user: $request->user(),
+                properties: ['article_id' => $article->id, 'slug' => $article->slug],
+                request: $request
+            );
+
             return response()->json([
                 'status' => true,
                 'message' => 'News article updated successfully.',
@@ -138,6 +156,15 @@ class NewsArticleController extends Controller
                 $request->user()?->id,
                 $request->validated('scheduled_at'),
                 $request->validated('published_at')
+            );
+
+            \App\Services\SystemActivityService::log(
+                module: 'News',
+                action: 'Status Changed',
+                description: "Updated article status to {$targetStatus}: {$article->title}",
+                user: $request->user(),
+                properties: ['article_id' => $article->id, 'status' => $targetStatus],
+                request: $request
             );
 
             return response()->json([
@@ -192,7 +219,18 @@ class NewsArticleController extends Controller
     {
         $this->authorizePermission($request, 'news.delete');
 
+        $title = $newsArticle->title;
+        $id = $newsArticle->id;
         $service->deleteArticle($newsArticle);
+
+        \App\Services\SystemActivityService::log(
+            module: 'News',
+            action: 'Deleted',
+            description: "Deleted article: {$title}",
+            user: $request->user(),
+            properties: ['article_id' => $id],
+            request: $request
+        );
 
         return response()->json([
             'status' => true,

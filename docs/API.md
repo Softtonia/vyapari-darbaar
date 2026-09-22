@@ -4700,3 +4700,146 @@ The News CMS module is an editorial management system supporting manual authorin
 | `news-categories.create` | News Categories | Yes | Yes | Create news categories |
 | `news-categories.update` | News Categories | Yes | Yes | Edit news categories and toggle status |
 | `news-categories.delete` | News Categories | Yes | Yes | Delete unreferenced news categories |
+
+---
+
+## 27. System Activity Logs (Audit Trail)
+
+Vyapari Darbaar records administrative and system actions across modules (`Website`, `News`, `Users`, `Auth`, `Mandis`, `Commodities`, `Payments`, `Ads`, etc.) for auditing, compliance, and activity dashboards.
+
+### 27.1 List System Activity Logs
+- **Method:** `GET`
+- **URI:** `/api/admin/activity-logs`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` middleware)
+- **Query Parameters:**
+  - `page`: integer (default: `1`)
+  - `per_page`: integer (default: `20`, max: `100`)
+  - `search`: string (filters description, module, action, IP, or user name/email)
+  - `module`: string (comma-separated or single, e.g. `Website,News`)
+  - `action`: string (comma-separated or single, e.g. `Created,Updated,Login`)
+  - `status`: string (`Success` or `Failed`)
+  - `user_id`: integer (filter by specific performer)
+  - `date_from`: ISO datetime or date (`YYYY-MM-DD`)
+  - `date_to`: ISO datetime or date (`YYYY-MM-DD`)
+  - `sort_by`: `id`, `created_at`, `module`, `action`, `status` (default: `id`)
+  - `sort_order`: `asc` or `desc` (default: `desc`)
+- **Success Response (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "System activity logs retrieved successfully.",
+      "data": {
+          "total_logs": 12584,
+          "items": [
+              {
+                  "id": 1,
+                  "date_time": "17 Sep 2026, 10:22 AM",
+                  "created_at": "2026-09-17T10:22:00.000000Z",
+                  "user": {
+                      "id": 1,
+                      "name": "Admin",
+                      "role": "Super Admin",
+                      "email": "admin@vyaparidarbaar.com"
+                  },
+                  "action": "Updated",
+                  "module": "Website",
+                  "description": "Updated homepage banner",
+                  "ip_address": "103.21.45.67",
+                  "status": "Success",
+                  "properties": {
+                      "banner": "mandi_fest_2026.webp",
+                      "section": "hero"
+                  }
+              }
+          ],
+          "pagination": {
+              "current_page": 1,
+              "per_page": 20,
+              "total": 12584,
+              "last_page": 630
+          }
+      }
+  }
+  ```
+
+---
+
+### 27.2 Get Activity Log Details
+- **Method:** `GET`
+- **URI:** `/api/admin/activity-logs/{id}`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` middleware)
+- **Success Response (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Activity log details retrieved successfully.",
+      "data": {
+          "id": 1,
+          "date_time": "17 Sep 2026, 10:22 AM",
+          "created_at": "2026-09-17T10:22:00.000000Z",
+          "user": {
+              "id": 1,
+              "name": "Admin",
+              "role": "Super Admin",
+              "email": "admin@vyaparidarbaar.com"
+          },
+          "action": "Updated",
+          "module": "Website",
+          "description": "Updated homepage banner",
+          "ip_address": "103.21.45.67",
+          "status": "Success",
+          "properties": {
+              "banner": "mandi_fest_2026.webp",
+              "section": "hero"
+          }
+      }
+  }
+  ```
+
+---
+
+### 27.3 Get Available Modules Filter Options
+- **Method:** `GET`
+- **URI:** `/api/admin/activity-logs/modules`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` middleware)
+- **Success Response (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Modules list retrieved successfully.",
+      "data": [
+          { "module": "Ads", "count": 14 },
+          { "module": "Auth", "count": 850 },
+          { "module": "Commodities", "count": 65 },
+          { "module": "Mandis", "count": 120 },
+          { "module": "News", "count": 412 },
+          { "module": "Payments", "count": 95 },
+          { "module": "Settings", "count": 30 },
+          { "module": "Users", "count": 310 },
+          { "module": "Website", "count": 45 }
+      ]
+  }
+  ```
+
+---
+
+### 27.4 Get Available Actions Filter Options
+- **Method:** `GET`
+- **URI:** `/api/admin/activity-logs/actions`
+- **Authentication:** Bearer token (`auth:sanctum`, `admin` middleware)
+- **Success Response (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Actions list retrieved successfully.",
+      "data": [
+          { "action": "Created", "count": 340 },
+          { "action": "Deleted", "count": 52 },
+          { "action": "Login", "count": 810 },
+          { "action": "Logout", "count": 790 },
+          { "action": "Status Changed", "count": 115 },
+          { "action": "Updated", "count": 620 }
+      ]
+  }
+  ```
+

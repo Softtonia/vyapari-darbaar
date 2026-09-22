@@ -496,6 +496,18 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.site-settings.update');
         });
 
+        // System Activity Logs (Audit Trail)
+        Route::prefix('activity-logs')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\Admin\AdminSystemActivityController::class, 'index'])
+                ->name('admin.activity-logs.index');
+            Route::get('modules', [\App\Http\Controllers\Api\Admin\AdminSystemActivityController::class, 'modules'])
+                ->name('admin.activity-logs.modules');
+            Route::get('actions', [\App\Http\Controllers\Api\Admin\AdminSystemActivityController::class, 'actions'])
+                ->name('admin.activity-logs.actions');
+            Route::get('{id}', [\App\Http\Controllers\Api\Admin\AdminSystemActivityController::class, 'show'])
+                ->name('admin.activity-logs.show');
+        });
+
         // SMTP Settings management
         Route::prefix('settings/smtp')->group(function () {
             Route::get('/', [SmtpSettingController::class, 'show'])->name('admin.settings.smtp.show');

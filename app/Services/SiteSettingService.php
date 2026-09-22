@@ -223,6 +223,17 @@ class SiteSettingService
             }
         }
 
+        SystemActivityService::log(
+            module: 'Website',
+            action: 'Updated',
+            description: 'Updated site settings & configuration',
+            user: $adminId ? \App\Models\User::find($adminId) : null,
+            properties: [
+                'updated_fields' => array_keys($data),
+            ],
+            status: 'Success'
+        );
+
         return $setting;
     }
 }
