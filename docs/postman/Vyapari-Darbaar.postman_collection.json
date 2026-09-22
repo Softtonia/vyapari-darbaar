@@ -4001,6 +4001,84 @@
                                     ]
                                 }
                             }
+                        },
+                        {
+                            "name": "Delete Activity Log",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/activity-logs/:id",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "activity-logs",
+                                        ":id"
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "id",
+                                            "value": "1",
+                                            "description": "Activity log entry ID to delete"
+                                        }
+                                    ]
+                                },
+                                "description": "Delete a single activity log entry by ID.\n\nMethod: DELETE\nAuth: Admin Bearer Token"
+                            }
+                        },
+                        {
+                            "name": "Bulk Delete Activity Logs",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"ids\": [\n        1,\n        2,\n        3\n    ]\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/activity-logs/bulk-delete",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "activity-logs",
+                                        "bulk-delete"
+                                    ]
+                                },
+                                "description": "Bulk delete activity log entries.\n\nRequest Body Options:\n1. Delete specific IDs:\n   {\"ids\": [1, 2, 3]}\n\n2. Delete ALL logs:\n   {\"delete_all\": true}\n\nMethod: POST\nAuth: Admin Bearer Token"
+                            }
                         }
                     ]
                 },
