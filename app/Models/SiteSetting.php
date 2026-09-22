@@ -19,6 +19,7 @@ class SiteSetting extends Model
         'site_description',
         'email',
         'phone_number',
+        'social_links',
         'timezone',
         'default_language',
         'currency',
@@ -30,6 +31,7 @@ class SiteSetting extends Model
     ];
 
     protected $casts = [
+        'social_links' => 'array',
         'created_by' => 'integer',
         'updated_by' => 'integer',
     ];

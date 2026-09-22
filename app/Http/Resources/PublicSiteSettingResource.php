@@ -23,6 +23,7 @@ class PublicSiteSettingResource extends JsonResource
             'site_description' => $this->site_description,
             'email' => $this->email,
             'phone_number' => $this->phone_number,
+            'social_links' => ! empty($this->social_links) ? $this->social_links : (object) [],
             'timezone' => $this->timezone,
             'default_language' => $this->default_language,
             'currency' => $this->currency,

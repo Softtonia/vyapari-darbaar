@@ -48,6 +48,30 @@ class UpdateSiteSettingRequest extends FormRequest
             $sanitized['phone_number'] = $phone !== '' ? $phone : null;
         }
 
+        if ($this->has('social_links')) {
+            $rawSocial = $this->input('social_links');
+            if (is_string($rawSocial)) {
+                $decoded = json_decode($rawSocial, true);
+                if (is_array($decoded)) {
+                    $rawSocial = $decoded;
+                }
+            }
+            if (is_array($rawSocial)) {
+                $cleaned = [];
+                foreach ($rawSocial as $platform => $url) {
+                    if (is_string($url)) {
+                        $trimmed = trim($url);
+                        $cleaned[$platform] = $trimmed !== '' ? $trimmed : null;
+                    } elseif ($url === null) {
+                        $cleaned[$platform] = null;
+                    }
+                }
+                $sanitized['social_links'] = $cleaned;
+            } elseif ($rawSocial === null || $rawSocial === '') {
+                $sanitized['social_links'] = null;
+            }
+        }
+
         if ($this->has('timezone') && is_string($this->input('timezone'))) {
             $tz = trim($this->input('timezone'));
             $sanitized['timezone'] = $tz !== '' ? $tz : null;
@@ -83,6 +107,8 @@ class UpdateSiteSettingRequest extends FormRequest
             'admin_email' => ['sometimes', 'nullable', 'string', 'email', 'max:150'],
             'phone_number' => ['sometimes', 'nullable', 'string', 'max:50'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:50'],
+            'social_links' => ['sometimes', 'nullable', 'array'],
+            'social_links.*' => ['sometimes', 'nullable', 'string', 'max:500'],
             'timezone' => ['sometimes', 'nullable', 'string', 'max:100', 'timezone:all'],
             'default_language' => ['sometimes', 'nullable', 'string', 'max:20'],
             'currency' => ['sometimes', 'nullable', 'string', 'max:20'],

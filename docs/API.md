@@ -2032,6 +2032,13 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
           "site_description": "Connecting mandi traders across India.",
           "email": "admin@vyaparidarbaar.com",
           "phone_number": "+919876543210",
+          "social_links": {
+              "facebook": "https://facebook.com/vyaparidarbar",
+              "twitter": "https://x.com/vyaparidarbar",
+              "instagram": "https://instagram.com/vyaparidarbar",
+              "linkedin": "https://linkedin.com/company/vyaparidarbar",
+              "youtube": "https://youtube.com/@vyaparidarbar"
+          },
           "timezone": "Asia/Kolkata",
           "default_language": "en",
           "currency": "INR",
@@ -2062,6 +2069,13 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
           "site_description": "Connecting mandi traders across India.",
           "email": "admin@vyaparidarbaar.com",
           "phone_number": "+919876543210",
+          "social_links": {
+              "facebook": "https://facebook.com/vyaparidarbar",
+              "twitter": "https://x.com/vyaparidarbar",
+              "instagram": "https://instagram.com/vyaparidarbar",
+              "linkedin": "https://linkedin.com/company/vyaparidarbar",
+              "youtube": "https://youtube.com/@vyaparidarbar"
+          },
           "timezone": "Asia/Kolkata",
           "default_language": "en",
           "currency": "INR",
@@ -2091,6 +2105,8 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
   - `site_description`: `sometimes|nullable|string|max:5000`
   - `email`: `sometimes|nullable|string|email|max:150`
   - `phone_number`: `sometimes|nullable|string|max:50`
+  - `social_links`: `sometimes|nullable|array` (or stringified JSON in multipart/form-data)
+  - `social_links.*`: `sometimes|nullable|string|max:500`
   - `timezone`: `sometimes|nullable|string|max:100|timezone:all`
   - `default_language`: `sometimes|nullable|string|max:20`
   - `currency`: `sometimes|nullable|string|max:20`
@@ -2111,6 +2127,13 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
       "site_description": "Connecting mandi traders across India.",
       "email": "admin@vyaparidarbaar.com",
       "phone_number": "+919876543210",
+      "social_links": {
+          "facebook": "https://facebook.com/vyaparidarbar",
+          "twitter": "https://x.com/vyaparidarbar",
+          "instagram": "https://instagram.com/vyaparidarbar",
+          "linkedin": "https://linkedin.com/company/vyaparidarbar",
+          "youtube": "https://youtube.com/@vyaparidarbar"
+      },
       "timezone": "Asia/Kolkata",
       "default_language": "en",
       "currency": "INR"
@@ -2125,6 +2148,7 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
   site_name=Vyapari Darbaar Global
   email=admin@vyaparidarbaar.com
   phone_number=+919876543210
+  social_links={"facebook": "https://facebook.com/vyaparidarbar", "twitter": "https://x.com/vyaparidarbar", "instagram": "https://instagram.com/vyaparidarbar", "linkedin": "https://linkedin.com/company/vyaparidarbar", "youtube": "https://youtube.com/@vyaparidarbar"}
   timezone=Asia/Kolkata
   default_language=en
   currency=INR
@@ -2144,6 +2168,13 @@ Vyapari Darbaar maintains an application-level singleton record (`id = 1`) for g
           "site_description": "Connecting mandi traders across India.",
           "email": "admin@vyaparidarbaar.com",
           "phone_number": "+919876543210",
+          "social_links": {
+              "facebook": "https://facebook.com/vyaparidarbar",
+              "twitter": "https://x.com/vyaparidarbar",
+              "instagram": "https://instagram.com/vyaparidarbar",
+              "linkedin": "https://linkedin.com/company/vyaparidarbar",
+              "youtube": "https://youtube.com/@vyaparidarbar"
+          },
           "timezone": "Asia/Kolkata",
           "default_language": "en",
           "currency": "INR",
