@@ -123,7 +123,6 @@ class ActivityLogObserver
             foreach (self::SENSITIVE_FIELDS as $field) {
                 unset($old[$field]);
             }
-
             SystemActivityService::log(
                 module: $module,
                 action: $action,
@@ -189,30 +188,30 @@ class ActivityLogObserver
      */
     protected function resolveIdentifier(Model $model): string
     {
-        if (! empty($model->title)) {
+        if (!empty($model->title)) {
             return (string) $model->title;
         }
 
-        if (! empty($model->name)) {
+        if (!empty($model->name)) {
             return (string) $model->name;
         }
 
-        if (! empty($model->full_name)) {
+        if (!empty($model->full_name)) {
             return (string) $model->full_name;
         }
 
-        if (! empty($model->username)) {
+        if (!empty($model->username)) {
             return (string) $model->username;
         }
 
-        if (! empty($model->email)) {
+        if (!empty($model->email)) {
             return (string) $model->email;
         }
 
-        if (! empty($model->code)) {
+        if (!empty($model->code)) {
             return (string) $model->code;
         }
 
-        return '#'.$model->getKey();
+        return '#' . $model->getKey();
     }
 }
