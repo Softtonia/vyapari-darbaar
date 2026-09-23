@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CommodityVariety extends Model
 {
+    use \App\Traits\AutoSortOrder;
+
     use HasFactory, SoftDeletes;
 
     /**

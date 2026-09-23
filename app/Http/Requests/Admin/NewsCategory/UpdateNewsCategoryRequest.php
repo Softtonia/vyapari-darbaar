@@ -33,7 +33,7 @@ class UpdateNewsCategoryRequest extends FormRequest
 
         if ($this->has('sort_order')) {
             $order = $this->input('sort_order');
-            $sanitized['sort_order'] = ($order !== null && $order !== '') ? (int) $order : 0;
+            $sanitized['sort_order'] = ($order !== null && $order !== '') ? (int) $order : null;
         }
 
         if ($this->has('status')) {

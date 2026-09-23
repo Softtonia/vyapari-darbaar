@@ -7641,7 +7641,7 @@
                             "name": "Admin - News Imports",
                             "item": [
                                 {
-                                    "name": "Trigger PIB Import",
+                                    "name": "Trigger PIB/SEBI Import",
                                     "request": {
                                         "method": "POST",
                                         "header": [

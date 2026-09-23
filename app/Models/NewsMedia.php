@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Storage;
 
 class NewsMedia extends Model
 {
+    use \App\Traits\AutoSortOrder;
+
     use HasFactory;
 
     protected $table = 'news_media';

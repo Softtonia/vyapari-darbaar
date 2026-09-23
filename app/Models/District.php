@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class District extends Model
 {
+    use \App\Traits\AutoSortOrder;
+
     use HasFactory, SoftDeletes;
 
     /**

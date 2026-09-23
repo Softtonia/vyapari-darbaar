@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CommodityGrade extends Model
 {
+    use \App\Traits\AutoSortOrder;
+
     use HasFactory, SoftDeletes;
 
     protected $table = 'commodity_grades';

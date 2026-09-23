@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Mandi extends Model
 {
+    use \App\Traits\AutoSortOrder;
+
     use HasFactory, SoftDeletes;
 
     /**

@@ -39,7 +39,7 @@ class UpdateDistrictRequest extends FormRequest
 
         if ($this->has('sort_order')) {
             $sortOrder = $this->input('sort_order');
-            $sanitized['sort_order'] = ($sortOrder !== null && $sortOrder !== '') ? (int) $sortOrder : 0;
+            $sanitized['sort_order'] = ($sortOrder !== null && $sortOrder !== '') ? (int) $sortOrder : null;
         }
 
         if ($this->has('status')) {

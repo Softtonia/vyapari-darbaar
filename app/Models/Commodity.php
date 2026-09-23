@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
 
 class Commodity extends Model
 {
+    use \App\Traits\AutoSortOrder;
+
     use HasFactory, SoftDeletes;
 
     /**

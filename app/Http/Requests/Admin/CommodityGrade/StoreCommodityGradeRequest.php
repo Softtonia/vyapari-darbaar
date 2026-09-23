@@ -49,7 +49,7 @@ class StoreCommodityGradeRequest extends FormRequest
             'commodity_variety_id' => $varietyId,
             'description' => $desc !== '' ? $desc : null,
             'status' => $this->has('status') ? filter_var($this->input('status'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true : true,
-            'sort_order' => $this->has('sort_order') && $this->input('sort_order') !== null && $this->input('sort_order') !== '' ? (int) $this->input('sort_order') : 0,
+            'sort_order' => $this->has('sort_order') && $this->input('sort_order') !== null && $this->input('sort_order') !== '' ? (int) $this->input('sort_order') : null,
         ]);
     }
 

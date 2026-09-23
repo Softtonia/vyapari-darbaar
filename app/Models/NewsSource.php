@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
 
 class NewsSource extends Model
 {
+    use \App\Traits\AutoSortOrder;
+
     use HasFactory, SoftDeletes;
 
     protected $table = 'news_sources';

@@ -44,7 +44,7 @@ class StoreExchangeRequest extends FormRequest
             'timezone' => $timezone !== '' ? $timezone : 'Asia/Kolkata',
             'website' => $website !== '' ? $website : null,
             'default_data_delay_minutes' => $this->has('default_data_delay_minutes') && $this->input('default_data_delay_minutes') !== null && $this->input('default_data_delay_minutes') !== '' ? (int) $this->input('default_data_delay_minutes') : null,
-            'sort_order' => $this->has('sort_order') && $this->input('sort_order') !== null && $this->input('sort_order') !== '' ? (int) $this->input('sort_order') : 0,
+            'sort_order' => $this->has('sort_order') && $this->input('sort_order') !== null && $this->input('sort_order') !== '' ? (int) $this->input('sort_order') : null,
             'status' => $this->has('status') ? filter_var($this->input('status'), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true : true,
         ]);
     }
