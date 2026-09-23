@@ -272,14 +272,14 @@ class PibNewsImportService
             );
         }
 
-        $category = NewsCategory::where('slug', $slug)->first();
-
-        if (! $category) {
-            throw new DomainException(
-                "Configured PIB {$type} NewsCategory with slug '{$slug}' not found. "
-                . 'Create it in Admin News Categories or update PIB_RSS_'.strtoupper($type).'_CATEGORY_SLUG in .env.'
-            );
-        }
+        $category = NewsCategory::firstOrCreate(
+            ['slug' => $slug],
+            [
+                'name' => ucfirst($type) . ' News',
+                'description' => "Auto-created category for {$type} news imports",
+                'status' => true,
+            ]
+        );
 
         if (! $category->status) {
             throw new DomainException(
