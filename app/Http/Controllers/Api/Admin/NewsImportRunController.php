@@ -112,14 +112,36 @@ class NewsImportRunController extends Controller
      * Rapid successive API calls will each get their own run record, but only
      * one job will acquire the lock and process; others will be marked skipped.
      */
-    public function trigger(Request $request, PibNewsImportService $service): JsonResponse
+    public function trigger(Request $request): JsonResponse
     {
         $this->authorizeAdmin($request, 'news-import.trigger');
 
-        if (! config('news_imports.pib.enabled', true)) {
+        $source = $request->input('source', 'pib');
+
+        if ($source === 'pib') {
+            if (! config('news_imports.pib.enabled', true)) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'PIB RSS import is currently disabled.',
+                ], 422);
+            }
+            $service = app(\App\Services\PibNewsImportService::class);
+            $jobClass = \App\Jobs\ProcessPibRssImportJob::class;
+            $message = 'PIB news import queued successfully.';
+        } elseif ($source === 'sebi') {
+            if (! config('news_imports.sebi.enabled', true)) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'SEBI RSS import is currently disabled.',
+                ], 422);
+            }
+            $service = app(\App\Services\SebiNewsImportService::class);
+            $jobClass = \App\Jobs\ProcessSebiRssImportJob::class;
+            $message = 'SEBI news import queued successfully.';
+        } else {
             return response()->json([
                 'status'  => false,
-                'message' => 'PIB RSS import is currently disabled.',
+                'message' => 'Invalid news source specified.',
             ], 422);
         }
 
@@ -128,11 +150,11 @@ class NewsImportRunController extends Controller
 
         $run = $service->createPendingRun(triggeredBy: $admin?->id);
 
-        ProcessPibRssImportJob::dispatch($run->id);
+        $jobClass::dispatch($run->id);
 
         return response()->json([
             'status'  => true,
-            'message' => 'PIB news import queued successfully.',
+            'message' => $message,
             'data'    => [
                 'run_id' => $run->id,
                 'status' => NewsImportStatus::PENDING->value,

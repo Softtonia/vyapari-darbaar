@@ -96,4 +96,22 @@ return [
 
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | SEBI RSS Auto-Import
+    |--------------------------------------------------------------------------
+    */
+    'sebi' => [
+        'enabled' => env('SEBI_RSS_ENABLED', true),
+        'url' => env('SEBI_RSS_URL', 'https://www.sebi.gov.in/sebirss.xml'),
+        'source_code' => env('SEBI_RSS_SOURCE_CODE', 'SEBI'),
+        'default_category_slug' => env('SEBI_RSS_CATEGORY_SLUG', 'business'),
+        'default_author' => env('SEBI_RSS_DEFAULT_AUTHOR', 'SEBI'),
+        'timeout_seconds' => (int) env('SEBI_RSS_TIMEOUT', 30),
+        'max_items' => (int) env('SEBI_RSS_MAX_ITEMS', 50),
+        'lock_key' => 'news:lock:import:sebi',
+        'lock_ttl' => (int) env('SEBI_RSS_LOCK_TTL', 600),
+        'queue' => env('SEBI_RSS_QUEUE', 'news-import'),
+    ],
+
 ];
