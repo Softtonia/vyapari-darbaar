@@ -6671,1057 +6671,1062 @@
                     ]
                 },
                 {
-                    "name": "News Articles Management",
-                    "description": "Editorial CMS article lifecycle management for Admin.",
+                    "name": "News CMS",
                     "item": [
                         {
-                            "name": "List Admin News Articles",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news?search=&status=&news_source_id=&news_category_id=&content_type=&is_featured=&is_breaking=&per_page=15&page=1",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news"
-                                    ],
-                                    "query": [
-                                        {
-                                            "key": "search",
-                                            "value": ""
+                            "name": "News Articles Management",
+                            "description": "Editorial CMS article lifecycle management for Admin.",
+                            "item": [
+                                {
+                                    "name": "List Admin News Articles",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news?search=&status=&news_source_id=&news_category_id=&content_type=&is_featured=&is_breaking=&per_page=15&page=1",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "search",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "key": "status",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "key": "news_source_id",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "key": "news_category_id",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "key": "content_type",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "key": "is_featured",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "key": "is_breaking",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "key": "per_page",
+                                                    "value": "15"
+                                                },
+                                                {
+                                                    "key": "page",
+                                                    "value": "1"
+                                                }
+                                            ]
                                         },
-                                        {
-                                            "key": "status",
-                                            "value": ""
+                                        "description": "List news articles for admin without loading longtext content column."
+                                    }
+                                },
+                                {
+                                    "name": "Create News Article (Draft)",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"news_source_id\": 1,\n    \"news_category_id\": 1,\n    \"content_type\": \"news\",\n    \"title\": \"Chana Futures Rally 2 Percent on Festive Demand\",\n    \"slug\": \"chana-futures-rally-2-percent\",\n    \"short_description\": \"Chana prices rose substantially across mandis today.\",\n    \"content\": \"<p>Chana futures witnessed robust buying across major trading centers today ahead of festive demand.<\\/p>\",\n    \"author_name\": \"Editorial Desk\",\n    \"source_url\": \"https:\\/\\/ncdex.com\\/market-updates\\/chana-festive\",\n    \"status\": \"draft\",\n    \"is_featured\": false,\n    \"is_breaking\": false,\n    \"meta_title\": \"Chana Futures Rally 2 Percent - Vyapari Darbaar\",\n    \"meta_description\": \"Read full report on Chana futures surge.\",\n    \"meta_keywords\": [\n        \"chana\",\n        \"futures\",\n        \"ncdex\",\n        \"agri\"\n    ]\n}"
                                         },
-                                        {
-                                            "key": "news_source_id",
-                                            "value": ""
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news"
+                                            ]
                                         },
-                                        {
-                                            "key": "news_category_id",
-                                            "value": ""
+                                        "description": "Create a draft editorial news article."
+                                    }
+                                },
+                                {
+                                    "name": "Create & Publish News Article",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"news_source_id\": 1,\n    \"news_category_id\": 1,\n    \"content_type\": \"market_update\",\n    \"title\": \"Soybean Arrival Drops 15 Percent in Madhya Pradesh Mandis\",\n    \"content\": \"<p>Arrivals of soybean dipped by 15% across key mandis in Indore, Ujjain, and Dewas.<\\/p>\",\n    \"author_name\": \"Market Analyst\",\n    \"status\": \"published\",\n    \"is_featured\": true,\n    \"is_breaking\": false\n}"
                                         },
-                                        {
-                                            "key": "content_type",
-                                            "value": ""
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news"
+                                            ]
                                         },
-                                        {
-                                            "key": "is_featured",
-                                            "value": ""
+                                        "description": "Create and publish directly. Requires news.publish permission."
+                                    }
+                                },
+                                {
+                                    "name": "Schedule News Article",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"news_source_id\": 1,\n    \"news_category_id\": 1,\n    \"content_type\": \"expert_insight\",\n    \"title\": \"Weekly Commodity Outlook: Mustard and Guar Seed\",\n    \"content\": \"<p>Technical outlook on mustard seed for next week.<\\/p>\",\n    \"status\": \"scheduled\",\n    \"scheduled_at\": \"2026-09-22 09:00:00\"\n}"
                                         },
-                                        {
-                                            "key": "is_breaking",
-                                            "value": ""
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news"
+                                            ]
                                         },
-                                        {
-                                            "key": "per_page",
-                                            "value": "15"
+                                        "description": "Schedule article for future publishing. Requires news.publish permission and future scheduled_at date."
+                                    }
+                                },
+                                {
+                                    "name": "Get Admin News Article Detail",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news/{{newsArticleId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news",
+                                                "{{newsArticleId}}"
+                                            ]
                                         },
-                                        {
-                                            "key": "page",
-                                            "value": "1"
-                                        }
-                                    ]
-                                },
-                                "description": "List news articles for admin without loading longtext content column."
-                            }
-                        },
-                        {
-                            "name": "Create News Article (Draft)",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
+                                        "description": "Get full article details with sanitized content, attachments, and relations."
                                     }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"news_source_id\": 1,\n    \"news_category_id\": 1,\n    \"content_type\": \"news\",\n    \"title\": \"Chana Futures Rally 2 Percent on Festive Demand\",\n    \"slug\": \"chana-futures-rally-2-percent\",\n    \"short_description\": \"Chana prices rose substantially across mandis today.\",\n    \"content\": \"<p>Chana futures witnessed robust buying across major trading centers today ahead of festive demand.<\\/p>\",\n    \"author_name\": \"Editorial Desk\",\n    \"source_url\": \"https:\\/\\/ncdex.com\\/market-updates\\/chana-festive\",\n    \"status\": \"draft\",\n    \"is_featured\": false,\n    \"is_breaking\": false,\n    \"meta_title\": \"Chana Futures Rally 2 Percent - Vyapari Darbaar\",\n    \"meta_description\": \"Read full report on Chana futures surge.\",\n    \"meta_keywords\": [\n        \"chana\",\n        \"futures\",\n        \"ncdex\",\n        \"agri\"\n    ]\n}"
                                 },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news"
-                                    ]
-                                },
-                                "description": "Create a draft editorial news article."
-                            }
-                        },
-                        {
-                            "name": "Create & Publish News Article",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"news_source_id\": 1,\n    \"news_category_id\": 1,\n    \"content_type\": \"market_update\",\n    \"title\": \"Soybean Arrival Drops 15 Percent in Madhya Pradesh Mandis\",\n    \"content\": \"<p>Arrivals of soybean dipped by 15% across key mandis in Indore, Ujjain, and Dewas.<\\/p>\",\n    \"author_name\": \"Market Analyst\",\n    \"status\": \"published\",\n    \"is_featured\": true,\n    \"is_breaking\": false\n}"
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news"
-                                    ]
-                                },
-                                "description": "Create and publish directly. Requires news.publish permission."
-                            }
-                        },
-                        {
-                            "name": "Schedule News Article",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"news_source_id\": 1,\n    \"news_category_id\": 1,\n    \"content_type\": \"expert_insight\",\n    \"title\": \"Weekly Commodity Outlook: Mustard and Guar Seed\",\n    \"content\": \"<p>Technical outlook on mustard seed for next week.<\\/p>\",\n    \"status\": \"scheduled\",\n    \"scheduled_at\": \"2026-09-22 09:00:00\"\n}"
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news"
-                                    ]
-                                },
-                                "description": "Schedule article for future publishing. Requires news.publish permission and future scheduled_at date."
-                            }
-                        },
-                        {
-                            "name": "Get Admin News Article Detail",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news/{{newsArticleId}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news",
-                                        "{{newsArticleId}}"
-                                    ]
-                                },
-                                "description": "Get full article details with sanitized content, attachments, and relations."
-                            }
-                        },
-                        {
-                            "name": "Update News Article",
-                            "request": {
-                                "method": "PATCH",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"title\": \"Chana Futures Rally 2.5 Percent on Festive Demand\",\n    \"content\": \"<p>Updated content with afternoon closing figures.<\\/p>\"\n}"
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news/{{newsArticleId}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news",
-                                        "{{newsArticleId}}"
-                                    ]
-                                },
-                                "description": "Update article fields and auto-sanitize rich HTML content."
-                            }
-                        },
-                        {
-                            "name": "Update Article Status",
-                            "request": {
-                                "method": "PATCH",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"status\": \"archived\"\n}"
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news/{{newsArticleId}}/status",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news",
-                                        "{{newsArticleId}}",
-                                        "status"
-                                    ]
-                                },
-                                "description": "Change article status (draft, published, scheduled, archived). Archiving automatically clears featured and breaking flags."
-                            }
-                        },
-                        {
-                            "name": "Toggle Featured Status",
-                            "request": {
-                                "method": "PATCH",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"is_featured\": true\n}"
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news/{{newsArticleId}}/featured",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news",
-                                        "{{newsArticleId}}",
-                                        "featured"
-                                    ]
-                                },
-                                "description": "Toggle featured carousel highlight for published articles."
-                            }
-                        },
-                        {
-                            "name": "Toggle Breaking Status",
-                            "request": {
-                                "method": "PATCH",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"is_breaking\": true\n}"
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news/{{newsArticleId}}/breaking",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news",
-                                        "{{newsArticleId}}",
-                                        "breaking"
-                                    ]
-                                },
-                                "description": "Toggle breaking news banner highlight for urgent updates."
-                            }
-                        },
-                        {
-                            "name": "Delete News Article",
-                            "request": {
-                                "method": "DELETE",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news/{{newsArticleId}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news",
-                                        "{{newsArticleId}}"
-                                    ]
-                                },
-                                "description": "Soft delete news article and purge Redis caches."
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "News Sources Management",
-                    "description": "Editorial News Sources master management for Admin CMS.",
-                    "item": [
-                        {
-                            "name": "List News Sources",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-sources?search=&status=&per_page=15&page=1",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-sources"
-                                    ],
-                                    "query": [
-                                        {
-                                            "key": "search",
-                                            "value": ""
+                                {
+                                    "name": "Update News Article",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"title\": \"Chana Futures Rally 2.5 Percent on Festive Demand\",\n    \"content\": \"<p>Updated content with afternoon closing figures.<\\/p>\"\n}"
                                         },
-                                        {
-                                            "key": "status",
-                                            "value": ""
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news/{{newsArticleId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news",
+                                                "{{newsArticleId}}"
+                                            ]
                                         },
-                                        {
-                                            "key": "per_page",
-                                            "value": "15"
+                                        "description": "Update article fields and auto-sanitize rich HTML content."
+                                    }
+                                },
+                                {
+                                    "name": "Update Article Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"status\": \"archived\"\n}"
                                         },
-                                        {
-                                            "key": "page",
-                                            "value": "1"
-                                        }
-                                    ]
-                                },
-                                "description": "List news sources with search, status filtering, and pagination."
-                            }
-                        },
-                        {
-                            "name": "Get News Sources Options (Dropdown)",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-sources/options",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-sources",
-                                        "options"
-                                    ]
-                                },
-                                "description": "Lightweight Redis-cached list of active news sources for dropdowns."
-                            }
-                        },
-                        {
-                            "name": "Create News Source",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"name\": \"National Commodity & Derivatives Exchange\",\n    \"code\": \"NCDEX\",\n    \"slug\": \"ncdex\",\n    \"website_url\": \"https:\\/\\/www.ncdex.com\",\n    \"description\": \"Leading agricultural commodity exchange of India.\",\n    \"status\": true,\n    \"sort_order\": 1\n}"
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-sources",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-sources"
-                                    ]
-                                },
-                                "description": "Create a new editorial news source."
-                            }
-                        },
-                        {
-                            "name": "Get News Source Detail",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-sources/{{newsSourceId}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-sources",
-                                        "{{newsSourceId}}"
-                                    ]
-                                },
-                                "description": "View single news source details."
-                            }
-                        },
-                        {
-                            "name": "Update News Source",
-                            "request": {
-                                "method": "PATCH",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"name\": \"NCDEX India\",\n    \"website_url\": \"https:\\/\\/ncdex.com\",\n    \"sort_order\": 2\n}"
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-sources/{{newsSourceId}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-sources",
-                                        "{{newsSourceId}}"
-                                    ]
-                                },
-                                "description": "Update existing news source details."
-                            }
-                        },
-                        {
-                            "name": "Update News Source Status",
-                            "request": {
-                                "method": "PATCH",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"status\": false\n}"
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-sources/{{newsSourceId}}/status",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-sources",
-                                        "{{newsSourceId}}",
-                                        "status"
-                                    ]
-                                },
-                                "description": "Toggle active/inactive status of a news source."
-                            }
-                        },
-                        {
-                            "name": "Delete News Source",
-                            "request": {
-                                "method": "DELETE",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-sources/{{newsSourceId}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-sources",
-                                        "{{newsSourceId}}"
-                                    ]
-                                },
-                                "description": "Soft delete news source. Returns 409 Conflict if articles reference this source."
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "News Categories Management",
-                    "description": "Editorial News Categories master management for Admin CMS.",
-                    "item": [
-                        {
-                            "name": "List News Categories",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-categories?search=&status=&per_page=15&page=1",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-categories"
-                                    ],
-                                    "query": [
-                                        {
-                                            "key": "search",
-                                            "value": ""
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news/{{newsArticleId}}/status",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news",
+                                                "{{newsArticleId}}",
+                                                "status"
+                                            ]
                                         },
-                                        {
-                                            "key": "status",
-                                            "value": ""
+                                        "description": "Change article status (draft, published, scheduled, archived). Archiving automatically clears featured and breaking flags."
+                                    }
+                                },
+                                {
+                                    "name": "Toggle Featured Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"is_featured\": true\n}"
                                         },
-                                        {
-                                            "key": "per_page",
-                                            "value": "15"
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news/{{newsArticleId}}/featured",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news",
+                                                "{{newsArticleId}}",
+                                                "featured"
+                                            ]
                                         },
-                                        {
-                                            "key": "page",
-                                            "value": "1"
-                                        }
-                                    ]
-                                },
-                                "description": "List news categories with search, status filtering, and pagination."
-                            }
-                        },
-                        {
-                            "name": "Get News Categories Options (Dropdown)",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
+                                        "description": "Toggle featured carousel highlight for published articles."
                                     }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-categories/options",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-categories",
-                                        "options"
-                                    ]
                                 },
-                                "description": "Lightweight Redis-cached list of active news categories for dropdowns."
-                            }
-                        },
-                        {
-                            "name": "Create News Category",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
+                                {
+                                    "name": "Toggle Breaking Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"is_breaking\": true\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news/{{newsArticleId}}/breaking",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news",
+                                                "{{newsArticleId}}",
+                                                "breaking"
+                                            ]
+                                        },
+                                        "description": "Toggle breaking news banner highlight for urgent updates."
                                     }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"name\": \"Market Insights & Trends\",\n    \"slug\": \"market-insights-trends\",\n    \"description\": \"Commodity market daily trends and futures price outlook.\",\n    \"status\": true,\n    \"sort_order\": 1\n}"
                                 },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-categories",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-categories"
-                                    ]
-                                },
-                                "description": "Create a new editorial news category."
-                            }
-                        },
-                        {
-                            "name": "Get News Category Detail",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
+                                {
+                                    "name": "Delete News Article",
+                                    "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news/{{newsArticleId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news",
+                                                "{{newsArticleId}}"
+                                            ]
+                                        },
+                                        "description": "Soft delete news article and purge Redis caches."
                                     }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-categories/{{newsCategoryId}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-categories",
-                                        "{{newsCategoryId}}"
-                                    ]
-                                },
-                                "description": "View single news category details."
-                            }
-                        },
-                        {
-                            "name": "Update News Category",
-                            "request": {
-                                "method": "PATCH",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"name\": \"Market Insights\",\n    \"sort_order\": 3\n}"
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-categories/{{newsCategoryId}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-categories",
-                                        "{{newsCategoryId}}"
-                                    ]
-                                },
-                                "description": "Update existing news category details."
-                            }
-                        },
-                        {
-                            "name": "Update News Category Status",
-                            "request": {
-                                "method": "PATCH",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"status\": false\n}"
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-categories/{{newsCategoryId}}/status",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-categories",
-                                        "{{newsCategoryId}}",
-                                        "status"
-                                    ]
-                                },
-                                "description": "Toggle active/inactive status of a news category."
-                            }
-                        },
-                        {
-                            "name": "Delete News Category",
-                            "request": {
-                                "method": "DELETE",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-categories/{{newsCategoryId}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-categories",
-                                        "{{newsCategoryId}}"
-                                    ]
-                                },
-                                "description": "Soft delete news category. Returns 409 Conflict if articles reference this category."
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "News Media Management",
-                    "description": "Manage article attachments (images, PDFs, external links, videos).",
-                    "item": [
-                        {
-                            "name": "Add Media Attachment (External Link / Video)",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"media_type\": \"external_link\",\n    \"title\": \"Official Press Notification PDF\",\n    \"external_url\": \"https:\\/\\/ncdex.com\\/circulars\\/circular-2026-09.pdf\",\n    \"caption\": \"Official circular released by NCDEX\",\n    \"sort_order\": 1\n}"
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news/{{newsArticleId}}/media",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news",
-                                        "{{newsArticleId}}",
-                                        "media"
-                                    ]
-                                },
-                                "description": "Attach link or video to news article."
-                            }
-                        },
-                        {
-                            "name": "Delete Media Attachment",
-                            "request": {
-                                "method": "DELETE",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news/{{newsArticleId}}/media/{{newsMediaId}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news",
-                                        "{{newsArticleId}}",
-                                        "media",
-                                        "{{newsMediaId}}"
-                                    ]
-                                },
-                                "description": "Delete media record and safely remove physical disk file if stored locally."
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Admin - News Imports",
-                    "item": [
-                        {
-                            "name": "Trigger PIB Import",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-import/runs/trigger",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-import",
-                                        "runs",
-                                        "trigger"
-                                    ]
                                 }
-                            }
+                            ]
                         },
                         {
-                            "name": "List Import Runs",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
+                            "name": "News Sources Management",
+                            "description": "Editorial News Sources master management for Admin CMS.",
+                            "item": [
+                                {
+                                    "name": "List News Sources",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-sources?search=&status=&per_page=15&page=1",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-sources"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "search",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "key": "status",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "key": "per_page",
+                                                    "value": "15"
+                                                },
+                                                {
+                                                    "key": "page",
+                                                    "value": "1"
+                                                }
+                                            ]
+                                        },
+                                        "description": "List news sources with search, status filtering, and pagination."
                                     }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-import/runs",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-import",
-                                        "runs"
-                                    ]
+                                },
+                                {
+                                    "name": "Get News Sources Options (Dropdown)",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-sources/options",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-sources",
+                                                "options"
+                                            ]
+                                        },
+                                        "description": "Lightweight Redis-cached list of active news sources for dropdowns."
+                                    }
+                                },
+                                {
+                                    "name": "Create News Source",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"name\": \"National Commodity & Derivatives Exchange\",\n    \"code\": \"NCDEX\",\n    \"slug\": \"ncdex\",\n    \"website_url\": \"https:\\/\\/www.ncdex.com\",\n    \"description\": \"Leading agricultural commodity exchange of India.\",\n    \"status\": true,\n    \"sort_order\": 1\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-sources",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-sources"
+                                            ]
+                                        },
+                                        "description": "Create a new editorial news source."
+                                    }
+                                },
+                                {
+                                    "name": "Get News Source Detail",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-sources/{{newsSourceId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-sources",
+                                                "{{newsSourceId}}"
+                                            ]
+                                        },
+                                        "description": "View single news source details."
+                                    }
+                                },
+                                {
+                                    "name": "Update News Source",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"name\": \"NCDEX India\",\n    \"website_url\": \"https:\\/\\/ncdex.com\",\n    \"sort_order\": 2\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-sources/{{newsSourceId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-sources",
+                                                "{{newsSourceId}}"
+                                            ]
+                                        },
+                                        "description": "Update existing news source details."
+                                    }
+                                },
+                                {
+                                    "name": "Update News Source Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"status\": false\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-sources/{{newsSourceId}}/status",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-sources",
+                                                "{{newsSourceId}}",
+                                                "status"
+                                            ]
+                                        },
+                                        "description": "Toggle active/inactive status of a news source."
+                                    }
+                                },
+                                {
+                                    "name": "Delete News Source",
+                                    "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-sources/{{newsSourceId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-sources",
+                                                "{{newsSourceId}}"
+                                            ]
+                                        },
+                                        "description": "Soft delete news source. Returns 409 Conflict if articles reference this source."
+                                    }
                                 }
-                            }
+                            ]
                         },
                         {
-                            "name": "Show Import Run",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
+                            "name": "News Categories Management",
+                            "description": "Editorial News Categories master management for Admin CMS.",
+                            "item": [
+                                {
+                                    "name": "List News Categories",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-categories?search=&status=&per_page=15&page=1",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-categories"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "search",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "key": "status",
+                                                    "value": ""
+                                                },
+                                                {
+                                                    "key": "per_page",
+                                                    "value": "15"
+                                                },
+                                                {
+                                                    "key": "page",
+                                                    "value": "1"
+                                                }
+                                            ]
+                                        },
+                                        "description": "List news categories with search, status filtering, and pagination."
                                     }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/news-import/runs/{{run_id}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "news-import",
-                                        "runs",
-                                        "{{run_id}}"
-                                    ]
+                                },
+                                {
+                                    "name": "Get News Categories Options (Dropdown)",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-categories/options",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-categories",
+                                                "options"
+                                            ]
+                                        },
+                                        "description": "Lightweight Redis-cached list of active news categories for dropdowns."
+                                    }
+                                },
+                                {
+                                    "name": "Create News Category",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"name\": \"Market Insights & Trends\",\n    \"slug\": \"market-insights-trends\",\n    \"description\": \"Commodity market daily trends and futures price outlook.\",\n    \"status\": true,\n    \"sort_order\": 1\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-categories",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-categories"
+                                            ]
+                                        },
+                                        "description": "Create a new editorial news category."
+                                    }
+                                },
+                                {
+                                    "name": "Get News Category Detail",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-categories/{{newsCategoryId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-categories",
+                                                "{{newsCategoryId}}"
+                                            ]
+                                        },
+                                        "description": "View single news category details."
+                                    }
+                                },
+                                {
+                                    "name": "Update News Category",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"name\": \"Market Insights\",\n    \"sort_order\": 3\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-categories/{{newsCategoryId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-categories",
+                                                "{{newsCategoryId}}"
+                                            ]
+                                        },
+                                        "description": "Update existing news category details."
+                                    }
+                                },
+                                {
+                                    "name": "Update News Category Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"status\": false\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-categories/{{newsCategoryId}}/status",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-categories",
+                                                "{{newsCategoryId}}",
+                                                "status"
+                                            ]
+                                        },
+                                        "description": "Toggle active/inactive status of a news category."
+                                    }
+                                },
+                                {
+                                    "name": "Delete News Category",
+                                    "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-categories/{{newsCategoryId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-categories",
+                                                "{{newsCategoryId}}"
+                                            ]
+                                        },
+                                        "description": "Soft delete news category. Returns 409 Conflict if articles reference this category."
+                                    }
                                 }
-                            }
+                            ]
+                        },
+                        {
+                            "name": "News Media Management",
+                            "description": "Manage article attachments (images, PDFs, external links, videos).",
+                            "item": [
+                                {
+                                    "name": "Add Media Attachment (External Link / Video)",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"media_type\": \"external_link\",\n    \"title\": \"Official Press Notification PDF\",\n    \"external_url\": \"https:\\/\\/ncdex.com\\/circulars\\/circular-2026-09.pdf\",\n    \"caption\": \"Official circular released by NCDEX\",\n    \"sort_order\": 1\n}"
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news/{{newsArticleId}}/media",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news",
+                                                "{{newsArticleId}}",
+                                                "media"
+                                            ]
+                                        },
+                                        "description": "Attach link or video to news article."
+                                    }
+                                },
+                                {
+                                    "name": "Delete Media Attachment",
+                                    "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news/{{newsArticleId}}/media/{{newsMediaId}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news",
+                                                "{{newsArticleId}}",
+                                                "media",
+                                                "{{newsMediaId}}"
+                                            ]
+                                        },
+                                        "description": "Delete media record and safely remove physical disk file if stored locally."
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Admin - News Imports",
+                            "item": [
+                                {
+                                    "name": "Trigger PIB Import",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-import/runs/trigger",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-import",
+                                                "runs",
+                                                "trigger"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "List Import Runs",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-import/runs",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-import",
+                                                "runs"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Show Import Run",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/news-import/runs/{{run_id}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "news-import",
+                                                "runs",
+                                                "{{run_id}}"
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     ]
                 }
