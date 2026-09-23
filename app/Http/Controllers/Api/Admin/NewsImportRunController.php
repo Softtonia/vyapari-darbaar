@@ -86,7 +86,7 @@ class NewsImportRunController extends Controller
         $run->loadMissing([
             'source:id,name,code,slug',
             'category:id,name,slug',
-            'triggeredBy:id,name,email',
+            'triggeredBy',
         ]);
 
         return response()->json([
