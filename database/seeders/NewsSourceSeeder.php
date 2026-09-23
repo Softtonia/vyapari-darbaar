@@ -58,6 +58,15 @@ class NewsSourceSeeder extends Seeder
                 'sort_order' => 5,
                 'status' => true,
             ],
+            [
+                'name' => 'Press Information Bureau (PIB)',
+                'slug' => 'pib',
+                'code' => 'PIB',
+                'website_url' => 'https://pib.gov.in',
+                'description' => 'Official government press releases and announcements from the Press Information Bureau of India.',
+                'sort_order' => 6,
+                'status' => true,
+            ],
         ];
 
         foreach ($sources as $sourceData) {

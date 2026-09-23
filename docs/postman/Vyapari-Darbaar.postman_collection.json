@@ -7633,6 +7633,97 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "Admin - News Imports",
+                    "item": [
+                        {
+                            "name": "Trigger PIB Import",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/news-import/runs/trigger",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "news-import",
+                                        "runs",
+                                        "trigger"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "List Import Runs",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/news-import/runs",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "news-import",
+                                        "runs"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Show Import Run",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/news-import/runs/{{run_id}}",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "news-import",
+                                        "runs",
+                                        "{{run_id}}"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
                 }
             ]
         },

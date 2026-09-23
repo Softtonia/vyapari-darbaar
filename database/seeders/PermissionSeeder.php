@@ -148,6 +148,9 @@ class PermissionSeeder extends Seeder
             'news-sources.create',
             'news-sources.update',
             'news-sources.delete',
+            // PIB RSS Auto-Import permissions
+            'news-import.view',
+            'news-import.trigger',
         ];
 
         foreach ($adminPermissions as $permissionName) {

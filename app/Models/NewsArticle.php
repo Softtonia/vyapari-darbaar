@@ -34,6 +34,8 @@ class NewsArticle extends Model
         'featured_image',
         'author_name',
         'source_url',
+        'external_id',
+        'imported_at',
         'published_on',
         'published_at',
         'scheduled_at',
@@ -77,15 +79,16 @@ class NewsArticle extends Model
     protected function casts(): array
     {
         return [
-            'content_type' => NewsContentType::class,
-            'status' => NewsStatus::class,
-            'published_on' => 'date:Y-m-d',
-            'published_at' => 'datetime',
-            'scheduled_at' => 'datetime',
-            'is_featured' => 'boolean',
-            'is_breaking' => 'boolean',
+            'content_type'  => NewsContentType::class,
+            'status'        => NewsStatus::class,
+            'published_on'  => 'date:Y-m-d',
+            'published_at'  => 'datetime',
+            'scheduled_at'  => 'datetime',
+            'imported_at'   => 'datetime',
+            'is_featured'   => 'boolean',
+            'is_breaking'   => 'boolean',
             'meta_keywords' => 'array',
-            'view_count' => 'integer',
+            'view_count'    => 'integer',
         ];
     }
 

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('site_settings', function (Blueprint $table) {
-            $table->string('admin_email', 150)->nullable()->after('site_description');
+            $table->string('admin_email', 150)->nullable()->after('site_description_hi');
             $table->string('timezone', 100)->default('Asia/Kolkata')->after('admin_email');
             $table->string('default_language', 20)->default('en')->after('timezone');
             $table->string('currency', 20)->default('INR')->after('default_language');

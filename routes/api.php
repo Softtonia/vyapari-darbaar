@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\Admin\NotificationTemplateController;
 use App\Http\Controllers\Api\Admin\NotificationTopicController;
 use App\Http\Controllers\Api\Admin\NewsArticleController as AdminNewsArticleController;
 use App\Http\Controllers\Api\Admin\NewsCategoryController as AdminNewsCategoryController;
+use App\Http\Controllers\Api\Admin\NewsImportRunController;
 use App\Http\Controllers\Api\Admin\NewsMediaController as AdminNewsMediaController;
 use App\Http\Controllers\Api\Admin\NewsSourceController as AdminNewsSourceController;
 use App\Http\Controllers\Api\Admin\RoleController;
@@ -769,6 +770,16 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.news.media.store');
             Route::delete('{article}/media/{media}', [AdminNewsMediaController::class, 'destroy'])
                 ->name('admin.news.media.destroy');
+        });
+
+        // PIB RSS Auto-Import: run history and manual trigger
+        Route::prefix('news-import')->group(function () {
+            Route::post('runs/trigger', [NewsImportRunController::class, 'trigger'])
+                ->name('admin.news-import.runs.trigger');
+            Route::get('runs', [NewsImportRunController::class, 'index'])
+                ->name('admin.news-import.runs.index');
+            Route::get('runs/{run}', [NewsImportRunController::class, 'show'])
+                ->name('admin.news-import.runs.show');
         });
     });
 });
