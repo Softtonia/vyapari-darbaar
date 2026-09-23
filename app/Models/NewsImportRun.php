@@ -94,13 +94,13 @@ class NewsImportRun extends Model
     }
 
     /**
-     * Get the Admin who triggered this run.
+     * Get the User (Admin) who triggered this run.
      *
-     * @return BelongsTo<Admin, $this>
+     * @return BelongsTo<User, $this>
      */
     public function triggeredBy(): BelongsTo
     {
-        return $this->belongsTo(Admin::class, 'triggered_by');
+        return $this->belongsTo(User::class, 'triggered_by');
     }
 
     /**
