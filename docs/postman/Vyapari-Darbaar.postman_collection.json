@@ -7666,6 +7666,15 @@
                                                 "runs",
                                                 "trigger"
                                             ]
+                                        },
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n  \"source\": \"sebi\"\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
                                         }
                                     }
                                 },
