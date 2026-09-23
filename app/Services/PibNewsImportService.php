@@ -296,7 +296,7 @@ class PibNewsImportService
      */
     protected function classifyItem(PibNewsItemDTO $dto): string
     {
-        $text = strtolower($dto->title . ' ' . $dto->description . ' ' . $dto->content);
+        $text = strtolower($dto->title . ' ' . $dto->description);
 
         $traderKeywords = config('news_imports.pib.categories.trader.keywords', []);
         $agKeywords = config('news_imports.pib.categories.agriculture.keywords', []);
