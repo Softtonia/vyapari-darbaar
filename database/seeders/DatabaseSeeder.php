@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             UserSeeder::class,
             EmailTemplateSeeder::class,
+            CampaignEmailTemplateSeeder::class,
             CommodityCategorySeeder::class,
             CommoditySeeder::class,
             CommoditySubcategorySeeder::class,
