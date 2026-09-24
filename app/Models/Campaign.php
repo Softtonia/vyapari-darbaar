@@ -17,6 +17,7 @@ class Campaign extends Model
         'email_template_id',
         'send_type',
         'event',
+        'target_users',
         'scheduled_at',
         'is_active',
     ];
@@ -26,6 +27,7 @@ class Campaign extends Model
         return [
             'send_type' => CampaignSendType::class,
             'event' => CampaignEvent::class,
+            'target_users' => 'array',
             'scheduled_at' => 'datetime',
             'is_active' => 'boolean',
         ];

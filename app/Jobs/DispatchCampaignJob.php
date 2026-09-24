@@ -39,8 +39,12 @@ class DispatchCampaignJob implements ShouldQueue
             return;
         }
 
-        // Get all active users
-        $users = User::where('status', true)->get();
+        // Get active users based on target_users if specified
+        $query = User::where('status', 'active');
+        if (!empty($this->campaign->target_users)) {
+            $query->whereIn('id', $this->campaign->target_users);
+        }
+        $users = $query->get();
 
         foreach ($users as $user) {
             // Replace placeholders

@@ -26,6 +26,8 @@ class StoreCampaignRequest extends FormRequest
                 Rule::requiredIf(fn () => $this->input('send_type') === CampaignSendType::TRIGGER->value),
                 Rule::enum(CampaignEvent::class),
             ],
+            'target_users' => ['nullable', 'array'],
+            'target_users.*' => ['integer', 'exists:users,id'],
             'scheduled_at' => [
                 'nullable',
                 'date',

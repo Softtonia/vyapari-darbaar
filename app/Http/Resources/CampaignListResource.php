@@ -18,6 +18,7 @@ class CampaignListResource extends JsonResource
             'send_type_label' => $this->send_type->label(),
             'event' => $this->event?->value,
             'event_label' => $this->event?->label(),
+            'target_users' => $this->target_users,
             'scheduled_at' => $this->scheduled_at,
             'is_active' => $this->is_active,
             'created_at' => $this->created_at,
