@@ -31,7 +31,30 @@ class AdminProfileController extends Controller
             'data' => new AdminProfileResource($admin),
         ], 200);
     }
+    /**
+     * Display the authenticated administrator's active sessions (devices).
+     */
+    public function sessions(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $currentTokenId = $user->currentAccessToken()->id ?? null;
 
+        $tokens = $user->tokens()->orderBy('last_used_at', 'desc')->get()->map(function ($token) use ($currentTokenId) {
+            return [
+                'id' => $token->id,
+                'device_name' => $token->name,
+                'last_used_at' => $token->last_used_at ? $token->last_used_at->diffForHumans() : 'Never',
+                'created_at' => $token->created_at->format('M d, Y h:i A'),
+                'is_current_device' => $token->id === $currentTokenId,
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Active sessions retrieved successfully.',
+            'data' => $tokens,
+        ], 200);
+    }
     /**
      * Send email verification OTP for admin email update.
      */

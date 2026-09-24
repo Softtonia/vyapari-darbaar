@@ -204,6 +204,8 @@ Route::prefix('admin')->group(function () {
         // Profile management
         Route::get('profile', [AdminProfileController::class, 'profile'])
             ->name('admin.profile');
+        Route::get('profile/sessions', [AdminProfileController::class, 'sessions'])
+            ->name('admin.profile.sessions');
         Route::post('profile/send-email-otp', [AdminProfileController::class, 'sendEmailOtp'])
             ->name('admin.profile.send-email-otp');
         Route::patch('profile', [AdminProfileController::class, 'update'])
