@@ -4429,9 +4429,9 @@
                                             }
                                         ],
                                         "url": {
-                                            "raw": "{{base_url}}/api/admin/profile/sessions",
+                                            "raw": "{{live}}/api/admin/profile/sessions",
                                             "host": [
-                                                "{{base_url}}"
+                                                "{{live}}"
                                             ],
                                             "path": [
                                                 "api",
