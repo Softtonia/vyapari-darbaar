@@ -36,6 +36,7 @@ class AdminSeeder extends Seeder
                 'full_name' => 'Sales Admin',
                 'name' => 'Sales Admin',
                 'username' => 'sales.softtonia',
+                'role' => $adminRole,
             ],
             [
                 'email' => env('SEED_ADMIN_EMAIL', 'vijay.kumar@softtonia.com'),
@@ -45,6 +46,7 @@ class AdminSeeder extends Seeder
                 'full_name' => env('SEED_ADMIN_NAME', 'Super Admin'),
                 'name' => env('SEED_ADMIN_NAME', 'Super Admin'),
                 'username' => env('SEED_ADMIN_USERNAME', 'super.admin'),
+                'role' => $superAdminRole,
             ],
         ];
 
@@ -65,7 +67,7 @@ class AdminSeeder extends Seeder
                 ]
             );
 
-            $adminUser->syncRoles([$superAdminRole, $adminRole]);
+            $adminUser->syncRoles([$adminData['role']]);
         }
     }
 }
