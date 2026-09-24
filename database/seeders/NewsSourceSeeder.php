@@ -50,15 +50,6 @@ class NewsSourceSeeder extends Seeder
                 'status' => true,
             ],
             [
-                'name' => 'Ministry of Agriculture & Farmers Welfare',
-                'slug' => 'ministry-of-agriculture',
-                'code' => 'MOA',
-                'website_url' => 'https://agricoop.nic.in',
-                'description' => 'Policy updates, MSP notifications, and crop estimates from the Ministry of Agriculture.',
-                'sort_order' => 5,
-                'status' => true,
-            ],
-            [
                 'name' => 'Press Information Bureau (PIB)',
                 'slug' => 'pib',
                 'code' => 'PIB',
