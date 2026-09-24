@@ -3940,6 +3940,280 @@
                                     }
                                 }
                             ]
+                        },
+                        {
+                            "name": "Campaigns",
+                            "item": [
+                                {
+                                    "name": "Get Campaign Events",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/campaigns/events",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "campaigns",
+                                                "events"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Get Campaigns",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/campaigns?page=1&per_page=20",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "campaigns"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "page",
+                                                    "value": "1"
+                                                },
+                                                {
+                                                    "key": "per_page",
+                                                    "value": "20"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Create Campaign",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"name\": \"Welcome Campaign\",\n    \"email_template_id\": 1,\n    \"send_type\": \"trigger\",\n    \"event\": \"register\",\n    \"is_active\": true\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/campaigns",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "campaigns"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Get Single Campaign",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/campaigns/1",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "campaigns",
+                                                "1"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Update Campaign",
+                                    "request": {
+                                        "method": "PUT",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"name\": \"Welcome Campaign Updated\",\n    \"email_template_id\": 1,\n    \"send_type\": \"trigger\",\n    \"event\": \"welcome_user\",\n    \"is_active\": true\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/campaigns/1",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "campaigns",
+                                                "1"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Update Campaign Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"is_active\": false\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/campaigns/1/status",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "campaigns",
+                                                "1",
+                                                "status"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Delete Campaign",
+                                    "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/campaigns/1",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "campaigns",
+                                                "1"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Bulk Delete Campaigns",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"ids\": [\n        1,\n        2,\n        3\n    ]\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/campaigns/bulk-delete",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "campaigns",
+                                                "bulk-delete"
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     ]
                 },

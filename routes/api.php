@@ -244,6 +244,27 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.email-templates.update-status');
         });
 
+        // Campaign management
+        Route::prefix('campaigns')->group(function () {
+            Route::get('events', [\App\Http\Controllers\Api\Admin\CampaignController::class, 'events'])
+                ->name('admin.campaigns.events');
+            Route::get('/', [\App\Http\Controllers\Api\Admin\CampaignController::class, 'index'])
+                ->name('admin.campaigns.index');
+            Route::post('/', [\App\Http\Controllers\Api\Admin\CampaignController::class, 'store'])
+                ->name('admin.campaigns.store');
+            Route::post('bulk-delete', [\App\Http\Controllers\Api\Admin\CampaignController::class, 'bulkDestroy'])
+                ->name('admin.campaigns.bulk-delete');
+            Route::delete('bulk-delete', [\App\Http\Controllers\Api\Admin\CampaignController::class, 'bulkDestroy']);
+            Route::get('{campaign}', [\App\Http\Controllers\Api\Admin\CampaignController::class, 'show'])
+                ->name('admin.campaigns.show');
+            Route::put('{campaign}', [\App\Http\Controllers\Api\Admin\CampaignController::class, 'update'])
+                ->name('admin.campaigns.update');
+            Route::delete('{campaign}', [\App\Http\Controllers\Api\Admin\CampaignController::class, 'destroy'])
+                ->name('admin.campaigns.destroy');
+            Route::patch('{campaign}/status', [\App\Http\Controllers\Api\Admin\CampaignController::class, 'updateStatus'])
+                ->name('admin.campaigns.update-status');
+        });
+
         // User management
         Route::prefix('users')->group(function () {
             Route::get('/', [AdminUserController::class, 'index'])
