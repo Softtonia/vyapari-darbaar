@@ -130,15 +130,7 @@ class UserSeeder extends Seeder
                 ]
             );
 
-            if ($roleName === 'super_admin') {
-                $adminRole = Role::firstOrCreate(
-                    ['name' => 'admin', 'guard_name' => 'web'],
-                    ['slug' => 'admin', 'status' => true, 'is_default' => true]
-                );
-                $user->syncRoles([$role, $adminRole]);
-            } else {
-                $user->syncRoles([$role]);
-            }
+            $user->syncRoles([$role]);
         }
 
         // Dynamically ensure any additional roles in the database also have a corresponding seeded user
