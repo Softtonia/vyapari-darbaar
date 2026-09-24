@@ -4442,6 +4442,38 @@
                                         }
                                     },
                                     "response": []
+                                },
+                                {
+                                    "name": "Revoke Session",
+                                    "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "Bearer {{admin_token}}",
+                                                "type": "text"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/profile/sessions/1",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "profile",
+                                                "sessions",
+                                                "1"
+                                            ]
+                                        }
+                                    },
+                                    "response": []
                                 }
                             ]
                         }

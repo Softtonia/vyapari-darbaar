@@ -206,6 +206,8 @@ Route::prefix('admin')->group(function () {
             ->name('admin.profile');
         Route::get('profile/sessions', [AdminProfileController::class, 'sessions'])
             ->name('admin.profile.sessions');
+        Route::delete('profile/sessions/{id}', [AdminProfileController::class, 'revokeSession'])
+            ->name('admin.profile.sessions.revoke');
         Route::post('profile/send-email-otp', [AdminProfileController::class, 'sendEmailOtp'])
             ->name('admin.profile.send-email-otp');
         Route::patch('profile', [AdminProfileController::class, 'update'])

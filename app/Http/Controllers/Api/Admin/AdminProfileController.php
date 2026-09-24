@@ -56,6 +56,37 @@ class AdminProfileController extends Controller
         ], 200);
     }
     /**
+     * Revoke a specific session (device) by its ID.
+     */
+    public function revokeSession(Request $request, $id): JsonResponse
+    {
+        $user = $request->user();
+        
+        $token = $user->tokens()->where('id', $id)->first();
+        
+        if (!$token) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Session not found or already revoked.',
+            ], 404);
+        }
+        
+        if ($token->id === $user->currentAccessToken()->id) {
+            return response()->json([
+                'status' => false,
+                'message' => 'You cannot revoke your current session here. Please use the logout API instead.',
+            ], 400);
+        }
+        
+        $token->delete();
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'Session revoked successfully.',
+        ], 200);
+    }
+
+    /**
      * Send email verification OTP for admin email update.
      */
     public function sendEmailOtp(
