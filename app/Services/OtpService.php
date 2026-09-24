@@ -27,39 +27,38 @@ class OtpService
         int $expiryMinutes = self::DEFAULT_EXPIRY_MINUTES,
         int $length = self::DEFAULT_OTP_LENGTH
     ): array {
-        $cacheKey = $this->buildCacheKey($identifier, $purpose);
-        $cachedData = $this->safeGet($cacheKey);
-
+        $identifier = $this->normalizeIdentifier($identifier);
         $now = Carbon::now();
 
         // 1. If an OTP exists and is still valid within the 10-minute window, reuse it
-        if (is_array($cachedData) && isset($cachedData['otp'], $cachedData['expires_at'])) {
-            $expiresAt = Carbon::parse($cachedData['expires_at']);
+        $existingOtp = \App\Models\Otp::where('identifier', $identifier)
+            ->where('purpose', $purpose)
+            ->whereNull('verified_at')
+            ->where('expires_at', '>', $now)
+            ->latest()
+            ->first();
 
-            if ($expiresAt->isAfter($now)) {
-                $remainingSeconds = max(0, $now->diffInSeconds($expiresAt, false));
+        if ($existingOtp) {
+            $remainingSeconds = max(0, $now->diffInSeconds($existingOtp->expires_at, false));
 
-                return [
-                    'otp' => (string) $cachedData['otp'],
-                    'is_new' => false,
-                    'expires_at' => $expiresAt,
-                    'remaining_seconds' => (int) $remainingSeconds,
-                ];
-            }
+            return [
+                'otp' => $existingOtp->otp,
+                'is_new' => false,
+                'expires_at' => $existingOtp->expires_at,
+                'remaining_seconds' => (int) $remainingSeconds,
+            ];
         }
 
         // 2. Generate a new OTP if none exists or previous has expired
         $otp = $this->generateNumericCode($length);
         $expiresAt = $now->copy()->addMinutes($expiryMinutes);
 
-        $dataToStore = [
+        \App\Models\Otp::create([
+            'identifier' => $identifier,
+            'purpose' => $purpose,
             'otp' => $otp,
-            'created_at' => $now->toIso8601String(),
-            'expires_at' => $expiresAt->toIso8601String(),
-        ];
-
-        // Store in cache for the full expiry duration
-        $this->safePut($cacheKey, $dataToStore, $expiresAt);
+            'expires_at' => $expiresAt,
+        ]);
 
         return [
             'otp' => $otp,
@@ -78,21 +77,21 @@ class OtpService
         string $purpose = 'default',
         int $expiryMinutes = self::DEFAULT_EXPIRY_MINUTES
     ): void {
-        $cacheKey = $this->buildCacheKey($identifier, $purpose);
+        $identifier = $this->normalizeIdentifier($identifier);
         $now = Carbon::now();
         $expiresAt = $now->copy()->addMinutes($expiryMinutes);
 
-        $dataToStore = [
+        \App\Models\Otp::create([
+            'identifier' => $identifier,
+            'purpose' => $purpose,
             'otp' => $otp,
-            'created_at' => $now->toIso8601String(),
-            'expires_at' => $expiresAt->toIso8601String(),
-        ];
-
-        $this->safePut($cacheKey, $dataToStore, $expiresAt);
+            'expires_at' => $expiresAt,
+        ]);
     }
 
     /**
      * Check if a resend cooldown is currently active.
+     * We check if the last generated OTP was within the cooldown period.
      *
      * @param  string  $identifier
      * @param  string  $purpose
@@ -104,12 +103,16 @@ class OtpService
         string $purpose = 'default',
         int $cooldownSeconds = self::DEFAULT_RESEND_COOLDOWN_SECONDS
     ): array {
-        $cooldownKey = $this->buildCooldownKey($identifier, $purpose);
-        $cooldownUntil = $this->safeGet($cooldownKey);
+        $identifier = $this->normalizeIdentifier($identifier);
+        
+        $lastOtp = \App\Models\Otp::where('identifier', $identifier)
+            ->where('purpose', $purpose)
+            ->latest()
+            ->first();
 
-        if ($cooldownUntil) {
-            $cooldownTime = Carbon::parse($cooldownUntil);
+        if ($lastOtp) {
             $now = Carbon::now();
+            $cooldownTime = $lastOtp->created_at->addSeconds($cooldownSeconds);
 
             if ($cooldownTime->isAfter($now)) {
                 return [
@@ -127,16 +130,16 @@ class OtpService
 
     /**
      * Set resend cooldown timestamp.
+     * In the DB approach, the cooldown is implicitly set by the created_at timestamp
+     * of the OTP itself. We only keep this method for backward compatibility.
      */
     public function setResendCooldown(
         string $identifier,
         string $purpose = 'default',
         int $cooldownSeconds = self::DEFAULT_RESEND_COOLDOWN_SECONDS
     ): void {
-        $cooldownKey = $this->buildCooldownKey($identifier, $purpose);
-        $cooldownUntil = Carbon::now()->addSeconds($cooldownSeconds);
-
-        $this->safePut($cooldownKey, $cooldownUntil->toIso8601String(), $cooldownUntil);
+        // No-op for database-backed OTPs as created_at handles this naturally,
+        // unless you specifically need to force a cooldown without creating an OTP.
     }
 
     /**
@@ -145,7 +148,7 @@ class OtpService
      * @param  string  $identifier
      * @param  string  $inputOtp
      * @param  string  $purpose
-     * @param  bool  $consumeOnSuccess  If true, OTP is destroyed upon successful verification
+     * @param  bool  $consumeOnSuccess  If true, OTP is destroyed/marked verified upon successful verification
      * @return bool
      */
     public function verify(
@@ -154,39 +157,43 @@ class OtpService
         string $purpose = 'default',
         bool $consumeOnSuccess = true
     ): bool {
-        $cacheKey = $this->buildCacheKey($identifier, $purpose);
-        $cachedData = $this->safeGet($cacheKey);
+        $identifier = $this->normalizeIdentifier($identifier);
+        $now = Carbon::now();
 
-        if (!is_array($cachedData) || !isset($cachedData['otp'], $cachedData['expires_at'])) {
-            return false;
-        }
+        $activeOtp = \App\Models\Otp::where('identifier', $identifier)
+            ->where('purpose', $purpose)
+            ->whereNull('verified_at')
+            ->where('expires_at', '>', $now)
+            ->latest()
+            ->first();
 
-        $expiresAt = Carbon::parse($cachedData['expires_at']);
-        if (Carbon::now()->isAfter($expiresAt)) {
-            // Expired
-            $this->invalidate($identifier, $purpose);
+        if (!$activeOtp) {
             return false;
         }
 
         // Constant time comparison
-        if (!hash_equals((string) $cachedData['otp'], trim($inputOtp))) {
+        if (!hash_equals($activeOtp->otp, trim($inputOtp))) {
             return false;
         }
 
         if ($consumeOnSuccess) {
-            $this->invalidate($identifier, $purpose);
+            $activeOtp->update(['verified_at' => $now]);
         }
 
         return true;
     }
 
     /**
-     * Invalidate/delete the OTP and cooldown.
+     * Invalidate/delete the OTP.
      */
     public function invalidate(string $identifier, string $purpose = 'default'): void
     {
-        $this->safeForget($this->buildCacheKey($identifier, $purpose));
-        $this->safeForget($this->buildCooldownKey($identifier, $purpose));
+        $identifier = $this->normalizeIdentifier($identifier);
+        
+        \App\Models\Otp::where('identifier', $identifier)
+            ->where('purpose', $purpose)
+            ->whereNull('verified_at')
+            ->update(['verified_at' => Carbon::now()]);
     }
 
     /**
@@ -194,37 +201,29 @@ class OtpService
      */
     public function getRemainingSeconds(string $identifier, string $purpose = 'default'): int
     {
-        $cacheKey = $this->buildCacheKey($identifier, $purpose);
-        $cachedData = $this->safeGet($cacheKey);
+        $identifier = $this->normalizeIdentifier($identifier);
+        $now = Carbon::now();
 
-        if (is_array($cachedData) && isset($cachedData['expires_at'])) {
-            $expiresAt = Carbon::parse($cachedData['expires_at']);
-            $now = Carbon::now();
+        $activeOtp = \App\Models\Otp::where('identifier', $identifier)
+            ->where('purpose', $purpose)
+            ->whereNull('verified_at')
+            ->where('expires_at', '>', $now)
+            ->latest()
+            ->first();
 
-            if ($expiresAt->isAfter($now)) {
-                return (int) $now->diffInSeconds($expiresAt, false);
-            }
+        if ($activeOtp) {
+            return (int) $now->diffInSeconds($activeOtp->expires_at, false);
         }
 
         return 0;
     }
 
     /**
-     * Build cache key for OTP.
+     * Normalize identifier for DB storage.
      */
-    protected function buildCacheKey(string $identifier, string $purpose): string
+    protected function normalizeIdentifier(string $identifier): string
     {
-        $normalized = strtolower(trim($identifier));
-        return "otp:{$purpose}:{$normalized}";
-    }
-
-    /**
-     * Build cache key for resend cooldown.
-     */
-    protected function buildCooldownKey(string $identifier, string $purpose): string
-    {
-        $normalized = strtolower(trim($identifier));
-        return "otp_cooldown:{$purpose}:{$normalized}";
+        return strtolower(trim($identifier));
     }
 
     /**
@@ -236,53 +235,5 @@ class OtpService
         $max = (int) str_repeat('9', $length);
 
         return (string) random_int($min, $max);
-    }
-
-    /**
-     * Safe Cache Get with fallback to file store if default (e.g., Redis) is unavailable.
-     */
-    protected function safeGet(string $key): mixed
-    {
-        try {
-            return Cache::get($key);
-        } catch (\Throwable) {
-            try {
-                return Cache::store('file')->get($key);
-            } catch (\Throwable) {
-                return null;
-            }
-        }
-    }
-
-    /**
-     * Safe Cache Put with fallback to file store if default is unavailable.
-     */
-    protected function safePut(string $key, mixed $value, $ttl): void
-    {
-        try {
-            Cache::put($key, $value, $ttl);
-        } catch (\Throwable) {
-            try {
-                Cache::store('file')->put($key, $value, $ttl);
-            } catch (\Throwable) {
-                // Ignore
-            }
-        }
-    }
-
-    /**
-     * Safe Cache Forget with fallback to file store if default is unavailable.
-     */
-    protected function safeForget(string $key): void
-    {
-        try {
-            Cache::forget($key);
-        } catch (\Throwable) {
-            try {
-                Cache::store('file')->forget($key);
-            } catch (\Throwable) {
-                // Ignore
-            }
-        }
     }
 }

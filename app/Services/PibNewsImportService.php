@@ -120,11 +120,7 @@ class PibNewsImportService
             // 1. Resolve source
             $source = $this->resolveSource();
 
-            // 2. Resolve categories
-            $traderCategory = $this->resolveCategory('trader');
-            $agricultureCategory = $this->resolveCategory('agriculture');
-
-            // Update run with resolved IDs
+            // Update run with resolved source ID
             $run->update([
                 'news_source_id'   => $source->id,
             ]);
@@ -162,6 +158,8 @@ class PibNewsImportService
             $skipped  = 0;
             $failed   = 0;
 
+            $categories = [];
+
             foreach ($items as $dto) {
                 try {
                     // Primary duplicate check: (news_source_id, external_id)
@@ -184,7 +182,11 @@ class PibNewsImportService
                         continue;
                     }
 
-                    $category = $classification === 'AGRICULTURE' ? $agricultureCategory : $traderCategory;
+                    $type = $classification === 'AGRICULTURE' ? 'agriculture' : 'trader';
+                    if (!isset($categories[$type])) {
+                        $categories[$type] = $this->resolveCategory($type);
+                    }
+                    $category = $categories[$type];
 
                     // Import as DRAFT article
                     $article = $this->importItem($dto, $source, $category);

@@ -92,12 +92,6 @@ class SebiNewsImportService
         $source = $this->resolveSource();
         
         $categorySlug = config('news_imports.sebi.default_category_slug', 'business');
-        $category = NewsCategory::firstOrCreate(
-            ['slug' => $categorySlug],
-            ['name' => ucwords(str_replace('-', ' ', $categorySlug)), 'is_active' => true]
-        );
-
-        $run->update(['news_category_id' => $category->id]);
 
         $items = $this->provider->fetchLatestItems();
         
@@ -111,6 +105,8 @@ class SebiNewsImportService
         $failed = 0;
         $errors = [];
 
+        $category = null;
+
         foreach ($items as $dto) {
             try {
                 // Check if already imported
@@ -121,6 +117,14 @@ class SebiNewsImportService
                 if ($exists) {
                     $skipped++;
                     continue;
+                }
+
+                if (!$category) {
+                    $category = NewsCategory::firstOrCreate(
+                        ['slug' => $categorySlug],
+                        ['name' => ucwords(str_replace('-', ' ', $categorySlug)), 'is_active' => true]
+                    );
+                    $run->update(['news_category_id' => $category->id]);
                 }
 
                 $this->importItem($dto, $source, $category);
