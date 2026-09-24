@@ -218,6 +218,9 @@ Route::prefix('admin')->group(function () {
             ->name('admin.logout');
         Route::post('logout-all', [AdminAuthController::class, 'logoutAll'])
             ->name('admin.logout-all');
+        Route::post('change-password', [AdminAuthController::class, 'changePassword'])
+            ->middleware('throttle:admin-change-password')
+            ->name('admin.change-password');
 
         // Email templates management
         Route::prefix('email-templates')->group(function () {

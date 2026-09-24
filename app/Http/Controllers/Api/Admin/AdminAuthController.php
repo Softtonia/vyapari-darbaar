@@ -282,4 +282,35 @@ class AdminAuthController extends Controller
 
         return response()->json($response, 200);
     }
+
+    /**
+     * Change the authenticated administrator's password.
+     */
+    public function changePassword(
+        \App\Http\Requests\Admin\ChangeAdminPasswordRequest $request,
+        \App\Actions\Admin\Profile\ChangeAdminPasswordAction $action
+    ): JsonResponse {
+        /** @var \App\Models\User $admin */
+        $admin = $request->user();
+
+        $action->execute(
+            $admin,
+            (string) $request->input('current_password'),
+            (string) $request->input('password')
+        );
+
+        app(\App\Services\CampaignEmailService::class)->triggerEvent(
+            \App\Enums\CampaignEvent::CHANGE_PASSWORD,
+            $admin,
+            [
+                'UserName' => $admin->full_name,
+                'Username' => $admin->username,
+            ]
+        );
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Your password has been changed successfully.',
+        ], 200);
+    }
 }
