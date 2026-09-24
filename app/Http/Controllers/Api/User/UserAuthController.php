@@ -198,8 +198,12 @@ class UserAuthController extends Controller
      */
     public function register(RegisterUserRequest $request, RegisterUserAction $action): JsonResponse
     {
-        $deviceName = (string) $request->input('device_name', $request->header('User-Agent', 'user-device'));
-        $result = $action->execute($request->validated(), $deviceName);
+        $deviceName = $request->input('device_name');
+        if (empty($deviceName)) {
+            $deviceName = $this->parseUserAgent($request->header('User-Agent'));
+        }
+
+        $result = $action->execute($request->validated(), (string) $deviceName);
 
         /** @var User|null $user */
         $user = $result['user'] ?? null;
@@ -220,8 +224,12 @@ class UserAuthController extends Controller
      */
     public function login(LoginUserRequest $request, LoginUserAction $action): JsonResponse
     {
-        $deviceName = (string) $request->input('device_name', $request->header('User-Agent', 'user-device'));
-        $result = $action->execute($request->credentials(), $deviceName);
+        $deviceName = $request->input('device_name');
+        if (empty($deviceName)) {
+            $deviceName = $this->parseUserAgent($request->header('User-Agent'));
+        }
+
+        $result = $action->execute($request->credentials(), (string) $deviceName);
 
         if (! $result['success']) {
             return response()->json([
@@ -252,9 +260,13 @@ class UserAuthController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        $deviceName = (string) $request->input('device_name', $request->header('User-Agent', 'user-device'));
+        
+        $deviceName = $request->input('device_name');
+        if (empty($deviceName)) {
+            $deviceName = $this->parseUserAgent($request->header('User-Agent'));
+        }
 
-        $result = $action->execute($user, $deviceName);
+        $result = $action->execute($user, (string) $deviceName);
 
         return response()->json([
             'status' => true,
@@ -368,5 +380,32 @@ class UserAuthController extends Controller
                 'is_available' => true,
             ],
         ], 200);
+    }
+
+    /**
+     * Parse User-Agent into a readable device name (OS + Browser).
+     */
+    private function parseUserAgent(?string $userAgent): string
+    {
+        if (empty($userAgent)) {
+            return 'Unknown Device';
+        }
+
+        $os = 'Unknown OS';
+        if (preg_match('/windows|win32/i', $userAgent)) $os = 'Windows';
+        elseif (preg_match('/macintosh|mac os x/i', $userAgent)) $os = 'Mac';
+        elseif (preg_match('/linux/i', $userAgent)) $os = 'Linux';
+        elseif (preg_match('/iphone|ipad|ipod/i', $userAgent)) $os = 'iOS';
+        elseif (preg_match('/android/i', $userAgent)) $os = 'Android';
+
+        $browser = 'Unknown Browser';
+        if (preg_match('/edg/i', $userAgent)) $browser = 'Edge';
+        elseif (preg_match('/opr|opera/i', $userAgent)) $browser = 'Opera';
+        elseif (preg_match('/chrome/i', $userAgent)) $browser = 'Chrome';
+        elseif (preg_match('/safari/i', $userAgent)) $browser = 'Safari';
+        elseif (preg_match('/firefox/i', $userAgent)) $browser = 'Firefox';
+        elseif (preg_match('/postman/i', $userAgent)) $browser = 'Postman';
+
+        return trim("$os - $browser", ' -');
     }
 }

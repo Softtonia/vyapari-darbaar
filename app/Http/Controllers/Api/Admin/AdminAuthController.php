@@ -29,8 +29,12 @@ class AdminAuthController extends Controller
      */
     public function login(LoginAdminRequest $request, LoginAdminAction $action): JsonResponse
     {
-        $deviceName = (string) $request->input('device_name', $request->header('User-Agent', 'admin-token'));
-        $result = $action->execute($request->credentials(), $deviceName);
+        $deviceName = $request->input('device_name');
+        if (empty($deviceName)) {
+            $deviceName = $this->parseUserAgent($request->header('User-Agent'));
+        }
+
+        $result = $action->execute($request->credentials(), (string) $deviceName);
 
         if (! $result['success']) {
             return response()->json([
@@ -44,6 +48,33 @@ class AdminAuthController extends Controller
             'message' => $result['message'],
             'data' => $result['data'],
         ], 200);
+    }
+
+    /**
+     * Parse User-Agent into a readable device name (OS + Browser).
+     */
+    private function parseUserAgent(?string $userAgent): string
+    {
+        if (empty($userAgent)) {
+            return 'Unknown Device';
+        }
+
+        $os = 'Unknown OS';
+        if (preg_match('/windows|win32/i', $userAgent)) $os = 'Windows';
+        elseif (preg_match('/macintosh|mac os x/i', $userAgent)) $os = 'Mac';
+        elseif (preg_match('/linux/i', $userAgent)) $os = 'Linux';
+        elseif (preg_match('/iphone|ipad|ipod/i', $userAgent)) $os = 'iOS';
+        elseif (preg_match('/android/i', $userAgent)) $os = 'Android';
+
+        $browser = 'Unknown Browser';
+        if (preg_match('/edg/i', $userAgent)) $browser = 'Edge';
+        elseif (preg_match('/opr|opera/i', $userAgent)) $browser = 'Opera';
+        elseif (preg_match('/chrome/i', $userAgent)) $browser = 'Chrome';
+        elseif (preg_match('/safari/i', $userAgent)) $browser = 'Safari';
+        elseif (preg_match('/firefox/i', $userAgent)) $browser = 'Firefox';
+        elseif (preg_match('/postman/i', $userAgent)) $browser = 'Postman';
+
+        return trim("$os - $browser", ' -');
     }
 
     /**
