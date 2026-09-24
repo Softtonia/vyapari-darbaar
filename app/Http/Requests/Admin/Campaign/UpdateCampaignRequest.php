@@ -14,16 +14,6 @@ class UpdateCampaignRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation()
-    {
-        if ($this->has('email_template_id')) {
-            $decoded = \Vinkla\Hashids\Facades\Hashids::decode($this->email_template_id);
-            if (!empty($decoded)) {
-                $this->merge(['email_template_id' => $decoded[0]]);
-            }
-        }
-    }
-
     public function rules(): array
     {
         return [

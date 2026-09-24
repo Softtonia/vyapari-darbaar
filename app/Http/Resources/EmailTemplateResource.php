@@ -21,7 +21,7 @@ class EmailTemplateResource extends JsonResource
         $renderer = app(\App\Services\EmailTemplateRenderer::class);
 
         return [
-            'id' => $this->hashid,
+            'id' => $this->id,
             'name' => $this->name,
             'key' => $this->key,
             'subject' => $this->subject,
