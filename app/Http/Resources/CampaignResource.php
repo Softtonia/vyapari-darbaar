@@ -10,9 +10,9 @@ class CampaignResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->hashid,
             'name' => $this->name,
-            'email_template_id' => $this->email_template_id,
+            'email_template_id' => $this->whenLoaded('emailTemplate', fn () => $this->emailTemplate->hashid, $this->email_template_id),
             'send_type' => $this->send_type->value,
             'event' => $this->event?->value,
             'scheduled_at' => $this->scheduled_at,

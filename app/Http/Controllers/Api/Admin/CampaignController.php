@@ -112,8 +112,13 @@ class CampaignController extends Controller
 
     public function bulkDestroy(Request $request): JsonResponse
     {
-        $request->validate(['ids' => 'required|array', 'ids.*' => 'integer|exists:campaigns,id']);
-        $deletedCount = Campaign::whereIn('id', $request->input('ids'))->delete();
+        $request->validate(['ids' => 'required|array']);
+        $ids = array_map(function ($id) {
+            $decoded = \Vinkla\Hashids\Facades\Hashids::decode($id);
+            return !empty($decoded) ? $decoded[0] : $id;
+        }, $request->input('ids'));
+
+        $deletedCount = Campaign::whereIn('id', $ids)->delete();
 
         return response()->json([
             'status' => true,

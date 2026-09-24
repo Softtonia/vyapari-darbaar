@@ -15,6 +15,22 @@ class BulkDeleteEmailTemplatesRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        if ($this->has('ids') && is_array($this->ids)) {
+            $decodedIds = [];
+            foreach ($this->ids as $id) {
+                $decoded = \Vinkla\Hashids\Facades\Hashids::decode($id);
+                if (!empty($decoded)) {
+                    $decodedIds[] = $decoded[0];
+                } else {
+                    $decodedIds[] = $id;
+                }
+            }
+            $this->merge(['ids' => $decodedIds]);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -24,7 +40,7 @@ class BulkDeleteEmailTemplatesRequest extends FormRequest
     {
         return [
             'ids' => ['required', 'array', 'min:1', 'max:100'],
-            'ids.*' => ['required', 'integer', 'distinct', 'exists:email_templates,id'],
+            'ids.*' => ['required', 'distinct', 'exists:email_templates,id'],
         ];
     }
 

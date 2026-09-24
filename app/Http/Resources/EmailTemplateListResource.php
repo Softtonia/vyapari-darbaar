@@ -18,7 +18,7 @@ class EmailTemplateListResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => $this->hashid,
             'name' => $this->name,
             'key' => $this->key,
             'subject' => $this->subject,
