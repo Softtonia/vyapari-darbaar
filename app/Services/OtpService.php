@@ -37,7 +37,6 @@ class OtpService
             ->where('expires_at', '>', $now)
             ->latest()
             ->first();
-
         if ($existingOtp) {
             $remainingSeconds = max(0, $now->diffInSeconds($existingOtp->expires_at, false));
 
