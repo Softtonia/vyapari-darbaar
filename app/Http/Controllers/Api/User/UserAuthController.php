@@ -198,10 +198,7 @@ class UserAuthController extends Controller
      */
     public function register(RegisterUserRequest $request, RegisterUserAction $action): JsonResponse
     {
-        $deviceName = $request->input('device_name');
-        if (empty($deviceName)) {
-            $deviceName = $this->parseUserAgent($request->header('User-Agent'));
-        }
+        $deviceName = $this->parseUserAgent($request->header('User-Agent'), $request->ip());
 
         $result = $action->execute($request->validated(), (string) $deviceName);
 
@@ -224,10 +221,7 @@ class UserAuthController extends Controller
      */
     public function login(LoginUserRequest $request, LoginUserAction $action): JsonResponse
     {
-        $deviceName = $request->input('device_name');
-        if (empty($deviceName)) {
-            $deviceName = $this->parseUserAgent($request->header('User-Agent'));
-        }
+        $deviceName = $this->parseUserAgent($request->header('User-Agent'), $request->ip());
 
         $result = $action->execute($request->credentials(), (string) $deviceName);
 
@@ -261,10 +255,7 @@ class UserAuthController extends Controller
         /** @var User $user */
         $user = $request->user();
         
-        $deviceName = $request->input('device_name');
-        if (empty($deviceName)) {
-            $deviceName = $this->parseUserAgent($request->header('User-Agent'));
-        }
+        $deviceName = $this->parseUserAgent($request->header('User-Agent'), $request->ip());
 
         $result = $action->execute($user, (string) $deviceName);
 
@@ -383,12 +374,12 @@ class UserAuthController extends Controller
     }
 
     /**
-     * Parse User-Agent into a readable device name (OS + Browser).
+     * Parse User-Agent into a readable device name (OS + Browser) and append IP.
      */
-    private function parseUserAgent(?string $userAgent): string
+    private function parseUserAgent(?string $userAgent, ?string $ip = null): string
     {
         if (empty($userAgent)) {
-            return 'Unknown Device';
+            return 'Unknown Device' . ($ip ? " (IP: $ip)" : '');
         }
 
         $os = 'Unknown OS';
@@ -406,6 +397,7 @@ class UserAuthController extends Controller
         elseif (preg_match('/firefox/i', $userAgent)) $browser = 'Firefox';
         elseif (preg_match('/postman/i', $userAgent)) $browser = 'Postman';
 
-        return trim("$os - $browser", ' -');
+        $parsed = trim("$os - $browser", ' -');
+        return $ip ? "$parsed (IP: $ip)" : $parsed;
     }
 }
