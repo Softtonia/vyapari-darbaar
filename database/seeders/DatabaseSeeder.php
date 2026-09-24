@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             SiteSettingSeeder::class,
             ExchangeSeeder::class,
             NewsSourceSeeder::class,
+            CampaignSeeder::class,
         ]);
     }
 }
