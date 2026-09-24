@@ -25,6 +25,20 @@ class DeleteEmailTemplateAction
             );
         }
 
-        $emailTemplate->delete();
+        try {
+            $emailTemplate->delete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Check if it's a foreign key constraint violation (usually code 23000)
+            if ($e->getCode() == '23000') {
+                throw new HttpResponseException(
+                    response()->json([
+                        'status' => false,
+                        'message' => 'Cannot delete this template because it is currently assigned to one or more campaigns.',
+                        'error' => 'Foreign key constraint',
+                    ], 400)
+                );
+            }
+            throw $e;
+        }
     }
 }

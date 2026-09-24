@@ -33,8 +33,21 @@ class BulkDeleteEmailTemplatesAction
             );
         }
 
-        return DB::transaction(function () use ($ids) {
-            return EmailTemplate::query()->whereIn('id', $ids)->delete();
-        });
+        try {
+            return DB::transaction(function () use ($ids) {
+                return EmailTemplate::query()->whereIn('id', $ids)->delete();
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == '23000') {
+                throw new HttpResponseException(
+                    response()->json([
+                        'status' => false,
+                        'message' => 'Cannot delete selected templates because one or more are currently assigned to campaigns.',
+                        'error' => 'Foreign key constraint',
+                    ], 400)
+                );
+            }
+            throw $e;
+        }
     }
 }
