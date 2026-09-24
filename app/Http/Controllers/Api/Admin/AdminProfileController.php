@@ -136,6 +136,12 @@ class AdminProfileController extends Controller
 
         $updatedAdmin = $action->execute($admin, $request->validatedProfileData());
 
+        app(\App\Services\CampaignEmailService::class)->triggerEvent(
+            \App\Enums\CampaignEvent::UPDATE_PROFILE,
+            $updatedAdmin,
+            ['name' => $updatedAdmin->name, 'email' => $updatedAdmin->email, 'phone' => $updatedAdmin->phone]
+        );
+
         return response()->json([
             'status' => true,
             'message' => 'Admin profile updated successfully.',

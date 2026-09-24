@@ -21,4 +21,6 @@ Schedule::command('news:publish-scheduled')
 Schedule::command('news:import-pib-rss')
     ->everyFourHours()
     ->withoutOverlapping();
-
+Schedule::command('campaigns:dispatch-scheduled')
+    ->everyMinute()
+    ->withoutOverlapping();

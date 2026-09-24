@@ -206,6 +206,20 @@ class UserAuthController extends Controller
         $user = $result['user'] ?? null;
         $roleName = $user?->roles?->first()?->name ?? 'user';
 
+        if ($user) {
+            app(\App\Services\CampaignEmailService::class)->triggerEvent(
+                \App\Enums\CampaignEvent::REGISTER,
+                $user,
+                ['name' => $user->name, 'email' => $user->email, 'phone' => $user->phone]
+            );
+
+            app(\App\Services\CampaignEmailService::class)->triggerEvent(
+                \App\Enums\CampaignEvent::WELCOME_USER,
+                $user,
+                ['name' => $user->name, 'email' => $user->email, 'phone' => $user->phone]
+            );
+        }
+
         return response()->json([
             'status' => true,
             'message' => 'User registered successfully.',
@@ -278,6 +292,17 @@ class UserAuthController extends Controller
     ): JsonResponse {
         $result = $action->execute($request->email());
 
+        if ($result['status']) {
+            $user = \App\Models\User::where('email', $request->email())->first();
+            if ($user) {
+                app(\App\Services\CampaignEmailService::class)->triggerEvent(
+                    \App\Enums\CampaignEvent::FORGET_PASSWORD,
+                    $user,
+                    ['name' => $user->name, 'email' => $user->email, 'phone' => $user->phone]
+                );
+            }
+        }
+
         return response()->json([
             'status' => $result['status'],
             'message' => $result['message'],
@@ -331,6 +356,12 @@ class UserAuthController extends Controller
             $user,
             (string) $request->input('current_password'),
             (string) $request->input('password')
+        );
+
+        app(\App\Services\CampaignEmailService::class)->triggerEvent(
+            \App\Enums\CampaignEvent::CHANGE_PASSWORD,
+            $user,
+            ['name' => $user->name, 'email' => $user->email, 'phone' => $user->phone]
         );
 
         return response()->json([

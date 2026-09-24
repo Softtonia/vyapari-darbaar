@@ -143,6 +143,12 @@ class AdminUserController extends Controller
         $user = $action->execute($admin, $request->validatedUserData());
         $user->loadMissing(['creator:id,first_name,last_name,name', 'roles', 'companies']);
 
+        app(\App\Services\CampaignEmailService::class)->triggerEvent(
+            \App\Enums\CampaignEvent::ADD_USER,
+            $user,
+            ['name' => $user->name, 'email' => $user->email, 'phone' => $user->phone]
+        );
+
         return response()->json([
             'status' => true,
             'message' => 'User created successfully.',
@@ -171,6 +177,12 @@ class AdminUserController extends Controller
     {
         $updatedUser = $action->execute($user, $request->validatedUserData());
         $updatedUser->loadMissing(['creator:id,first_name,last_name,name', 'roles', 'companies']);
+
+        app(\App\Services\CampaignEmailService::class)->triggerEvent(
+            \App\Enums\CampaignEvent::UPDATE_USER,
+            $updatedUser,
+            ['name' => $updatedUser->name, 'email' => $updatedUser->email, 'phone' => $updatedUser->phone]
+        );
 
         return response()->json([
             'status' => true,

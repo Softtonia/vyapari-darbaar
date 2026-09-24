@@ -90,6 +90,12 @@ class UserProfileController extends Controller
 
         $updatedUser = $action->execute($user, $request->validatedProfileData());
 
+        app(\App\Services\CampaignEmailService::class)->triggerEvent(
+            \App\Enums\CampaignEvent::UPDATE_PROFILE,
+            $updatedUser,
+            ['name' => $updatedUser->name, 'email' => $updatedUser->email, 'phone' => $updatedUser->phone]
+        );
+
         return response()->json([
             'status' => true,
             'message' => 'User profile updated successfully.',
