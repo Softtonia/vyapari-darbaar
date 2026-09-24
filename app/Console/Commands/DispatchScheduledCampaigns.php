@@ -36,6 +36,7 @@ class DispatchScheduledCampaigns extends Command
 
         foreach ($campaigns as $campaign) {
             $this->info("Dispatching campaign: {$campaign->name}");
+            $campaign->update(['is_active' => false]);
             DispatchCampaignJob::dispatch($campaign);
         }
 

@@ -30,7 +30,7 @@ class DispatchCampaignJob implements ShouldQueue
      */
     public function handle(): void
     {
-        if (!$this->campaign->is_active) {
+        if ($this->campaign->send_type->value === 'trigger' && !$this->campaign->is_active) {
             return;
         }
 
@@ -60,10 +60,6 @@ class DispatchCampaignJob implements ShouldQueue
             $user->notify(new CampaignEmailNotification($subject, $body));
         }
 
-        // If it was a scheduled campaign, we can mark it as inactive after sending so it doesn't send again.
-        if ($this->campaign->send_type->value === 'schedule') {
-            $this->campaign->update(['is_active' => false]);
-        }
     }
 
     private function replacePlaceholders(string $content, array $placeholders): string
