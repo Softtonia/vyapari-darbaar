@@ -852,6 +852,8 @@ Route::get('firebase/config', [PublicFirebaseConfigController::class, 'show'])
     ->name('firebase.config');
 
 Route::prefix('locations')->middleware('throttle:location-api')->group(function () {
+    Route::get('countries', [LocationController::class, 'countries'])->name('locations.countries');
+    Route::get('cities', [LocationController::class, 'cities'])->name('locations.cities');
     Route::get('states', [LocationController::class, 'states'])
         ->name('locations.states');
     Route::get('districts', [LocationController::class, 'districts'])

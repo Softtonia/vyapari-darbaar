@@ -9839,6 +9839,161 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "Public Locations",
+            "description": "Public APIs for fetching countries, states, and cities.",
+            "item": [
+                {
+                    "name": "Get Countries",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}\/api\/locations\/countries",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "locations",
+                                "countries"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get States",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}\/api\/locations\/states?country_id=101",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "locations",
+                                "states"
+                            ],
+                            "query": [
+                                {
+                                    "key": "country_id",
+                                    "value": "101"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Cities",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application\/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{live}}\/api\/locations\/cities?state_id=4008",
+                            "host": [
+                                "{{live}}"
+                            ],
+                            "path": [
+                                "api",
+                                "locations",
+                                "cities"
+                            ],
+                            "query": [
+                                {
+                                    "key": "state_id",
+                                    "value": "4008"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Locations",
+            "item": [
+                {
+                    "name": "Get Countries",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}\/api\/locations\/countries",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "locations",
+                                "countries"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get States",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}\/api\/locations\/states?country_id=1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "locations",
+                                "states"
+                            ],
+                            "query": [
+                                {
+                                    "key": "country_id",
+                                    "value": "1"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Cities",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}\/api\/locations\/cities?state_id=14",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "locations",
+                                "cities"
+                            ],
+                            "query": [
+                                {
+                                    "key": "state_id",
+                                    "value": "14"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
         }
     ],
     "variable": [

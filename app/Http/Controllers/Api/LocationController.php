@@ -17,16 +17,59 @@ use Illuminate\Http\Request;
 class LocationController extends Controller
 {
     /**
+     * Get active countries.
+     */
+    public function countries(): JsonResponse
+    {
+        $countries = \App\Models\Country::where('status', true)->get(['id', 'name', 'code', 'phone_code']);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Countries fetched successfully.',
+            'data' => $countries,
+        ], 200);
+    }
+
+    /**
      * Get active states for public location selection.
      */
-    public function states(StateService $service): JsonResponse
+    public function states(Request $request, StateService $service): JsonResponse
     {
-        $states = $service->getOptions();
+        // Optionally filter by country_id
+        $countryId = $request->input('country_id');
+        
+        $statesQuery = \App\Models\State::where('status', true);
+        if ($countryId) {
+            $statesQuery->where('country_id', $countryId);
+        }
+        
+        $states = $statesQuery->orderBy('sort_order')->orderBy('name')->get(['id', 'country_id', 'name', 'code', 'slug']);
 
         return response()->json([
             'status' => true,
             'message' => 'States fetched successfully.',
             'data' => $states,
+        ], 200);
+    }
+
+    /**
+     * Get active cities filtered by state.
+     */
+    public function cities(Request $request): JsonResponse
+    {
+        $stateId = $request->input('state_id');
+        
+        $citiesQuery = \App\Models\City::where('status', true);
+        if ($stateId) {
+            $citiesQuery->where('state_id', $stateId);
+        }
+        
+        $cities = $citiesQuery->orderBy('name')->get(['id', 'state_id', 'name']);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Cities fetched successfully.',
+            'data' => $cities,
         ], 200);
     }
 
