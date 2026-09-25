@@ -52,7 +52,8 @@ class UpdateUserRequest extends FormRequest
             
             'pan_number' => ['nullable', 'string', 'max:50'],
             'year_of_establishment' => ['nullable', 'string', 'max:10'],
-            'business_category' => ['nullable', 'string', 'max:100'],
+            'business_category_ids' => ['nullable', 'array'],
+            'business_category_ids.*' => ['exists:business_categories,id'],
             'no_of_employees' => ['nullable', 'string', 'max:50'],
             'website' => ['nullable', 'string', 'max:255'],
             

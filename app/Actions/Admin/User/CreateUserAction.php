@@ -107,7 +107,6 @@ class CreateUserAction
                     'gstin' => isset($data['gstin']) ? strtoupper(trim((string) $data['gstin'])) : null,
                     'pan_number' => isset($data['pan_number']) ? trim((string) $data['pan_number']) : null,
                     'year_of_establishment' => isset($data['year_of_establishment']) ? trim((string) $data['year_of_establishment']) : null,
-                    'business_category' => isset($data['business_category']) ? trim((string) $data['business_category']) : null,
                     'no_of_employees' => isset($data['no_of_employees']) ? trim((string) $data['no_of_employees']) : null,
                     'website' => isset($data['website']) ? trim((string) $data['website']) : null,
                     
@@ -141,6 +140,10 @@ class CreateUserAction
                     'role' => $targetRole, // Associate with their primary role
                     'is_primary' => true,
                 ]);
+
+                if (!empty($data['business_category_ids']) && is_array($data['business_category_ids'])) {
+                    $company->businessCategories()->attach($data['business_category_ids']);
+                }
             }
 
             return $newUser->fresh(['roles', 'companies']);

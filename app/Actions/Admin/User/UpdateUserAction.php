@@ -52,7 +52,7 @@ class UpdateUserAction
                 
                 $companyFields = [
                     'contact_person', 'business_type', 'gstin', 'country_id', 'state_id', 'city_id', 'address',
-                    'address_line_2', 'pin_code', 'pan_number', 'year_of_establishment', 'business_category', 'no_of_employees',
+                    'address_line_2', 'pin_code', 'pan_number', 'year_of_establishment', 'no_of_employees',
                     'website', 'business_description', 'trade_preference', 'verification_status'
                 ];
 
@@ -72,6 +72,10 @@ class UpdateUserAction
                 }
 
                 $company->save();
+
+                if (isset($data['business_category_ids']) && is_array($data['business_category_ids'])) {
+                    $company->businessCategories()->sync($data['business_category_ids']);
+                }
 
                 if (!$user->companies()->where('company_id', $company->id)->exists()) {
                     $user->companies()->attach($company->id, [
