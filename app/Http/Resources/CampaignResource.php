@@ -16,7 +16,7 @@ class CampaignResource extends JsonResource
             'send_type' => $this->send_type->value,
             'event' => $this->event?->value,
             'target_users' => $this->target_users,
-            'scheduled_at' => $this->scheduled_at,
+            'scheduled_at' => $this->scheduled_at?->format('Y-m-d H:i:s'),
             'is_active' => $this->is_active,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
