@@ -35,6 +35,9 @@ return new class extends Migration
             $table->unsignedBigInteger('view_count')->default(0);
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('author', 255)->nullable();
+            $table->boolean('is_imported')->default(false);
+            $table->foreignId('import_run_id')->nullable()->constrained('news_import_runs')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
 
