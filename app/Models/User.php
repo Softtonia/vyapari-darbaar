@@ -76,6 +76,10 @@ class User extends Authenticatable
         'created_by_user_id',
         'created_by_admin_id',
         'email_verified_at',
+        'date_of_birth',
+        'gender',
+        'alternate_number',
+        'profile_photo',
     ];
 
     /**
