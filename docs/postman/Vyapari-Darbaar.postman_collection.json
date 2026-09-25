@@ -8403,6 +8403,170 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "Business Documents",
+                    "item": [
+                        {
+                            "name": "List Business Documents",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "{{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/admin/business-documents?company_id=1",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "business-documents"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "company_id",
+                                            "value": "1",
+                                            "description": "Optional filter"
+                                        },
+                                        {
+                                            "key": "user_id",
+                                            "value": "1",
+                                            "description": "Optional filter",
+                                            "disabled": true
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Upload Business Document",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "{{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "company_id",
+                                            "value": "1",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "user_id",
+                                            "value": "1",
+                                            "type": "text",
+                                            "disabled": true
+                                        },
+                                        {
+                                            "key": "document_type",
+                                            "value": "gst_certificate",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "file",
+                                            "type": "file",
+                                            "src": ""
+                                        }
+                                    ]
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/admin/business-documents",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "business-documents"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Update Document Status",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "{{admin_token}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"status\": \"verified\"\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/api/admin/business-documents/{{business_doc_id}}/status",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "business-documents",
+                                        "{{business_doc_id}}",
+                                        "status"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Delete Business Document",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "{{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{base_url}}/api/admin/business-documents/{{business_doc_id}}",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "business-documents",
+                                        "{{business_doc_id}}"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -10014,6 +10178,11 @@
         },
         {
             "key": "kyc_id",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "business_doc_id",
             "value": "1",
             "type": "string"
         }

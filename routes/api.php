@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Admin\AdminAuthController;
 use App\Http\Controllers\Api\Admin\AdminCompanyController;
 use App\Http\Controllers\Api\Admin\KycDocumentController;
+use App\Http\Controllers\Api\Admin\BusinessDocumentController;
 use App\Http\Controllers\Api\Admin\AdminInAppNotificationController;
 use App\Http\Controllers\Api\Admin\AdminNotificationDeviceController;
 use App\Http\Controllers\Api\Admin\AdminProfileController;
