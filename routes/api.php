@@ -657,7 +657,10 @@ Route::prefix('admin')->group(function () {
         });
 
         // Company Management
-        Route::prefix('kyc')->group(function () { Route::post('batch-upload', [KycDocumentController::class, 'batchUpload'])->name('admin.kyc.batch-upload'); Route::get('batch-progress/{batchId}', [KycDocumentController::class, 'batchProgress'])->name('admin.kyc.batch-progress'); });
+        Route::prefix('kyc')->group(function () { Route::post('batch-upload', [KycDocumentController::class, 'batchUpload'])->name('admin.kyc.batch-upload'); Route::get('batch-progress/{batchId}', [KycDocumentController::class, 'batchProgress'])->name('admin.kyc.batch-progress');
+        Route::get('/', [KycDocumentController::class, 'index'])->name('admin.kyc.index');
+        Route::patch('{id}/status', [KycDocumentController::class, 'updateStatus'])->name('admin.kyc.update-status');
+        Route::delete('{id}', [KycDocumentController::class, 'destroy'])->name('admin.kyc.destroy'); });
 
         Route::prefix('companies')->group(function () {
             Route::get('/', [AdminCompanyController::class, 'index'])

@@ -76,4 +76,54 @@ class KycDocumentController extends Controller
             'documents' => $documents,
         ]);
     }
+
+    /**
+     * Get all KYC documents for a company.
+     */
+    public function index(Request $request)
+    {
+        $request->validate(['company_id' => 'required|exists:companies,id']);
+        
+        $documents = CompanyKycDocument::where('company_id', $request->company_id)->get();
+        
+        return response()->json([
+            'status' => true,
+            'data' => $documents
+        ]);
+    }
+
+    /**
+     * Update KYC document status (verify/reject).
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate(['status' => 'required|in:pending,verified,rejected']);
+        
+        $document = CompanyKycDocument::findOrFail($id);
+        $document->update(['status' => $request->status]);
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'KYC document status updated successfully.',
+            'data' => $document
+        ]);
+    }
+
+    /**
+     * Delete a KYC document.
+     */
+    public function destroy($id)
+    {
+        $document = CompanyKycDocument::findOrFail($id);
+        
+        // Optionally delete file from storage here
+        // \Illuminate\Support\Facades\Storage::disk('public')->delete($document->file_path);
+        
+        $document->delete();
+        
+        return response()->json([
+            'status' => true,
+            'message' => 'KYC document deleted successfully.'
+        ]);
+    }
 }
