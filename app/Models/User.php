@@ -38,17 +38,15 @@ class User extends Authenticatable
             if (empty($user->attributes['username']) && ! empty($user->attributes['email'])) {
                 $user->attributes['username'] = explode('@', $user->attributes['email'])[0].'_'.substr(md5(uniqid()), 0, 4);
             }
-            if (empty($user->attributes['full_name'])) {
-                $name = ! empty($user->attributes['name'])
-                    ? $user->attributes['name']
-                    : trim(($user->attributes['first_name'] ?? '').' '.($user->attributes['last_name'] ?? ''));
+            if (empty($user->attributes['name'])) {
+                $name = '';
                 if (empty($name) && ! empty($user->attributes['username'])) {
                     $name = $user->attributes['username'];
                 }
                 if (empty($name) && ! empty($user->attributes['email'])) {
                     $name = explode('@', $user->attributes['email'])[0];
                 }
-                $user->attributes['full_name'] = ! empty($name) ? $name : 'User';
+                $user->attributes['name'] = ! empty($name) ? $name : 'User';
             }
         });
     }
@@ -117,53 +115,6 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Get the user's full name.
-     */
-    public function getFullNameAttribute(?string $value = null): string
-    {
-        if (! empty($value)) {
-            return $value;
-        }
-
-        $calculated = trim(($this->first_name ?? '').' '.($this->last_name ?? ''));
-
-        return $calculated !== '' ? $calculated : ($this->attributes['name'] ?? '');
-    }
-
-    /**
-     * Set the full name and backfill name attribute if needed.
-     */
-    public function setFullNameAttribute(?string $value): void
-    {
-        $this->attributes['full_name'] = trim((string) $value);
-        if (empty($this->attributes['first_name']) && empty($this->attributes['last_name']) && ! empty($value)) {
-            $parts = preg_split('/\s+/', trim((string) $value), 2);
-            $this->attributes['first_name'] = $parts[0] ?? null;
-            $this->attributes['last_name'] = $parts[1] ?? null;
-        }
-    }
-
-    /**
-     * Backward-compatible name attribute getter.
-     */
-    public function getNameAttribute(?string $value): string
-    {
-        if (! empty($value)) {
-            return $value;
-        }
-
-        return $this->full_name;
-    }
-
-    /**
-     * Backward-compatible name attribute setter.
-     */
-    public function setNameAttribute(?string $value): void
-    {
-        $this->setFullNameAttribute($value);
-        unset($this->attributes['name']);
-    }
 
     /**
      * Helper to check if user has super admin role.

@@ -18,10 +18,12 @@ return new class extends Migration
             $table->text('site_description')->nullable();
             $table->string('web_logo', 500)->nullable();
             $table->string('mobile_logo', 500)->nullable();
+            $table->string('email', 255)->nullable();
+            $table->string('favicon', 500)->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('timezone', 100)->default('UTC');
-            $table->string('language', 20)->default('en');
+            $table->string('default_language', 20)->default('en');
             $table->string('currency', 10)->default('INR');
             $table->string('phone_number', 25)->nullable();
             $table->json('social_links')->nullable();
