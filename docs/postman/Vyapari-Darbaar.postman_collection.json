@@ -1906,17 +1906,113 @@
                                                 "value": "application\/json"
                                             },
                                             {
-                                                "key": "Content-Type",
-                                                "value": "application\/json"
-                                            },
-                                            {
                                                 "key": "Authorization",
                                                 "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "body": {
-                                            "mode": "raw",
-                                            "raw": "{\n    \"first_name\": \"Amit\",\n    \"last_name\": \"Sharma\",\n    \"full_name\": \"Amit Sharma\",\n    \"phone_number\": \"+919876543210\",\n    \"email\": \"amit.sharma@example.com\",\n    \"role\": \"user\",\n    \"is_default\": false\n}"
+                                            "mode": "formdata",
+                                            "formdata": [
+                                                {
+                                                    "key": "first_name",
+                                                    "value": "Amit",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "last_name",
+                                                    "value": "Sharma",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "phone_number",
+                                                    "value": "+919876543210",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "alternate_number",
+                                                    "value": "+919876543211",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "email",
+                                                    "value": "amit.sharma@example.com",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "role",
+                                                    "value": "trader",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "gender",
+                                                    "value": "male",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "date_of_birth",
+                                                    "value": "1990-01-01",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "profile_photo",
+                                                    "type": "file"
+                                                },
+                                                {
+                                                    "key": "company_name",
+                                                    "value": "Sharma Traders",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "business_type",
+                                                    "value": "Wholesale",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "gstin",
+                                                    "value": "22AAAAA0000A1Z5",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "country_id",
+                                                    "value": "1",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "state_id",
+                                                    "value": "14",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "city_id",
+                                                    "value": "1",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "address",
+                                                    "value": "123 Main Market",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "pin_code",
+                                                    "value": "400001",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "bank_name",
+                                                    "value": "HDFC Bank",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "bank_account_number",
+                                                    "value": "0000111122223333",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "bank_ifsc_code",
+                                                    "value": "HDFC0001234",
+                                                    "type": "text"
+                                                }
+                                            ]
                                         },
                                         "url": {
                                             "raw": "{{live}}\/api\/admin\/users",
