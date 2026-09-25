@@ -33,9 +33,9 @@ class StoreUserRequest extends FormRequest
             'contact_person' => ['nullable', 'string', 'max:150'],
             'business_type' => ['nullable', 'string', 'max:100'],
             'gstin' => ['nullable', 'string', 'max:20'],
-            'country' => ['nullable', 'string', 'max:100'],
-            'state' => ['nullable', 'string', 'max:100'],
-            'city' => ['nullable', 'string', 'max:100'],
+            'country_id' => ['nullable', 'integer', 'exists:countries,id'],
+            'state_id' => ['nullable', 'integer', 'exists:states,id'],
+            'city_id' => ['nullable', 'integer', 'exists:cities,id'],
             'address' => ['nullable', 'string', 'max:1000'],
             'address_line_2' => ['nullable', 'string', 'max:1000'],
             'pin_code' => ['nullable', 'string', 'max:20'],
@@ -102,7 +102,7 @@ class StoreUserRequest extends FormRequest
         ];
 
         $companyFields = [
-            'company_name', 'contact_person', 'business_type', 'gstin', 'country', 'state', 'city', 'address',
+            'company_name', 'contact_person', 'business_type', 'gstin', 'country_id', 'state_id', 'city_id', 'address',
             'address_line_2', 'pin_code', 'pan_number', 'year_of_establishment', 'business_category', 'no_of_employees',
             'website', 'bank_account_holder_name', 'bank_name', 'bank_account_number', 'bank_ifsc_code', 'bank_branch_name',
             'business_description', 'commodities_handled', 'trade_preference', 'buy_sell_preference', 'verification_status'

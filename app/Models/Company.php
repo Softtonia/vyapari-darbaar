@@ -32,25 +32,15 @@ class Company extends Model
         'business_category',
         'no_of_employees',
         'website',
-        'country',
-        'state',
-        'city',
+        'country_id',
+        'state_id',
+        'city_id',
         'address',
         'address_line_2',
         'pin_code',
         'commodities_handled',
         'trade_preference',
         'verification_status',
-        'aadhaar_card_path',
-        'pan_card_path',
-        'passport_photo_path',
-        'gst_certificate_path',
-        'business_registration_path',
-        'bank_account_holder_name',
-        'bank_name',
-        'bank_account_number',
-        'bank_ifsc_code',
-        'bank_branch_name',
         'business_description',
     ];
 
@@ -76,5 +66,30 @@ class Company extends Model
         return $this->belongsToMany(User::class, 'user_has_companies')
             ->withPivot('role', 'is_primary')
             ->withTimestamps();
+    }
+
+    public function bankDetails()
+    {
+        return $this->hasMany(CompanyBankDetail::class);
+    }
+
+    public function kycDocuments()
+    {
+        return $this->hasMany(CompanyKycDocument::class);
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(State::class);
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
     }
 }

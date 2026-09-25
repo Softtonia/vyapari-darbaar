@@ -107,18 +107,12 @@ class CreateUserAction
                     'no_of_employees' => isset($data['no_of_employees']) ? trim((string) $data['no_of_employees']) : null,
                     'website' => isset($data['website']) ? trim((string) $data['website']) : null,
                     
-                    'country' => isset($data['country']) ? trim((string) $data['country']) : 'India',
-                    'state' => isset($data['state']) ? trim((string) $data['state']) : null,
-                    'city' => isset($data['city']) ? trim((string) $data['city']) : null,
+                    'country_id' => isset($data['country_id']) ? $data['country_id'] : null,
+                    'state_id' => isset($data['state_id']) ? $data['state_id'] : null,
+                    'city_id' => isset($data['city_id']) ? $data['city_id'] : null,
                     'address' => isset($data['address']) ? trim((string) $data['address']) : null,
                     'address_line_2' => isset($data['address_line_2']) ? trim((string) $data['address_line_2']) : null,
                     'pin_code' => isset($data['pin_code']) ? trim((string) $data['pin_code']) : null,
-                    
-                    'bank_account_holder_name' => isset($data['bank_account_holder_name']) ? trim((string) $data['bank_account_holder_name']) : null,
-                    'bank_name' => isset($data['bank_name']) ? trim((string) $data['bank_name']) : null,
-                    'bank_account_number' => isset($data['bank_account_number']) ? trim((string) $data['bank_account_number']) : null,
-                    'bank_ifsc_code' => isset($data['bank_ifsc_code']) ? trim((string) $data['bank_ifsc_code']) : null,
-                    'bank_branch_name' => isset($data['bank_branch_name']) ? trim((string) $data['bank_branch_name']) : null,
                     
                     'business_description' => isset($data['business_description']) ? trim((string) $data['business_description']) : null,
                     
@@ -126,6 +120,18 @@ class CreateUserAction
                     'trade_preference' => strtolower((string) ($data['trade_preference'] ?? $data['buy_sell_preference'] ?? 'both')),
                     'verification_status' => isset($data['verification_status']) ? trim((string) $data['verification_status']) : 'pending',
                 ]);
+                
+                if (!empty($data['bank_account_number']) || !empty($data['bank_name'])) {
+                    \App\Models\CompanyBankDetail::create([
+                        'company_id' => $company->id,
+                        'account_holder_name' => isset($data['bank_account_holder_name']) ? trim((string) $data['bank_account_holder_name']) : null,
+                        'bank_name' => isset($data['bank_name']) ? trim((string) $data['bank_name']) : null,
+                        'account_number' => isset($data['bank_account_number']) ? trim((string) $data['bank_account_number']) : null,
+                        'ifsc_code' => isset($data['bank_ifsc_code']) ? trim((string) $data['bank_ifsc_code']) : null,
+                        'branch_name' => isset($data['bank_branch_name']) ? trim((string) $data['bank_branch_name']) : null,
+                        'is_primary' => true,
+                    ]);
+                }
 
                 $newUser->companies()->attach($company->id, [
                     'role' => $targetRole, // Associate with their primary role
