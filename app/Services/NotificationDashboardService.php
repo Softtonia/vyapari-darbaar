@@ -94,7 +94,7 @@ class NotificationDashboardService
             ->count();
 
         $recentBatches = NotificationBatch::query()
-            ->with('creator:id,first_name,last_name,name')
+            ->with('creator:id,name')
             ->latest('id')
             ->limit(5)
             ->get()
@@ -117,7 +117,7 @@ class NotificationDashboardService
             ->toArray();
 
         $recentFailures = NotificationLog::query()
-            ->with(['user:id,first_name,last_name,name,email', 'device:id,device_type,device_name'])
+            ->with(['user:id,name,email', 'device:id,device_type,device_name'])
             ->where('status', DeliveryStatus::FAILED)
             ->latest('id')
             ->limit(5)

@@ -27,7 +27,7 @@ class NotificationBatchService
     public function paginate(array $filters = []): LengthAwarePaginator
     {
         $query = NotificationBatch::query()
-            ->with(['creator:id,first_name,last_name,name', 'template:id,name,code', 'topic:id,name,slug']);
+            ->with(['creator:id,name', 'template:id,name,code', 'topic:id,name,slug']);
 
         if (! empty($filters['status'])) {
             $query->where('status', (string) $filters['status']);
@@ -84,7 +84,7 @@ class NotificationBatchService
     {
         $query = NotificationBatch::query()
             ->with([
-                'creator:id,first_name,last_name,name',
+                'creator:id,name',
                 'template:id,name,code',
                 'topic:id,name,slug',
                 'parentBatch:id,uuid,title',

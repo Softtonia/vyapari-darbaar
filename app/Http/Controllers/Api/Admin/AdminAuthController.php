@@ -151,7 +151,7 @@ class AdminAuthController extends Controller
 
         // Dispatch email notification if email is present
         if (! empty($email)) {
-            $adminName = $targetAdmin->full_name ?? $targetAdmin->name ?? 'Administrator';
+            $adminName = $targetAdmin->name ?? $targetAdmin->name ?? 'Administrator';
             try {
                 Notification::route('mail', $email)
                     ->notify(new AdminOtpNotification($otpData['otp'], $purpose, $adminName));
@@ -303,7 +303,7 @@ class AdminAuthController extends Controller
             \App\Enums\CampaignEvent::CHANGE_PASSWORD,
             $admin,
             [
-                'UserName' => $admin->full_name,
+                'UserName' => $admin->name,
                 'Username' => $admin->username,
             ]
         );

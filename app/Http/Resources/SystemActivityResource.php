@@ -26,7 +26,7 @@ class SystemActivityResource extends JsonResource
 
         if ($user) {
             $userId = $user->id;
-            $userName = $user->full_name ?: ($user->username ?: 'Admin');
+            $userName = $user->name ?: ($user->username ?: 'Admin');
             $userRole = $user->roles->first()?->name ?? 'User';
             $userEmail = $user->email;
         }

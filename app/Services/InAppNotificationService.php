@@ -168,7 +168,7 @@ class InAppNotificationService
     public function paginateForAdmin(array $filters = []): LengthAwarePaginator
     {
         $query = InAppNotification::query()
-            ->with(['user:id,first_name,last_name,name,email,username', 'batch:id,uuid,title']);
+            ->with(['user:id,name,email,username', 'batch:id,uuid,title']);
 
         if (! empty($filters['user_id'])) {
             $query->where('user_id', (int) $filters['user_id']);
@@ -197,9 +197,9 @@ class InAppNotificationService
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('body', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($uq) use ($search) {
-                        $uq->where('full_name', 'like', "%{$search}%")
-                            ->orWhere('first_name', 'like', "%{$search}%")
-                            ->orWhere('last_name', 'like', "%{$search}%")
+                        $uq->where('name', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%");
                     });
             });
@@ -219,7 +219,7 @@ class InAppNotificationService
     public function findForAdmin(int $id): ?InAppNotification
     {
         return InAppNotification::query()
-            ->with(['user:id,first_name,last_name,name,email,username', 'batch:id,uuid,title'])
+            ->with(['user:id,name,email,username', 'batch:id,uuid,title'])
             ->find($id);
     }
 }

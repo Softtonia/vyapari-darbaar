@@ -18,7 +18,7 @@ class NotificationLogService
     {
         $query = NotificationLog::query()
             ->with([
-                'user:id,first_name,last_name,name,email,username',
+                'user:id,name,email,username',
                 'device:id,device_type,device_name,browser,ip_address',
                 'batch:id,uuid,title',
             ]);
@@ -59,9 +59,9 @@ class NotificationLogService
                     ->orWhere('provider_message_id', 'like', "%{$search}%")
                     ->orWhere('error_code', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($uq) use ($search) {
-                        $uq->where('full_name', 'like', "%{$search}%")
-                            ->orWhere('first_name', 'like', "%{$search}%")
-                            ->orWhere('last_name', 'like', "%{$search}%")
+                        $uq->where('name', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%");
                     });
             });
@@ -89,7 +89,7 @@ class NotificationLogService
     {
         return NotificationLog::query()
             ->with([
-                'user:id,first_name,last_name,name,email,username',
+                'user:id,name,email,username',
                 'device:id,device_type,device_name,browser,ip_address',
                 'batch:id,uuid,title',
             ])

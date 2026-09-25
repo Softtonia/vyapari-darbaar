@@ -131,7 +131,7 @@ class NotificationDeviceService
     public function paginateForAdmin(array $filters = []): LengthAwarePaginator
     {
         $query = NotificationDevice::query()
-            ->with('user:id,first_name,last_name,name,email,username');
+            ->with('user:id,name,email,username');
 
         if (! empty($filters['user_id'])) {
             $query->where('user_id', (int) $filters['user_id']);
@@ -164,9 +164,9 @@ class NotificationDeviceService
                     ->orWhere('browser', 'like', "%{$search}%")
                     ->orWhere('ip_address', 'like', "%{$search}%")
                     ->orWhereHas('user', function ($uq) use ($search) {
-                        $uq->where('full_name', 'like', "%{$search}%")
-                            ->orWhere('first_name', 'like', "%{$search}%")
-                            ->orWhere('last_name', 'like', "%{$search}%")
+                        $uq->where('name', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%");
                     });
             });
@@ -193,7 +193,7 @@ class NotificationDeviceService
     public function findForAdmin(int $id): ?NotificationDevice
     {
         return NotificationDevice::query()
-            ->with('user:id,first_name,last_name,name,email,username')
+            ->with('user:id,name,email,username')
             ->find($id);
     }
 

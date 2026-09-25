@@ -27,7 +27,7 @@ class AdminUserActivityResource extends JsonResource
 
                 return [
                     'id' => $this->user->id,
-                    'full_name' => $this->user->full_name,
+                    'name' => $this->user->name,
                     'username' => $this->user->username,
                     'email' => $this->user->email,
                     'status' => $this->user->status,

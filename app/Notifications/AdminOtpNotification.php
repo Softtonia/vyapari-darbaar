@@ -77,11 +77,11 @@ class AdminOtpNotification extends Notification implements ShouldBeEncrypted, Sh
         $adminName = $this->adminName;
         if (! $adminName) {
             if ($notifiable instanceof Admin || $notifiable instanceof User) {
-                $adminName = $notifiable->full_name ?? $notifiable->name ?? 'Administrator';
+                $adminName = $notifiable->name ?? $notifiable->name ?? 'Administrator';
             } elseif (is_object($notifiable) && isset($notifiable->routes['mail'])) {
                 $email = strtolower((string) $notifiable->routes['mail']);
                 $foundAdmin = Admin::where('email', $email)->first();
-                $adminName = $foundAdmin ? ($foundAdmin->full_name ?? $foundAdmin->name ?? 'Administrator') : 'Administrator';
+                $adminName = $foundAdmin ? ($foundAdmin->name ?? $foundAdmin->name ?? 'Administrator') : 'Administrator';
             } else {
                 $adminName = 'Administrator';
             }

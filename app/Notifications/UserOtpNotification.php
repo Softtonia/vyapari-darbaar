@@ -77,11 +77,11 @@ class UserOtpNotification extends Notification implements ShouldBeEncrypted, Sho
         $userName = $this->userName;
         if (! $userName) {
             if ($notifiable instanceof User) {
-                $userName = $notifiable->full_name ?? $notifiable->name ?? 'User';
+                $userName = $notifiable->name ?? $notifiable->name ?? 'User';
             } elseif (is_object($notifiable) && isset($notifiable->routes['mail'])) {
                 $email = strtolower((string) $notifiable->routes['mail']);
                 $foundUser = User::where('email', $email)->first();
-                $userName = $foundUser ? ($foundUser->full_name ?? $foundUser->name ?? 'User') : 'User';
+                $userName = $foundUser ? ($foundUser->name ?? $foundUser->name ?? 'User') : 'User';
             } else {
                 $userName = 'User';
             }

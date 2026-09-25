@@ -126,7 +126,7 @@ class UserActivity extends Model
                     ->orWhere('event', 'like', "%{$escaped}%")
                     ->orWhere('ip_address', 'like', "%{$escaped}%")
                     ->orWhereHas('user', function (Builder $userQuery) use ($escaped) {
-                        $userQuery->where('full_name', 'like', "%{$escaped}%")
+                        $userQuery->where('name', 'like', "%{$escaped}%")
                             ->orWhere('username', 'like', "%{$escaped}%")
                             ->orWhere('email', 'like', "%{$escaped}%");
                     });

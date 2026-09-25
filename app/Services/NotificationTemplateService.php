@@ -32,7 +32,7 @@ class NotificationTemplateService
      */
     public function paginate(array $filters): LengthAwarePaginator
     {
-        $query = NotificationTemplate::query()->with('creator:id,first_name,last_name,name');
+        $query = NotificationTemplate::query()->with('creator:id,name');
 
         if (! empty($filters['search'])) {
             $search = (string) $filters['search'];
@@ -149,9 +149,9 @@ class NotificationTemplateService
         $company = $user->company;
 
         $vars = [
-            'user_name' => $user->name ?? $user->full_name,
-            'first_name' => $user->first_name ?? explode(' ', (string) $user->name)[0] ?? '',
-            'last_name' => $user->last_name ?? '',
+            'user_name' => $user->name ?? $user->name,
+            'first_name' => $user->name ?? explode(' ', (string) $user->name)[0] ?? '',
+            'last_name' => $user->name ?? '',
             'company_name' => $company?->name ?? 'Vyapari Darbaar',
             'date' => now()->format('d M Y'),
             'app_name' => config('app.name', 'Vyapari Darbaar'),

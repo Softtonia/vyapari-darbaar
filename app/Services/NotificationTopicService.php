@@ -19,7 +19,7 @@ class NotificationTopicService
     public function paginate(array $filters = []): LengthAwarePaginator
     {
         $query = NotificationTopic::query()
-            ->with('creator:id,first_name,last_name,name')
+            ->with('creator:id,name')
             ->withCount('users');
 
         if (! empty($filters['search'])) {

@@ -115,7 +115,7 @@ class UserAuthController extends Controller
 
         // Dispatch queued email notification if email is present
         if (! empty($email)) {
-            $recipientName = $targetUser ? ($targetUser->full_name ?? $targetUser->name) : 'User';
+            $recipientName = $targetUser ? ($targetUser->name ?? $targetUser->name) : 'User';
             try {
                 Notification::route('mail', $email)
                     ->notify(new UserOtpNotification($otpData['otp'], $purpose, $recipientName));

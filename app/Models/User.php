@@ -57,9 +57,6 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'first_name',
-        'last_name',
-        'full_name',
         'name',
         'phone_number',
         'username',
@@ -95,9 +92,6 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $appends = [
-        'full_name',
-    ];
 
     /**
      * Get the attributes that should be cast.

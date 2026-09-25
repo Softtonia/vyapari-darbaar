@@ -241,8 +241,8 @@ class ActivityLogObserver
             return (string) $model->name;
         }
 
-        if (!empty($model->full_name)) {
-            return (string) $model->full_name;
+        if (!empty($model->name)) {
+            return (string) $model->name;
         }
 
         if (!empty($model->username)) {

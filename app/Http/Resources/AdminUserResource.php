@@ -22,9 +22,7 @@ class AdminUserResource extends JsonResource
 
         return [
             'id' => $this->id,
-            'first_name' => $this->first_name,
-            'last_name' => $this->last_name,
-            'full_name' => $this->full_name,
+            'name' => $this->name,
             'phone_number' => $this->phone_number,
             'username' => $this->username,
             'email' => $this->email,
@@ -48,9 +46,7 @@ class AdminUserResource extends JsonResource
 
                 return [
                     'id' => $this->creator->id,
-                    'first_name' => $this->creator->first_name,
-                    'last_name' => $this->creator->last_name,
-                    'full_name' => $this->creator->full_name,
+                    'name' => $this->creator->name,
                 ];
             }),
         ];
