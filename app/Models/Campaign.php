@@ -28,7 +28,7 @@ class Campaign extends Model
             'send_type' => CampaignSendType::class,
             'event' => CampaignEvent::class,
             'target_users' => 'array',
-            'scheduled_at' => 'datetime',
+            'scheduled_at' => 'datetime:Y-m-d\TH:i:s',
             'is_active' => 'boolean',
         ];
     }
