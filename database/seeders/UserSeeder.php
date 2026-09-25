@@ -23,8 +23,7 @@ class UserSeeder extends Seeder
 
         $usersByRole = [
             'super_admin' => [
-                'first_name' => 'Super',
-                'last_name' => 'Admin',
+                'name' => 'Super Admin',
                 'username' => 'superadmin',
                 'email' => env('SEED_SUPERADMIN_EMAIL', 'vijay.kumar@softtonia.com'),
                 'phone_number' => '+919800000001',
@@ -33,8 +32,7 @@ class UserSeeder extends Seeder
                 'must_change_password' => false,
             ],
             'admin' => [
-                'first_name' => 'System',
-                'last_name' => 'Admin',
+                'name' => 'System Admin',
                 'username' => 'admin',
                 'email' => env('SEED_ADMIN_USER_EMAIL', 'admin@vyaparidarbaar.com'),
                 'phone_number' => '+919800000002',
@@ -43,8 +41,7 @@ class UserSeeder extends Seeder
                 'must_change_password' => false,
             ],
             'editor' => [
-                'first_name' => 'Content',
-                'last_name' => 'Editor',
+                'name' => 'Content Editor',
                 'username' => 'editor',
                 'email' => env('SEED_EDITOR_EMAIL', 'editor@vyaparidarbaar.com'),
                 'phone_number' => '+919800000003',
@@ -53,8 +50,7 @@ class UserSeeder extends Seeder
                 'must_change_password' => false,
             ],
             'trader' => [
-                'first_name' => 'Market',
-                'last_name' => 'Trader',
+                'name' => 'Market Trader',
                 'username' => 'trader',
                 'email' => env('SEED_TRADER_EMAIL', 'trader@vyaparidarbaar.com'),
                 'phone_number' => '+919800000004',
@@ -63,8 +59,7 @@ class UserSeeder extends Seeder
                 'must_change_password' => false,
             ],
             'user' => [
-                'first_name' => 'Regular',
-                'last_name' => 'User',
+                'name' => 'Regular User',
                 'username' => 'user',
                 'email' => env('SEED_REGULAR_USER_EMAIL', 'user@vyaparidarbaar.com'),
                 'phone_number' => '+919800000005',
@@ -73,8 +68,7 @@ class UserSeeder extends Seeder
                 'must_change_password' => false,
             ],
             'subscriber' => [
-                'first_name' => 'Premium',
-                'last_name' => 'Subscriber',
+                'name' => 'Premium Subscriber',
                 'username' => 'subscriber',
                 'email' => env('SEED_SUBSCRIBER_EMAIL', 'subscriber@vyaparidarbaar.com'),
                 'phone_number' => '+919800000006',
@@ -83,8 +77,7 @@ class UserSeeder extends Seeder
                 'must_change_password' => false,
             ],
             'advertiser' => [
-                'first_name' => 'Market',
-                'last_name' => 'Advertiser',
+                'name' => 'Market Advertiser',
                 'username' => 'advertiser',
                 'email' => env('SEED_ADVERTISER_EMAIL', 'advertiser@vyaparidarbaar.com'),
                 'phone_number' => '+919800000007',
@@ -93,8 +86,7 @@ class UserSeeder extends Seeder
                 'must_change_password' => false,
             ],
             'guest' => [
-                'first_name' => 'Guest',
-                'last_name' => 'User',
+                'name' => 'Guest User',
                 'username' => 'guest',
                 'email' => env('SEED_GUEST_EMAIL', 'guest@vyaparidarbaar.com'),
                 'phone_number' => '+919800000008',
@@ -111,14 +103,11 @@ class UserSeeder extends Seeder
                 ['slug' => $roleName, 'status' => true, 'is_default' => true]
             );
 
-            $fullName = "{$userData['first_name']} {$userData['last_name']}";
+            $fullName = $userData['name'];
 
             $user = User::updateOrCreate(
                 ['email' => $userData['email']],
                 [
-                    'first_name' => $userData['first_name'],
-                    'last_name' => $userData['last_name'],
-                    'full_name' => $fullName,
                     'name' => $fullName,
                     'username' => $userData['username'],
                     'phone_number' => $userData['phone_number'],
@@ -145,9 +134,6 @@ class UserSeeder extends Seeder
             $user = User::updateOrCreate(
                 ['email' => $email],
                 [
-                    'first_name' => $cleanName,
-                    'last_name' => 'User',
-                    'full_name' => "{$cleanName} User",
                     'name' => "{$cleanName} User",
                     'username' => $username,
                     'phone_number' => $phone,
