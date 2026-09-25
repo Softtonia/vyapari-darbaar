@@ -62,6 +62,10 @@ class RoleService
             ->search($filters['search'] ?? null)
             ->status($filters['status'] ?? null)
             ->isDefault($filters['is_default'] ?? null)
+            ->when(!empty($filters['exclude_roles']), function ($q) use ($filters) {
+                $q->whereNotIn('name', $filters['exclude_roles'])
+                  ->whereNotIn('slug', $filters['exclude_roles']);
+            })
             ->sort($sortBy, $sortOrder);
 
         return $query->paginate($perPage);

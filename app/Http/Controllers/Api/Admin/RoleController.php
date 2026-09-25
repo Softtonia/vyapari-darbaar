@@ -21,7 +21,18 @@ class RoleController extends Controller
      */
     public function index(Request $request, RoleService $roleService): JsonResponse
     {
-        $paginator = $roleService->listRoles($request->all());
+        $filters = $request->all();
+        $user = $request->user();
+
+        if ($user) {
+            if ($user->hasRole(['super_admin', 'Super Admin'])) {
+                $filters['exclude_roles'] = ['super_admin', 'Super Admin'];
+            } else {
+                $filters['exclude_roles'] = ['super_admin', 'Super Admin', 'admin', 'Admin'];
+            }
+        }
+
+        $paginator = $roleService->listRoles($filters);
 
         return response()->json([
             'status' => true,
