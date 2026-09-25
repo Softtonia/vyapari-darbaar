@@ -55,10 +55,16 @@ class StateSeeder extends Seeder
             ['name' => 'Puducherry', 'slug' => 'puducherry', 'code' => 'PY', 'sort_order' => 36, 'status' => true],
         ];
 
+        $india = \App\Models\Country::where('code', 'IN')->first();
+        if (!$india) {
+            return;
+        }
+
         foreach ($states as $state) {
+            $stateData = array_merge($state, ['country_id' => $india->id]);
             State::updateOrCreate(
                 ['code' => $state['code']],
-                $state
+                $stateData
             );
         }
     }
