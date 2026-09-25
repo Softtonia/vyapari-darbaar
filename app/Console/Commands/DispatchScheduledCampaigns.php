@@ -31,7 +31,7 @@ class DispatchScheduledCampaigns extends Command
         $campaigns = Campaign::where('is_active', true)
             ->where('send_type', CampaignSendType::SCHEDULE->value)
             ->whereNotNull('scheduled_at')
-            ->where('scheduled_at', '<=', now())
+            ->where('scheduled_at', '<=', now()->timezone('Asia/Kolkata'))
             ->get();
 
         foreach ($campaigns as $campaign) {
