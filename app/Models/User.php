@@ -334,4 +334,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(BusinessDocument::class);
     }
+
+    public function locations()
+    {
+        return $this->hasMany(UserLocation::class);
+    }
 }

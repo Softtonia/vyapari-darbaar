@@ -11,10 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('campaigns', function (Blueprint $table) {
-            if (!Schema::hasColumn('campaigns', 'target_users')) {
-                $table->json('target_users')->nullable()->after('event');
-            }
+        Schema::table('kyc', function (Blueprint $table) {
+            $table->foreignId('user_id')->nullable()->after('company_id')->constrained('users')->cascadeOnDelete();
         });
     }
 
@@ -23,8 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('campaigns', function (Blueprint $table) {
-            $table->dropColumn('target_users');
+        Schema::table('kyc', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+            $table->dropColumn('user_id');
         });
     }
 };
