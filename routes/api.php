@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\AdminAuthController;
 use App\Http\Controllers\Api\Admin\AdminCompanyController;
+use App\Http\Controllers\Api\Admin\KycDocumentController;
 use App\Http\Controllers\Api\Admin\AdminInAppNotificationController;
 use App\Http\Controllers\Api\Admin\AdminNotificationDeviceController;
 use App\Http\Controllers\Api\Admin\AdminProfileController;
@@ -656,6 +657,8 @@ Route::prefix('admin')->group(function () {
         });
 
         // Company Management
+        Route::prefix('kyc')->group(function () { Route::post('batch-upload', [KycDocumentController::class, 'batchUpload'])->name('admin.kyc.batch-upload'); Route::get('batch-progress/{batchId}', [KycDocumentController::class, 'batchProgress'])->name('admin.kyc.batch-progress'); });
+
         Route::prefix('companies')->group(function () {
             Route::get('/', [AdminCompanyController::class, 'index'])
                 ->name('admin.companies.index');
