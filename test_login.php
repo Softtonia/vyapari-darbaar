@@ -1,5 +1,5 @@
 <?php
-$ch = curl_init('http://localhost/api/auth/admin/login');
+$ch = curl_init('http://localhost:8000/api/auth/admin/login');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([

@@ -14,8 +14,11 @@ return new class extends Migration
         Schema::create('user_activities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('module', 50)->nullable()->index();
+            $table->string('action', 50)->nullable()->index();
             $table->string('event', 50)->index();
             $table->string('description', 255);
+            $table->string('status', 20)->nullable();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->json('properties')->nullable();
