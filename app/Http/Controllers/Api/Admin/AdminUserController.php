@@ -149,6 +149,39 @@ class AdminUserController extends Controller
             $query->where('created_by', $request->user()->id);
         }
 
+        if ($request->has('role') && $request->role !== 'all' && $request->role !== 'All Users') {
+            $role = strtolower($request->role);
+            $query->whereHas('roles', function($q) use ($role) {
+                $q->where('name', $role)->orWhere('slug', $role);
+            });
+
+            $total = (clone $query)->count();
+            $active = (clone $query)->where('status', 'active')->count();
+            $newThisMonth = (clone $query)->whereMonth('created_at', now()->month)
+                                          ->whereYear('created_at', now()->year)->count();
+            
+            $verified = 0;
+            if ($role === 'trader') {
+                $verified = (clone $query)->whereHas('companies', function($q) {
+                    $q->where('verification_status', 'verified');
+                })->count();
+            } else {
+                $verified = (clone $query)->whereNotNull('email_verified_at')->count();
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => ucfirst($role) . ' stats retrieved successfully.',
+                'data' => [
+                    'total' => $total,
+                    'active' => $active,
+                    'premium' => 0, // Implement premium logic based on subscriptions later
+                    'new_this_month' => $newThisMonth,
+                    'verified' => $verified,
+                ]
+            ], 200);
+        }
+
         return response()->json([
             'status' => true,
             'message' => 'Stats retrieved successfully.',
