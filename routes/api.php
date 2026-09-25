@@ -278,6 +278,8 @@ Route::prefix('admin')->group(function () {
             Route::post('bulk-delete', [AdminUserController::class, 'bulkDestroy'])
                 ->name('admin.users.bulk-delete');
             Route::delete('bulk-delete', [AdminUserController::class, 'bulkDestroy']);
+            Route::get('stats', [AdminUserController::class, 'stats'])
+                ->name('admin.users.stats');
             Route::get('{user}', [AdminUserController::class, 'show'])
                 ->name('admin.users.show');
             Route::put('{user}', [AdminUserController::class, 'update'])

@@ -65,6 +65,10 @@ class AdminUserController extends Controller
             ])
             ->where('id', '!=', $request->user()->id);
 
+        if ($request->user() && !$request->user()->hasRole(['super_admin', 'Super Admin', 'admin', 'Admin'])) {
+            $query->where('created_by', $request->user()->id);
+        }
+
         // Search: full_name, first_name, last_name, username prefix, email prefix, phone_number
         if ($request->filled('search')) {
             $search = (string) $request->input('search');
@@ -131,6 +135,37 @@ class AdminUserController extends Controller
                 'to' => $paginator->lastItem(),
                 'total' => $paginator->total(),
             ],
+        ], 200);
+    }
+
+    /**
+     * Get statistics for users.
+     */
+    public function stats(Request $request): JsonResponse
+    {
+        $query = User::query()->where('id', '!=', $request->user()->id);
+
+        if ($request->user() && !$request->user()->hasRole(['super_admin', 'Super Admin', 'admin', 'Admin'])) {
+            $query->where('created_by', $request->user()->id);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Stats retrieved successfully.',
+            'data' => [
+                'total' => (clone $query)->count(),
+                'active' => (clone $query)->where('status', 'active')->count(),
+                'subscribers' => (clone $query)->whereHas('roles', function($q) {
+                    $q->whereIn('name', ['subscriber', 'Subscriber']);
+                })->count(),
+                'advertisers' => (clone $query)->whereHas('roles', function($q) {
+                    $q->whereIn('name', ['advertiser', 'Advertiser']);
+                })->count(),
+                'traders' => (clone $query)->whereHas('roles', function($q) {
+                    $q->whereIn('name', ['trader', 'Trader']);
+                })->count(),
+                'pending' => (clone $query)->where('status', 'pending')->count(),
+            ]
         ], 200);
     }
 
