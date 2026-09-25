@@ -92,4 +92,14 @@ class Company extends Model
     {
         return $this->belongsTo(City::class);
     }
+
+    public function businessCategories()
+    {
+        return $this->belongsToMany(BusinessCategory::class, 'company_business_categories');
+    }
+
+    public function businessDocuments()
+    {
+        return $this->hasMany(BusinessDocument::class);
+    }
 }
