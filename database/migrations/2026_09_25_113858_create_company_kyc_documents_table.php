@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('company_kyc_documents', function (Blueprint $table) {
+        Schema::create('kyc', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
             $table->string('document_type', 100); // e.g. aadhaar_card, pan_card, gst_certificate, business_registration, passport_photo
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('company_kyc_documents');
+        Schema::dropIfExists('kyc');
     }
 };
