@@ -18,6 +18,10 @@ return new class extends Migration
             $table->foreignId('state_id')->nullable()->constrained('states')->cascadeOnDelete();
             $table->foreignId('city_id')->nullable()->constrained('cities')->cascadeOnDelete();
             $table->timestamps();
+            $table->index('user_id');
+            $table->index('country_id');
+            $table->index('state_id');
+            $table->index('city_id');
         });
     }
 

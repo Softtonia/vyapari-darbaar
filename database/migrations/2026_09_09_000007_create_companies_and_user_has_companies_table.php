@@ -18,18 +18,30 @@ return new class extends Migration
                 $table->string('contact_person', 150)->nullable();
                 $table->string('business_type', 100)->nullable();
                 $table->string('gstin', 20)->nullable();
-                $table->string('country', 100)->nullable()->default('India');
-                $table->string('state', 100)->nullable();
-                $table->string('city', 100)->nullable();
+                $table->foreignId('country_id')->nullable()->constrained('countries')->nullOnDelete();
+                $table->foreignId('state_id')->nullable()->constrained('states')->nullOnDelete();
+                $table->foreignId('city_id')->nullable()->constrained('cities')->nullOnDelete();
                 $table->text('address')->nullable();
+                $table->string('address_line_2', 255)->nullable();
+                $table->string('pin_code', 20)->nullable();
+                $table->string('pan_number', 50)->nullable();
+                $table->string('year_of_establishment', 10)->nullable();
+                $table->string('no_of_employees', 50)->nullable();
+                $table->string('website', 255)->nullable();
+                $table->text('business_description')->nullable();
                 $table->json('commodities_handled')->nullable();
                 $table->string('trade_preference', 20)->default('both'); // 'buy', 'sell', 'both'
                 $table->string('verification_status', 20)->default('pending'); // 'pending', 'verified', 'rejected'
                 $table->timestamps();
 
                 $table->index('verification_status');
-                $table->index('city');
-                $table->index('state');
+                $table->index('country_id');
+                $table->index('state_id');
+                $table->index('city_id');
+                $table->index('name');
+                $table->index('business_type');
+                $table->index('gstin');
+                $table->index('pan_number');
             });
         }
 

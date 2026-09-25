@@ -23,6 +23,10 @@ return new class extends Migration
                 $table->timestamp('email_verified_at')->nullable();
                 $table->string('password', 255);
                 $table->string('status', 20)->default('active');
+                $table->date('date_of_birth')->nullable();
+                $table->string('gender', 20)->nullable();
+                $table->string('alternate_number', 25)->nullable();
+                $table->string('profile_photo', 500)->nullable();
                 $table->string('suspension_reason', 500)->nullable();
                 $table->boolean('must_change_password')->default(true);
                 $table->timestamp('last_login_at')->nullable();

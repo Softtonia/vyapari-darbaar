@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('states', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('country_id')->nullable()->constrained('countries')->cascadeOnDelete();
             $table->string('name', 150);
             $table->string('slug', 180)->unique();
             $table->string('code', 20)->unique();
@@ -24,6 +25,9 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->index(['status', 'sort_order', 'id'], 'idx_states_status_sort_id');
+            $table->index('country_id');
+            $table->index('name');
+            $table->index('code');
         });
     }
 

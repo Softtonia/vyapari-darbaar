@@ -14,11 +14,17 @@ return new class extends Migration
         Schema::create('kyc', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
             $table->string('document_type', 100); // e.g. aadhaar_card, pan_card, gst_certificate, business_registration, passport_photo
             $table->string('file_path', 500);
             $table->string('status', 50)->default('pending'); // pending, verified, rejected
             $table->string('upload_batch_id', 100)->nullable(); // For batch upload progress tracking
             $table->timestamps();
+            $table->index('company_id');
+            $table->index('user_id');
+            $table->index('status');
+            $table->index('document_type');
+            $table->index('upload_batch_id');
         });
     }
 

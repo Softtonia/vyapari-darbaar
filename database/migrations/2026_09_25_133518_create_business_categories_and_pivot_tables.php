@@ -13,6 +13,8 @@ return new class extends Migration
             $table->string('name', 150);
             $table->boolean('status')->default(true);
             $table->timestamps();
+            $table->index('name');
+            $table->index('status');
         });
 
         Schema::create('company_business_categories', function (Blueprint $table) {
@@ -20,6 +22,8 @@ return new class extends Migration
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
             $table->foreignId('business_category_id')->constrained('business_categories')->cascadeOnDelete();
             $table->timestamps();
+            $table->index('company_id');
+            $table->index('business_category_id');
         });
 
         if (Schema::hasColumn('companies', 'business_category')) {
