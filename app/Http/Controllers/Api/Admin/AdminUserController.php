@@ -62,7 +62,8 @@ class AdminUserController extends Controller
                 'must_change_password',
                 'created_at',
                 'updated_at',
-            ]);
+            ])
+            ->where('id', '!=', $request->user()->id);
 
         // Search: full_name, first_name, last_name, username prefix, email prefix, phone_number
         if ($request->filled('search')) {
