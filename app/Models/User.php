@@ -329,4 +329,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(NotificationLog::class);
     }
+
+    public function businessDocuments()
+    {
+        return $this->hasMany(BusinessDocument::class);
+    }
 }
