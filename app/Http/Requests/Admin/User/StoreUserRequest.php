@@ -37,6 +37,23 @@ class StoreUserRequest extends FormRequest
             'state' => ['nullable', 'string', 'max:100'],
             'city' => ['nullable', 'string', 'max:100'],
             'address' => ['nullable', 'string', 'max:1000'],
+            'address_line_2' => ['nullable', 'string', 'max:1000'],
+            'pin_code' => ['nullable', 'string', 'max:20'],
+            
+            'pan_number' => ['nullable', 'string', 'max:50'],
+            'year_of_establishment' => ['nullable', 'string', 'max:10'],
+            'business_category' => ['nullable', 'string', 'max:100'],
+            'no_of_employees' => ['nullable', 'string', 'max:50'],
+            'website' => ['nullable', 'string', 'max:255'],
+            
+            'bank_account_holder_name' => ['nullable', 'string', 'max:255'],
+            'bank_name' => ['nullable', 'string', 'max:255'],
+            'bank_account_number' => ['nullable', 'string', 'max:100'],
+            'bank_ifsc_code' => ['nullable', 'string', 'max:20'],
+            'bank_branch_name' => ['nullable', 'string', 'max:255'],
+            
+            'business_description' => ['nullable', 'string'],
+            
             'commodities_handled' => ['nullable'],
             'trade_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
             'buy_sell_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
@@ -84,7 +101,14 @@ class StoreUserRequest extends FormRequest
             'role' => $role,
         ];
 
-        foreach (['company_name', 'contact_person', 'business_type', 'gstin', 'country', 'state', 'city', 'address', 'commodities_handled', 'trade_preference', 'buy_sell_preference', 'verification_status'] as $field) {
+        $companyFields = [
+            'company_name', 'contact_person', 'business_type', 'gstin', 'country', 'state', 'city', 'address',
+            'address_line_2', 'pin_code', 'pan_number', 'year_of_establishment', 'business_category', 'no_of_employees',
+            'website', 'bank_account_holder_name', 'bank_name', 'bank_account_number', 'bank_ifsc_code', 'bank_branch_name',
+            'business_description', 'commodities_handled', 'trade_preference', 'buy_sell_preference', 'verification_status'
+        ];
+
+        foreach ($companyFields as $field) {
             if ($this->has($field)) {
                 $data[$field] = $this->input($field);
             }

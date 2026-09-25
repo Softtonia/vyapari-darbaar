@@ -88,8 +88,8 @@ class CreateUserAction
             // syncRoles handles pivot creation cleanly and prevents duplicate role assignments
             $newUser->syncRoles([$targetRole]);
 
-            // Create and attach company for trader role if company details provided
-            if ($targetRole === 'trader' && ! empty($data['company_name'])) {
+            // Create and attach company for any role if company details provided
+            if (! empty($data['company_name'])) {
                 $commodities = $data['commodities_handled'] ?? [];
                 if (is_string($commodities)) {
                     $decoded = json_decode($commodities, true);
@@ -101,17 +101,34 @@ class CreateUserAction
                     'contact_person' => trim((string) ($data['contact_person'] ?? $data['name'])),
                     'business_type' => isset($data['business_type']) ? trim((string) $data['business_type']) : null,
                     'gstin' => isset($data['gstin']) ? strtoupper(trim((string) $data['gstin'])) : null,
+                    'pan_number' => isset($data['pan_number']) ? trim((string) $data['pan_number']) : null,
+                    'year_of_establishment' => isset($data['year_of_establishment']) ? trim((string) $data['year_of_establishment']) : null,
+                    'business_category' => isset($data['business_category']) ? trim((string) $data['business_category']) : null,
+                    'no_of_employees' => isset($data['no_of_employees']) ? trim((string) $data['no_of_employees']) : null,
+                    'website' => isset($data['website']) ? trim((string) $data['website']) : null,
+                    
                     'country' => isset($data['country']) ? trim((string) $data['country']) : 'India',
                     'state' => isset($data['state']) ? trim((string) $data['state']) : null,
                     'city' => isset($data['city']) ? trim((string) $data['city']) : null,
                     'address' => isset($data['address']) ? trim((string) $data['address']) : null,
+                    'address_line_2' => isset($data['address_line_2']) ? trim((string) $data['address_line_2']) : null,
+                    'pin_code' => isset($data['pin_code']) ? trim((string) $data['pin_code']) : null,
+                    
+                    'bank_account_holder_name' => isset($data['bank_account_holder_name']) ? trim((string) $data['bank_account_holder_name']) : null,
+                    'bank_name' => isset($data['bank_name']) ? trim((string) $data['bank_name']) : null,
+                    'bank_account_number' => isset($data['bank_account_number']) ? trim((string) $data['bank_account_number']) : null,
+                    'bank_ifsc_code' => isset($data['bank_ifsc_code']) ? trim((string) $data['bank_ifsc_code']) : null,
+                    'bank_branch_name' => isset($data['bank_branch_name']) ? trim((string) $data['bank_branch_name']) : null,
+                    
+                    'business_description' => isset($data['business_description']) ? trim((string) $data['business_description']) : null,
+                    
                     'commodities_handled' => $commodities,
                     'trade_preference' => strtolower((string) ($data['trade_preference'] ?? $data['buy_sell_preference'] ?? 'both')),
-                    'verification_status' => isset($data['verification_status']) ? trim((string) $data['verification_status']) : 'verified',
+                    'verification_status' => isset($data['verification_status']) ? trim((string) $data['verification_status']) : 'pending',
                 ]);
 
                 $newUser->companies()->attach($company->id, [
-                    'role' => 'trader',
+                    'role' => $targetRole, // Associate with their primary role
                     'is_primary' => true,
                 ]);
             }
