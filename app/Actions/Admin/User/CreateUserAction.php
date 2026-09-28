@@ -46,7 +46,7 @@ class CreateUserAction
             );
         }
 
-        $fullName = $data['full_name'] ?? $data['name'] ?? trim(($data['first_name'] ?? '').' '.($data['last_name'] ?? ''));
+        $fullName = $data['full_name'] ?? trim(($data['first_name'] ?? '').' '.($data['last_name'] ?? ''));
 
         // Step 2: Generate unique username server-side with Redis lock
         $username = $this->usernameGenerator->generate($fullName, $data['email']);
@@ -101,7 +101,7 @@ class CreateUserAction
 
                 $company = Company::create([
                     'name' => trim((string) $data['company_name']),
-                    'contact_person' => trim((string) ($data['contact_person'] ?? $data['name'])),
+                    'contact_person' => trim((string) ($data['contact_person'] ?? $fullName)),
                     'business_type' => isset($data['business_type']) ? trim((string) $data['business_type']) : null,
                     'gstin' => isset($data['gstin']) ? strtoupper(trim((string) $data['gstin'])) : null,
                     'pan_number' => isset($data['pan_number']) ? trim((string) $data['pan_number']) : null,
