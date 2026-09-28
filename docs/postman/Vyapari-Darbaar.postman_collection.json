@@ -8567,6 +8567,135 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "Users & KYC",
+                    "item": [
+                        {
+                            "name": "List Business Categories",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/business-categories",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "business-categories"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Create User (with KYC & Business Docs)",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/users",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "users"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "formdata",
+                                    "formdata": [
+                                        {
+                                            "key": "first_name",
+                                            "value": "Rahul",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "last_name",
+                                            "value": "Sharma",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "email",
+                                            "value": "rahul@example.com",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "phone_number",
+                                            "value": "9876543210",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "password",
+                                            "value": "password123",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "password_confirmation",
+                                            "value": "password123",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "role",
+                                            "value": "trader",
+                                            "type": "text"
+                                        },
+                                        {
+                                            "key": "aadhaar_card",
+                                            "type": "file",
+                                            "src": []
+                                        },
+                                        {
+                                            "key": "pan_card",
+                                            "type": "file",
+                                            "src": []
+                                        },
+                                        {
+                                            "key": "passport_photo",
+                                            "type": "file",
+                                            "src": []
+                                        },
+                                        {
+                                            "key": "gst_certificate",
+                                            "type": "file",
+                                            "src": []
+                                        },
+                                        {
+                                            "key": "business_registration",
+                                            "type": "file",
+                                            "src": []
+                                        },
+                                        {
+                                            "key": "business_category_ids[0]",
+                                            "value": "1",
+                                            "type": "text"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
                 }
             ]
         },
