@@ -63,6 +63,12 @@ class StoreUserRequest extends FormRequest
             'trade_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
             'buy_sell_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
             'verification_status' => ['nullable', 'string', 'in:pending,verified,rejected'],
+
+            'aadhaar_card' => ['nullable', 'file', 'mimes:jpeg,png,jpg,pdf', 'max:5120'],
+            'pan_card' => ['nullable', 'file', 'mimes:jpeg,png,jpg,pdf', 'max:5120'],
+            'passport_photo' => ['nullable', 'file', 'mimes:jpeg,png,jpg,pdf', 'max:5120'],
+            'gst_certificate' => ['nullable', 'file', 'mimes:jpeg,png,jpg,pdf', 'max:5120'],
+            'business_registration' => ['nullable', 'file', 'mimes:jpeg,png,jpg,pdf', 'max:5120'],
         ];
     }
 
@@ -112,7 +118,7 @@ class StoreUserRequest extends FormRequest
 
         $companyFields = [
             'company_name', 'contact_person', 'business_type', 'gstin', 'country_id', 'state_id', 'city_id', 'address',
-            'address_line_2', 'pin_code', 'pan_number', 'year_of_establishment', 'business_category', 'no_of_employees',
+            'address_line_2', 'pin_code', 'pan_number', 'year_of_establishment', 'business_category_ids', 'no_of_employees',
             'website', 'bank_account_holder_name', 'bank_name', 'bank_account_number', 'bank_ifsc_code', 'bank_branch_name',
             'business_description', 'commodities_handled', 'trade_preference', 'buy_sell_preference', 'verification_status'
         ];
@@ -120,6 +126,13 @@ class StoreUserRequest extends FormRequest
         foreach ($companyFields as $field) {
             if ($this->has($field)) {
                 $data[$field] = $this->input($field);
+            }
+        }
+
+        $fileFields = ['aadhaar_card', 'pan_card', 'passport_photo', 'gst_certificate', 'business_registration'];
+        foreach ($fileFields as $field) {
+            if ($this->hasFile($field)) {
+                $data[$field] = $this->file($field)->store('company_documents', 'public');
             }
         }
 

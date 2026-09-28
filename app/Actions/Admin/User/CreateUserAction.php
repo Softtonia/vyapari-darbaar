@@ -143,6 +143,39 @@ class CreateUserAction
                 if (!empty($data['business_category_ids']) && is_array($data['business_category_ids'])) {
                     $company->businessCategories()->attach($data['business_category_ids']);
                 }
+
+                $kycDocs = [
+                    'aadhaar_card' => 'Aadhaar Card',
+                    'pan_card' => 'PAN Card',
+                    'passport_photo' => 'Passport Photo',
+                ];
+                foreach ($kycDocs as $key => $docType) {
+                    if (!empty($data[$key])) {
+                        \App\Models\CompanyKycDocument::create([
+                            'company_id' => $company->id,
+                            'user_id' => $newUser->id,
+                            'document_type' => $docType,
+                            'file_path' => $data[$key],
+                            'status' => 'pending',
+                        ]);
+                    }
+                }
+
+                $businessDocs = [
+                    'gst_certificate' => 'GST Certificate',
+                    'business_registration' => 'Business Registration',
+                ];
+                foreach ($businessDocs as $key => $docType) {
+                    if (!empty($data[$key])) {
+                        \App\Models\BusinessDocument::create([
+                            'company_id' => $company->id,
+                            'user_id' => $newUser->id,
+                            'document_type' => $docType,
+                            'file_path' => $data[$key],
+                            'status' => 'pending',
+                        ]);
+                    }
+                }
             }
 
             return $newUser->fresh(['roles', 'companies']);
