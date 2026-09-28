@@ -39,6 +39,7 @@ return new class extends Migration
             $table->string('author', 255)->nullable();
             $table->boolean('is_imported')->default(false);
             $table->foreignId('import_run_id')->nullable()->constrained('news_import_runs')->nullOnDelete();
+            $table->dateTime('imported_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
 
