@@ -60,6 +60,18 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the user's profile photo url.
+     */
+    public function getProfilePhotoUrlAttribute()
+    {
+        if ($this->profile_photo) {
+            return asset('storage/' . $this->profile_photo);
+        }
+
+        return null;
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
