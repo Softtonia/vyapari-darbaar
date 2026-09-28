@@ -1817,7 +1817,7 @@
                     "name": "User,kyc & Role Management",
                     "item": [
                         {
-                            "name": "Users CRUD",
+                            "name": "Users",
                             "item": [
                                 {
                                     "name": "List Users",
@@ -3246,6 +3246,33 @@
                                     }
                                 }
                             ]
+                        },
+                        {
+                            "name": "Business Categories",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Accept",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/business-categories",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "business-categories"
+                                    ]
+                                }
+                            }
                         }
                     ]
                 },
