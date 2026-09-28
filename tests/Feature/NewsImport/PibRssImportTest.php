@@ -53,7 +53,6 @@ class PibRssImportTest extends TestCase
         $admin = Admin::forceCreate([
             'first_name' => 'Test',
             'last_name'  => 'Admin',
-            'full_name'  => 'Test Admin',
             'username'   => 'testadmin',
             'email'      => 'testadmin@example.com',
             'password'   => bcrypt('password'),
