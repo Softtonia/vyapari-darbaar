@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('news_articles', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('external_id')->nullable()->unique();
             $table->foreignId('news_source_id')->constrained('news_sources')->restrictOnDelete();
             $table->foreignId('news_category_id')->constrained('news_categories')->restrictOnDelete();
             $table->string('content_type', 32)->default('news');
