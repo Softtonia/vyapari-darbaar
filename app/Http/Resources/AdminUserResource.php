@@ -43,6 +43,20 @@ class AdminUserResource extends JsonResource
 
                 return $company ? new CompanyResource($company) : null;
             }),
+            'bank' => $this->when($isTrader, function () {
+                $company = $this->relationLoaded('companies')
+                    ? ($this->companies->firstWhere('pivot.is_primary', true) ?? $this->companies->first())
+                    : $this->company;
+
+                $bank = $company ? $company->bankDetails()->where('is_primary', true)->first() : null;
+                return $bank ? [
+                    'account_holder_name' => $bank->account_holder_name,
+                    'bank_name' => $bank->bank_name,
+                    'account_number' => $bank->account_number,
+                    'ifsc_code' => $bank->ifsc_code,
+                    'branch_name' => $bank->branch_name,
+                ] : null;
+            }),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             'creator' => $this->whenLoaded('creator', function () {
