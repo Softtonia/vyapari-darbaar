@@ -50,6 +50,13 @@ class CampaignSeeder extends Seeder
                 'event' => \App\Enums\CampaignEvent::UPDATE_PROFILE->value,
                 'is_active' => true,
             ],
+            [
+                'name' => 'News Published Trigger',
+                'email_template_id' => $templates->get('CAMPAIGN_NEWS_PUBLISH')?->id,
+                'send_type' => 'trigger',
+                'event' => \App\Enums\CampaignEvent::NEWS_PUBLISH->value,
+                'is_active' => true,
+            ],
         ];
 
         foreach ($campaigns as $campaign) {

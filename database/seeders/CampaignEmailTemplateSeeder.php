@@ -88,6 +88,25 @@ HTML
 </body>
 </html>
 HTML
+            ],
+            [
+                'key' => 'CAMPAIGN_NEWS_PUBLISH',
+                'name' => 'News Published Alert',
+                'subject' => 'New Update: {{news_title}}',
+                'type' => 'html',
+                'is_active' => true,
+                'body' => <<<'HTML'
+<!DOCTYPE html>
+<html>
+<head><title>Latest News</title></head>
+<body style="font-family: Arial, sans-serif; padding: 20px;">
+    <h2>{{news_title}}</h2>
+    <p>{{news_short_description}}</p>
+    <p><a href="{{news_url}}">Read the full article here</a></p>
+    <p>Thanks,<br>The {{CompanyName}} Team</p>
+</body>
+</html>
+HTML
             ]
         ];
 
