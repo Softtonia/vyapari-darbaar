@@ -131,7 +131,7 @@ class UpdateUserRequest extends FormRequest
         $data = [
             'first_name' => $firstName,
             'last_name' => $lastName,
-            'name' => trim("{$firstName} {$lastName}"),
+
         ];
 
         if ($this->has('phone_number')) {

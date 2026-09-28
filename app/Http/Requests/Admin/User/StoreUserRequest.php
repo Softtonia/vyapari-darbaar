@@ -100,7 +100,7 @@ class StoreUserRequest extends FormRequest
         $data = [
             'first_name' => $firstName,
             'last_name' => $lastName,
-            'name' => trim("{$firstName} {$lastName}"),
+
             'phone_number' => $phone,
             'alternate_number' => $this->input('alternate_number'),
             'date_of_birth' => $this->input('date_of_birth'),

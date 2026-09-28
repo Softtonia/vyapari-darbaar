@@ -69,7 +69,6 @@ class CreateUserAction
             $newUser = User::create([
                 'first_name' => $data['first_name'] ?? null,
                 'last_name' => $data['last_name'] ?? null,
-                'full_name' => $fullName,
                 'phone_number' => $data['phone_number'] ?? null,
                 'alternate_number' => $data['alternate_number'] ?? null,
                 'gender' => $data['gender'] ?? null,

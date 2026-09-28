@@ -19,7 +19,6 @@ class UpdateUserAction
             $updateData = [
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
-                'full_name' => $data['name'],
             ];
 
             $personalFields = ['phone_number', 'alternate_number', 'date_of_birth', 'gender', 'profile_photo'];
