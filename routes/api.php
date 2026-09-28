@@ -50,6 +50,9 @@ use App\Http\Controllers\Api\User\UserAuthController;
 use App\Http\Controllers\Api\User\UserCompanyController;
 use App\Http\Controllers\Api\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\BusinessCategoryController;
+
+Route::get('admin/business-categories', [BusinessCategoryController::class, 'index']);
 
 // Universal Direct Aliases for Mobile/Email OTP Login
 Route::post('send-otp', [UserAuthController::class, 'sendOtp'])->middleware('throttle:user-send-otp');

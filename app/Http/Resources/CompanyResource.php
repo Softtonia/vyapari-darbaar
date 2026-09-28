@@ -51,6 +51,8 @@ class CompanyResource extends JsonResource
                 ];
             }),
             'users' => UserProfileResource::collection($this->whenLoaded('users')),
+            'kyc_documents' => $this->whenLoaded('kycDocuments'),
+            'business_documents' => $this->whenLoaded('businessDocuments'),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];
