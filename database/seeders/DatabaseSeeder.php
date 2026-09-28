@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             SiteSettingSeeder::class,
             ExchangeSeeder::class,
             NewsSourceSeeder::class,
+            BusinessCategorySeeder::class,
         ]);
     }
 }
