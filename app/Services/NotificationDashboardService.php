@@ -94,7 +94,7 @@ class NotificationDashboardService
             ->count();
 
         $recentBatches = NotificationBatch::query()
-            ->with('creator:id,name')
+            ->with('creator:id,first_name,last_name')
             ->latest('id')
             ->limit(5)
             ->get()

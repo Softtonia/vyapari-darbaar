@@ -1834,9 +1834,9 @@
                                             }
                                         ],
                                         "url": {
-                                            "raw": "{{base_url}}/api/admin/users?page=1&per_page=15&role=trader&search=amit",
+                                            "raw": "{{live}}/api/admin/users?page=1&per_page=15&role=trader&search=amit",
                                             "host": [
-                                                "{{base_url}}"
+                                                "{{live}}"
                                             ],
                                             "path": [
                                                 "api",
@@ -2008,9 +2008,9 @@
                                             ]
                                         },
                                         "url": {
-                                            "raw": "{{base_url}}/api/admin/users",
+                                            "raw": "{{live}}/api/admin/users",
                                             "host": [
-                                                "{{base_url}}"
+                                                "{{live}}"
                                             ],
                                             "path": [
                                                 "api",
@@ -2036,9 +2036,9 @@
                                             }
                                         ],
                                         "url": {
-                                            "raw": "{{base_url}}/api/admin/users/{{user_id}}",
+                                            "raw": "{{live}}/api/admin/users/{{user_id}}",
                                             "host": [
-                                                "{{base_url}}"
+                                                "{{live}}"
                                             ],
                                             "path": [
                                                 "api",
@@ -2197,9 +2197,9 @@
                                             ]
                                         },
                                         "url": {
-                                            "raw": "{{base_url}}/api/admin/users/{{user_id}}",
+                                            "raw": "{{live}}/api/admin/users/{{user_id}}",
                                             "host": [
-                                                "{{base_url}}"
+                                                "{{live}}"
                                             ],
                                             "path": [
                                                 "api",
@@ -2227,9 +2227,9 @@
                                             }
                                         ],
                                         "url": {
-                                            "raw": "{{base_url}}/api/admin/users/{{user_id}}",
+                                            "raw": "{{live}}/api/admin/users/{{user_id}}",
                                             "host": [
-                                                "{{base_url}}"
+                                                "{{live}}"
                                             ],
                                             "path": [
                                                 "api",
@@ -2265,9 +2265,9 @@
                                             }
                                         },
                                         "url": {
-                                            "raw": "{{base_url}}/api/admin/users/{{user_id}}/status",
+                                            "raw": "{{live}}/api/admin/users/{{user_id}}/status",
                                             "host": [
-                                                "{{base_url}}"
+                                                "{{live}}"
                                             ],
                                             "path": [
                                                 "api",
@@ -8257,9 +8257,9 @@
                                     ]
                                 },
                                 "url": {
-                                    "raw": "{{base_url}}/api/admin/kyc/batch-upload",
+                                    "raw": "{{live}}/api/admin/kyc/batch-upload",
                                     "host": [
-                                        "{{base_url}}"
+                                        "{{live}}"
                                     ],
                                     "path": [
                                         "api",
@@ -8286,9 +8286,9 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{base_url}}/api/admin/kyc/batch-progress/{{batch_id}}",
+                                    "raw": "{{live}}/api/admin/kyc/batch-progress/{{batch_id}}",
                                     "host": [
-                                        "{{base_url}}"
+                                        "{{live}}"
                                     ],
                                     "path": [
                                         "api",
@@ -8316,9 +8316,9 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{base_url}}/api/admin/kyc?company_id=1",
+                                    "raw": "{{live}}/api/admin/kyc?company_id=1",
                                     "host": [
-                                        "{{base_url}}"
+                                        "{{live}}"
                                     ],
                                     "path": [
                                         "api",
@@ -8358,9 +8358,9 @@
                                     }
                                 },
                                 "url": {
-                                    "raw": "{{base_url}}/api/admin/kyc/{{kyc_id}}/status",
+                                    "raw": "{{live}}/api/admin/kyc/{{kyc_id}}/status",
                                     "host": [
-                                        "{{base_url}}"
+                                        "{{live}}"
                                     ],
                                     "path": [
                                         "api",
@@ -8388,9 +8388,9 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{base_url}}/api/admin/kyc/{{kyc_id}}",
+                                    "raw": "{{live}}/api/admin/kyc/{{kyc_id}}",
                                     "host": [
-                                        "{{base_url}}"
+                                        "{{live}}"
                                     ],
                                     "path": [
                                         "api",
@@ -8422,9 +8422,9 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{base_url}}/api/admin/business-documents?company_id=1",
+                                    "raw": "{{live}}/api/admin/business-documents?company_id=1",
                                     "host": [
-                                        "{{base_url}}"
+                                        "{{live}}"
                                     ],
                                     "path": [
                                         "api",
@@ -8488,9 +8488,9 @@
                                     ]
                                 },
                                 "url": {
-                                    "raw": "{{base_url}}/api/admin/business-documents",
+                                    "raw": "{{live}}/api/admin/business-documents",
                                     "host": [
-                                        "{{base_url}}"
+                                        "{{live}}"
                                     ],
                                     "path": [
                                         "api",
@@ -8524,9 +8524,9 @@
                                     }
                                 },
                                 "url": {
-                                    "raw": "{{base_url}}/api/admin/business-documents/{{business_doc_id}}/status",
+                                    "raw": "{{live}}/api/admin/business-documents/{{business_doc_id}}/status",
                                     "host": [
-                                        "{{base_url}}"
+                                        "{{live}}"
                                     ],
                                     "path": [
                                         "api",
@@ -8553,9 +8553,9 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{base_url}}/api/admin/business-documents/{{business_doc_id}}",
+                                    "raw": "{{live}}/api/admin/business-documents/{{business_doc_id}}",
                                     "host": [
-                                        "{{base_url}}"
+                                        "{{live}}"
                                     ],
                                     "path": [
                                         "api",
@@ -10012,9 +10012,9 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{base_url}}/api/locations/countries",
+                                    "raw": "{{live}}/api/locations/countries",
                                     "host": [
-                                        "{{base_url}}"
+                                        "{{live}}"
                                     ],
                                     "path": [
                                         "api",
@@ -10036,9 +10036,9 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{base_url}}/api/locations/states?country_id=1",
+                                    "raw": "{{live}}/api/locations/states?country_id=1",
                                     "host": [
-                                        "{{base_url}}"
+                                        "{{live}}"
                                     ],
                                     "path": [
                                         "api",
@@ -10066,9 +10066,9 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{base_url}}/api/locations/cities?state_id=4",
+                                    "raw": "{{live}}/api/locations/cities?state_id=4",
                                     "host": [
-                                        "{{base_url}}"
+                                        "{{live}}"
                                     ],
                                     "path": [
                                         "api",
@@ -10152,7 +10152,7 @@
             "type": "string"
         },
         {
-            "key": "base_url",
+            "key": "live",
             "value": "http://localhost:8000",
             "type": "string"
         },

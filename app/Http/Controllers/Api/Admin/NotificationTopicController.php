@@ -85,7 +85,7 @@ class NotificationTopicController extends Controller
             ], 403);
         }
 
-        $topic->loadMissing('creator:id,first_name,last_name,name');
+        $topic->loadMissing('creator:id,first_name,last_name');
         $topic->loadCount('users');
 
         return response()->json([

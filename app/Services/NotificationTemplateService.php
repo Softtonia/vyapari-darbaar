@@ -32,7 +32,7 @@ class NotificationTemplateService
      */
     public function paginate(array $filters): LengthAwarePaginator
     {
-        $query = NotificationTemplate::query()->with('creator:id,name');
+        $query = NotificationTemplate::query()->with('creator:id,first_name,last_name');
 
         if (! empty($filters['search'])) {
             $search = (string) $filters['search'];

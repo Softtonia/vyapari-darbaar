@@ -85,7 +85,7 @@ class NotificationTemplateController extends Controller
             ], 403);
         }
 
-        $template->loadMissing('creator:id,first_name,last_name,name');
+        $template->loadMissing('creator:id,first_name,last_name');
 
         return response()->json([
             'status' => true,
