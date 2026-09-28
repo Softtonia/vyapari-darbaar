@@ -31,14 +31,16 @@ class AdminSeeder extends Seeder
             [
                 'email' => 'sales@softtonia.com',
                 'password' => 'Soft@12345',
-                'name' => 'Sales Admin',
+                'first_name' => 'Sales',
+                'last_name' => 'Admin',
                 'username' => 'sales.softtonia',
                 'role' => $superAdminRole,
             ],
             [
                 'email' => env('SEED_ADMIN_EMAIL', 'vijay.kumar@softtonia.com'),
                 'password' => env('SEED_ADMIN_PASSWORD', 'Soft@12345'),
-                'name' => env('SEED_ADMIN_NAME', 'Super Admin'),
+                'first_name' => env('SEED_ADMIN_NAME', 'Super Admin'),
+                'last_name' => '',
                 'username' => env('SEED_ADMIN_USERNAME', 'super.admin'),
                 'role' => $superAdminRole,
             ],
@@ -48,7 +50,8 @@ class AdminSeeder extends Seeder
             $adminUser = User::updateOrCreate(
                 ['email' => $adminData['email']],
                 [
-                    'name' => $adminData['name'],
+                    'first_name' => $adminData['first_name'],
+                    'last_name' => $adminData['last_name'],
                     'username' => $adminData['username'],
                     'password' => Hash::make($adminData['password']),
                     'status' => 'active',

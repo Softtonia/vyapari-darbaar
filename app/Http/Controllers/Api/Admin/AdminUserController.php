@@ -29,7 +29,8 @@ class AdminUserController extends Controller
      */
     protected const ALLOWED_SORT_FIELDS = [
         'created_at',
-        'name',
+        'first_name',
+        'last_name',
         'username',
         'email',
         'phone_number',
@@ -48,7 +49,8 @@ class AdminUserController extends Controller
             ->with('roles')
             ->select([
                 'id',
-                'name',
+                'first_name',
+                'last_name',
                 'phone_number',
                 'username',
                 'email',
@@ -68,7 +70,8 @@ class AdminUserController extends Controller
         if ($request->filled('search')) {
             $search = (string) $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
                     ->orWhere('phone_number', 'like', "%{$search}%")
                     ->orWhere('username', 'like', "{$search}%")
                     ->orWhere('email', 'like', "{$search}%");

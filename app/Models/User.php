@@ -38,7 +38,7 @@ class User extends Authenticatable
             if (empty($user->attributes['username']) && ! empty($user->attributes['email'])) {
                 $user->attributes['username'] = explode('@', $user->attributes['email'])[0].'_'.substr(md5(uniqid()), 0, 4);
             }
-            if (empty($user->attributes['name'])) {
+            if (empty($user->attributes['first_name'])) {
                 $name = '';
                 if (empty($name) && ! empty($user->attributes['username'])) {
                     $name = $user->attributes['username'];
@@ -46,9 +46,17 @@ class User extends Authenticatable
                 if (empty($name) && ! empty($user->attributes['email'])) {
                     $name = explode('@', $user->attributes['email'])[0];
                 }
-                $user->attributes['name'] = ! empty($name) ? $name : 'User';
+                $user->attributes['first_name'] = ! empty($name) ? $name : 'User';
             }
         });
+    }
+
+    /**
+     * Get the user's full name.
+     */
+    public function getNameAttribute()
+    {
+        return trim("{$this->first_name} {$this->last_name}");
     }
 
     /**
@@ -57,7 +65,8 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'phone_number',
         'username',
         'email',
