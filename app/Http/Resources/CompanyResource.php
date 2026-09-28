@@ -36,7 +36,7 @@ class CompanyResource extends JsonResource
             'city_id' => $this->city_id,
             'pan_number' => $this->pan_number,
             'year_of_establishment' => $this->year_of_establishment,
-            'business_category' => $this->business_category,
+            'business_category' => $this->businessCategories->first()?->name,
             'no_of_employees' => $this->no_of_employees,
             'website' => $this->website,
             'business_description' => $this->business_description,
