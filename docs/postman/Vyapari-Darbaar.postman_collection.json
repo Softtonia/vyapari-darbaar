@@ -1814,7 +1814,7 @@
                     ]
                 },
                 {
-                    "name": "User & Role Management",
+                    "name": "User,kyc & Role Management",
                     "item": [
                         {
                             "name": "Users CRUD",
@@ -2892,6 +2892,355 @@
                                                     "key": "per_page",
                                                     "value": "20"
                                                 }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "KYC Documents",
+                            "item": [
+                                {
+                                    "name": "Batch Upload KYC Documents",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "{{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "formdata",
+                                            "formdata": [
+                                                {
+                                                    "key": "company_id",
+                                                    "value": "1",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "document_type[]",
+                                                    "value": "pan_card",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "files[]",
+                                                    "src": "",
+                                                    "type": "file"
+                                                }
+                                            ]
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/kyc/batch-upload",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "kyc",
+                                                "batch-upload"
+                                            ],
+                                            "query": []
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Check Batch Progress",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "{{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/kyc/batch-progress/{{batch_id}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "kyc",
+                                                "batch-progress",
+                                                "{{batch_id}}"
+                                            ],
+                                            "query": []
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "List KYC Documents (by Company)",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "{{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/kyc?company_id=1",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "kyc"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "company_id",
+                                                    "value": "1"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Update KYC Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "{{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"status\": \"verified\"\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/kyc/{{kyc_id}}/status",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "kyc",
+                                                "{{kyc_id}}",
+                                                "status"
+                                            ],
+                                            "query": []
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Delete KYC Document",
+                                    "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "{{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/kyc/{{kyc_id}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "kyc",
+                                                "{{kyc_id}}"
+                                            ],
+                                            "query": []
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "Business Documents",
+                            "item": [
+                                {
+                                    "name": "List Business Documents",
+                                    "request": {
+                                        "method": "GET",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "{{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/business-documents?company_id=1",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "business-documents"
+                                            ],
+                                            "query": [
+                                                {
+                                                    "key": "company_id",
+                                                    "value": "1",
+                                                    "description": "Optional filter"
+                                                },
+                                                {
+                                                    "key": "user_id",
+                                                    "value": "1",
+                                                    "description": "Optional filter",
+                                                    "disabled": true
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Upload Business Document",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "{{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "formdata",
+                                            "formdata": [
+                                                {
+                                                    "key": "company_id",
+                                                    "value": "1",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "user_id",
+                                                    "value": "1",
+                                                    "type": "text",
+                                                    "disabled": true
+                                                },
+                                                {
+                                                    "key": "document_type",
+                                                    "value": "gst_certificate",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "file",
+                                                    "type": "file",
+                                                    "src": ""
+                                                }
+                                            ]
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/business-documents",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "business-documents"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Update Document Status",
+                                    "request": {
+                                        "method": "PATCH",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "{{admin_token}}"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"status\": \"verified\"\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/business-documents/{{business_doc_id}}/status",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "business-documents",
+                                                "{{business_doc_id}}",
+                                                "status"
+                                            ]
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Delete Business Document",
+                                    "request": {
+                                        "method": "DELETE",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json"
+                                            },
+                                            {
+                                                "key": "Authorization",
+                                                "value": "{{admin_token}}"
+                                            }
+                                        ],
+                                        "url": {
+                                            "raw": "{{live}}/api/admin/business-documents/{{business_doc_id}}",
+                                            "host": [
+                                                "{{live}}"
+                                            ],
+                                            "path": [
+                                                "api",
+                                                "admin",
+                                                "business-documents",
+                                                "{{business_doc_id}}"
                                             ]
                                         }
                                     }
@@ -8216,484 +8565,6 @@
                                     ]
                                 }
                             ]
-                        }
-                    ]
-                },
-                {
-                    "name": "KYC Documents",
-                    "item": [
-                        {
-                            "name": "Batch Upload KYC Documents",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "{{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "formdata",
-                                    "formdata": [
-                                        {
-                                            "key": "company_id",
-                                            "value": "1",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "document_type[]",
-                                            "value": "pan_card",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "files[]",
-                                            "src": "",
-                                            "type": "file"
-                                        }
-                                    ]
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/kyc/batch-upload",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "kyc",
-                                        "batch-upload"
-                                    ],
-                                    "query": []
-                                }
-                            }
-                        },
-                        {
-                            "name": "Check Batch Progress",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "{{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/kyc/batch-progress/{{batch_id}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "kyc",
-                                        "batch-progress",
-                                        "{{batch_id}}"
-                                    ],
-                                    "query": []
-                                }
-                            }
-                        },
-                        {
-                            "name": "List KYC Documents (by Company)",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "{{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/kyc?company_id=1",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "kyc"
-                                    ],
-                                    "query": [
-                                        {
-                                            "key": "company_id",
-                                            "value": "1"
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            "name": "Update KYC Status",
-                            "request": {
-                                "method": "PATCH",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "{{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"status\": \"verified\"\n}",
-                                    "options": {
-                                        "raw": {
-                                            "language": "json"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/kyc/{{kyc_id}}/status",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "kyc",
-                                        "{{kyc_id}}",
-                                        "status"
-                                    ],
-                                    "query": []
-                                }
-                            }
-                        },
-                        {
-                            "name": "Delete KYC Document",
-                            "request": {
-                                "method": "DELETE",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "{{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/kyc/{{kyc_id}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "kyc",
-                                        "{{kyc_id}}"
-                                    ],
-                                    "query": []
-                                }
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Business Documents",
-                    "item": [
-                        {
-                            "name": "List Business Documents",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "{{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/business-documents?company_id=1",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "business-documents"
-                                    ],
-                                    "query": [
-                                        {
-                                            "key": "company_id",
-                                            "value": "1",
-                                            "description": "Optional filter"
-                                        },
-                                        {
-                                            "key": "user_id",
-                                            "value": "1",
-                                            "description": "Optional filter",
-                                            "disabled": true
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            "name": "Upload Business Document",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "{{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "formdata",
-                                    "formdata": [
-                                        {
-                                            "key": "company_id",
-                                            "value": "1",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "user_id",
-                                            "value": "1",
-                                            "type": "text",
-                                            "disabled": true
-                                        },
-                                        {
-                                            "key": "document_type",
-                                            "value": "gst_certificate",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "file",
-                                            "type": "file",
-                                            "src": ""
-                                        }
-                                    ]
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/business-documents",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "business-documents"
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            "name": "Update Document Status",
-                            "request": {
-                                "method": "PATCH",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "{{admin_token}}"
-                                    }
-                                ],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"status\": \"verified\"\n}",
-                                    "options": {
-                                        "raw": {
-                                            "language": "json"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "{{live}}/api/admin/business-documents/{{business_doc_id}}/status",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "business-documents",
-                                        "{{business_doc_id}}",
-                                        "status"
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            "name": "Delete Business Document",
-                            "request": {
-                                "method": "DELETE",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "{{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/business-documents/{{business_doc_id}}",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "business-documents",
-                                        "{{business_doc_id}}"
-                                    ]
-                                }
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "Users & KYC",
-                    "item": [
-                        {
-                            "name": "List Business Categories",
-                            "request": {
-                                "method": "GET",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/business-categories",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "business-categories"
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            "name": "Create User (with KYC & Business Docs)",
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Accept",
-                                        "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{live}}/api/admin/users",
-                                    "host": [
-                                        "{{live}}"
-                                    ],
-                                    "path": [
-                                        "api",
-                                        "admin",
-                                        "users"
-                                    ]
-                                },
-                                "body": {
-                                    "mode": "formdata",
-                                    "formdata": [
-                                        {
-                                            "key": "first_name",
-                                            "value": "Rahul",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "last_name",
-                                            "value": "Sharma",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "email",
-                                            "value": "rahul@example.com",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "phone_number",
-                                            "value": "9876543210",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "password",
-                                            "value": "password123",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "password_confirmation",
-                                            "value": "password123",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "role",
-                                            "value": "trader",
-                                            "type": "text"
-                                        },
-                                        {
-                                            "key": "aadhaar_card",
-                                            "type": "file",
-                                            "src": []
-                                        },
-                                        {
-                                            "key": "pan_card",
-                                            "type": "file",
-                                            "src": []
-                                        },
-                                        {
-                                            "key": "passport_photo",
-                                            "type": "file",
-                                            "src": []
-                                        },
-                                        {
-                                            "key": "gst_certificate",
-                                            "type": "file",
-                                            "src": []
-                                        },
-                                        {
-                                            "key": "business_registration",
-                                            "type": "file",
-                                            "src": []
-                                        },
-                                        {
-                                            "key": "business_category_ids[0]",
-                                            "value": "1",
-                                            "type": "text"
-                                        }
-                                    ]
-                                }
-                            }
                         }
                     ]
                 }
