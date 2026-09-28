@@ -13,6 +13,7 @@ enum CampaignEvent: string
     case TICKET_RAISED = 'ticket_raised';
     case TICKET_RESOLVED = 'ticket_resolved';
     case UPDATE_PROFILE = 'update_profile';
+    case NEWS_PUBLISH = 'news_publish';
 
     public function label(): string
     {
@@ -26,6 +27,7 @@ enum CampaignEvent: string
             self::TICKET_RAISED => 'Ticket Raised',
             self::TICKET_RESOLVED => 'Ticket Resolved',
             self::UPDATE_PROFILE => 'Update Profile',
+            self::NEWS_PUBLISH => 'News Publish',
         };
     }
     

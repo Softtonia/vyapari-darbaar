@@ -30,7 +30,13 @@ class CampaignEmailService
             $subject = $this->replacePlaceholders($template->subject, $placeholders);
             $body = $this->replacePlaceholders($template->body, $placeholders);
 
-            $notifiable->notify(new CampaignEmailNotification($subject, $body));
+            $notification = new CampaignEmailNotification($subject, $body);
+
+            if (is_iterable($notifiable)) {
+                \Illuminate\Support\Facades\Notification::send($notifiable, $notification);
+            } else {
+                $notifiable->notify($notification);
+            }
         }
     }
 

@@ -359,6 +359,10 @@ class NewsArticleService
 
         $this->invalidateCaches($article);
 
+        if ($status === NewsStatus::PUBLISHED->value) {
+            $this->triggerNewsPublishCampaign($article);
+        }
+
         return $article->load(['source', 'category']);
     }
 
@@ -419,6 +423,10 @@ class NewsArticleService
 
         $this->invalidateCaches($article, $oldSlug);
 
+        if ($article->wasChanged('status') && $article->status === NewsStatus::PUBLISHED->value) {
+            $this->triggerNewsPublishCampaign($article);
+        }
+
         return $article->fresh()->load(['source', 'category', 'media']);
     }
 
@@ -451,6 +459,10 @@ class NewsArticleService
         $article->update($payload);
 
         $this->invalidateCaches($article, $oldSlug);
+
+        if ($article->wasChanged('status') && $article->status === NewsStatus::PUBLISHED->value) {
+            $this->triggerNewsPublishCampaign($article);
+        }
 
         return $article->fresh();
     }
@@ -545,5 +557,24 @@ class NewsArticleService
         }
 
         return $slug;
+    }
+
+    /**
+     * Trigger the email campaign for news publish.
+     */
+    protected function triggerNewsPublishCampaign(NewsArticle $article): void
+    {
+        // Chunk active users to prevent memory exhaustion
+        \App\Models\User::where('status', 'active')->chunk(500, function ($users) use ($article) {
+            app(\App\Services\CampaignEmailService::class)->triggerEvent(
+                \App\Enums\CampaignEvent::NEWS_PUBLISH,
+                $users,
+                [
+                    'news_title' => $article->title,
+                    'news_url' => config('app.frontend_url') . '/news/' . $article->slug,
+                    'news_short_description' => $article->short_description ?? '',
+                ]
+            );
+        });
     }
 }
