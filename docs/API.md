@@ -4985,3 +4985,98 @@ Vyapari Darbaar records administrative and system actions across modules (`Websi
 - **GET** `/api/user/notifications/unread-count` - Get Unread Count
 - **PATCH** `/api/user/notifications/read-all` - Mark All as Read
 - **POST** `/api/user/notifications/devices` - Register FCM Device
+
+---
+
+## 28. Data Sources Management (Admin)
+*All require `Authorization: Bearer <admin_token>` and `EnsureAdmin` middleware.*
+
+### 28.1 List Data Sources
+- **Method:** `GET`
+- **URI:** `/api/admin/data-sources`
+- **Query Parameters:** `page`, `per_page`
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Data sources retrieved successfully.",
+      "data": { ... }
+  }
+  ```
+
+### 28.2 Create Data Source
+- **Method:** `POST`
+- **URI:** `/api/admin/data-sources`
+- **Request Body:**
+  ```json
+  {
+      "name": "Example Mandi API",
+      "url": "https://api.example.com",
+      "type": "api",
+      "status": true
+  }
+  ```
+- **Success (201 Created):**
+  ```json
+  {
+      "status": true,
+      "message": "Data source created successfully.",
+      "data": { "id": 1, ... }
+  }
+  ```
+
+### 28.3 Get Data Source Detail
+- **Method:** `GET`
+- **URI:** `/api/admin/data-sources/{id}`
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Data source details retrieved successfully.",
+      "data": { "id": 1, ... }
+  }
+  ```
+
+### 28.4 Update Data Source
+- **Method:** `PUT`
+- **URI:** `/api/admin/data-sources/{id}`
+- **Request Body:**
+  ```json
+  {
+      "name": "Updated Mandi API",
+      "url": "https://api.example.com/v2",
+      "type": "api",
+      "status": true
+  }
+  ```
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Data source updated successfully.",
+      "data": { ... }
+  }
+  ```
+
+### 28.5 Update Data Source Status
+- **Method:** `PATCH`
+- **URI:** `/api/admin/data-sources/{id}/status`
+- **Request Body:** `{"status": false}`
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Data source status updated successfully."
+  }
+  ```
+
+### 28.6 Delete Data Source
+- **Method:** `DELETE`
+- **URI:** `/api/admin/data-sources/{id}`
+- **Success (200 OK):**
+  ```json
+  {
+      "status": true,
+      "message": "Data source deleted successfully."
+  }
+  ```
