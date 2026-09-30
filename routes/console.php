@@ -24,3 +24,7 @@ Schedule::command('news:import-pib-rss')
 Schedule::command('campaigns:dispatch-scheduled')
     ->everyMinute()
     ->withoutOverlapping();
+
+Schedule::command('datasources:run-scheduled')
+    ->everyMinute()
+    ->withoutOverlapping();

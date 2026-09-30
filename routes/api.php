@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\Admin\CommodityController;
 use App\Http\Controllers\Api\Admin\CommodityGradeController;
 use App\Http\Controllers\Api\Admin\CommoditySubcategoryController;
 use App\Http\Controllers\Api\Admin\CommodityVarietyController;
+use App\Http\Controllers\Api\Admin\DataSourceController;
 use App\Http\Controllers\Api\Admin\DistrictController;
 use App\Http\Controllers\Api\Admin\EmailTemplateController;
 use App\Http\Controllers\Api\Admin\ExchangeCommodityMappingController;
@@ -659,7 +660,8 @@ Route::prefix('admin')->group(function () {
                     ->name('admin.notifications.topics.remove-users');
             });
         });
-        // Company Management
+
+        // Company Management
         Route::prefix('user-kyc')->middleware(['permission:users.update'])->group(function () {
             Route::get('/', [\App\Http\Controllers\Api\Admin\AdminUserKycController::class, 'index'])->name('admin.user-kyc.index');
             Route::get('{user}', [\App\Http\Controllers\Api\Admin\AdminUserKycController::class, 'show'])->name('admin.user-kyc.show');
@@ -670,10 +672,13 @@ Route::prefix('admin')->group(function () {
         });
 
         // Legacy Company KYC
-        Route::prefix('kyc')->group(function () { Route::post('batch-upload', [KycDocumentController::class, 'batchUpload'])->name('admin.kyc.batch-upload'); Route::get('batch-progress/{batchId}', [KycDocumentController::class, 'batchProgress'])->name('admin.kyc.batch-progress');
-        Route::get('/', [KycDocumentController::class, 'index'])->name('admin.kyc.index');
-        Route::patch('{id}/status', [KycDocumentController::class, 'updateStatus'])->name('admin.kyc.update-status');
-        Route::delete('{id}', [KycDocumentController::class, 'destroy'])->name('admin.kyc.destroy'); });
+        Route::prefix('kyc')->group(function () {
+            Route::post('batch-upload', [KycDocumentController::class, 'batchUpload'])->name('admin.kyc.batch-upload');
+            Route::get('batch-progress/{batchId}', [KycDocumentController::class, 'batchProgress'])->name('admin.kyc.batch-progress');
+            Route::get('/', [KycDocumentController::class, 'index'])->name('admin.kyc.index');
+            Route::patch('{id}/status', [KycDocumentController::class, 'updateStatus'])->name('admin.kyc.update-status');
+            Route::delete('{id}', [KycDocumentController::class, 'destroy'])->name('admin.kyc.destroy');
+        });
 
         Route::prefix('business-documents')->group(function () {
             Route::get('/', [BusinessDocumentController::class, 'index'])->name('admin.business-documents.index');
@@ -836,6 +841,15 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.news-import.runs.index');
             Route::get('runs/{run}', [NewsImportRunController::class, 'show'])
                 ->name('admin.news-import.runs.show');
+        });
+        // Data Sources Management (Mandi Scraping/API Sources)
+        Route::prefix('data-sources')->group(function () {
+            Route::get('/', [DataSourceController::class, 'index'])->name('admin.data-sources.index');
+            Route::post('/', [DataSourceController::class, 'store'])->name('admin.data-sources.store');
+            Route::get('{dataSource}', [DataSourceController::class, 'show'])->name('admin.data-sources.show');
+            Route::put('{dataSource}', [DataSourceController::class, 'update'])->name('admin.data-sources.update');
+            Route::delete('{dataSource}', [DataSourceController::class, 'destroy'])->name('admin.data-sources.destroy');
+            Route::patch('{dataSource}/status', [DataSourceController::class, 'updateStatus'])->name('admin.data-sources.update-status');
         });
     });
 });
