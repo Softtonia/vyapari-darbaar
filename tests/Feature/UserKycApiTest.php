@@ -78,14 +78,15 @@ class UserKycApiTest extends TestCase
             'message',
             'data' => [
                 'id',
+                'kyc_documents',
                 'company' => [
-                    'kyc_documents',
                     'business_documents'
                 ]
             ]
         ]);
 
-        $data = $response->json('data.company');
+        $userData = $response->json('data');
+        $companyData = $response->json('data.company');
 
         // Verify Company is created
         $this->assertDatabaseHas('companies', [
@@ -94,10 +95,10 @@ class UserKycApiTest extends TestCase
         ]);
 
         // Verify Documents are linked
-        $this->assertNotEmpty($data['kyc_documents']);
-        $this->assertNotEmpty($data['business_documents']);
+        $this->assertNotEmpty($userData['kyc_documents']);
+        $this->assertNotEmpty($companyData['business_documents']);
 
         // Check if files actually "uploaded" in fake storage
-        Storage::disk('public')->assertExists($data['kyc_documents'][0]['file_path']);
+        Storage::disk('public')->assertExists($userData['kyc_documents'][0]['file_path']);
     }
 }

@@ -57,6 +57,10 @@ class AdminUserResource extends JsonResource
                     'branch_name' => $bank->branch_name,
                 ] : null;
             }),
+            'kyc_status' => $this->kyc_status,
+            'kyc_documents' => $this->whenLoaded('kycDocuments', function () {
+                return $this->kycDocuments;
+            }),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             'creator' => $this->whenLoaded('creator', function () {

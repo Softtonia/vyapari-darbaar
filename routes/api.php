@@ -659,8 +659,16 @@ Route::prefix('admin')->group(function () {
                     ->name('admin.notifications.topics.remove-users');
             });
         });
+        // Company Management
+        Route::prefix('user-kyc')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\Admin\AdminUserKycController::class, 'index'])->name('admin.user-kyc.index');
+            Route::get('{user}', [\App\Http\Controllers\Api\Admin\AdminUserKycController::class, 'show'])->name('admin.user-kyc.show');
+            Route::post('{user}/approve', [\App\Http\Controllers\Api\Admin\AdminUserKycController::class, 'approveUserKyc'])->name('admin.user-kyc.approve');
+            Route::get('documents/{id}', [\App\Http\Controllers\Api\Admin\AdminUserKycController::class, 'showDocument'])->name('admin.user-kyc.documents.show');
+            Route::patch('documents/{id}/status', [\App\Http\Controllers\Api\Admin\AdminUserKycController::class, 'updateDocumentStatus'])->name('admin.user-kyc.documents.update-status');
+        });
 
-        // Company Management
+        // Legacy Company KYC
         Route::prefix('kyc')->group(function () { Route::post('batch-upload', [KycDocumentController::class, 'batchUpload'])->name('admin.kyc.batch-upload'); Route::get('batch-progress/{batchId}', [KycDocumentController::class, 'batchProgress'])->name('admin.kyc.batch-progress');
         Route::get('/', [KycDocumentController::class, 'index'])->name('admin.kyc.index');
         Route::patch('{id}/status', [KycDocumentController::class, 'updateStatus'])->name('admin.kyc.update-status');
@@ -1030,6 +1038,14 @@ Route::prefix('user')->group(function () {
                 ->name('user.notifications.devices.store');
             Route::delete('/', [NotificationDeviceController::class, 'destroy'])
                 ->name('user.notifications.devices.destroy');
+        });
+
+        // User KYC
+        Route::prefix('kyc')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Api\User\UserKycController::class, 'index'])->name('user.kyc.index');
+            Route::post('/', [\App\Http\Controllers\Api\User\UserKycController::class, 'store'])->name('user.kyc.store');
+            Route::post('submit', [\App\Http\Controllers\Api\User\UserKycController::class, 'submit'])->name('user.kyc.submit');
+            Route::delete('{id}', [\App\Http\Controllers\Api\User\UserKycController::class, 'destroy'])->name('user.kyc.destroy');
         });
 
         // Trader Company Profile
