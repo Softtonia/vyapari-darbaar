@@ -1830,7 +1830,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "url": {
@@ -1877,7 +1877,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "body": {
@@ -2032,7 +2032,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "url": {
@@ -2061,7 +2061,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "body": {
@@ -2223,7 +2223,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "url": {
@@ -2252,7 +2252,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "body": {
@@ -2912,7 +2912,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "body": {
@@ -2961,7 +2961,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "url": {
@@ -2991,7 +2991,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "url": {
@@ -3024,7 +3024,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "body": {
@@ -3063,7 +3063,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "url": {
@@ -3097,7 +3097,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "url": {
@@ -3137,7 +3137,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "body": {
@@ -3190,7 +3190,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "body": {
@@ -3228,7 +3228,7 @@
                                             },
                                             {
                                                 "key": "Authorization",
-                                                "value": "{{admin_token}}"
+                                                "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "url": {
