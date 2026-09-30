@@ -2924,12 +2924,22 @@
                                                     "type": "text"
                                                 },
                                                 {
-                                                    "key": "document_type[]",
+                                                    "key": "documents[0][type]",
                                                     "value": "pan_card",
                                                     "type": "text"
                                                 },
                                                 {
-                                                    "key": "files[]",
+                                                    "key": "documents[0][file]",
+                                                    "src": "",
+                                                    "type": "file"
+                                                },
+                                                {
+                                                    "key": "documents[1][type]",
+                                                    "value": "aadhar_card",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "documents[1][file]",
                                                     "src": "",
                                                     "type": "file"
                                                 }
