@@ -96,6 +96,7 @@ class User extends Authenticatable
         'gender',
         'alternate_number',
         'profile_photo',
+        'kyc_status',
     ];
 
     /**
@@ -304,5 +305,15 @@ class User extends Authenticatable
     public function locations()
     {
         return $this->hasMany(UserLocation::class);
+    }
+
+    /**
+     * User KYC Documents
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\UserKycDocument, $this>
+     */
+    public function kycDocuments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(UserKycDocument::class);
     }
 }

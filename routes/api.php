@@ -666,6 +666,13 @@ Route::prefix('admin')->group(function () {
         Route::patch('{id}/status', [KycDocumentController::class, 'updateStatus'])->name('admin.kyc.update-status');
         Route::delete('{id}', [KycDocumentController::class, 'destroy'])->name('admin.kyc.destroy'); });
 
+        Route::prefix('business-documents')->group(function () {
+            Route::get('/', [BusinessDocumentController::class, 'index'])->name('admin.business-documents.index');
+            Route::post('/', [BusinessDocumentController::class, 'store'])->name('admin.business-documents.store');
+            Route::patch('{id}/status', [BusinessDocumentController::class, 'updateStatus'])->name('admin.business-documents.update-status');
+            Route::delete('{id}', [BusinessDocumentController::class, 'destroy'])->name('admin.business-documents.destroy');
+        });
+
         Route::prefix('companies')->group(function () {
             Route::get('/', [AdminCompanyController::class, 'index'])
                 ->name('admin.companies.index');
