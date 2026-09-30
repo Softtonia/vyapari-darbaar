@@ -4970,3 +4970,18 @@ Vyapari Darbaar records administrative and system actions across modules (`Websi
   }
   ```
 
+
+---
+
+## 6. Notifications API
+
+### 6.1 Admin Notifications
+- **GET** `/api/admin/notifications/dashboard` - Dashboard stats
+- **POST** `/api/admin/notifications/preview` - Preview Notification
+- **POST** `/api/admin/notifications/send` - Send Notification
+
+### 6.2 User Notifications
+- **GET** `/api/user/notifications` - List In-App Notifications
+- **GET** `/api/user/notifications/unread-count` - Get Unread Count
+- **PATCH** `/api/user/notifications/read-all` - Mark All as Read
+- **POST** `/api/user/notifications/devices` - Register FCM Device

@@ -10125,6 +10125,212 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "Notifications",
+            "item": [
+                {
+                    "name": "Admin Notifications",
+                    "item": [
+                        {
+                            "name": "Dashboard Stats",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/admin/notifications/dashboard",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "notifications",
+                                        "dashboard"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Preview Notification",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"title\": \"Test\", \"body\": \"Test body\"}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/notifications/preview",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "notifications",
+                                        "preview"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Send Notification",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{admin_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"title\": \"Test\", \"body\": \"Test body\", \"target_type\": \"all\"}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/admin/notifications/send",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "admin",
+                                        "notifications",
+                                        "send"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "User Notifications",
+                    "item": [
+                        {
+                            "name": "List In-App Notifications",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{user_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/user/notifications",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "user",
+                                        "notifications"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Unread Count",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{user_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/user/notifications/unread-count",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "user",
+                                        "notifications",
+                                        "unread-count"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Mark All as Read",
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{user_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{live}}/api/user/notifications/read-all",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "user",
+                                        "notifications",
+                                        "read-all"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Register Device",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{user_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\"fcm_token\": \"token_string\", \"device_type\": \"android\"}"
+                                },
+                                "url": {
+                                    "raw": "{{live}}/api/user/notifications/devices",
+                                    "host": [
+                                        "{{live}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "user",
+                                        "notifications",
+                                        "devices"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "variable": [
