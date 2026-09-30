@@ -660,11 +660,12 @@ Route::prefix('admin')->group(function () {
             });
         });
         // Company Management
-        Route::prefix('user-kyc')->group(function () {
+        Route::prefix('user-kyc')->middleware(['permission:users.update'])->group(function () {
             Route::get('/', [\App\Http\Controllers\Api\Admin\AdminUserKycController::class, 'index'])->name('admin.user-kyc.index');
             Route::get('{user}', [\App\Http\Controllers\Api\Admin\AdminUserKycController::class, 'show'])->name('admin.user-kyc.show');
             Route::post('{user}/approve', [\App\Http\Controllers\Api\Admin\AdminUserKycController::class, 'approveUserKyc'])->name('admin.user-kyc.approve');
             Route::get('documents/{id}', [\App\Http\Controllers\Api\Admin\AdminUserKycController::class, 'showDocument'])->name('admin.user-kyc.documents.show');
+            Route::get('documents/{id}/download', [\App\Http\Controllers\Api\Admin\AdminUserKycController::class, 'downloadDocument'])->name('admin.user-kyc.documents.download');
             Route::patch('documents/{id}/status', [\App\Http\Controllers\Api\Admin\AdminUserKycController::class, 'updateDocumentStatus'])->name('admin.user-kyc.documents.update-status');
         });
 
@@ -1045,6 +1046,7 @@ Route::prefix('user')->group(function () {
             Route::get('/', [\App\Http\Controllers\Api\User\UserKycController::class, 'index'])->name('user.kyc.index');
             Route::post('/', [\App\Http\Controllers\Api\User\UserKycController::class, 'store'])->name('user.kyc.store');
             Route::post('submit', [\App\Http\Controllers\Api\User\UserKycController::class, 'submit'])->name('user.kyc.submit');
+            Route::get('documents/{id}/download', [\App\Http\Controllers\Api\User\UserKycController::class, 'download'])->name('user.kyc.documents.download');
             Route::delete('{id}', [\App\Http\Controllers\Api\User\UserKycController::class, 'destroy'])->name('user.kyc.destroy');
         });
 

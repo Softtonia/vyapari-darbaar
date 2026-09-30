@@ -59,7 +59,17 @@ class AdminUserResource extends JsonResource
             }),
             'kyc_status' => $this->kyc_status,
             'kyc_documents' => $this->whenLoaded('kycDocuments', function () {
-                return $this->kycDocuments;
+                return $this->kycDocuments->map(function ($doc) {
+                    return [
+                        'id' => $doc->id,
+                        'document_type' => $doc->document_type,
+                        'status' => $doc->status,
+                        'rejection_reason' => $doc->rejection_reason,
+                        'download_url' => route('admin.user-kyc.documents.download', ['id' => $doc->id]),
+                        'created_at' => $doc->created_at?->toISOString(),
+                        'updated_at' => $doc->updated_at?->toISOString(),
+                    ];
+                });
             }),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),

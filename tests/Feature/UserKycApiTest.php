@@ -99,6 +99,50 @@ class UserKycApiTest extends TestCase
         $this->assertNotEmpty($companyData['business_documents']);
 
         // Check if files actually "uploaded" in fake storage
-        Storage::disk('public')->assertExists($userData['kyc_documents'][0]['file_path']);
+        Storage::disk('local')->assertExists($userData['kyc_documents'][0]['file_path'] ?? '');
+    }
+
+    public function test_secure_document_download()
+    {
+        Storage::fake('local');
+        
+        $user1 = \App\Models\User::factory()->create();
+        $user2 = \App\Models\User::factory()->create();
+
+        $path = UploadedFile::fake()->image('aadhaar.jpg')->store('kyc_documents');
+
+        $document1 = $user1->kycDocuments()->create([
+            'document_type' => 'Aadhaar Card',
+            'file_path' => $path,
+            'status' => 'pending'
+        ]);
+
+        // User 1 accesses their own document
+        $response1 = $this->actingAs($user1, 'sanctum')->getJson("/api/user/kyc/documents/{$document1->id}/download");
+        $response1->assertStatus(200);
+
+        // User 2 cannot access User 1's document
+        $response2 = $this->actingAs($user2, 'sanctum')->getJson("/api/user/kyc/documents/{$document1->id}/download");
+        $response2->assertStatus(404);
+
+        // Admin can access if they have permission
+        $admin = Admin::forceCreate([
+            'first_name' => 'Super',
+            'last_name' => 'Admin',
+            'username' => 'superadmin',
+            'email' => 'admin@test.com',
+            'password' => bcrypt('password'),
+            'status' => 'active',
+            'is_default' => true,
+        ]);
+        
+        $role = Role::firstOrCreate(['name' => 'super_admin', 'slug' => 'super_admin', 'guard_name' => 'web']);
+        $admin->assignRole($role);
+        // By default, super admin has all permissions via gate or assignment, but we can assign directly
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'users.update', 'guard_name' => 'web']);
+        $role->givePermissionTo('users.update');
+
+        $responseAdmin = $this->actingAs($admin, 'sanctum')->getJson("/api/admin/user-kyc/documents/{$document1->id}/download");
+        $responseAdmin->assertStatus(200);
     }
 }

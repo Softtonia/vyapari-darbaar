@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserKycController extends Controller
 {
@@ -17,7 +18,17 @@ class UserKycController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
-        $documents = $user->kycDocuments()->get();
+        $documents = $user->kycDocuments()->get()->map(function ($doc) {
+            return [
+                'id' => $doc->id,
+                'document_type' => $doc->document_type,
+                'status' => $doc->status,
+                'rejection_reason' => $doc->rejection_reason,
+                'download_url' => route('user.kyc.documents.download', ['id' => $doc->id]),
+                'created_at' => $doc->created_at,
+                'updated_at' => $doc->updated_at,
+            ];
+        });
 
         return response()->json([
             'status' => true,
@@ -70,12 +81,12 @@ class UserKycController extends Controller
         }
 
         $file = $request->file('file');
-        $path = $file->store('kyc_documents', 'public'); // Adjust storage disk if needed for security
+        $path = $file->store('kyc_documents'); // Private storage
 
         if ($existing) {
             // Delete old file
-            if (Storage::disk('public')->exists($existing->file_path)) {
-                Storage::disk('public')->delete($existing->file_path);
+            if (Storage::exists($existing->file_path)) {
+                Storage::delete($existing->file_path);
             }
             $existing->update([
                 'file_path' => $path,
@@ -101,7 +112,12 @@ class UserKycController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Document uploaded successfully.',
-            'data' => $document
+            'data' => [
+                'id' => $document->id,
+                'document_type' => $document->document_type,
+                'status' => $document->status,
+                'download_url' => route('user.kyc.documents.download', ['id' => $document->id])
+            ]
         ], 201);
     }
 
@@ -122,8 +138,7 @@ class UserKycController extends Controller
         $documents = $user->kycDocuments()->get();
         $types = $documents->pluck('document_type')->toArray();
         
-        // Example logic: Aadhaar and PAN are required
-        $required = ['Aadhaar Card', 'PAN Card'];
+        $required = config('kyc.user.required_documents', ['Aadhaar Card', 'PAN Card']);
         $missing = array_diff($required, $types);
         
         if (!empty($missing)) {
@@ -166,8 +181,8 @@ class UserKycController extends Controller
             return response()->json(['status' => false, 'message' => 'Cannot delete document at this stage.'], 403);
         }
 
-        if (Storage::disk('public')->exists($document->file_path)) {
-            Storage::disk('public')->delete($document->file_path);
+        if (Storage::exists($document->file_path)) {
+            Storage::delete($document->file_path);
         }
 
         $document->delete();
@@ -176,5 +191,24 @@ class UserKycController extends Controller
             'status' => true,
             'message' => 'Document deleted successfully.'
         ]);
+    }
+
+    /**
+     * Download a document securely.
+     */
+    public function download($id, Request $request): StreamedResponse|JsonResponse
+    {
+        $user = $request->user();
+        $document = $user->kycDocuments()->find($id);
+
+        if (!$document) {
+            return response()->json(['status' => false, 'message' => 'Document not found.'], 404);
+        }
+
+        if (!Storage::exists($document->file_path)) {
+            return response()->json(['status' => false, 'message' => 'File not found on disk.'], 404);
+        }
+
+        return Storage::download($document->file_path);
     }
 }

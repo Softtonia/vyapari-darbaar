@@ -8,6 +8,8 @@ use App\Models\UserKycDocument;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminUserKycController extends Controller
 {
@@ -43,7 +45,17 @@ class AdminUserKycController extends Controller
                 'user_id' => $user->id,
                 'name' => $user->name,
                 'kyc_status' => $user->kyc_status,
-                'documents' => $user->kycDocuments
+                'documents' => $user->kycDocuments->map(function ($doc) {
+                    return [
+                        'id' => $doc->id,
+                        'document_type' => $doc->document_type,
+                        'status' => $doc->status,
+                        'rejection_reason' => $doc->rejection_reason,
+                        'download_url' => route('admin.user-kyc.documents.download', ['id' => $doc->id]),
+                        'created_at' => $doc->created_at,
+                        'updated_at' => $doc->updated_at,
+                    ];
+                })
             ]
         ]);
     }
@@ -58,7 +70,16 @@ class AdminUserKycController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Document retrieved successfully.',
-            'data' => $document
+            'data' => [
+                'id' => $document->id,
+                'user' => $document->user,
+                'document_type' => $document->document_type,
+                'status' => $document->status,
+                'rejection_reason' => $document->rejection_reason,
+                'download_url' => route('admin.user-kyc.documents.download', ['id' => $document->id]),
+                'created_at' => $document->created_at,
+                'updated_at' => $document->updated_at,
+            ]
         ]);
     }
 
@@ -91,7 +112,13 @@ class AdminUserKycController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Document status updated successfully.',
-            'data' => $document
+            'data' => [
+                'id' => $document->id,
+                'document_type' => $document->document_type,
+                'status' => $document->status,
+                'rejection_reason' => $document->rejection_reason,
+                'download_url' => route('admin.user-kyc.documents.download', ['id' => $document->id])
+            ]
         ]);
     }
 
@@ -104,7 +131,7 @@ class AdminUserKycController extends Controller
         $documents = $user->kycDocuments()->get();
         $types = $documents->pluck('document_type')->toArray();
         
-        $required = ['Aadhaar Card', 'PAN Card'];
+        $required = config('kyc.user.required_documents', ['Aadhaar Card', 'PAN Card']);
         $missing = array_diff($required, $types);
         
         if (!empty($missing)) {
@@ -132,5 +159,19 @@ class AdminUserKycController extends Controller
             'message' => 'User KYC approved successfully.',
             'data' => ['kyc_status' => $user->kyc_status]
         ]);
+    }
+
+    /**
+     * Download a user document securely.
+     */
+    public function downloadDocument($id): StreamedResponse|JsonResponse
+    {
+        $document = UserKycDocument::findOrFail($id);
+
+        if (!Storage::exists($document->file_path)) {
+            return response()->json(['status' => false, 'message' => 'File not found on disk.'], 404);
+        }
+
+        return Storage::download($document->file_path);
     }
 }
