@@ -8623,7 +8623,7 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{live}}/api/admin/data-sources?page=1&per_page=20",
+                                    "raw": "{{live}}/api/admin/data-sources?page=1&per_page=20&job_type=daily&search=",
                                     "host": [
                                         "{{live}}"
                                     ],
@@ -8640,6 +8640,15 @@
                                         {
                                             "key": "per_page",
                                             "value": "20"
+                                        },
+                                        {
+                                            "key": "job_type",
+                                            "value": "daily",
+                                            "description": "daily | weekly | monthly | quarterly"
+                                        },
+                                        {
+                                            "key": "search",
+                                            "value": ""
                                         }
                                     ]
                                 }
@@ -8653,8 +8662,9 @@
                                     "script": {
                                         "exec": [
                                             "var jsonData = pm.response.json();",
-                                            "if (jsonData.status === true && jsonData.data && jsonData.data.id) {",
+                                            "if (jsonData.success === true && jsonData.data && jsonData.data.id) {",
                                             "    pm.environment.set('data_source_id', jsonData.data.id);",
+                                            "    pm.collectionVariables.set('data_source_id', jsonData.data.id);",
                                             "}"
                                         ],
                                         "type": "text/javascript"
@@ -8679,7 +8689,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"name\": \"Example Mandi API\",\n    \"url\": \"https://api.example.com\",\n    \"type\": \"api\",\n    \"status\": true\n}"
+                                    "raw": "{\n    \"website_name\": \"Agmarknet\",\n    \"link\": \"https://agmarknet.gov.in\",\n    \"description\": \"Daily mandi rates - 6000+ mandi, min/max/modal\",\n    \"job_type\": \"daily\",\n    \"schedule_time\": \"07:00\",\n    \"schedule_day_of_week\": null,\n    \"schedule_day_of_month\": null,\n    \"schedule_month_of_quarter\": null,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/data-sources",
@@ -8695,7 +8705,7 @@
                             }
                         },
                         {
-                            "name": "Get Data Source",
+                            "name": "Get Data Source Detail",
                             "request": {
                                 "method": "GET",
                                 "header": [
@@ -8742,7 +8752,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"name\": \"Updated Mandi API\",\n    \"url\": \"https://api.example.com/v2\",\n    \"type\": \"api\",\n    \"status\": true\n}"
+                                    "raw": "{\n    \"website_name\": \"DA&FW Sowing Data\",\n    \"link\": \"https://agricoop.nic.in\",\n    \"description\": \"Weekly buwai rakba (Kharif Jun-Sep, Rabi Oct-Jan)\",\n    \"job_type\": \"weekly\",\n    \"schedule_time\": \"18:00\",\n    \"schedule_day_of_week\": 5,\n    \"schedule_day_of_month\": null,\n    \"schedule_month_of_quarter\": null,\n    \"status\": true\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/admin/data-sources/{{data_source_id}}",
