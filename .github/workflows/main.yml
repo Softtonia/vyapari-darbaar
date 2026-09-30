@@ -450,8 +450,8 @@ jobs:
               [ -e "$CURRENT_PATH/.env" ] && \
               [ ! -L "$CURRENT_PATH/.env" ]
           then
-              echo "WARNING: current/.env is not a symlink. Removing it."
-              rm -f "$CURRENT_PATH/.env"
+              echo "WARNING: current/.env is not a symlink. Moving it."
+              mv "$CURRENT_PATH/.env" "$CURRENT_PATH/.env.bak_$(date +%s)" || true
           fi
 
 
@@ -471,8 +471,8 @@ jobs:
               [ -e "$CURRENT_PATH/storage" ] && \
               [ ! -L "$CURRENT_PATH/storage" ]
           then
-              echo "WARNING: current/storage is not a symlink. Removing it."
-              rm -rf "$CURRENT_PATH/storage"
+              echo "WARNING: current/storage is not a symlink. Moving it."
+              mv "$CURRENT_PATH/storage" "$CURRENT_PATH/storage_bak_$(date +%s)" || true
           fi
 
 
@@ -532,8 +532,8 @@ jobs:
               [ -e "$CURRENT_PATH/public/storage" ] && \
               [ ! -L "$CURRENT_PATH/public/storage" ]
           then
-              echo "WARNING: public/storage is not a symlink. Removing it."
-              rm -rf "$CURRENT_PATH/public/storage"
+              echo "WARNING: public/storage is not a symlink. Moving it."
+              mv "$CURRENT_PATH/public/storage" "$CURRENT_PATH/public/storage_bak_$(date +%s)" || true
           fi
 
 
