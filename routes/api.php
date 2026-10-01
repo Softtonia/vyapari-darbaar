@@ -705,17 +705,17 @@ Route::prefix('admin')->group(function () {
             Route::delete('{id}', [BusinessDocumentController::class, 'destroy'])->name('admin.business-documents.destroy');
         });
 
-        Route::prefix('companies')->group(function () {
+        Route::prefix('business-profiles')->group(function () {
             Route::get('/', [AdminBusinessProfileController::class, 'index'])
-                ->name('admin.companies.index');
+                ->name('admin.business-profiles.index');
             Route::get('{id}', [AdminBusinessProfileController::class, 'show'])
-                ->name('admin.companies.show');
+                ->name('admin.business-profiles.show');
             Route::put('{id}', [AdminBusinessProfileController::class, 'update'])
-                ->name('admin.business_profiles.update');
+                ->name('admin.business-profiles.update');
             Route::patch('{id}/status', [AdminBusinessProfileController::class, 'updateStatus'])
-                ->name('admin.business_profiles.update-status');
+                ->name('admin.business-profiles.update-status');
             Route::delete('{id}', [AdminBusinessProfileController::class, 'destroy'])
-                ->name('admin.companies.destroy');
+                ->name('admin.business-profiles.destroy');
         });
 
         // Exchange Management
