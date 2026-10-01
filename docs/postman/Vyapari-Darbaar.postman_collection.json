@@ -3951,7 +3951,7 @@
                                             }
                                         ],
                                         "url": {
-                                            "raw": "{{live}}/api/admin/kyc?company_id=1",
+                                            "raw": "{{live}}/api/admin/kyc?business_profile_id=1",
                                             "host": [
                                                 "{{live}}"
                                             ],
@@ -4087,7 +4087,7 @@
                                             }
                                         ],
                                         "url": {
-                                            "raw": "{{live}}/api/admin/business-documents?company_id=1",
+                                            "raw": "{{live}}/api/admin/business-documents?business_profile_id=1",
                                             "host": [
                                                 "{{live}}"
                                             ],
@@ -9422,7 +9422,7 @@
                                             }
                                         ],
                                         "url": {
-                                            "raw": "{{live}}/api/admin/business-profiles/{{company_id}}",
+                                            "raw": "{{live}}/api/admin/business-profiles/{{business_profile_id}}",
                                             "host": [
                                                 "{{live}}"
                                             ],
@@ -9430,7 +9430,7 @@
                                                 "api",
                                                 "admin",
                                                 "companies",
-                                                "{{company_id}}"
+                                                "{{business_profile_id}}"
                                             ]
                                         },
                                         "auth": {
@@ -9468,7 +9468,7 @@
                                             "raw": "{\n    \"verification_status\": \"verified\"\n}"
                                         },
                                         "url": {
-                                            "raw": "{{live}}/api/admin/business-profiles/{{company_id}}/status",
+                                            "raw": "{{live}}/api/admin/business-profiles/{{business_profile_id}}/status",
                                             "host": [
                                                 "{{live}}"
                                             ],
@@ -9476,7 +9476,7 @@
                                                 "api",
                                                 "admin",
                                                 "companies",
-                                                "{{company_id}}",
+                                                "{{business_profile_id}}",
                                                 "status"
                                             ]
                                         },
@@ -9507,7 +9507,7 @@
                                             }
                                         ],
                                         "url": {
-                                            "raw": "{{live}}/api/admin/business-profiles/{{company_id}}",
+                                            "raw": "{{live}}/api/admin/business-profiles/{{business_profile_id}}",
                                             "host": [
                                                 "{{live}}"
                                             ],
@@ -9515,7 +9515,7 @@
                                                 "api",
                                                 "admin",
                                                 "companies",
-                                                "{{company_id}}"
+                                                "{{business_profile_id}}"
                                             ]
                                         },
                                         "auth": {

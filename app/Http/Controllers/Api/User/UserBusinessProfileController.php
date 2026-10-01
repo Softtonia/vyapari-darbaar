@@ -100,7 +100,7 @@ class UserBusinessProfileController extends Controller
             $user,
             'company_create',
             'Trader registered company profile',
-            ['company_id' => $businessProfile->id, 'company_name' => $businessProfile->name]
+            ['business_profile_id' => $businessProfile->id, 'company_name' => $businessProfile->company_name]
         );
 
         // In-App Notification: Company Profile Created
