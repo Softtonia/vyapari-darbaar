@@ -65,9 +65,13 @@ class MediaService
         // Case 3: Image URL
         if ($imageUrl) {
             // Check if the URL matches an already uploaded media record
-            // Match against source_url first, or fallback to checking if it perfectly matches image_url
-            $existing = Media::where('source_url', $imageUrl)
-                ->orWhere('image_url', $imageUrl)
+            $parsedUrl = parse_url($imageUrl, PHP_URL_PATH);
+
+            $existing = Media::where('image_url', $imageUrl)
+                ->when($parsedUrl, function($q) use ($parsedUrl) {
+                    $q->orWhere('image_url', $parsedUrl)
+                      ->orWhere('image_url', 'like', '%' . $parsedUrl);
+                })
                 ->first();
 
             if ($existing) {
@@ -81,21 +85,20 @@ class MediaService
             $this->validateUrl($imageUrl);
             $path = $this->downloadAndStoreImage($imageUrl);
 
-            return $this->createOrUpdateMedia($attachmentId, $path, $imageUrl);
+            return $this->createOrUpdateMedia($attachmentId, $path);
         }
 
         // Case 4: Nothing provided
         return null;
     }
 
-    protected function createOrUpdateMedia(?int $attachmentId, string $path, ?string $sourceUrl = null): Media
+    protected function createOrUpdateMedia(?int $attachmentId, string $path): Media
     {
         if ($attachmentId) {
             $media = Media::where('attachment_id', $attachmentId)->first();
             if ($media) {
                 $media->update([
                     'image_url' => Storage::url($path),
-                    'source_url' => $sourceUrl ?? $media->source_url,
                 ]);
                 return $media;
             }
@@ -106,7 +109,6 @@ class MediaService
         $media = Media::create([
             'attachment_id' => $attachmentId ?? 0,
             'image_url' => Storage::url($path),
-            'source_url' => $sourceUrl,
         ]);
 
         // If no attachment_id was provided, set it to match the generated primary key (id).

@@ -11,8 +11,17 @@ class Media extends Model
     protected $fillable = [
         'attachment_id',
         'image_url',
-        'source_url',
     ];
+
+    public function getImageUrlAttribute($value)
+    {
+        if (empty($value)) return $value;
+        // If it's already an absolute URL (e.g. external image), return as is
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            return $value;
+        }
+        return url($value);
+    }
 
     protected $casts = [
         'attachment_id' => 'integer',
