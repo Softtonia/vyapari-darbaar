@@ -88,7 +88,7 @@ class CommodityCategoryController extends Controller
      */
     public function show(CommodityCategory $commodityCategory): JsonResponse
     {
-        $commodityCategory->load(['creator', 'updater']);
+        $commodityCategory->load(['creator', 'updater', 'media']);
 
         return response()->json([
             'status' => true,

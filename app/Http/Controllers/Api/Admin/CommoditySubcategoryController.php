@@ -97,6 +97,7 @@ class CommoditySubcategoryController extends Controller
             'commodity.category:id,name,slug',
             'creator',
             'updater',
+            'media',
         ]);
 
         return response()->json([

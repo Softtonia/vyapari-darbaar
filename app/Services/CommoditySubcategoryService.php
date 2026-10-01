@@ -42,10 +42,12 @@ class CommoditySubcategoryService
             ->with([
                 'commodity:id,commodity_category_id,name,slug',
                 'commodity.category:id,name,slug',
+                'media',
             ])
             ->select([
                 'id',
                 'commodity_id',
+                'media_id',
                 'name',
                 'slug',
                 'sort_order',

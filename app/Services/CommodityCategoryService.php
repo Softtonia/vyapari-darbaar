@@ -42,11 +42,13 @@ class CommodityCategoryService
         $sortOrder = (string) ($filters['sort_order'] ?? 'asc');
 
         $query = CommodityCategory::query()
+            ->with('media')
             ->select([
                 'id',
                 'name',
                 'slug',
                 'description',
+                'media_id',
                 'sort_order',
                 'status',
                 'created_by',

@@ -40,6 +40,8 @@ class CommoditySubcategoryResource extends JsonResource
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
+            'media_id' => $this->media_id,
+            'image_url' => $this->media ? $this->media->image_url : null,
             'sort_order' => (int) $this->sort_order,
             'status' => (bool) $this->status,
             'created_at' => $this->created_at?->toISOString(),
