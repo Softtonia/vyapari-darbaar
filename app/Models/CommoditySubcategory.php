@@ -34,6 +34,7 @@ class CommoditySubcategory extends Model
         'description',
         'sort_order',
         'status',
+        'media_id',
         'created_by',
         'updated_by',
     ];
@@ -223,5 +224,9 @@ class CommoditySubcategory extends Model
         }
 
         return $query;
+    }
+    public function media()
+    {
+        return $this->belongsTo(Media::class, 'media_id');
     }
 }

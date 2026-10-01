@@ -67,6 +67,9 @@ class UpdateCommodityCategoryRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
             'status' => ['nullable', 'boolean'],
+            'media_id' => ['nullable', 'integer', 'exists:media,id'],
+            'image' => ['nullable', 'file', 'mimes:jpeg,png,gif,webp', 'max:10240'],
+            'image_url' => ['nullable', 'url'],
         ];
     }
 }

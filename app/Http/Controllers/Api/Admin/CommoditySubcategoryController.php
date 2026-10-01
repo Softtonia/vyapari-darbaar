@@ -60,10 +60,23 @@ class CommoditySubcategoryController extends Controller
     /**
      * Store a newly created commodity subcategory.
      */
-    public function store(StoreCommoditySubcategoryRequest $request, CommoditySubcategoryService $service): JsonResponse
+    public function store(StoreCommoditySubcategoryRequest $request, CommoditySubcategoryService $service, \App\Services\MediaService $mediaService): JsonResponse
     {
+        $data = $request->validated();
+
+        if ($request->has('media_id') || $request->hasFile('image') || $request->filled('image_url')) {
+            $media = $mediaService->resolve(
+                $request->input('media_id'),
+                $request->file('image'),
+                $request->input('image_url')
+            );
+            if ($media) {
+                $data['media_id'] = $media->id;
+            }
+        }
+
         $subcat = $service->createCommoditySubcategory(
-            $request->validated(),
+            $data,
             $request->user()?->id
         );
 
@@ -99,12 +112,26 @@ class CommoditySubcategoryController extends Controller
     public function update(
         UpdateCommoditySubcategoryRequest $request,
         CommoditySubcategory $commoditySubcategory,
-        CommoditySubcategoryService $service
+        CommoditySubcategoryService $service,
+        \App\Services\MediaService $mediaService
     ): JsonResponse {
         try {
+            $data = $request->validated();
+            
+            if ($request->has('media_id') || $request->hasFile('image') || $request->filled('image_url')) {
+                $media = $mediaService->resolve(
+                    $request->input('media_id'),
+                    $request->file('image'),
+                    $request->input('image_url')
+                );
+                if ($media) {
+                    $data['media_id'] = $media->id;
+                }
+            }
+
             $updatedSubcategory = $service->updateCommoditySubcategory(
                 $commoditySubcategory,
-                $request->validated(),
+                $data,
                 $request->user()?->id
             );
 
@@ -213,6 +240,115 @@ class CommoditySubcategoryController extends Controller
             'data' => [
                 'deleted_count' => $result['deleted_count'],
             ],
+        ], 200);
+    }
+
+    /**
+     * Export commodity subcategories to CSV.
+     */
+    public function export(\Illuminate\Http\Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $subcategories = CommoditySubcategory::with(['commodity', 'media'])->get();
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=commodity_subcategories.csv",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = ['ID', 'Commodity ID', 'Commodity Name', 'Attachment ID', 'Image URL', 'Name', 'Slug', 'Description', 'Sort Order', 'Status', 'Created At'];
+
+        $callback = function() use($subcategories, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($subcategories as $subcategory) {
+                fputcsv($file, [
+                    $subcategory->id,
+                    $subcategory->commodity_id,
+                    $subcategory->commodity ? $subcategory->commodity->name : '',
+                    $subcategory->media ? $subcategory->media->attachment_id : '',
+                    $subcategory->media ? url($subcategory->media->image_url) : '',
+                    $subcategory->name,
+                    $subcategory->slug,
+                    $subcategory->description,
+                    $subcategory->sort_order,
+                    $subcategory->status ? 'Active' : 'Inactive',
+                    $subcategory->created_at,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Import commodity subcategories from CSV.
+     */
+    public function import(\Illuminate\Http\Request $request, \App\Services\MediaService $mediaService): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt'
+        ]);
+
+        $file = $request->file('file');
+        $fileHandle = fopen($file->getPathname(), 'r');
+        $header = fgetcsv($fileHandle);
+        $headerMap = array_flip(array_map('trim', array_map('strtolower', $header)));
+        
+        $importedCount = 0;
+        $userId = $request->user()?->id;
+        
+        while (($row = fgetcsv($fileHandle)) !== false) {
+            if (count($row) < 3) continue;
+
+            $attachmentId = isset($headerMap['attachment id']) && !empty($row[$headerMap['attachment id']]) ? (int)$row[$headerMap['attachment id']] : null;
+            $imageUrl = isset($headerMap['image url']) && !empty($row[$headerMap['image url']]) ? $row[$headerMap['image url']] : null;
+            $commodityId = $row[$headerMap['commodity id']] ?? $row[1] ?? null;
+            $name = $row[$headerMap['name']] ?? $row[3] ?? '';
+            $slug = $row[$headerMap['slug']] ?? $row[4] ?? \Illuminate\Support\Str::slug($name);
+            $desc = $row[$headerMap['description']] ?? $row[5] ?? null;
+            $sortOrder = $row[$headerMap['sort order']] ?? $row[6] ?? 0;
+            $status = $row[$headerMap['status']] ?? $row[7] ?? 'Active';
+            
+            $mediaId = null;
+            if ($attachmentId || $imageUrl) {
+                try {
+                    $media = $mediaService->resolve(null, null, $imageUrl, $attachmentId);
+                    if ($media) {
+                        $mediaId = $media->id;
+                    }
+                } catch (\Exception $e) {
+                    // Ignore media resolution errors during bulk import
+                }
+            }
+
+            if ($commodityId) {
+                CommoditySubcategory::updateOrCreate(
+                    ['slug' => $slug],
+                    [
+                        'commodity_id' => $commodityId,
+                        'name' => $name,
+                        'description' => $desc,
+                        'sort_order' => is_numeric($sortOrder) ? (int)$sortOrder : 0,
+                        'status' => strtolower($status) === 'active' ? 1 : 0,
+                        'media_id' => $mediaId,
+                        'created_by' => $userId,
+                        'updated_by' => $userId,
+                    ]
+                );
+                $importedCount++;
+            }
+        }
+        fclose($fileHandle);
+
+        return response()->json([
+            'status' => true,
+            'message' => "Successfully imported {$importedCount} commodity subcategories.",
         ], 200);
     }
 }

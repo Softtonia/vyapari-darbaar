@@ -56,10 +56,23 @@ class CommodityCategoryController extends Controller
     /**
      * Store a newly created commodity category.
      */
-    public function store(StoreCommodityCategoryRequest $request, CommodityCategoryService $service): JsonResponse
+    public function store(StoreCommodityCategoryRequest $request, CommodityCategoryService $service, \App\Services\MediaService $mediaService): JsonResponse
     {
+        $data = $request->validated();
+        
+        if ($request->has('media_id') || $request->hasFile('image') || $request->filled('image_url')) {
+            $media = $mediaService->resolve(
+                $request->input('media_id'),
+                $request->file('image'),
+                $request->input('image_url')
+            );
+            if ($media) {
+                $data['media_id'] = $media->id;
+            }
+        }
+
         $category = $service->createCategory(
-            $request->validated(),
+            $data,
             $request->user()?->id
         );
 
@@ -90,11 +103,25 @@ class CommodityCategoryController extends Controller
     public function update(
         UpdateCommodityCategoryRequest $request,
         CommodityCategory $commodityCategory,
-        CommodityCategoryService $service
+        CommodityCategoryService $service,
+        \App\Services\MediaService $mediaService
     ): JsonResponse {
+        $data = $request->validated();
+        
+        if ($request->has('media_id') || $request->hasFile('image') || $request->filled('image_url')) {
+            $media = $mediaService->resolve(
+                $request->input('media_id'),
+                $request->file('image'),
+                $request->input('image_url')
+            );
+            if ($media) {
+                $data['media_id'] = $media->id;
+            }
+        }
+
         $category = $service->updateCategory(
             $commodityCategory,
-            $request->validated(),
+            $data,
             $request->user()?->id
         );
 
@@ -194,6 +221,113 @@ class CommodityCategoryController extends Controller
             'data' => [
                 'deleted_count' => $result['deleted_count'],
             ],
+        ], 200);
+    }
+
+    /**
+     * Export commodity categories to CSV.
+     */
+    public function export(\Illuminate\Http\Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $categories = CommodityCategory::with('media')->get();
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=commodity_categories.csv",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = ['ID', 'Attachment ID', 'Image URL', 'Name', 'Slug', 'Description', 'Sort Order', 'Status', 'Created At'];
+
+        $callback = function() use($categories, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+
+            foreach ($categories as $category) {
+                fputcsv($file, [
+                    $category->id,
+                    $category->media ? $category->media->attachment_id : '',
+                    $category->media ? url($category->media->image_url) : '',
+                    $category->name,
+                    $category->slug,
+                    $category->description,
+                    $category->sort_order,
+                    $category->status ? 'Active' : 'Inactive',
+                    $category->created_at,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Import commodity categories from CSV.
+     */
+    public function import(\Illuminate\Http\Request $request, \App\Services\MediaService $mediaService): JsonResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt'
+        ]);
+
+        $file = $request->file('file');
+        $fileHandle = fopen($file->getPathname(), 'r');
+        
+        // Ensure to read header to figure out indices dynamically, or just map them. 
+        // For simplicity, we assume strict column order based on export:
+        // ['ID', 'Attachment ID', 'Image URL', 'Name', 'Slug', 'Description', 'Sort Order', 'Status', 'Created At']
+        $header = fgetcsv($fileHandle);
+        $headerMap = array_flip(array_map('trim', array_map('strtolower', $header)));
+        
+        $importedCount = 0;
+        $userId = $request->user()?->id;
+        
+        while (($row = fgetcsv($fileHandle)) !== false) {
+            if (count($row) < 2) continue;
+            
+            $attachmentId = isset($headerMap['attachment id']) && !empty($row[$headerMap['attachment id']]) ? (int)$row[$headerMap['attachment id']] : null;
+            $imageUrl = isset($headerMap['image url']) && !empty($row[$headerMap['image url']]) ? $row[$headerMap['image url']] : null;
+            $name = $row[$headerMap['name']] ?? $row[1] ?? '';
+            $slug = $row[$headerMap['slug']] ?? $row[2] ?? \Illuminate\Support\Str::slug($name);
+            $desc = $row[$headerMap['description']] ?? $row[3] ?? null;
+            $sortOrder = $row[$headerMap['sort order']] ?? $row[4] ?? 0;
+            $status = $row[$headerMap['status']] ?? $row[5] ?? 'Active';
+            
+            $mediaId = null;
+            if ($attachmentId || $imageUrl) {
+                try {
+                    $media = $mediaService->resolve(null, null, $imageUrl, $attachmentId);
+                    if ($media) {
+                        $mediaId = $media->id;
+                    }
+                } catch (\Exception $e) {
+                    // Ignore media resolution errors during bulk import
+                }
+            }
+
+            CommodityCategory::updateOrCreate(
+                ['slug' => $slug],
+                [
+                    'name' => $name,
+                    'description' => $desc,
+                    'sort_order' => is_numeric($sortOrder) ? (int)$sortOrder : 0,
+                    'status' => strtolower($status) === 'active' ? 1 : 0,
+                    'media_id' => $mediaId,
+                    'created_by' => $userId,
+                    'updated_by' => $userId,
+                ]
+            );
+            $importedCount++;
+        }
+        fclose($fileHandle);
+
+        return response()->json([
+            'status' => true,
+            'message' => "Successfully imported {$importedCount} commodity categories.",
         ], 200);
     }
 }

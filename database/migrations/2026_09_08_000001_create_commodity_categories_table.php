@@ -13,18 +13,35 @@ return new class extends Migration
     {
         Schema::create('commodity_categories', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('media_id')
+                ->nullable()
+                ->constrained('media')
+                ->nullOnDelete();
+
             $table->string('name', 150);
             $table->string('slug', 180)->unique();
             $table->text('description')->nullable();
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->boolean('status')->default(true);
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->foreignId('updated_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
             $table->timestamps();
             $table->softDeletes();
 
-            // Composite covering index for active dropdown/sorting queries
-            $table->index(['status', 'sort_order', 'id'], 'idx_comm_cat_status_sort_id');
+            $table->index(
+                ['status', 'sort_order', 'id'],
+                'idx_comm_cat_status_sort_id'
+            );
         });
     }
 

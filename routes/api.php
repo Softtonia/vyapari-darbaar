@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\Admin\ExchangeInstrumentController;
 use App\Http\Controllers\Api\Admin\FirebaseSettingController;
 use App\Http\Controllers\Api\Admin\MandiController;
 use App\Http\Controllers\Api\Admin\MarketIngestionRunController;
+use App\Http\Controllers\Api\Admin\MediaController;
 use App\Http\Controllers\Api\Admin\NotificationBatchController;
 use App\Http\Controllers\Api\Admin\NotificationDashboardController;
 use App\Http\Controllers\Api\Admin\NotificationLogController;
@@ -341,8 +342,21 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.roles.update-status');
         });
 
+        // Media management
+        Route::prefix('media')->group(function () {
+            Route::get('/', [MediaController::class, 'index'])->name('admin.media.index');
+            Route::post('/', [MediaController::class, 'store'])->name('admin.media.store');
+            Route::get('{media}', [MediaController::class, 'show'])->name('admin.media.show');
+            Route::put('{media}', [MediaController::class, 'update'])->name('admin.media.update');
+            Route::delete('{media}', [MediaController::class, 'destroy'])->name('admin.media.destroy');
+        });
+
         // Commodity Category management
         Route::prefix('commodity-categories')->group(function () {
+            Route::get('export', [CommodityCategoryController::class, 'export'])
+                ->name('admin.commodity-categories.export');
+            Route::post('import', [CommodityCategoryController::class, 'import'])
+                ->name('admin.commodity-categories.import');
             Route::get('options', [CommodityCategoryController::class, 'options'])
                 ->name('admin.commodity-categories.options');
             Route::get('/', [CommodityCategoryController::class, 'index'])
@@ -387,6 +401,10 @@ Route::prefix('admin')->group(function () {
 
         // Commodity Subcategory management
         Route::prefix('commodity-subcategories')->group(function () {
+            Route::get('export', [CommoditySubcategoryController::class, 'export'])
+                ->name('admin.commodity-subcategories.export');
+            Route::post('import', [CommoditySubcategoryController::class, 'import'])
+                ->name('admin.commodity-subcategories.import');
             Route::get('options', [CommoditySubcategoryController::class, 'options'])
                 ->name('admin.commodity-subcategories.options');
             Route::get('/', [CommoditySubcategoryController::class, 'index'])
@@ -610,7 +628,7 @@ Route::prefix('admin')->group(function () {
                 Route::get('/', [NotificationBatchController::class, 'index'])
                     ->name('admin.notifications.batches.index');
                 Route::get('{batch}', [NotificationBatchController::class, 'show'])
-                    ->name('admin.notifications.batches.show');
+                    ->name('admin.notifications.ghbatches.show');
                 Route::post('{batch}/cancel', [NotificationBatchController::class, 'cancel'])
                     ->name('admin.notifications.batches.cancel');
                 Route::post('{batch}/retry-failed', [NotificationBatchController::class, 'retryFailed'])
@@ -850,6 +868,14 @@ Route::prefix('admin')->group(function () {
             Route::put('{dataSource}', [DataSourceController::class, 'update'])->name('admin.data-sources.update');
             Route::delete('{dataSource}', [DataSourceController::class, 'destroy'])->name('admin.data-sources.destroy');
             Route::patch('{dataSource}/status', [DataSourceController::class, 'updateStatus'])->name('admin.data-sources.update-status');
+        });
+        // Media management
+        Route::prefix('media')->group(function () {
+            Route::get('/', [MediaController::class, 'index'])->name('admin.media.index');
+            Route::post('/', [MediaController::class, 'store'])->name('admin.media.store');
+            Route::get('{media}', [MediaController::class, 'show'])->name('admin.media.show');
+            Route::put('{media}', [MediaController::class, 'update'])->name('admin.media.update');
+            Route::delete('{media}', [MediaController::class, 'destroy'])->name('admin.media.destroy');
         });
     });
 });

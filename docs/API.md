@@ -5080,3 +5080,52 @@ Vyapari Darbaar records administrative and system actions across modules (`Websi
       "message": "Data source deleted successfully."
   }
   ```
+
+---
+
+## 29. Media Management
+*All require `Authorization: Bearer <admin_token>` and `EnsureAdmin` middleware.*
+
+### 29.1 List Media
+- **Method:** `GET`
+- **URI:** `/api/admin/media`
+
+### 29.2 Upload Media
+- **Method:** `POST`
+- **URI:** `/api/admin/media`
+- **Request Body:** `multipart/form-data` with `file`
+
+### 29.3 Show Media
+- **Method:** `GET`
+- **URI:** `/api/admin/media/{id}`
+
+### 29.4 Update Media
+- **Method:** `PUT`
+- **URI:** `/api/admin/media/{id}`
+
+### 29.5 Delete Media
+- **Method:** `DELETE`
+- **URI:** `/api/admin/media/{id}`
+
+---
+
+## 30. Commodity Import / Export
+*All require `Authorization: Bearer <admin_token>` and `EnsureAdmin` middleware.*
+
+### 30.1 Export Commodity Categories
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-categories/export`
+
+### 30.2 Import Commodity Categories
+- **Method:** `POST`
+- **URI:** `/api/admin/commodity-categories/import`
+- **Request Body:** `multipart/form-data` with CSV `file`
+
+### 30.3 Export Commodity Subcategories
+- **Method:** `GET`
+- **URI:** `/api/admin/commodity-subcategories/export`
+
+### 30.4 Import Commodity Subcategories
+- **Method:** `POST`
+- **URI:** `/api/admin/commodity-subcategories/import`
+- **Request Body:** `multipart/form-data` with CSV `file`
