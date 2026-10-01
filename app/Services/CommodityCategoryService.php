@@ -98,6 +98,7 @@ class CommodityCategoryService
                 'description' => $data['description'] ?? null,
                 'sort_order' => $data['sort_order'] ?? 0,
                 'status' => $data['status'] ?? true,
+                'media_id' => $data['media_id'] ?? null,
                 'created_by' => $adminId,
                 'updated_by' => $adminId,
             ]);
@@ -136,6 +137,10 @@ class CommodityCategoryService
 
             if (array_key_exists('status', $data)) {
                 $updateData['status'] = (bool) $data['status'];
+            }
+
+            if (array_key_exists('media_id', $data)) {
+                $updateData['media_id'] = $data['media_id'];
             }
 
             if ($adminId !== null) {
