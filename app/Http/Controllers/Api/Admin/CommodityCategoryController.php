@@ -239,7 +239,7 @@ class CommodityCategoryController extends Controller
             "Expires"             => "0"
         ];
 
-        $columns = ['ID', 'Attachment ID', 'Image URL', 'Name', 'Slug', 'Description', 'Sort Order', 'Status', 'Created At'];
+        $columns = ['ID', 'Image URL', 'Name', 'Slug', 'Description', 'Sort Order', 'Status', 'Created At'];
 
         $callback = function() use($categories, $columns) {
             $file = fopen('php://output', 'w');
@@ -248,7 +248,6 @@ class CommodityCategoryController extends Controller
             foreach ($categories as $category) {
                 fputcsv($file, [
                     $category->id,
-                    $category->media ? $category->media->attachment_id : '',
                     $category->media ? url($category->media->image_url) : '',
                     $category->name,
                     $category->slug,
@@ -279,7 +278,7 @@ class CommodityCategoryController extends Controller
         
         // Ensure to read header to figure out indices dynamically, or just map them. 
         // For simplicity, we assume strict column order based on export:
-        // ['ID', 'Attachment ID', 'Image URL', 'Name', 'Slug', 'Description', 'Sort Order', 'Status', 'Created At']
+        // ['ID', 'Image URL', 'Name', 'Slug', 'Description', 'Sort Order', 'Status', 'Created At']
         $header = fgetcsv($fileHandle);
         $headerMap = array_flip(array_map('trim', array_map('strtolower', $header)));
         
@@ -289,7 +288,7 @@ class CommodityCategoryController extends Controller
         while (($row = fgetcsv($fileHandle)) !== false) {
             if (count($row) < 2) continue;
             
-            $attachmentId = isset($headerMap['attachment id']) && !empty($row[$headerMap['attachment id']]) ? (int)$row[$headerMap['attachment id']] : null;
+            $attachmentId = null; // No longer parsed from CSV
             $imageUrl = isset($headerMap['image url']) && !empty($row[$headerMap['image url']]) ? $row[$headerMap['image url']] : null;
             $name = $row[$headerMap['name']] ?? $row[1] ?? '';
             $slug = $row[$headerMap['slug']] ?? $row[2] ?? \Illuminate\Support\Str::slug($name);
@@ -298,15 +297,21 @@ class CommodityCategoryController extends Controller
             $status = $row[$headerMap['status']] ?? $row[5] ?? 'Active';
             
             $mediaId = null;
-            if ($attachmentId || $imageUrl) {
+            if ($imageUrl) {
                 try {
-                    $media = $mediaService->resolve(null, null, $imageUrl, $attachmentId);
+                    $media = $mediaService->resolve(null, null, $imageUrl, null);
                     if ($media) {
                         $mediaId = $media->id;
                     }
                 } catch (\Exception $e) {
                     // Ignore media resolution errors during bulk import
                 }
+            }
+
+            // Find existing category if any to preserve media_id if empty in CSV
+            $existingCat = CommodityCategory::where('slug', $slug)->first();
+            if (!$imageUrl && $existingCat) {
+                $mediaId = $existingCat->media_id;
             }
 
             CommodityCategory::updateOrCreate(

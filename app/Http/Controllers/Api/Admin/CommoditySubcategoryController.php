@@ -258,7 +258,7 @@ class CommoditySubcategoryController extends Controller
             "Expires"             => "0"
         ];
 
-        $columns = ['ID', 'Commodity ID', 'Commodity Name', 'Attachment ID', 'Image URL', 'Name', 'Slug', 'Description', 'Sort Order', 'Status', 'Created At'];
+        $columns = ['ID', 'Commodity ID', 'Commodity Name', 'Image URL', 'Name', 'Slug', 'Description', 'Sort Order', 'Status', 'Created At'];
 
         $callback = function() use($subcategories, $columns) {
             $file = fopen('php://output', 'w');
@@ -269,7 +269,6 @@ class CommoditySubcategoryController extends Controller
                     $subcategory->id,
                     $subcategory->commodity_id,
                     $subcategory->commodity ? $subcategory->commodity->name : '',
-                    $subcategory->media ? $subcategory->media->attachment_id : '',
                     $subcategory->media ? url($subcategory->media->image_url) : '',
                     $subcategory->name,
                     $subcategory->slug,
@@ -306,7 +305,7 @@ class CommoditySubcategoryController extends Controller
         while (($row = fgetcsv($fileHandle)) !== false) {
             if (count($row) < 3) continue;
 
-            $attachmentId = isset($headerMap['attachment id']) && !empty($row[$headerMap['attachment id']]) ? (int)$row[$headerMap['attachment id']] : null;
+            $attachmentId = null; // No longer parsed from CSV
             $imageUrl = isset($headerMap['image url']) && !empty($row[$headerMap['image url']]) ? $row[$headerMap['image url']] : null;
             $commodityId = $row[$headerMap['commodity id']] ?? $row[1] ?? null;
             $name = $row[$headerMap['name']] ?? $row[3] ?? '';
@@ -316,15 +315,21 @@ class CommoditySubcategoryController extends Controller
             $status = $row[$headerMap['status']] ?? $row[7] ?? 'Active';
             
             $mediaId = null;
-            if ($attachmentId || $imageUrl) {
+            if ($imageUrl) {
                 try {
-                    $media = $mediaService->resolve(null, null, $imageUrl, $attachmentId);
+                    $media = $mediaService->resolve(null, null, $imageUrl, null);
                     if ($media) {
                         $mediaId = $media->id;
                     }
                 } catch (\Exception $e) {
                     // Ignore media resolution errors during bulk import
                 }
+            }
+
+            // Find existing subcategory if any to preserve media_id if empty in CSV
+            $existingSub = CommoditySubcategory::where('slug', $slug)->first();
+            if (!$imageUrl && $existingSub) {
+                $mediaId = $existingSub->media_id;
             }
 
             if ($commodityId) {
