@@ -141,17 +141,44 @@
                                                 "value": "application/json"
                                             },
                                             {
-                                                "key": "Content-Type",
-                                                "value": "application/json"
-                                            },
-                                            {
                                                 "key": "Authorization",
                                                 "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "body": {
-                                            "mode": "raw",
-                                            "raw": "{\n    \"name\": \"Grains\",\n    \"slug\": \"grains\",\n    \"description\": \"Wheat, Paddy/Rice, Maize, Barley, Millet and other cereal grains.\",\n    \"sort_order\": 1,\n    \"status\": true,\n    \"image_url\": \"\",\n    \"media_id\": null\n}"
+                                            "mode": "formdata",
+                                            "formdata": [
+                                                {
+                                                    "key": "name",
+                                                    "value": "Grains",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "slug",
+                                                    "value": "grains",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "description",
+                                                    "value": "Wheat, Paddy/Rice, Maize, Barley, Millet and other cereal grains.",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "sort_order",
+                                                    "value": "1",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "status",
+                                                    "value": "1",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "image",
+                                                    "type": "file",
+                                                    "src": []
+                                                }
+                                            ]
                                         },
                                         "url": {
                                             "raw": "{{live}}/api/admin/commodity-categories",
@@ -217,14 +244,10 @@
                                 {
                                     "name": "Update Commodity Category",
                                     "request": {
-                                        "method": "PUT",
+                                        "method": "POST",
                                         "header": [
                                             {
                                                 "key": "Accept",
-                                                "value": "application/json"
-                                            },
-                                            {
-                                                "key": "Content-Type",
                                                 "value": "application/json"
                                             },
                                             {
@@ -233,8 +256,44 @@
                                             }
                                         ],
                                         "body": {
-                                            "mode": "raw",
-                                            "raw": "{\n    \"name\": \"Grains & Cereals\",\n    \"slug\": \"grains-cereals\",\n    \"description\": \"Updated grain commodities list.\",\n    \"sort_order\": 1,\n    \"status\": true,\n    \"image_url\": \"\",\n    \"media_id\": null\n}"
+                                            "mode": "formdata",
+                                            "formdata": [
+                                                {
+                                                    "key": "_method",
+                                                    "value": "PUT",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "name",
+                                                    "value": "Grains & Cereals",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "slug",
+                                                    "value": "grains-cereals",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "description",
+                                                    "value": "Updated grain commodities list.",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "sort_order",
+                                                    "value": "1",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "status",
+                                                    "value": "1",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "image",
+                                                    "type": "file",
+                                                    "src": []
+                                                }
+                                            ]
                                         },
                                         "url": {
                                             "raw": "{{live}}/api/admin/commodity-categories/{{commodity_category_id}}",
@@ -675,17 +734,49 @@
                                                 "value": "application/json"
                                             },
                                             {
-                                                "key": "Content-Type",
-                                                "value": "application/json"
-                                            },
-                                            {
                                                 "key": "Authorization",
                                                 "value": "Bearer {{admin_token}}"
                                             }
                                         ],
                                         "body": {
-                                            "mode": "raw",
-                                            "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name\": \"Lokwan Wheat\",\n    \"slug\": \"lokwan-wheat\",\n    \"description\": \"High grade Lokwan wheat.\",\n    \"sort_order\": 1,\n    \"status\": true,\n    \"image_url\": \"\",\n    \"media_id\": null\n}"
+                                            "mode": "formdata",
+                                            "formdata": [
+                                                {
+                                                    "key": "commodity_id",
+                                                    "value": "{{commodity_id}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "name",
+                                                    "value": "Lokwan Wheat",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "slug",
+                                                    "value": "lokwan-wheat",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "description",
+                                                    "value": "High grade Lokwan wheat.",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "sort_order",
+                                                    "value": "1",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "status",
+                                                    "value": "1",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "image",
+                                                    "type": "file",
+                                                    "src": []
+                                                }
+                                            ]
                                         },
                                         "url": {
                                             "raw": "{{live}}/api/admin/commodity-subcategories",
@@ -751,14 +842,10 @@
                                 {
                                     "name": "Update Commodity Subcategory",
                                     "request": {
-                                        "method": "PUT",
+                                        "method": "POST",
                                         "header": [
                                             {
                                                 "key": "Accept",
-                                                "value": "application/json"
-                                            },
-                                            {
-                                                "key": "Content-Type",
                                                 "value": "application/json"
                                             },
                                             {
@@ -767,8 +854,49 @@
                                             }
                                         ],
                                         "body": {
-                                            "mode": "raw",
-                                            "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name\": \"Lokwan Wheat (Grade A)\",\n    \"slug\": \"lokwan-wheat-grade-a\",\n    \"description\": \"High grade milling Lokwan wheat.\",\n    \"sort_order\": 1,\n    \"status\": true,\n    \"image_url\": \"\",\n    \"media_id\": null\n}"
+                                            "mode": "formdata",
+                                            "formdata": [
+                                                {
+                                                    "key": "_method",
+                                                    "value": "PUT",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "commodity_id",
+                                                    "value": "{{commodity_id}}",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "name",
+                                                    "value": "Lokwan Wheat (Grade A)",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "slug",
+                                                    "value": "lokwan-wheat-grade-a",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "description",
+                                                    "value": "High grade milling Lokwan wheat.",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "sort_order",
+                                                    "value": "1",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "status",
+                                                    "value": "1",
+                                                    "type": "text"
+                                                },
+                                                {
+                                                    "key": "image",
+                                                    "type": "file",
+                                                    "src": []
+                                                }
+                                            ]
                                         },
                                         "url": {
                                             "raw": "{{live}}/api/admin/commodity-subcategories/{{commodity_subcategory_id}}",
