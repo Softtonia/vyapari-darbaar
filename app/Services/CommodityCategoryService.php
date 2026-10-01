@@ -92,11 +92,15 @@ class CommodityCategoryService
             $slug = ! empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['name']);
             $slug = $this->generateUniqueSlug($slug);
 
+            $sortOrder = (isset($data['sort_order']) && $data['sort_order'] !== null) 
+                ? (int) $data['sort_order'] 
+                : ((int) CommodityCategory::max('sort_order') + 1);
+
             return CommodityCategory::create([
                 'name' => $data['name'],
                 'slug' => $slug,
                 'description' => $data['description'] ?? null,
-                'sort_order' => $data['sort_order'] ?? 0,
+                'sort_order' => $sortOrder,
                 'status' => $data['status'] ?? true,
                 'media_id' => $data['media_id'] ?? null,
                 'created_by' => $adminId,

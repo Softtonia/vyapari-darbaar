@@ -106,12 +106,16 @@ class CommoditySubcategoryService
             $slug = ! empty($data['slug']) ? Str::slug($data['slug']) : Str::slug($data['name']);
             $slug = $this->generateUniqueSlug($slug, $commodityId);
 
+            $sortOrder = (isset($data['sort_order']) && $data['sort_order'] !== null) 
+                ? (int) $data['sort_order'] 
+                : ((int) CommoditySubcategory::where('commodity_id', $commodityId)->max('sort_order') + 1);
+
             return CommoditySubcategory::create([
                 'commodity_id' => $commodityId,
                 'name' => $data['name'],
                 'slug' => $slug,
                 'description' => $data['description'] ?? null,
-                'sort_order' => $data['sort_order'] ?? 0,
+                'sort_order' => $sortOrder,
                 'status' => $data['status'] ?? true,
                 'media_id' => $data['media_id'] ?? null,
                 'created_by' => $adminId,
