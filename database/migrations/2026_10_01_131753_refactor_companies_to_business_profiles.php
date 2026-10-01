@@ -34,7 +34,7 @@ return new class extends Migration
         });
 
         // 3. Migrate user_has_companies data
-        if (Schema::hasTable('user_has_companies')) {
+        if (Schema::hasTable('user_has_companies') && Schema::hasColumn('user_has_companies', 'company_id') && Schema::hasColumn('user_has_companies', 'user_id')) {
             $userHasCompanies = DB::table('user_has_companies')->get();
             foreach ($userHasCompanies as $mapping) {
                 DB::table('business_profiles')
@@ -46,11 +46,13 @@ return new class extends Migration
         // 4. Update KYC Table
         if (Schema::hasTable('kyc')) {
             // kyc already has user_id and company_id
-            $kycs = DB::table('kyc')->whereNotNull('company_id')->get();
-            foreach ($kycs as $kyc) {
-                $profile = DB::table('business_profiles')->where('id', $kyc->company_id)->first();
-                if ($profile) {
-                    DB::table('kyc')->where('id', $kyc->id)->update(['user_id' => $profile->user_id]);
+            if (Schema::hasColumn('kyc', 'company_id')) {
+                $kycs = DB::table('kyc')->whereNotNull('company_id')->get();
+                foreach ($kycs as $kyc) {
+                    $profile = DB::table('business_profiles')->where('id', $kyc->company_id)->first();
+                    if ($profile) {
+                        DB::table('kyc')->where('id', $kyc->id)->update(['user_id' => $profile->user_id]);
+                    }
                 }
             }
             Schema::table('kyc', function (Blueprint $table) {
@@ -66,11 +68,13 @@ return new class extends Migration
 
         // 5. Update Business Documents Table
         if (Schema::hasTable('business_documents')) {
-            $docs = DB::table('business_documents')->whereNotNull('company_id')->get();
-            foreach ($docs as $doc) {
-                $profile = DB::table('business_profiles')->where('id', $doc->company_id)->first();
-                if ($profile) {
-                    DB::table('business_documents')->where('id', $doc->id)->update(['user_id' => $profile->user_id]);
+            if (Schema::hasColumn('business_documents', 'company_id')) {
+                $docs = DB::table('business_documents')->whereNotNull('company_id')->get();
+                foreach ($docs as $doc) {
+                    $profile = DB::table('business_profiles')->where('id', $doc->company_id)->first();
+                    if ($profile) {
+                        DB::table('business_documents')->where('id', $doc->id)->update(['user_id' => $profile->user_id]);
+                    }
                 }
             }
             Schema::table('business_documents', function (Blueprint $table) {
@@ -93,9 +97,11 @@ return new class extends Migration
                     $table->foreignId('business_profile_id')->nullable()->after('id')->constrained('business_profiles')->cascadeOnDelete();
                 }
             });
-            $banks = DB::table('business_profile_bank_details')->whereNotNull('company_id')->get();
-            foreach ($banks as $bank) {
-                DB::table('business_profile_bank_details')->where('id', $bank->id)->update(['business_profile_id' => $bank->company_id]);
+            if (Schema::hasColumn('business_profile_bank_details', 'company_id')) {
+                $banks = DB::table('business_profile_bank_details')->whereNotNull('company_id')->get();
+                foreach ($banks as $bank) {
+                    DB::table('business_profile_bank_details')->where('id', $bank->id)->update(['business_profile_id' => $bank->company_id]);
+                }
             }
             Schema::table('business_profile_bank_details', function (Blueprint $table) {
                 if (Schema::hasColumn('business_profile_bank_details', 'company_id')) {
@@ -117,9 +123,11 @@ return new class extends Migration
                     $table->foreignId('business_profile_id')->nullable()->after('id')->constrained('business_profiles')->cascadeOnDelete();
                 }
             });
-            $cats = DB::table('business_profile_business_categories')->whereNotNull('company_id')->get();
-            foreach ($cats as $cat) {
-                DB::table('business_profile_business_categories')->where('id', $cat->id)->update(['business_profile_id' => $cat->company_id]);
+            if (Schema::hasColumn('business_profile_business_categories', 'company_id')) {
+                $cats = DB::table('business_profile_business_categories')->whereNotNull('company_id')->get();
+                foreach ($cats as $cat) {
+                    DB::table('business_profile_business_categories')->where('id', $cat->id)->update(['business_profile_id' => $cat->company_id]);
+                }
             }
             Schema::table('business_profile_business_categories', function (Blueprint $table) {
                 if (Schema::hasColumn('business_profile_business_categories', 'company_id')) {
