@@ -11,6 +11,7 @@ class Media extends Model
     protected $fillable = [
         'attachment_id',
         'image_url',
+        'source_url',
     ];
 
     protected $casts = [

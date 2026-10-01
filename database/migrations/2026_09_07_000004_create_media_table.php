@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('attachment_id')->index();
             $table->text('image_url');
+            $table->text('source_url')->nullable();
             $table->timestamps();
 
             $table->index(['attachment_id', 'id']);

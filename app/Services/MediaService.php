@@ -65,14 +65,9 @@ class MediaService
         // Case 3: Image URL
         if ($imageUrl) {
             // Check if the URL matches an already uploaded media record
-            // Try matching full URL or just the path part
-            $parsedUrl = parse_url($imageUrl, PHP_URL_PATH);
-            
-            $existing = Media::where('image_url', $imageUrl)
-                ->when($parsedUrl, function($q) use ($parsedUrl) {
-                    $q->orWhere('image_url', $parsedUrl)
-                      ->orWhere('image_url', 'like', '%' . $parsedUrl);
-                })
+            // Match against source_url first, or fallback to checking if it perfectly matches image_url
+            $existing = Media::where('source_url', $imageUrl)
+                ->orWhere('image_url', $imageUrl)
                 ->first();
 
             if ($existing) {
@@ -86,27 +81,40 @@ class MediaService
             $this->validateUrl($imageUrl);
             $path = $this->downloadAndStoreImage($imageUrl);
 
-            return $this->createOrUpdateMedia($attachmentId, $path);
+            return $this->createOrUpdateMedia($attachmentId, $path, $imageUrl);
         }
 
         // Case 4: Nothing provided
         return null;
     }
 
-    protected function createOrUpdateMedia(?int $attachmentId, string $path): Media
+    protected function createOrUpdateMedia(?int $attachmentId, string $path, ?string $sourceUrl = null): Media
     {
         if ($attachmentId) {
             $media = Media::where('attachment_id', $attachmentId)->first();
             if ($media) {
-                $media->update(['image_url' => Storage::url($path)]);
+                $media->update([
+                    'image_url' => Storage::url($path),
+                    'source_url' => $sourceUrl ?? $media->source_url,
+                ]);
                 return $media;
             }
         }
 
-        return Media::create([
-            'attachment_id' => $attachmentId,
+        // Insert with a temporary attachment_id to satisfy MySQL NOT NULL constraint.
+        // We use 0 as a temporary value.
+        $media = Media::create([
+            'attachment_id' => $attachmentId ?? 0,
             'image_url' => Storage::url($path),
+            'source_url' => $sourceUrl,
         ]);
+
+        // If no attachment_id was provided, set it to match the generated primary key (id).
+        if (!$attachmentId) {
+            $media->update(['attachment_id' => $media->id]);
+        }
+
+        return $media;
     }
 
     protected function validateUploadedFile(UploadedFile $file): void
