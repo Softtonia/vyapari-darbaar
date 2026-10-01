@@ -64,6 +64,25 @@ class MediaService
 
         // Case 3: Image URL
         if ($imageUrl) {
+            // Check if the URL matches an already uploaded media record
+            // Try matching full URL or just the path part
+            $parsedUrl = parse_url($imageUrl, PHP_URL_PATH);
+            
+            $existing = Media::where('image_url', $imageUrl)
+                ->when($parsedUrl, function($q) use ($parsedUrl) {
+                    $q->orWhere('image_url', $parsedUrl)
+                      ->orWhere('image_url', 'like', '%' . $parsedUrl);
+                })
+                ->first();
+
+            if ($existing) {
+                // Optionally update attachment_id if it's newly provided during import
+                if ($attachmentId && !$existing->attachment_id) {
+                    $existing->update(['attachment_id' => $attachmentId]);
+                }
+                return $existing;
+            }
+
             $this->validateUrl($imageUrl);
             $path = $this->downloadAndStoreImage($imageUrl);
 
