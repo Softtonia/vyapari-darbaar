@@ -83,19 +83,22 @@ return new class extends Migration
             });
         }
 
-        // 6. Update Company Bank Details
+        // 6. Rename and Update Company Bank Details
         if (Schema::hasTable('company_bank_details')) {
-            Schema::table('company_bank_details', function (Blueprint $table) {
-                if (!Schema::hasColumn('company_bank_details', 'business_profile_id')) {
+            Schema::rename('company_bank_details', 'business_profile_bank_details');
+        }
+        if (Schema::hasTable('business_profile_bank_details')) {
+            Schema::table('business_profile_bank_details', function (Blueprint $table) {
+                if (!Schema::hasColumn('business_profile_bank_details', 'business_profile_id')) {
                     $table->foreignId('business_profile_id')->nullable()->after('id')->constrained('business_profiles')->cascadeOnDelete();
                 }
             });
-            $banks = DB::table('company_bank_details')->whereNotNull('company_id')->get();
+            $banks = DB::table('business_profile_bank_details')->whereNotNull('company_id')->get();
             foreach ($banks as $bank) {
-                DB::table('company_bank_details')->where('id', $bank->id)->update(['business_profile_id' => $bank->company_id]);
+                DB::table('business_profile_bank_details')->where('id', $bank->id)->update(['business_profile_id' => $bank->company_id]);
             }
-            Schema::table('company_bank_details', function (Blueprint $table) {
-                if (Schema::hasColumn('company_bank_details', 'company_id')) {
+            Schema::table('business_profile_bank_details', function (Blueprint $table) {
+                if (Schema::hasColumn('business_profile_bank_details', 'company_id')) {
                     try {
                         $table->dropForeign(['company_id']);
                     } catch (\Exception $e) {}
@@ -104,19 +107,22 @@ return new class extends Migration
             });
         }
 
-        // 7. Update Company Business Categories
+        // 7. Rename and Update Company Business Categories
         if (Schema::hasTable('company_business_categories')) {
-            Schema::table('company_business_categories', function (Blueprint $table) {
-                if (!Schema::hasColumn('company_business_categories', 'business_profile_id')) {
+            Schema::rename('company_business_categories', 'business_profile_business_categories');
+        }
+        if (Schema::hasTable('business_profile_business_categories')) {
+            Schema::table('business_profile_business_categories', function (Blueprint $table) {
+                if (!Schema::hasColumn('business_profile_business_categories', 'business_profile_id')) {
                     $table->foreignId('business_profile_id')->nullable()->after('id')->constrained('business_profiles')->cascadeOnDelete();
                 }
             });
-            $cats = DB::table('company_business_categories')->whereNotNull('company_id')->get();
+            $cats = DB::table('business_profile_business_categories')->whereNotNull('company_id')->get();
             foreach ($cats as $cat) {
-                DB::table('company_business_categories')->where('id', $cat->id)->update(['business_profile_id' => $cat->company_id]);
+                DB::table('business_profile_business_categories')->where('id', $cat->id)->update(['business_profile_id' => $cat->company_id]);
             }
-            Schema::table('company_business_categories', function (Blueprint $table) {
-                if (Schema::hasColumn('company_business_categories', 'company_id')) {
+            Schema::table('business_profile_business_categories', function (Blueprint $table) {
+                if (Schema::hasColumn('business_profile_business_categories', 'company_id')) {
                     try {
                         $table->dropForeign(['company_id']);
                     } catch (\Exception $e) {}
@@ -200,20 +206,22 @@ return new class extends Migration
             });
         }
         
-        if (Schema::hasTable('company_bank_details')) {
-            Schema::table('company_bank_details', function (Blueprint $table) {
+        if (Schema::hasTable('business_profile_bank_details')) {
+            Schema::table('business_profile_bank_details', function (Blueprint $table) {
                 $table->foreignId('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
                 $table->dropForeign(['business_profile_id']);
                 $table->dropColumn('business_profile_id');
             });
+            Schema::rename('business_profile_bank_details', 'company_bank_details');
         }
         
-        if (Schema::hasTable('company_business_categories')) {
-            Schema::table('company_business_categories', function (Blueprint $table) {
+        if (Schema::hasTable('business_profile_business_categories')) {
+            Schema::table('business_profile_business_categories', function (Blueprint $table) {
                 $table->foreignId('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
                 $table->dropForeign(['business_profile_id']);
                 $table->dropColumn('business_profile_id');
             });
+            Schema::rename('business_profile_business_categories', 'company_business_categories');
         }
     }
 };

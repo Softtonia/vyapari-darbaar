@@ -115,7 +115,7 @@ class CreateUserAction
                 ]);
                 
                 if (!empty($data['bank_account_number']) || !empty($data['bank_name'])) {
-                    \App\Models\CompanyBankDetail::create([
+                    App\Models\BusinessProfileBankDetail::create([
                         'business_profile_id' => $businessProfile->id,
                         'account_holder_name' => isset($data['bank_account_holder_name']) ? trim((string) $data['bank_account_holder_name']) : null,
                         'bank_name' => isset($data['bank_name']) ? trim((string) $data['bank_name']) : null,

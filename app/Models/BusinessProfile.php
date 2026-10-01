@@ -58,7 +58,7 @@ class BusinessProfile extends Model
 
     public function bankDetails()
     {
-        return $this->hasMany(CompanyBankDetail::class, 'business_profile_id');
+        return $this->hasMany(BusinessProfileBankDetail::class, 'business_profile_id');
     }
 
     public function country()

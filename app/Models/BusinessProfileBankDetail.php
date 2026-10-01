@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CompanyBankDetail extends Model
+class BusinessProfileBankDetail extends Model
 {
+    protected $table = 'business_profile_bank_details';
+
     protected $fillable = [
         'business_profile_id',
         'account_holder_name',

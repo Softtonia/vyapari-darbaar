@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CompanyKycDocument extends Model
+class BusinessProfileKycDocument extends Model
 {
     protected $table = 'kyc';
 

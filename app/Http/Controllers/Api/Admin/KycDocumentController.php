@@ -33,7 +33,7 @@ class KycDocumentController extends Controller
             $path = $file->store("kyc/{$userId}", 'public');
 
             // Save to DB
-            $doc = CompanyKycDocument::create([
+            $doc = BusinessProfileKycDocument::create([
                 'user_id' => $userId,
                 'document_type' => $type,
                 'file_path' => $path,
@@ -57,7 +57,7 @@ class KycDocumentController extends Controller
      */
     public function batchProgress($batchId)
     {
-        $documents = CompanyKycDocument::where('upload_batch_id', $batchId)->get();
+        $documents = BusinessProfileKycDocument::where('upload_batch_id', $batchId)->get();
 
         if ($documents->isEmpty()) {
             return response()->json([
@@ -84,7 +84,7 @@ class KycDocumentController extends Controller
     {
         $request->validate(['user_id' => 'required|exists:users,id']);
         
-        $documents = CompanyKycDocument::where('user_id', $request->user_id)->get();
+        $documents = BusinessProfileKycDocument::where('user_id', $request->user_id)->get();
         
         return response()->json([
             'status' => true,
@@ -99,7 +99,7 @@ class KycDocumentController extends Controller
     {
         $request->validate(['status' => 'required|in:pending,verified,rejected']);
         
-        $document = CompanyKycDocument::findOrFail($id);
+        $document = BusinessProfileKycDocument::findOrFail($id);
         $document->update(['status' => $request->status]);
         
         return response()->json([
@@ -114,7 +114,7 @@ class KycDocumentController extends Controller
      */
     public function destroy($id)
     {
-        $document = CompanyKycDocument::findOrFail($id);
+        $document = BusinessProfileKycDocument::findOrFail($id);
         
         // Optionally delete file from storage here
         // \Illuminate\Support\Facades\Storage::disk('public')->delete($document->file_path);

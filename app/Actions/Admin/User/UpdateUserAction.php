@@ -80,7 +80,7 @@ class UpdateUserAction
                 if (!empty($data['bank_account_number']) || !empty($data['bank_name'])) {
                     $bank = $businessProfile->bankDetails()->where('is_primary', true)->first();
                     if (!$bank) {
-                        $bank = new \App\Models\CompanyBankDetail();
+                        $bank = new App\Models\BusinessProfileBankDetail();
                         $bank->business_profile_id = $businessProfile->id;
                         $bank->is_primary = true;
                     }
