@@ -8997,11 +8997,13 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{live}}//media",
+                                    "raw": "{{live}}/api/admin/media",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
+                                        "api",
+                                        "admin",
                                         "media"
                                     ]
                                 }
@@ -9015,11 +9017,6 @@
                                     {
                                         "key": "Accept",
                                         "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}",
-                                        "type": "text"
                                     }
                                 ],
                                 "body": {
@@ -9033,24 +9030,12 @@
                                     ]
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/admin/media",
+                                    "raw": "{{live}}/media",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
-                                        "api",
-                                        "admin",
                                         "media"
-                                    ]
-                                },
-                                "auth": {
-                                    "type": "bearer",
-                                    "bearer": [
-                                        {
-                                            "key": "token",
-                                            "value": "{{admin_token}}",
-                                            "type": "string"
-                                        }
                                     ]
                                 }
                             }
@@ -9063,33 +9048,16 @@
                                     {
                                         "key": "Accept",
                                         "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}",
-                                        "type": "text"
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{live}}/api/admin/media/1",
+                                    "raw": "{{live}}/media/1",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
-                                        "api",
-                                        "admin",
                                         "media",
                                         "1"
-                                    ]
-                                },
-                                "auth": {
-                                    "type": "bearer",
-                                    "bearer": [
-                                        {
-                                            "key": "token",
-                                            "value": "{{admin_token}}",
-                                            "type": "string"
-                                        }
                                     ]
                                 }
                             }
@@ -9102,33 +9070,16 @@
                                     {
                                         "key": "Accept",
                                         "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}",
-                                        "type": "text"
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{live}}/api/admin/media/1",
+                                    "raw": "{{live}}/media/1",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
-                                        "api",
-                                        "admin",
                                         "media",
                                         "1"
-                                    ]
-                                },
-                                "auth": {
-                                    "type": "bearer",
-                                    "bearer": [
-                                        {
-                                            "key": "token",
-                                            "value": "{{admin_token}}",
-                                            "type": "string"
-                                        }
                                     ]
                                 }
                             }
@@ -9141,33 +9092,16 @@
                                     {
                                         "key": "Accept",
                                         "value": "application/json"
-                                    },
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{admin_token}}",
-                                        "type": "text"
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{live}}/api/admin/media/1",
+                                    "raw": "{{live}}/media/1",
                                     "host": [
                                         "{{live}}"
                                     ],
                                     "path": [
-                                        "api",
-                                        "admin",
                                         "media",
                                         "1"
-                                    ]
-                                },
-                                "auth": {
-                                    "type": "bearer",
-                                    "bearer": [
-                                        {
-                                            "key": "token",
-                                            "value": "{{admin_token}}",
-                                            "type": "string"
-                                        }
                                     ]
                                 }
                             }

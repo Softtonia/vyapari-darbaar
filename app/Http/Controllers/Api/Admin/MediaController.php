@@ -38,10 +38,11 @@ class MediaController extends Controller
         $request->validate([
             'attachment_id' => ['nullable', 'integer', 'min:1'],
             'image' => ['nullable', 'file', 'mimes:jpeg,png,gif,webp', 'max:10240'],
+            'file' => ['nullable', 'file', 'mimes:jpeg,png,gif,webp', 'max:10240'],
             'image_url' => ['nullable', 'url'],
         ]);
 
-        if (!$request->hasFile('image') && !$request->filled('image_url')) {
+        if (!$request->hasFile('image') && !$request->hasFile('file') && !$request->filled('image_url')) {
             return response()->json([
                 'status' => false,
                 'message' => 'Either an image file or an image_url is required.'
@@ -49,9 +50,11 @@ class MediaController extends Controller
         }
 
         try {
+            $uploadedFile = $request->file('image') ?: $request->file('file');
+            
             $media = $this->mediaService->resolve(
                 null,
-                $request->file('image'),
+                $uploadedFile,
                 $request->input('image_url'),
                 $request->input('attachment_id')
             );
@@ -82,22 +85,25 @@ class MediaController extends Controller
         $request->validate([
             'attachment_id' => ['nullable', 'integer', 'min:1'],
             'image' => ['nullable', 'file', 'mimes:jpeg,png,gif,webp', 'max:10240'],
+            'file' => ['nullable', 'file', 'mimes:jpeg,png,gif,webp', 'max:10240'],
             'image_url' => ['nullable', 'url'],
         ]);
 
         try {
-            if ($request->hasFile('image') || $request->filled('image_url')) {
+            if ($request->hasFile('image') || $request->hasFile('file') || $request->filled('image_url')) {
                 // Delete old physical file if replacing
                 if ($media->image_url && Storage::disk('public')->exists(str_replace('/storage/', '', $media->image_url))) {
                     Storage::disk('public')->delete(str_replace('/storage/', '', $media->image_url));
                 }
+
+                $uploadedFile = $request->file('image') ?: $request->file('file');
 
                 // Resolve will handle upload/download and update the media record if attachment_id matches, 
                 // but since we are specifically updating this media record, we should handle it carefully.
                 // It's safer to just process the new file/url and update the current model.
                 $newMedia = $this->mediaService->resolve(
                     null,
-                    $request->file('image'),
+                    $uploadedFile,
                     $request->input('image_url'),
                     null // Don't pass attachment ID to prevent resolving a different media record
                 );
