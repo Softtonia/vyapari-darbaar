@@ -57,7 +57,7 @@ return new class extends Migration
                 if (Schema::hasColumn('kyc', 'company_id')) {
                     // Try dropping foreign key. Name is usually kyc_company_id_foreign
                     try {
-                        $table->dropForeign(['company_id']);
+                        $table->dropForeign('kyc_company_id_foreign');
                     } catch (\Exception $e) {}
                     $table->dropColumn('company_id');
                 }
@@ -76,7 +76,7 @@ return new class extends Migration
             Schema::table('business_documents', function (Blueprint $table) {
                 if (Schema::hasColumn('business_documents', 'company_id')) {
                     try {
-                        $table->dropForeign(['company_id']);
+                        $table->dropForeign('business_documents_company_id_foreign');
                     } catch (\Exception $e) {}
                     $table->dropColumn('company_id');
                 }
@@ -100,7 +100,7 @@ return new class extends Migration
             Schema::table('business_profile_bank_details', function (Blueprint $table) {
                 if (Schema::hasColumn('business_profile_bank_details', 'company_id')) {
                     try {
-                        $table->dropForeign(['company_id']);
+                        $table->dropForeign('company_bank_details_company_id_foreign');
                     } catch (\Exception $e) {}
                     $table->dropColumn('company_id');
                 }
@@ -124,7 +124,7 @@ return new class extends Migration
             Schema::table('business_profile_business_categories', function (Blueprint $table) {
                 if (Schema::hasColumn('business_profile_business_categories', 'company_id')) {
                     try {
-                        $table->dropForeign(['company_id']);
+                        $table->dropForeign('company_business_categories_company_id_foreign');
                     } catch (\Exception $e) {}
                     $table->dropColumn('company_id');
                 }
