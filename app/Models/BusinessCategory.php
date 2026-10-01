@@ -10,6 +10,6 @@ class BusinessCategory extends Model
 
     public function companies()
     {
-        return $this->belongsToMany(Company::class, 'company_business_categories');
+        return $this->belongsToMany(BusinessProfile::class, 'company_business_categories');
     }
 }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CompanyBankDetail extends Model
 {
     protected $fillable = [
-        'company_id',
+        'business_profile_id',
         'account_holder_name',
         'bank_name',
         'account_number',
@@ -16,8 +16,8 @@ class CompanyBankDetail extends Model
         'is_primary',
     ];
 
-    public function company()
+    public function businessProfile()
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(BusinessProfile::class);
     }
 }

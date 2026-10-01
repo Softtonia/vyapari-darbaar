@@ -4,9 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Company extends Model
+class BusinessProfile extends Model
 {
     use HasFactory;
 
@@ -15,7 +14,7 @@ class Company extends Model
      *
      * @var string
      */
-    protected $table = 'companies';
+    protected $table = 'business_profiles';
 
     /**
      * The attributes that are mass assignable.
@@ -23,21 +22,14 @@ class Company extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'user_id',
+        'company_name',
         'contact_person',
         'business_type',
-        'gstin',
-        'pan_number',
-        'year_of_establishment',
-        'business_category',
-        'no_of_employees',
-        'website',
         'country_id',
         'state_id',
         'city_id',
         'address',
-        'address_line_2',
-        'pin_code',
         'commodities_handled',
         'trade_preference',
         'verification_status',
@@ -57,25 +49,16 @@ class Company extends Model
     }
 
     /**
-     * Users associated with this company.
-     *
-     * @return BelongsToMany<User, $this>
+     * User associated with this business profile.
      */
-    public function users(): BelongsToMany
+    public function user()
     {
-        return $this->belongsToMany(User::class, 'user_has_companies')
-            ->withPivot('role', 'is_primary')
-            ->withTimestamps();
+        return $this->belongsTo(User::class);
     }
 
     public function bankDetails()
     {
-        return $this->hasMany(CompanyBankDetail::class);
-    }
-
-    public function kycDocuments()
-    {
-        return $this->hasMany(CompanyKycDocument::class);
+        return $this->hasMany(CompanyBankDetail::class, 'business_profile_id');
     }
 
     public function country()
@@ -95,11 +78,6 @@ class Company extends Model
 
     public function businessCategories()
     {
-        return $this->belongsToMany(BusinessCategory::class, 'company_business_categories');
-    }
-
-    public function businessDocuments()
-    {
-        return $this->hasMany(BusinessDocument::class);
+        return $this->belongsToMany(BusinessCategory::class, 'company_business_categories', 'business_profile_id', 'business_category_id');
     }
 }

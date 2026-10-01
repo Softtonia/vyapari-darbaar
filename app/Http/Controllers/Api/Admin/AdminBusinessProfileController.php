@@ -4,23 +4,23 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Enums\NotificationType;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CompanyResource;
+use App\Http\Resources\BusinessProfileResource;
 use App\Jobs\SendUserNotificationJob;
 use App\Models\Admin;
-use App\Models\Company;
+use App\Models\BusinessProfile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class AdminCompanyController extends Controller
+class AdminBusinessProfileController extends Controller
 {
     /**
      * Display a listing of companies with search and filters.
      */
     public function index(Request $request): JsonResponse
     {
-        $this->authorizeAdmin($request, 'companies.view');
+        $this->authorizeAdmin($request, 'business_profiles.view');
 
-        $query = Company::query()->with('users');
+        $query = BusinessProfile::query()->with('users');
 
         if ($request->filled('search')) {
             $search = trim((string) $request->input('search'));
@@ -46,18 +46,18 @@ class AdminCompanyController extends Controller
         }
 
         $perPage = min(100, max(1, (int) $request->input('per_page', 20)));
-        $companies = $query->latest('id')->paginate($perPage);
+        $businessProfiles = $query->latest('id')->paginate($perPage);
 
         return response()->json([
             'status' => true,
             'message' => 'Companies retrieved successfully.',
             'data' => [
-                'items' => CompanyResource::collection($companies->items()),
+                'items' => BusinessProfileResource::collection($businessProfiles->items()),
                 'pagination' => [
-                    'current_page' => $companies->currentPage(),
-                    'per_page' => $companies->perPage(),
-                    'total' => $companies->total(),
-                    'last_page' => $companies->lastPage(),
+                    'current_page' => $businessProfiles->currentPage(),
+                    'per_page' => $businessProfiles->perPage(),
+                    'total' => $businessProfiles->total(),
+                    'last_page' => $businessProfiles->lastPage(),
                 ],
             ],
         ], 200);
@@ -68,11 +68,11 @@ class AdminCompanyController extends Controller
      */
     public function show(Request $request, int $id): JsonResponse
     {
-        $this->authorizeAdmin($request, 'companies.view');
+        $this->authorizeAdmin($request, 'business_profiles.view');
 
-        $company = Company::with('users')->find($id);
+        $businessProfile = BusinessProfile::with('users')->find($id);
 
-        if (! $company) {
+        if (! $businessProfile) {
             return response()->json([
                 'status' => false,
                 'message' => 'Company not found.',
@@ -82,7 +82,7 @@ class AdminCompanyController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Company details retrieved successfully.',
-            'data' => new CompanyResource($company),
+            'data' => new BusinessProfileResource($businessProfile),
         ], 200);
     }
 
@@ -91,11 +91,11 @@ class AdminCompanyController extends Controller
      */
     public function update(Request $request, int $id): JsonResponse
     {
-        $this->authorizeAdmin($request, 'companies.update');
+        $this->authorizeAdmin($request, 'business_profiles.update');
 
-        $company = Company::find($id);
+        $businessProfile = BusinessProfile::find($id);
 
-        if (! $company) {
+        if (! $businessProfile) {
             return response()->json([
                 'status' => false,
                 'message' => 'Company not found.',
@@ -155,12 +155,12 @@ class AdminCompanyController extends Controller
             $updateData['commodities_handled'] = $commodities;
         }
 
-        $company->update($updateData);
+        $businessProfile->update($updateData);
 
         return response()->json([
             'status' => true,
             'message' => 'Company updated successfully.',
-            'data' => new CompanyResource($company->fresh(['users'])),
+            'data' => new BusinessProfileResource($businessProfile->fresh(['users'])),
         ], 200);
     }
 
@@ -169,11 +169,11 @@ class AdminCompanyController extends Controller
      */
     public function updateStatus(Request $request, int $id): JsonResponse
     {
-        $this->authorizeAdmin($request, 'companies.update');
+        $this->authorizeAdmin($request, 'business_profiles.update');
 
-        $company = Company::find($id);
+        $businessProfile = BusinessProfile::find($id);
 
-        if (! $company) {
+        if (! $businessProfile) {
             return response()->json([
                 'status' => false,
                 'message' => 'Company not found.',
@@ -185,14 +185,14 @@ class AdminCompanyController extends Controller
         ]);
 
         $status = strtolower((string) $validated['verification_status']);
-        $company->update(['verification_status' => $status]);
+        $businessProfile->update(['verification_status' => $status]);
 
         // Notify associated company users
-        foreach ($company->users as $companyUser) {
+        foreach ($businessProfile->users as $companyUser) {
             SendUserNotificationJob::dispatch(
                 $companyUser->id,
                 'Company Status Updated',
-                "Hello {{user_first_name}}, your company {$company->name} status has been updated to '{$status}'.",
+                "Hello {{user_first_name}}, your company {$businessProfile->name} status has been updated to '{$status}'.",
                 NotificationType::PUSH_AND_IN_APP
             );
         }
@@ -200,7 +200,7 @@ class AdminCompanyController extends Controller
         return response()->json([
             'status' => true,
             'message' => "Company verification status updated to '{$status}' successfully.",
-            'data' => new CompanyResource($company->fresh(['users'])),
+            'data' => new BusinessProfileResource($businessProfile->fresh(['users'])),
         ], 200);
     }
 
@@ -209,18 +209,18 @@ class AdminCompanyController extends Controller
      */
     public function destroy(Request $request, int $id): JsonResponse
     {
-        $this->authorizeAdmin($request, 'companies.delete');
+        $this->authorizeAdmin($request, 'business_profiles.delete');
 
-        $company = Company::find($id);
+        $businessProfile = BusinessProfile::find($id);
 
-        if (! $company) {
+        if (! $businessProfile) {
             return response()->json([
                 'status' => false,
                 'message' => 'Company not found.',
             ], 404);
         }
 
-        $company->delete();
+        $businessProfile->delete();
 
         return response()->json([
             'status' => true,

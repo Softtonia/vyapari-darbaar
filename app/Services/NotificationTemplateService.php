@@ -146,13 +146,13 @@ class NotificationTemplateService
      */
     public function buildUserVariables(User $user, array $extraContext = []): array
     {
-        $company = $user->company;
+        $businessProfile = $user->businessProfile;
 
         $vars = [
             'user_name' => $user->name ?? $user->name,
             'first_name' => $user->name ?? explode(' ', (string) $user->name)[0] ?? '',
             'last_name' => $user->name ?? '',
-            'company_name' => $company?->name ?? 'Vyapari Darbaar',
+            'company_name' => $businessProfile?->name ?? 'Vyapari Darbaar',
             'date' => now()->format('d M Y'),
             'app_name' => config('app.name', 'Vyapari Darbaar'),
         ];

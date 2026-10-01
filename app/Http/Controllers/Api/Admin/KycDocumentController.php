@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\CompanyKycDocument;
+use App\Models\BusinessProfileKycDocument;
 use Illuminate\Support\Str;
 
 class KycDocumentController extends Controller
@@ -15,14 +15,14 @@ class KycDocumentController extends Controller
     public function batchUpload(Request $request)
     {
         $request->validate([
-            'company_id' => 'required|exists:companies,id',
+            'user_id' => 'required|exists:users,id',
             'documents' => 'required|array',
             'documents.*.type' => 'required|string',
             'documents.*.file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120', // 5MB Max
         ]);
 
         $batchId = (string) Str::uuid();
-        $companyId = $request->input('company_id');
+        $userId = $request->input('user_id');
         $uploadedDocs = [];
 
         foreach ($request->file('documents') as $index => $docData) {
@@ -30,11 +30,11 @@ class KycDocumentController extends Controller
             $file = $docData['file'];
 
             // Store file
-            $path = $file->store("kyc/{$companyId}", 'public');
+            $path = $file->store("kyc/{$userId}", 'public');
 
             // Save to DB
             $doc = CompanyKycDocument::create([
-                'company_id' => $companyId,
+                'user_id' => $userId,
                 'document_type' => $type,
                 'file_path' => $path,
                 'status' => 'pending',
@@ -82,9 +82,9 @@ class KycDocumentController extends Controller
      */
     public function index(Request $request)
     {
-        $request->validate(['company_id' => 'required|exists:companies,id']);
+        $request->validate(['user_id' => 'required|exists:users,id']);
         
-        $documents = CompanyKycDocument::where('company_id', $request->company_id)->get();
+        $documents = CompanyKycDocument::where('user_id', $request->user_id)->get();
         
         return response()->json([
             'status' => true,

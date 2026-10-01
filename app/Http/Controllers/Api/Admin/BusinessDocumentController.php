@@ -12,15 +12,10 @@ class BusinessDocumentController extends Controller
     public function index(Request $request)
     {
         $request->validate([
-            'company_id' => 'nullable|exists:companies,id',
-            'user_id' => 'nullable|exists:users,id',
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $query = BusinessDocument::query();
-
-        if ($request->filled('company_id')) {
-            $query->where('company_id', $request->company_id);
-        }
 
         if ($request->filled('user_id')) {
             $query->where('user_id', $request->user_id);
@@ -37,8 +32,7 @@ class BusinessDocumentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'company_id' => 'required|exists:companies,id',
-            'user_id' => 'nullable|exists:users,id',
+            'user_id' => 'required|exists:users,id',
             'document_type' => 'required|string|max:100',
             'file' => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120',
         ]);
@@ -46,7 +40,6 @@ class BusinessDocumentController extends Controller
         $path = $request->file('file')->store('business-documents', 'public');
 
         $document = BusinessDocument::create([
-            'company_id' => $request->company_id,
             'user_id' => $request->user_id,
             'document_type' => $request->document_type,
             'file_path' => $path,

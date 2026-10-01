@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\AdminAuthController;
-use App\Http\Controllers\Api\Admin\AdminCompanyController;
+use App\Http\Controllers\Api\Admin\AdminBusinessProfileController;
 use App\Http\Controllers\Api\Admin\KycDocumentController;
 use App\Http\Controllers\Api\Admin\BusinessDocumentController;
 use App\Http\Controllers\Api\Admin\AdminInAppNotificationController;
@@ -49,7 +49,7 @@ use App\Http\Controllers\Api\User\InAppNotificationController;
 use App\Http\Controllers\Api\User\NotificationDeviceController;
 use App\Http\Controllers\Api\User\UserActivityController;
 use App\Http\Controllers\Api\User\UserAuthController;
-use App\Http\Controllers\Api\User\UserCompanyController;
+use App\Http\Controllers\Api\User\UserBusinessProfileController;
 use App\Http\Controllers\Api\User\UserProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BusinessCategoryController;
@@ -706,15 +706,15 @@ Route::prefix('admin')->group(function () {
         });
 
         Route::prefix('companies')->group(function () {
-            Route::get('/', [AdminCompanyController::class, 'index'])
+            Route::get('/', [AdminBusinessProfileController::class, 'index'])
                 ->name('admin.companies.index');
-            Route::get('{id}', [AdminCompanyController::class, 'show'])
+            Route::get('{id}', [AdminBusinessProfileController::class, 'show'])
                 ->name('admin.companies.show');
-            Route::put('{id}', [AdminCompanyController::class, 'update'])
-                ->name('admin.companies.update');
-            Route::patch('{id}/status', [AdminCompanyController::class, 'updateStatus'])
-                ->name('admin.companies.update-status');
-            Route::delete('{id}', [AdminCompanyController::class, 'destroy'])
+            Route::put('{id}', [AdminBusinessProfileController::class, 'update'])
+                ->name('admin.business_profiles.update');
+            Route::patch('{id}/status', [AdminBusinessProfileController::class, 'updateStatus'])
+                ->name('admin.business_profiles.update-status');
+            Route::delete('{id}', [AdminBusinessProfileController::class, 'destroy'])
                 ->name('admin.companies.destroy');
         });
 
@@ -1092,13 +1092,13 @@ Route::prefix('user')->group(function () {
 
         // Trader Company Profile
         Route::prefix('company')->group(function () {
-            Route::get('/', [UserCompanyController::class, 'show'])
+            Route::get('/', [UserBusinessProfileController::class, 'show'])
                 ->name('user.company.show');
-            Route::post('/', [UserCompanyController::class, 'store'])
+            Route::post('/', [UserBusinessProfileController::class, 'store'])
                 ->name('user.company.store');
-            Route::put('/', [UserCompanyController::class, 'update'])
+            Route::put('/', [UserBusinessProfileController::class, 'update'])
                 ->name('user.company.update');
-            Route::patch('/', [UserCompanyController::class, 'update']);
+            Route::patch('/', [UserBusinessProfileController::class, 'update']);
         });
     });
 });

@@ -4,15 +4,15 @@ namespace App\Http\Controllers\Api\User;
 
 use App\Enums\NotificationType;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CompanyResource;
+use App\Http\Resources\BusinessProfileResource;
 use App\Jobs\SendUserNotificationJob;
-use App\Models\Company;
+use App\Models\BusinessProfile;
 use App\Models\User;
 use App\Services\UserActivityService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class UserCompanyController extends Controller
+class UserBusinessProfileController extends Controller
 {
     /**
      * View current authenticated trader's company profile.
@@ -22,9 +22,9 @@ class UserCompanyController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $company = $user->company;
+        $businessProfile = $user->businessProfile;
 
-        if (! $company) {
+        if (! $businessProfile) {
             return response()->json([
                 'status' => false,
                 'message' => 'No company associated with this user account.',
@@ -34,7 +34,7 @@ class UserCompanyController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Company details retrieved successfully.',
-            'data' => new CompanyResource($company),
+            'data' => new BusinessProfileResource($businessProfile),
         ], 200);
     }
 
@@ -46,11 +46,11 @@ class UserCompanyController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        if ($user->company) {
+        if ($user->businessProfile) {
             return response()->json([
                 'status' => false,
                 'message' => 'User already has an associated company profile.',
-                'data' => new CompanyResource($user->company),
+                'data' => new BusinessProfileResource($user->businessProfile),
             ], 422);
         }
 
@@ -77,7 +77,7 @@ class UserCompanyController extends Controller
             $commodities = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode(',', $commodities)));
         }
 
-        $company = Company::create([
+        $businessProfile = BusinessProfile::create([
             'name' => $companyName,
             'contact_person' => isset($validated['contact_person']) ? trim((string) $validated['contact_person']) : $user->full_name,
             'business_type' => isset($validated['business_type']) ? trim((string) $validated['business_type']) : null,
@@ -91,7 +91,7 @@ class UserCompanyController extends Controller
             'verification_status' => 'pending',
         ]);
 
-        $user->companies()->attach($company->id, [
+        $user->businessProfile()->attach($businessProfile->id, [
             'role' => 'trader',
             'is_primary' => true,
         ]);
@@ -100,7 +100,7 @@ class UserCompanyController extends Controller
             $user,
             'company_create',
             'Trader registered company profile',
-            ['company_id' => $company->id, 'company_name' => $company->name]
+            ['company_id' => $businessProfile->id, 'company_name' => $businessProfile->name]
         );
 
         // In-App Notification: Company Profile Created
@@ -114,7 +114,7 @@ class UserCompanyController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Company profile created successfully.',
-            'data' => new CompanyResource($company->fresh()),
+            'data' => new BusinessProfileResource($businessProfile->fresh()),
         ], 201);
     }
 
@@ -126,9 +126,9 @@ class UserCompanyController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $company = $user->company;
+        $businessProfile = $user->businessProfile;
 
-        if (! $company) {
+        if (! $businessProfile) {
             // Allow update endpoint to create company if none exists yet
             return $this->store($request);
         }
@@ -181,7 +181,7 @@ class UserCompanyController extends Controller
             $updateData['commodities_handled'] = $commodities;
         }
 
-        $company->update($updateData);
+        $businessProfile->update($updateData);
 
         UserActivityService::log(
             $user,
@@ -201,7 +201,7 @@ class UserCompanyController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Company profile updated successfully.',
-            'data' => new CompanyResource($company->fresh()),
+            'data' => new BusinessProfileResource($businessProfile->fresh()),
         ], 200);
     }
 }

@@ -3845,7 +3845,7 @@
                                             "mode": "formdata",
                                             "formdata": [
                                                 {
-                                                    "key": "company_id",
+                                                    "key": "user_id",
                                                     "value": "1",
                                                     "type": "text"
                                                 },
@@ -3962,7 +3962,7 @@
                                             ],
                                             "query": [
                                                 {
-                                                    "key": "company_id",
+                                                    "key": "user_id",
                                                     "value": "1"
                                                 }
                                             ]
@@ -4098,7 +4098,7 @@
                                             ],
                                             "query": [
                                                 {
-                                                    "key": "company_id",
+                                                    "key": "user_id",
                                                     "value": "1",
                                                     "description": "Optional filter"
                                                 },
@@ -4140,7 +4140,7 @@
                                             "mode": "formdata",
                                             "formdata": [
                                                 {
-                                                    "key": "company_id",
+                                                    "key": "user_id",
                                                     "value": "1",
                                                     "type": "text"
                                                 },
@@ -9351,7 +9351,7 @@
                     ]
                 },
                 {
-                    "name": "Companies",
+                    "name": "Business Profiles",
                     "item": [
                         {
                             "name": "Companies Management",
@@ -9371,7 +9371,7 @@
                                             }
                                         ],
                                         "url": {
-                                            "raw": "{{live}}/api/admin/companies?verification_status=pending&per_page=20&page=1",
+                                            "raw": "{{live}}/api/admin/business-profiles?verification_status=pending&per_page=20&page=1",
                                             "host": [
                                                 "{{live}}"
                                             ],
@@ -9422,7 +9422,7 @@
                                             }
                                         ],
                                         "url": {
-                                            "raw": "{{live}}/api/admin/companies/{{company_id}}",
+                                            "raw": "{{live}}/api/admin/business-profiles/{{company_id}}",
                                             "host": [
                                                 "{{live}}"
                                             ],
@@ -9468,7 +9468,7 @@
                                             "raw": "{\n    \"verification_status\": \"verified\"\n}"
                                         },
                                         "url": {
-                                            "raw": "{{live}}/api/admin/companies/{{company_id}}/status",
+                                            "raw": "{{live}}/api/admin/business-profiles/{{company_id}}/status",
                                             "host": [
                                                 "{{live}}"
                                             ],
@@ -9507,7 +9507,7 @@
                                             }
                                         ],
                                         "url": {
-                                            "raw": "{{live}}/api/admin/companies/{{company_id}}",
+                                            "raw": "{{live}}/api/admin/business-profiles/{{company_id}}",
                                             "host": [
                                                 "{{live}}"
                                             ],
@@ -12533,7 +12533,7 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{live}}/api/user/company",
+                                    "raw": "{{live}}/api/user/business-profile",
                                     "host": [
                                         "{{live}}"
                                     ],
@@ -12568,7 +12568,7 @@
                                     "raw": "{\n    \"company_name\": \"Singhania Global Agro Ltd\",\n    \"contact_person\": \"Vikram Singhania\",\n    \"business_type\": \"Exporter\",\n    \"gstin\": \"27ABCDE1234F1Z5\",\n    \"city\": \"Nagpur\",\n    \"state\": \"Maharashtra\",\n    \"address\": \"APMC Commercial Complex\",\n    \"commodities_handled\": [\"Wheat\", \"Soybean\", \"Cotton\"],\n    \"trade_preference\": \"both\"\n}"
                                 },
                                 "url": {
-                                    "raw": "{{live}}/api/user/company",
+                                    "raw": "{{live}}/api/user/business-profile",
                                     "host": [
                                         "{{live}}"
                                     ],

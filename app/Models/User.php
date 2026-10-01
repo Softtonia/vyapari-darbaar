@@ -204,26 +204,13 @@ class User extends Authenticatable
     }
 
     /**
-     * Companies associated with this user.
+     * Business Profile associated with this user.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Company, $this>
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\BusinessProfile, $this>
      */
-    public function companies(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function businessProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->belongsToMany(Company::class, 'user_has_companies')
-            ->withPivot('role', 'is_primary')
-            ->withTimestamps();
-    }
-
-    /**
-     * Get the primary company associated with the user.
-     *
-     * @return \App\Models\Company|null
-     */
-    public function getCompanyAttribute(): ?Company
-    {
-        return $this->companies()->wherePivot('is_primary', true)->first()
-            ?? $this->companies()->first();
+        return $this->hasOne(BusinessProfile::class);
     }
 
     /**

@@ -3,7 +3,7 @@
 namespace App\Actions\Admin\User;
 
 use App\Jobs\SendUserCredentialsEmailJob;
-use App\Models\Company;
+use App\Models\BusinessProfile;
 use App\Models\EmailTemplate;
 use App\Models\Role;
 use App\Models\User;
@@ -99,25 +99,16 @@ class CreateUserAction
                     $commodities = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode(',', $commodities)));
                 }
 
-                $company = Company::create([
-                    'name' => trim((string) $data['company_name']),
+                $businessProfile = BusinessProfile::create([
+                    'user_id' => $newUser->id,
+                    'company_name' => trim((string) $data['company_name']),
                     'contact_person' => trim((string) ($data['contact_person'] ?? $fullName)),
                     'business_type' => isset($data['business_type']) ? trim((string) $data['business_type']) : null,
-                    'gstin' => isset($data['gstin']) ? strtoupper(trim((string) $data['gstin'])) : null,
-                    'pan_number' => isset($data['pan_number']) ? trim((string) $data['pan_number']) : null,
-                    'year_of_establishment' => isset($data['year_of_establishment']) ? trim((string) $data['year_of_establishment']) : null,
-                    'no_of_employees' => isset($data['no_of_employees']) ? trim((string) $data['no_of_employees']) : null,
-                    'website' => isset($data['website']) ? trim((string) $data['website']) : null,
-                    
                     'country_id' => isset($data['country_id']) ? $data['country_id'] : null,
                     'state_id' => isset($data['state_id']) ? $data['state_id'] : null,
                     'city_id' => isset($data['city_id']) ? $data['city_id'] : null,
                     'address' => isset($data['address']) ? trim((string) $data['address']) : null,
-                    'address_line_2' => isset($data['address_line_2']) ? trim((string) $data['address_line_2']) : null,
-                    'pin_code' => isset($data['pin_code']) ? trim((string) $data['pin_code']) : null,
-                    
                     'business_description' => isset($data['business_description']) ? trim((string) $data['business_description']) : null,
-                    
                     'commodities_handled' => $commodities,
                     'trade_preference' => strtolower((string) ($data['trade_preference'] ?? $data['buy_sell_preference'] ?? 'both')),
                     'verification_status' => isset($data['verification_status']) ? trim((string) $data['verification_status']) : 'pending',
@@ -125,7 +116,7 @@ class CreateUserAction
                 
                 if (!empty($data['bank_account_number']) || !empty($data['bank_name'])) {
                     \App\Models\CompanyBankDetail::create([
-                        'company_id' => $company->id,
+                        'business_profile_id' => $businessProfile->id,
                         'account_holder_name' => isset($data['bank_account_holder_name']) ? trim((string) $data['bank_account_holder_name']) : null,
                         'bank_name' => isset($data['bank_name']) ? trim((string) $data['bank_name']) : null,
                         'account_number' => isset($data['bank_account_number']) ? trim((string) $data['bank_account_number']) : null,
@@ -135,13 +126,8 @@ class CreateUserAction
                     ]);
                 }
 
-                $newUser->companies()->attach($company->id, [
-                    'role' => $targetRole, // Associate with their primary role
-                    'is_primary' => true,
-                ]);
-
                 if (!empty($data['business_category_ids']) && is_array($data['business_category_ids'])) {
-                    $company->businessCategories()->attach($data['business_category_ids']);
+                    $businessProfile->businessCategories()->attach($data['business_category_ids']);
                 }
 
                 $businessDocs = [
@@ -151,7 +137,6 @@ class CreateUserAction
                 foreach ($businessDocs as $key => $docType) {
                     if (!empty($data[$key])) {
                         \App\Models\BusinessDocument::create([
-                            'company_id' => $company->id,
                             'user_id' => $newUser->id,
                             'document_type' => $docType,
                             'file_path' => $data[$key],
@@ -179,7 +164,7 @@ class CreateUserAction
 
 
 
-            return $newUser->fresh(['roles', 'companies']);
+            return $newUser->fresh(['roles', 'businessProfile']);
         });
 
         // Step 6: Dispatch encrypted credential email job after commit

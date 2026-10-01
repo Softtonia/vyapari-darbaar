@@ -40,24 +40,23 @@ class UpdateUserAction
 
             // Update associated company
             if (!empty($data['company_name'])) {
-                $company = $user->company; // Gets primary company
+                $businessProfile = $user->businessProfile; // Gets primary company
                 
-                if (!$company) {
+                if (!$businessProfile) {
                     // Create new if doesn't exist
-                    $company = new \App\Models\Company();
+                    $businessProfile = new \App\Models\BusinessProfile();
                 }
 
-                $company->name = trim((string) $data['company_name']);
+                $businessProfile->company_name = trim((string) $data['company_name']);
                 
                 $companyFields = [
-                    'contact_person', 'business_type', 'gstin', 'country_id', 'state_id', 'city_id', 'address',
-                    'address_line_2', 'pin_code', 'pan_number', 'year_of_establishment', 'no_of_employees',
-                    'website', 'business_description', 'trade_preference', 'verification_status'
+                    'contact_person', 'business_type', 'country_id', 'state_id', 'city_id', 'address',
+                    'business_description', 'trade_preference', 'verification_status'
                 ];
 
                 foreach ($companyFields as $field) {
                     if (array_key_exists($field, $data)) {
-                        $company->{$field} = $data[$field] === '' ? null : $data[$field];
+                        $businessProfile->{$field} = $data[$field] === '' ? null : $data[$field];
                     }
                 }
 
@@ -67,28 +66,22 @@ class UpdateUserAction
                         $decoded = json_decode($commodities, true);
                         $commodities = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode(',', $commodities)));
                     }
-                    $company->commodities_handled = $commodities;
+                    $businessProfile->commodities_handled = $commodities;
                 }
 
-                $company->save();
+                $businessProfile->user_id = $user->id;
+                $businessProfile->save();
 
                 if (isset($data['business_category_ids']) && is_array($data['business_category_ids'])) {
-                    $company->businessCategories()->sync($data['business_category_ids']);
-                }
-
-                if (!$user->companies()->where('company_id', $company->id)->exists()) {
-                    $user->companies()->attach($company->id, [
-                        'role' => $targetRole ?? 'user',
-                        'is_primary' => true,
-                    ]);
+                    $businessProfile->businessCategories()->sync($data['business_category_ids']);
                 }
 
                 // Update Bank Details
                 if (!empty($data['bank_account_number']) || !empty($data['bank_name'])) {
-                    $bank = $company->bankDetails()->where('is_primary', true)->first();
+                    $bank = $businessProfile->bankDetails()->where('is_primary', true)->first();
                     if (!$bank) {
                         $bank = new \App\Models\CompanyBankDetail();
-                        $bank->company_id = $company->id;
+                        $bank->business_profile_id = $businessProfile->id;
                         $bank->is_primary = true;
                     }
 
@@ -101,7 +94,7 @@ class UpdateUserAction
                 }
             }
 
-            return $user->fresh(['roles', 'companies']);
+            return $user->fresh(['roles', 'businessProfile']);
         });
     }
 }
