@@ -151,7 +151,7 @@
                                         ],
                                         "body": {
                                             "mode": "raw",
-                                            "raw": "{\n    \"name\": \"Grains\",\n    \"slug\": \"grains\",\n    \"description\": \"Wheat, Paddy/Rice, Maize, Barley, Millet and other cereal grains.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                            "raw": "{\n    \"name\": \"Grains\",\n    \"slug\": \"grains\",\n    \"description\": \"Wheat, Paddy/Rice, Maize, Barley, Millet and other cereal grains.\",\n    \"sort_order\": 1,\n    \"status\": true,\n    \"image_url\": \"\",\n    \"media_id\": null\n}"
                                         },
                                         "url": {
                                             "raw": "{{live}}/api/admin/commodity-categories",
@@ -234,7 +234,7 @@
                                         ],
                                         "body": {
                                             "mode": "raw",
-                                            "raw": "{\n    \"name\": \"Grains & Cereals\",\n    \"slug\": \"grains-cereals\",\n    \"description\": \"Updated grain commodities list.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                            "raw": "{\n    \"name\": \"Grains & Cereals\",\n    \"slug\": \"grains-cereals\",\n    \"description\": \"Updated grain commodities list.\",\n    \"sort_order\": 1,\n    \"status\": true,\n    \"image_url\": \"\",\n    \"media_id\": null\n}"
                                         },
                                         "url": {
                                             "raw": "{{live}}/api/admin/commodity-categories/{{commodity_category_id}}",
@@ -685,7 +685,7 @@
                                         ],
                                         "body": {
                                             "mode": "raw",
-                                            "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name\": \"Lokwan Wheat\",\n    \"slug\": \"lokwan-wheat\",\n    \"description\": \"High grade Lokwan wheat.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                            "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name\": \"Lokwan Wheat\",\n    \"slug\": \"lokwan-wheat\",\n    \"description\": \"High grade Lokwan wheat.\",\n    \"sort_order\": 1,\n    \"status\": true,\n    \"image_url\": \"\",\n    \"media_id\": null\n}"
                                         },
                                         "url": {
                                             "raw": "{{live}}/api/admin/commodity-subcategories",
@@ -768,7 +768,7 @@
                                         ],
                                         "body": {
                                             "mode": "raw",
-                                            "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name\": \"Lokwan Wheat (Grade A)\",\n    \"slug\": \"lokwan-wheat-grade-a\",\n    \"description\": \"High grade milling Lokwan wheat.\",\n    \"sort_order\": 1,\n    \"status\": true\n}"
+                                            "raw": "{\n    \"commodity_id\": {{commodity_id}},\n    \"name\": \"Lokwan Wheat (Grade A)\",\n    \"slug\": \"lokwan-wheat-grade-a\",\n    \"description\": \"High grade milling Lokwan wheat.\",\n    \"sort_order\": 1,\n    \"status\": true,\n    \"image_url\": \"\",\n    \"media_id\": null\n}"
                                         },
                                         "url": {
                                             "raw": "{{live}}/api/admin/commodity-subcategories/{{commodity_subcategory_id}}",
