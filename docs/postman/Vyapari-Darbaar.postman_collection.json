@@ -9354,10 +9354,10 @@
                     "name": "Business Profiles",
                     "item": [
                         {
-                            "name": "Companies Management",
+                            "name": "Business Management",
                             "item": [
                                 {
-                                    "name": "List Companies",
+                                    "name": "List Business",
                                     "request": {
                                         "method": "GET",
                                         "header": [
@@ -9408,7 +9408,7 @@
                                     }
                                 },
                                 {
-                                    "name": "View Company Details",
+                                    "name": "View Business Details",
                                     "request": {
                                         "method": "GET",
                                         "header": [
@@ -9446,7 +9446,7 @@
                                     }
                                 },
                                 {
-                                    "name": "Update Company Verification Status",
+                                    "name": "Update Business Verification Status",
                                     "request": {
                                         "method": "PATCH",
                                         "header": [
@@ -9493,7 +9493,7 @@
                                     }
                                 },
                                 {
-                                    "name": "Delete Company",
+                                    "name": "Delete Business Profile",
                                     "request": {
                                         "method": "DELETE",
                                         "header": [
