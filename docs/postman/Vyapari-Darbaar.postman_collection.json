@@ -9309,7 +9309,7 @@
                                     }
                                 },
                                 {
-                                    "name": "Get Market Ingestion Run Detail (Admin)",
+                                    "name": "Get Market Ingestion Run Detail",
                                     "request": {
                                         "method": "GET",
                                         "header": [
