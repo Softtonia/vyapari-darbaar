@@ -27,9 +27,13 @@ return new class extends Migration
             }
             if (!Schema::hasColumn('business_profiles', 'trade_preference')) {
                 $table->enum('trade_preference', ['buy', 'sell', 'both'])->default('both');
+            } else {
+                $table->enum('trade_preference', ['buy', 'sell', 'both'])->default('both')->change();
             }
             if (!Schema::hasColumn('business_profiles', 'verification_status')) {
                 $table->enum('verification_status', ['approve', 'pending', 'reject', 'inprogress'])->default('pending');
+            } else {
+                $table->enum('verification_status', ['approve', 'pending', 'reject', 'inprogress'])->default('pending')->change();
             }
         });
 
@@ -159,77 +163,7 @@ return new class extends Migration
     public function down(): void
     {
         // Reverting this massive structural change accurately is impossible without data loss,
-        // but we define the schema reverse where possible.
-        
-        Schema::create('user_has_companies', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('company_id')->constrained('business_profiles')->cascadeOnDelete();
-            $table->timestamps();
-        });
-
-        if (Schema::hasTable('business_profiles')) {
-            $profiles = DB::table('business_profiles')->whereNotNull('user_id')->get();
-            foreach ($profiles as $profile) {
-                DB::table('user_has_companies')->insert([
-                    'user_id' => $profile->user_id,
-                    'company_id' => $profile->id,
-                ]);
-            }
-
-            Schema::table('business_profiles', function (Blueprint $table) {
-                $table->dropForeign(['user_id']);
-                $table->dropColumn('user_id');
-                $table->renameColumn('company_name', 'name');
-                $table->dropColumn(['business_description', 'trade_preference', 'verification_status']);
-                $table->string('gstin')->nullable();
-                $table->string('address_line_2')->nullable();
-                $table->string('pin_code')->nullable();
-                $table->string('pan_number')->nullable();
-                $table->string('year_of_establishment')->nullable();
-                $table->string('no_of_employees')->nullable();
-                $table->string('website')->nullable();
-            });
-
-            Schema::rename('business_profiles', 'companies');
-        }
-
-        if (Schema::hasTable('kyc')) {
-            Schema::table('kyc', function (Blueprint $table) {
-                $table->foreignId('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
-            });
-            // We can't perfectly recover company_id because we lost it, but we can try to guess from user_id
-            $kycs = DB::table('kyc')->whereNotNull('user_id')->get();
-            foreach ($kycs as $kyc) {
-                $profile = DB::table('companies')->where('user_id', $kyc->user_id)->first();
-                if ($profile) {
-                    DB::table('kyc')->where('id', $kyc->id)->update(['company_id' => $profile->id]);
-                }
-            }
-        }
-        
-        if (Schema::hasTable('business_documents')) {
-            Schema::table('business_documents', function (Blueprint $table) {
-                $table->foreignId('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
-            });
-        }
-        
-        if (Schema::hasTable('business_profile_bank_details')) {
-            Schema::table('business_profile_bank_details', function (Blueprint $table) {
-                $table->foreignId('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
-                $table->dropForeign(['business_profile_id']);
-                $table->dropColumn('business_profile_id');
-            });
-            Schema::rename('business_profile_bank_details', 'company_bank_details');
-        }
-        
-        if (Schema::hasTable('business_profile_business_categories')) {
-            Schema::table('business_profile_business_categories', function (Blueprint $table) {
-                $table->foreignId('company_id')->nullable()->constrained('companies')->cascadeOnDelete();
-                $table->dropForeign(['business_profile_id']);
-                $table->dropColumn('business_profile_id');
-            });
-            Schema::rename('business_profile_business_categories', 'company_business_categories');
-        }
+        // The application architecture has been permanently changed to use business_profiles.
+        // Therefore, this down method will not recreate the deprecated user_has_companies or company_id columns.
     }
 };

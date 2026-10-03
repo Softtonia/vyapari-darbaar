@@ -78,6 +78,6 @@ class BusinessProfile extends Model
 
     public function businessCategories()
     {
-        return $this->belongsToMany(BusinessCategory::class, 'company_business_categories', 'business_profile_id', 'business_category_id');
+        return $this->belongsToMany(BusinessCategory::class, 'business_profile_business_categories', 'business_profile_id', 'business_category_id');
     }
 }
