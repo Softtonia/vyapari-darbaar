@@ -69,7 +69,7 @@ class SendNotificationChunkJob implements ShouldQueue
         }
 
         $users = User::query()
-            ->with(['companies'])
+            ->with(['businessProfile'])
             ->whereIn('id', $this->userIds)
             ->get()
             ->keyBy('id');

@@ -9542,7 +9542,7 @@
                             "item": [
                                 {
                                     "name": "Send Notification (Single User)",
-                                    "request": {
+                                      "request": {
                                         "method": "POST",
                                         "header": [
                                             {

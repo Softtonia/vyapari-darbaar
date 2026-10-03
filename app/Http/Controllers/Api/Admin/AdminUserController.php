@@ -158,7 +158,7 @@ class AdminUserController extends Controller
             
             $verified = 0;
             if ($role === 'trader') {
-                $verified = (clone $query)->whereHas('companies', function($q) {
+                $verified = (clone $query)->whereHas('businessProfile', function($q) {
                     $q->where('verification_status', 'verified');
                 })->count();
             } else {
@@ -206,7 +206,7 @@ class AdminUserController extends Controller
         /** @var Admin $admin */
         $admin = $request->user();
         $user = $action->execute($admin, $request->validatedUserData());
-        $user->loadMissing(['creator:id,first_name,last_name', 'roles', 'kycDocuments', 'companies.businessDocuments', 'companies.businessCategories', 'companies.bankDetails']);
+        $user->loadMissing(['creator:id,first_name,last_name', 'roles', 'kycDocuments', 'businessProfile.businessCategories', 'businessProfile.bankDetails', 'businessDocuments', 'locations']);
 
         app(\App\Services\CampaignEmailService::class)->triggerEvent(
             \App\Enums\CampaignEvent::ADD_USER,
@@ -226,7 +226,7 @@ class AdminUserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
-        $user->loadMissing(['creator:id,first_name,last_name', 'roles', 'kycDocuments', 'companies.businessDocuments', 'companies.businessCategories', 'companies.bankDetails']);
+        $user->loadMissing(['creator:id,first_name,last_name', 'roles', 'kycDocuments', 'businessProfile.businessCategories', 'businessProfile.bankDetails', 'businessDocuments', 'locations']);
 
         return response()->json([
             'status' => true,
@@ -241,7 +241,7 @@ class AdminUserController extends Controller
     public function update(UpdateUserRequest $request, User $user, UpdateUserAction $action): JsonResponse
     {
         $updatedUser = $action->execute($user, $request->validatedUserData());
-        $updatedUser->loadMissing(['creator:id,first_name,last_name', 'roles', 'kycDocuments', 'companies.businessDocuments', 'companies.businessCategories', 'companies.bankDetails']);
+        $updatedUser->loadMissing(['creator:id,first_name,last_name', 'roles', 'kycDocuments', 'businessProfile.businessCategories', 'businessProfile.bankDetails', 'businessDocuments', 'locations']);
 
         app(\App\Services\CampaignEmailService::class)->triggerEvent(
             \App\Enums\CampaignEvent::UPDATE_USER,
@@ -270,7 +270,7 @@ class AdminUserController extends Controller
             (string) $request->input('status'),
             $reason !== null ? (string) $reason : null
         );
-        $updatedUser->loadMissing(['creator:id,first_name,last_name', 'roles', 'kycDocuments', 'companies.businessDocuments', 'companies.businessCategories', 'companies.bankDetails']);
+        $updatedUser->loadMissing(['creator:id,first_name,last_name', 'roles', 'kycDocuments', 'businessProfile.businessCategories', 'businessProfile.bankDetails', 'businessDocuments', 'locations']);
 
         return response()->json([
             'status' => true,

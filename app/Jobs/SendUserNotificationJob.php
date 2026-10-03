@@ -60,7 +60,7 @@ class SendUserNotificationJob implements ShouldQueue
         FcmService $fcmService,
         FirebaseConfigService $firebaseConfigService
     ): void {
-        $user = User::query()->with('companies')->find($this->userId);
+        $user = User::query()->with('businessProfile')->find($this->userId);
         if (! $user) {
             return;
         }

@@ -37,18 +37,14 @@ class AdminUserResource extends JsonResource
             'must_change_password' => (bool) $this->must_change_password,
             'role' => $roleName,
             'company' => $this->when($isTrader, function () {
-                $businessProfile = $this->relationLoaded('companies')
-                    ? ($this->businessProfile->firstWhere('pivot.is_primary', true) ?? $this->businessProfile->first())
-                    : $this->businessProfile;
-
+                $businessProfile = $this->businessProfile;
                 return $businessProfile ? new BusinessProfileResource($businessProfile) : null;
             }),
             'bank' => $this->when($isTrader, function () {
-                $businessProfile = $this->relationLoaded('companies')
-                    ? ($this->businessProfile->firstWhere('pivot.is_primary', true) ?? $this->businessProfile->first())
-                    : $this->businessProfile;
-
-                $bank = $businessProfile ? $businessProfile->bankDetails()->where('is_primary', true)->first() : null;
+                $businessProfile = $this->businessProfile;
+                $bank = $businessProfile && $businessProfile->relationLoaded('bankDetails') 
+                    ? $businessProfile->bankDetails->where('is_primary', true)->first() 
+                    : ($businessProfile ? $businessProfile->bankDetails()->where('is_primary', true)->first() : null);
                 return $bank ? [
                     'account_holder_name' => $bank->account_holder_name,
                     'bank_name' => $bank->bank_name,
