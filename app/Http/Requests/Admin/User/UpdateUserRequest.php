@@ -19,9 +19,9 @@ class UpdateUserRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
+     * Get validated update data with normalized fields.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {

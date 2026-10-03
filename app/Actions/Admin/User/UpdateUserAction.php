@@ -11,7 +11,13 @@ class UpdateUserAction
     /**
      * Update the user's information and sync Spatie role if provided.
      *
-     * @param  array{first_name: string, last_name: string, name: string, email: string, phone_number?: string|null, role?: string|null}  $data
+     * @param array{
+     *     first_name: string,
+     *     last_name: string,
+     *     email: string,
+     *     phone_number?: string|null,
+     *     role?: string|null
+     * } $data
      */
     public function execute(User $user, array $data): User
     {
@@ -41,17 +47,24 @@ class UpdateUserAction
             // Update associated company
             if (!empty($data['company_name'])) {
                 $businessProfile = $user->businessProfile; // Gets primary company
-                
+
                 if (!$businessProfile) {
                     // Create new if doesn't exist
                     $businessProfile = new \App\Models\BusinessProfile();
                 }
 
                 $businessProfile->company_name = trim((string) $data['company_name']);
-                
+
                 $companyFields = [
-                    'contact_person', 'business_type', 'country_id', 'state_id', 'city_id', 'address',
-                    'business_description', 'trade_preference', 'verification_status'
+                    'contact_person',
+                    'business_type',
+                    'country_id',
+                    'state_id',
+                    'city_id',
+                    'address',
+                    'business_description',
+                    'trade_preference',
+                    'verification_status'
                 ];
 
                 foreach ($companyFields as $field) {
