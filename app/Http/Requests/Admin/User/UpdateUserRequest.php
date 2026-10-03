@@ -121,7 +121,7 @@ class UpdateUserRequest extends FormRequest
     /**
      * Get validated update data with normalized fields.
      *
-     * @return array{first_name: string, last_name: string, name: string, phone_number?: string|null, role?: string|null}
+     * @return array{first_name: string, last_name: string, phone_number?: string|null, role?: string|null}
      */
     public function validatedUserData(): array
     {
