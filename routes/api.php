@@ -305,23 +305,15 @@ Route::prefix('admin')->group(function () {
         });
 
         // Activity & Login Management
-        Route::prefix('activities')->group(function () {
-            Route::get('/', [AdminUserActivityController::class, 'index'])
-                ->name('admin.activities.index');
-            Route::get('own', [AdminUserActivityController::class, 'ownActivities'])
-                ->name('admin.activities.own');
-            Route::get('user/{user}', [AdminUserActivityController::class, 'userActivities'])
-                ->name('admin.activities.user');
-        });
+        Route::get('user-activities', [AdminUserActivityController::class, 'index'])
+            ->name('admin.activities.index');
+        Route::get('my-activities', [AdminUserActivityController::class, 'ownActivities'])
+            ->name('admin.activities.own');
 
-        Route::prefix('user-logins')->group(function () {
-            Route::get('/', [AdminUserActivityController::class, 'logins'])
-                ->name('admin.logins.index');
-            Route::get('own', [AdminUserActivityController::class, 'ownLogins'])
-                ->name('admin.logins.own');
-            Route::get('user/{user}', [AdminUserActivityController::class, 'userLogins'])
-                ->name('admin.logins.user');
-        });
+        Route::get('user-logins', [AdminUserActivityController::class, 'logins'])
+            ->name('admin.logins.index');
+        Route::get('my-logins', [AdminUserActivityController::class, 'ownLogins'])
+            ->name('admin.logins.own');
 
         // Role management
         Route::prefix('roles')->group(function () {
