@@ -6757,11 +6757,13 @@
                                             }
                                         },
                                         "url": {
-                                            "raw": "{{admin_base_url}}/change-password",
+                                            "raw": "{{live}}/api/admin/change-password",
                                             "host": [
-                                                "{{admin_base_url}}"
+                                                "{{live}}"
                                             ],
                                             "path": [
+                                                "api",
+                                                "admin",
                                                 "change-password"
                                             ]
                                         }
