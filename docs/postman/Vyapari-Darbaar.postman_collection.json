@@ -9378,7 +9378,7 @@
                                             "path": [
                                                 "api",
                                                 "admin",
-                                                "companies"
+                                                "business-profiles"
                                             ],
                                             "query": [
                                                 {
@@ -9429,7 +9429,7 @@
                                             "path": [
                                                 "api",
                                                 "admin",
-                                                "companies",
+                                                "business-profiles",
                                                 "{{business_profile_id}}"
                                             ]
                                         },
@@ -9475,7 +9475,7 @@
                                             "path": [
                                                 "api",
                                                 "admin",
-                                                "companies",
+                                                "business-profiles",
                                                 "{{business_profile_id}}",
                                                 "status"
                                             ]
@@ -9514,7 +9514,7 @@
                                             "path": [
                                                 "api",
                                                 "admin",
-                                                "companies",
+                                                "business-profiles",
                                                 "{{business_profile_id}}"
                                             ]
                                         },
