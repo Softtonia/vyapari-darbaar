@@ -22,6 +22,9 @@ return new class extends Migration
             if (Schema::hasColumn('business_profiles', 'name')) {
                 $table->renameColumn('name', 'company_name');
             }
+            if (Schema::hasColumn('business_profiles', 'commodities_handled')) {
+                $table->renameColumn('commodities_handled', 'business_commodities');
+            }
             if (!Schema::hasColumn('business_profiles', 'business_description')) {
                 $table->text('business_description')->nullable();
             }

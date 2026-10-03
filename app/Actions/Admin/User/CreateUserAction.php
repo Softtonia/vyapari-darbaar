@@ -93,7 +93,7 @@ class CreateUserAction
 
             // Create and attach company for any role if company details provided
             if (! empty($data['company_name'])) {
-                $commodities = $data['commodities_handled'] ?? [];
+                $commodities = $data['business_commodities'] ?? [];
                 if (is_string($commodities)) {
                     $decoded = json_decode($commodities, true);
                     $commodities = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode(',', $commodities)));
@@ -109,7 +109,7 @@ class CreateUserAction
                     'city_id' => isset($data['city_id']) ? $data['city_id'] : null,
                     'address' => isset($data['address']) ? trim((string) $data['address']) : null,
                     'business_description' => isset($data['business_description']) ? trim((string) $data['business_description']) : null,
-                    'commodities_handled' => $commodities,
+                    'business_commodities' => $commodities,
                     'trade_preference' => strtolower((string) ($data['trade_preference'] ?? $data['buy_sell_preference'] ?? 'both')),
                     'verification_status' => isset($data['verification_status']) ? trim((string) $data['verification_status']) : 'pending',
                 ]);

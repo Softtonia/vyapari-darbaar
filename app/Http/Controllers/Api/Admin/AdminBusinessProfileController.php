@@ -112,7 +112,7 @@ class AdminBusinessProfileController extends Controller
             'state' => ['nullable', 'string', 'max:100'],
             'city' => ['nullable', 'string', 'max:100'],
             'address' => ['nullable', 'string', 'max:1000'],
-            'commodities_handled' => ['nullable'],
+            'business_commodities' => ['nullable'],
             'trade_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
             'buy_sell_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
             'verification_status' => ['nullable', 'string', 'in:pending,verified,rejected,PENDING,VERIFIED,REJECTED'],
@@ -146,13 +146,13 @@ class AdminBusinessProfileController extends Controller
             $updateData['verification_status'] = strtolower((string) $validated['verification_status']);
         }
 
-        if (array_key_exists('commodities_handled', $validated)) {
-            $commodities = $validated['commodities_handled'];
+        if (array_key_exists('business_commodities', $validated)) {
+            $commodities = $validated['business_commodities'];
             if (is_string($commodities)) {
                 $decoded = json_decode($commodities, true);
                 $commodities = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode(',', $commodities)));
             }
-            $updateData['commodities_handled'] = $commodities;
+            $updateData['business_commodities'] = $commodities;
         }
 
         $businessProfile->update($updateData);

@@ -30,7 +30,7 @@ class BusinessProfile extends Model
         'state_id',
         'city_id',
         'address',
-        'commodities_handled',
+        'business_commodities',
         'trade_preference',
         'verification_status',
         'business_description',
@@ -44,7 +44,7 @@ class BusinessProfile extends Model
     protected function casts(): array
     {
         return [
-            'commodities_handled' => 'array',
+            'business_commodities' => 'array',
         ];
     }
 

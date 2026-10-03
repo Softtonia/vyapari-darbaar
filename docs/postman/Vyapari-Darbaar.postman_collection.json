@@ -12565,7 +12565,7 @@
                                 ],
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"company_name\": \"Singhania Global Agro Ltd\",\n    \"contact_person\": \"Vikram Singhania\",\n    \"business_type\": \"Exporter\",\n    \"gstin\": \"27ABCDE1234F1Z5\",\n    \"city\": \"Nagpur\",\n    \"state\": \"Maharashtra\",\n    \"address\": \"APMC Commercial Complex\",\n    \"commodities_handled\": [\"Wheat\", \"Soybean\", \"Cotton\"],\n    \"trade_preference\": \"both\"\n}"
+                                    "raw": "{\n    \"company_name\": \"Singhania Global Agro Ltd\",\n    \"contact_person\": \"Vikram Singhania\",\n    \"business_type\": \"Exporter\",\n    \"gstin\": \"27ABCDE1234F1Z5\",\n    \"city\": \"Nagpur\",\n    \"state\": \"Maharashtra\",\n    \"address\": \"APMC Commercial Complex\",\n    \"business_commodities\": [\"Wheat\", \"Soybean\", \"Cotton\"],\n    \"trade_preference\": \"both\"\n}"
                                 },
                                 "url": {
                                     "raw": "{{live}}/api/user/business-profile",

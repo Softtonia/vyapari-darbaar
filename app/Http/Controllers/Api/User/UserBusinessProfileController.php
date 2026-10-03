@@ -64,14 +64,14 @@ class UserBusinessProfileController extends Controller
             'state' => ['nullable', 'string', 'max:100'],
             'city' => ['nullable', 'string', 'max:100'],
             'address' => ['nullable', 'string', 'max:1000'],
-            'commodities_handled' => ['nullable'],
+            'business_commodities' => ['nullable'],
             'trade_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
             'buy_sell_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
         ]);
 
         $companyName = trim((string) ($validated['company_name'] ?? $validated['name']));
 
-        $commodities = $validated['commodities_handled'] ?? [];
+        $commodities = $validated['business_commodities'] ?? [];
         if (is_string($commodities)) {
             $decoded = json_decode($commodities, true);
             $commodities = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode(',', $commodities)));
@@ -86,7 +86,7 @@ class UserBusinessProfileController extends Controller
             'state' => isset($validated['state']) ? trim((string) $validated['state']) : null,
             'city' => isset($validated['city']) ? trim((string) $validated['city']) : null,
             'address' => isset($validated['address']) ? trim((string) $validated['address']) : null,
-            'commodities_handled' => $commodities,
+            'business_commodities' => $commodities,
             'trade_preference' => strtolower((string) ($validated['trade_preference'] ?? $validated['buy_sell_preference'] ?? 'both')),
             'verification_status' => 'pending',
         ]);
@@ -143,7 +143,7 @@ class UserBusinessProfileController extends Controller
             'state' => ['nullable', 'string', 'max:100'],
             'city' => ['nullable', 'string', 'max:100'],
             'address' => ['nullable', 'string', 'max:1000'],
-            'commodities_handled' => ['nullable'],
+            'business_commodities' => ['nullable'],
             'trade_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
             'buy_sell_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
         ]);
@@ -172,13 +172,13 @@ class UserBusinessProfileController extends Controller
             $updateData['trade_preference'] = strtolower((string) $validated['buy_sell_preference']);
         }
 
-        if (array_key_exists('commodities_handled', $validated)) {
-            $commodities = $validated['commodities_handled'];
+        if (array_key_exists('business_commodities', $validated)) {
+            $commodities = $validated['business_commodities'];
             if (is_string($commodities)) {
                 $decoded = json_decode($commodities, true);
                 $commodities = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode(',', $commodities)));
             }
-            $updateData['commodities_handled'] = $commodities;
+            $updateData['business_commodities'] = $commodities;
         }
 
         $businessProfile->update($updateData);

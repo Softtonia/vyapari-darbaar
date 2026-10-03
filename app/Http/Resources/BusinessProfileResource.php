@@ -29,7 +29,7 @@ class BusinessProfileResource extends JsonResource
             'city_id' => $this->city_id,
             'address' => $this->address,
             'business_description' => $this->business_description,
-            'commodities_handled' => is_array($this->commodities_handled) ? $this->commodities_handled : [],
+            'business_commodities' => is_array($this->business_commodities) ? $this->business_commodities : [],
             'trade_preference' => $this->trade_preference,
             'verification_status' => $this->verification_status,
             'user' => new UserProfileResource($this->whenLoaded('user')),

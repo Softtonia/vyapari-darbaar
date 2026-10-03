@@ -29,7 +29,7 @@ return new class extends Migration
                 $table->string('no_of_employees', 50)->nullable();
                 $table->string('website', 255)->nullable();
                 $table->text('business_description')->nullable();
-                $table->json('commodities_handled')->nullable();
+                $table->json('business_commodities')->nullable();
                 $table->string('trade_preference', 20)->default('both'); // 'buy', 'sell', 'both'
                 $table->string('verification_status', 20)->default('pending'); // 'pending', 'verified', 'rejected'
                 $table->timestamps();

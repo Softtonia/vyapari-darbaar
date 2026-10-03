@@ -60,13 +60,13 @@ class UpdateUserAction
                     }
                 }
 
-                if (isset($data['commodities_handled'])) {
-                    $commodities = $data['commodities_handled'];
+                if (isset($data['business_commodities'])) {
+                    $commodities = $data['business_commodities'];
                     if (is_string($commodities)) {
                         $decoded = json_decode($commodities, true);
                         $commodities = is_array($decoded) ? $decoded : array_filter(array_map('trim', explode(',', $commodities)));
                     }
-                    $businessProfile->commodities_handled = $commodities;
+                    $businessProfile->business_commodities = $commodities;
                 }
 
                 $businessProfile->user_id = $user->id;

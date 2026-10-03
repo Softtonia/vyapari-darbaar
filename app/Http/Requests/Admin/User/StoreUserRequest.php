@@ -59,7 +59,7 @@ class StoreUserRequest extends FormRequest
             
             'business_description' => ['nullable', 'string'],
             
-            'commodities_handled' => ['nullable'],
+            'business_commodities' => ['nullable'],
             'trade_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
             'buy_sell_preference' => ['nullable', 'string', 'in:buy,sell,both,BUY,SELL,BOTH'],
             'verification_status' => ['nullable', 'string', 'in:pending,verified,rejected'],
@@ -120,7 +120,7 @@ class StoreUserRequest extends FormRequest
             'company_name', 'contact_person', 'business_type', 'gstin', 'country_id', 'state_id', 'city_id', 'address',
             'address_line_2', 'pin_code', 'pan_number', 'year_of_establishment', 'business_category_ids', 'no_of_employees',
             'website', 'bank_account_holder_name', 'bank_name', 'bank_account_number', 'bank_ifsc_code', 'bank_branch_name',
-            'business_description', 'commodities_handled', 'trade_preference', 'buy_sell_preference', 'verification_status'
+            'business_description', 'business_commodities', 'trade_preference', 'buy_sell_preference', 'verification_status'
         ];
 
         foreach ($companyFields as $field) {

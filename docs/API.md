@@ -2818,7 +2818,7 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
           "state": "Maharashtra",
           "city": "Nagpur",
           "address": "Shop 12, APMC Market Yard",
-          "commodities_handled": ["Wheat", "Soybean", "Cotton"],
+          "business_commodities": ["Wheat", "Soybean", "Cotton"],
           "trade_preference": "both",
           "buy_sell_preference": "both",
           "verification_status": "pending",
@@ -2844,7 +2844,7 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
       "state": "Maharashtra",
       "city": "Nagpur",
       "address": "Shop 12, APMC Market Yard",
-      "commodities_handled": ["Wheat", "Soybean", "Cotton"],
+      "business_commodities": ["Wheat", "Soybean", "Cotton"],
       "trade_preference": "both"
   }
   ```
@@ -2881,7 +2881,7 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
       "city": "Nagpur",
       "state": "Maharashtra",
       "address": "APMC Commercial Complex, Wardha Road",
-      "commodities_handled": ["Wheat", "Soybean", "Cotton", "Maize"],
+      "business_commodities": ["Wheat", "Soybean", "Cotton", "Maize"],
       "trade_preference": "both"
   }
   ```
@@ -2894,7 +2894,7 @@ Vyapari Darbar maintains a singleton database configuration (`smtp_settings`) al
           "id": 1,
           "name": "Singhania Global Agro Ltd",
           "city": "Nagpur",
-          "commodities_handled": ["Wheat", "Soybean", "Cotton", "Maize"],
+          "business_commodities": ["Wheat", "Soybean", "Cotton", "Maize"],
           "trade_preference": "both"
       }
   }
