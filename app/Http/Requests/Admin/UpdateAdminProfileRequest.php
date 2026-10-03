@@ -32,7 +32,7 @@ class UpdateAdminProfileRequest extends FormRequest
 
         return [
             'first_name' => ['sometimes', 'required', 'string', 'max:100'],
-            'last_name' => ['sometimes', 'required', 'string', 'max:100'],
+            'last_name' => ['sometimes', 'nullable', 'string', 'max:100'],
             'name' => ['sometimes', 'nullable', 'string', 'max:150'],
             'email' => [
                 'sometimes',
