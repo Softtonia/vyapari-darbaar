@@ -314,7 +314,7 @@ Route::prefix('admin')->group(function () {
                 ->name('admin.activities.user');
         });
 
-        Route::prefix('logins')->group(function () {
+        Route::prefix('user-logins')->group(function () {
             Route::get('/', [AdminUserActivityController::class, 'logins'])
                 ->name('admin.logins.index');
             Route::get('own', [AdminUserActivityController::class, 'ownLogins'])
