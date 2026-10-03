@@ -6730,6 +6730,43 @@
                                         }
                                     },
                                     "response": []
+                                },
+                                {
+                                    "name": "Change Admin Password",
+                                    "request": {
+                                        "method": "POST",
+                                        "header": [
+                                            {
+                                                "key": "Accept",
+                                                "value": "application/json",
+                                                "type": "text"
+                                            },
+                                            {
+                                                "key": "Content-Type",
+                                                "value": "application/json",
+                                                "type": "text"
+                                            }
+                                        ],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"current_password\": \"password\",\n    \"password\": \"new_password\",\n    \"password_confirmation\": \"new_password\"\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "url": {
+                                            "raw": "{{admin_base_url}}/change-password",
+                                            "host": [
+                                                "{{admin_base_url}}"
+                                            ],
+                                            "path": [
+                                                "change-password"
+                                            ]
+                                        }
+                                    },
+                                    "response": []
                                 }
                             ]
                         }
@@ -9542,7 +9579,7 @@
                             "item": [
                                 {
                                     "name": "Send Notification (Single User)",
-                                      "request": {
+                                    "request": {
                                         "method": "POST",
                                         "header": [
                                             {
