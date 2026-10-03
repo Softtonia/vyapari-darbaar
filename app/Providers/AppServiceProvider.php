@@ -84,7 +84,7 @@ class AppServiceProvider extends ServiceProvider
                 ?? $request->input('phone_number')
                 ?? $request->input('username')
                 ?? $request->input('identifier', '');
-            $identifier = sha1(strtolower(trim((string) $rawIdentifier)).'|'.$request->ip());
+            $identifier = sha1(strtolower(trim((string) $rawIdentifier)) . '|' . $request->ip());
 
             return Limit::perMinute(5)
                 ->by($identifier)
@@ -103,10 +103,10 @@ class AppServiceProvider extends ServiceProvider
                 ?? $request->input('phone_number')
                 ?? $request->input('username')
                 ?? $request->input('identifier', '');
-            $identifier = sha1(strtolower(trim((string) $rawIdentifier)).'|'.$request->ip());
+            $identifier = sha1(strtolower(trim((string) $rawIdentifier)) . '|' . $request->ip());
 
             return Limit::perMinute(5)
-                ->by('admin-send-otp:'.$identifier)
+                ->by('admin-send-otp:' . $identifier)
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'status' => false,
@@ -117,10 +117,10 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('admin-password-reset', function (Request $request) {
             $email = strtolower(trim((string) $request->input('email', '')));
-            $identifier = sha1($email.'|'.$request->ip());
+            $identifier = sha1($email . '|' . $request->ip());
 
             return Limit::perMinute(5)
-                ->by('admin-password-reset:'.$identifier)
+                ->by('admin-password-reset:' . $identifier)
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'status' => false,
@@ -128,12 +128,16 @@ class AppServiceProvider extends ServiceProvider
                     ], 429, $headers);
                 });
         });
-
+        RateLimiter::for('admin-change-password', function (Request $request) {
+            return Limit::perMinute(5)->by(
+                $request->user()?->id ?: $request->ip()
+            );
+        });
         RateLimiter::for('admin-smtp-test', function (Request $request) {
             $user = $request->user();
             $key = ($user instanceof \App\Models\User)
-                ? 'admin-smtp-test:'.$user->id
-                : 'guest:'.$request->ip();
+                ? 'admin-smtp-test:' . $user->id
+                : 'guest:' . $request->ip();
 
             return Limit::perMinute(5)
                 ->by($key)
@@ -148,8 +152,8 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('admin-firebase-test', function (Request $request) {
             $user = $request->user();
             $key = ($user instanceof \App\Models\User)
-                ? 'admin-firebase-test:'.$user->id
-                : 'guest:'.$request->ip();
+                ? 'admin-firebase-test:' . $user->id
+                : 'guest:' . $request->ip();
 
             return Limit::perMinute(5)
                 ->by($key)
@@ -164,8 +168,8 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('admin-notification-send', function (Request $request) {
             $user = $request->user();
             $key = ($user instanceof \App\Models\User)
-                ? 'admin-notification-send:'.$user->id
-                : 'guest:'.$request->ip();
+                ? 'admin-notification-send:' . $user->id
+                : 'guest:' . $request->ip();
 
             return Limit::perMinute(10)
                 ->by($key)
@@ -180,8 +184,8 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('admin-notification-preview', function (Request $request) {
             $user = $request->user();
             $key = ($user instanceof \App\Models\User)
-                ? 'admin-notification-preview:'.$user->id
-                : 'guest:'.$request->ip();
+                ? 'admin-notification-preview:' . $user->id
+                : 'guest:' . $request->ip();
 
             return Limit::perMinute(30)
                 ->by($key)
@@ -196,8 +200,8 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('admin-user-create', function (Request $request) {
             $user = $request->user();
             $key = ($user instanceof \App\Models\User)
-                ? 'admin-user-create:'.$user->id
-                : 'guest:'.$request->ip();
+                ? 'admin-user-create:' . $user->id
+                : 'guest:' . $request->ip();
 
             return Limit::perMinute(20)
                 ->by($key)
@@ -215,8 +219,8 @@ class AppServiceProvider extends ServiceProvider
             $targetUserId = $targetUser instanceof \App\Models\User ? $targetUser->id : (string) $request->route('user');
 
             $key = ($admin instanceof \App\Models\User)
-                ? 'admin-user-resend:'.$admin->id.':user:'.$targetUserId
-                : 'guest:'.$request->ip();
+                ? 'admin-user-resend:' . $admin->id . ':user:' . $targetUserId
+                : 'guest:' . $request->ip();
 
             return Limit::perMinutes(10, 3)
                 ->by($key)
@@ -231,8 +235,8 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('admin-api', function (Request $request) {
             $user = $request->user();
             $key = ($user instanceof \App\Models\User)
-                ? 'admin:'.$user->id
-                : 'guest:'.$request->ip();
+                ? 'admin:' . $user->id
+                : 'guest:' . $request->ip();
 
             return Limit::perMinute(60)
                 ->by($key)
@@ -246,10 +250,10 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('user-login', function (Request $request) {
             $username = strtolower(trim((string) $request->input('username', '')));
-            $identifier = sha1($username.'|'.$request->ip());
+            $identifier = sha1($username . '|' . $request->ip());
 
             return Limit::perMinute(5)
-                ->by('user-login:'.$identifier)
+                ->by('user-login:' . $identifier)
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'status' => false,
@@ -260,10 +264,10 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('user-password-reset', function (Request $request) {
             $email = strtolower(trim((string) $request->input('email', '')));
-            $identifier = sha1($email.'|'.$request->ip());
+            $identifier = sha1($email . '|' . $request->ip());
 
             return Limit::perMinute(5)
-                ->by('user-password-reset:'.$identifier)
+                ->by('user-password-reset:' . $identifier)
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'status' => false,
@@ -275,8 +279,8 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('user-change-password', function (Request $request) {
             $user = $request->user();
             $key = ($user instanceof \App\Models\User)
-                ? 'user-change-password:'.$user->id
-                : 'guest:'.$request->ip();
+                ? 'user-change-password:' . $user->id
+                : 'guest:' . $request->ip();
 
             return Limit::perMinute(5)
                 ->by($key)
@@ -290,10 +294,10 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('user-send-otp', function (Request $request) {
             $email = strtolower(trim((string) $request->input('email', '')));
-            $identifier = sha1($email.'|'.$request->ip());
+            $identifier = sha1($email . '|' . $request->ip());
 
             return Limit::perMinute(6)
-                ->by('user-send-otp:'.$identifier)
+                ->by('user-send-otp:' . $identifier)
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'status' => false,
@@ -304,10 +308,10 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('user-verify-otp', function (Request $request) {
             $email = strtolower(trim((string) $request->input('email', '')));
-            $identifier = sha1($email.'|'.$request->ip());
+            $identifier = sha1($email . '|' . $request->ip());
 
             return Limit::perMinute(10)
-                ->by('user-verify-otp:'.$identifier)
+                ->by('user-verify-otp:' . $identifier)
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'status' => false,
@@ -318,7 +322,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('user-register', function (Request $request) {
             return Limit::perMinute(10)
-                ->by('user-register:'.$request->ip())
+                ->by('user-register:' . $request->ip())
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'status' => false,
@@ -330,8 +334,8 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('user-api', function (Request $request) {
             $user = $request->user();
             $key = ($user instanceof \App\Models\User)
-                ? 'user:'.$user->id
-                : 'guest:'.$request->ip();
+                ? 'user:' . $user->id
+                : 'guest:' . $request->ip();
 
             return Limit::perMinute(120)
                 ->by($key)
@@ -345,7 +349,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('public-api', function (Request $request) {
             return Limit::perMinute(60)
-                ->by('public:'.$request->ip())
+                ->by('public:' . $request->ip())
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'status' => false,
@@ -356,7 +360,7 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('location-api', function (Request $request) {
             return Limit::perMinute(100)
-                ->by('location:'.$request->ip())
+                ->by('location:' . $request->ip())
                 ->response(function (Request $request, array $headers) {
                     return response()->json([
                         'status' => false,
